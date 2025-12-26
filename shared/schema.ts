@@ -32,6 +32,21 @@ export const defaultParameters: SimulationParameters = {
   wR: 0.5,
 };
 
+export const mobileParameters: SimulationParameters = {
+  gridSize: 150,
+  dt: 0.05,
+  curvatureGain: 2.0,
+  couplingRadius: 1.0,
+  couplingWeight: 0.7,
+  attractorStrength: 3.0,
+  redistributionRate: 0.2,
+  wK: 1.0,
+  wT: 0.8,
+  wC: 1.2,
+  wA: 2.0,
+  wR: 0.5,
+};
+
 export interface SimulationState {
   step: number;
   energy: number;
