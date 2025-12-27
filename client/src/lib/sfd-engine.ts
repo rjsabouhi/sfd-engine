@@ -55,6 +55,20 @@ export class SFDEngine {
   private varianceHistory: number[] = [];
   private varianceHistorySize: number = 20;
   
+  // Reactive event tracking for status line
+  private reactiveEvents = {
+    varianceSpike: false,
+    basinMerge: false,
+    boundaryFracture: false,
+    approachingStability: false,
+    enterCriticality: false,
+    enterChaos: false,
+    exitChaos: false,
+  };
+  private stepsInFirstMotion: number = 0;
+  private lastCurvatureMax: number = 0;
+  private wasInChaos: boolean = false;
+  
   // Cached analytics - updated periodically to avoid per-frame computation
   private cachedSignature: StructuralSignature | null = null;
   private signatureCacheInterval: number = 15; // Update every N steps
@@ -104,7 +118,23 @@ export class SFDEngine {
     this.lastSignatureCacheStep = 0;
     this.cachedDerivedFields.clear();
     this.lastDerivedFieldCacheStep = 0;
+    this.stepsInFirstMotion = 0;
+    this.lastCurvatureMax = 0;
+    this.wasInChaos = false;
+    this.resetReactiveEvents();
     this.updateBasinMap();
+  }
+  
+  private resetReactiveEvents(): void {
+    this.reactiveEvents = {
+      varianceSpike: false,
+      basinMerge: false,
+      boundaryFracture: false,
+      approachingStability: false,
+      enterCriticality: false,
+      enterChaos: false,
+      exitChaos: false,
+    };
   }
 
   reset(): void {
@@ -277,37 +307,100 @@ export class SFDEngine {
   private detectEvents(): void {
     const stats = this.computeStatistics();
     
+    // Reset reactive events each frame
+    this.resetReactiveEvents();
+    
     this.varianceHistory.push(stats.variance);
     if (this.varianceHistory.length > this.varianceHistorySize) {
       this.varianceHistory.shift();
     }
     
-    if (this.lastVariance > 0) {
-      const varianceChange = Math.abs(stats.variance - this.lastVariance) / this.lastVariance;
-      if (varianceChange > 0.5) {
-        this.addEvent({
-          id: `var-${this.step}`,
-          step: this.step,
-          type: "variance_instability",
-          description: `Variance ${varianceChange > 0 ? 'spike' : 'drop'} detected (${(varianceChange * 100).toFixed(1)}% change)`,
-        });
+    // Calculate variance change over 12 steps (as per GPT's spec)
+    let varianceChange12 = 0;
+    if (this.varianceHistory.length >= 12) {
+      const old = this.varianceHistory[this.varianceHistory.length - 12];
+      if (old > 0.001) {
+        varianceChange12 = (stats.variance - old) / old;
       }
     }
     
+    // Variance spike detection (>40% change over 12 steps)
+    if (varianceChange12 > 0.40) {
+      this.reactiveEvents.varianceSpike = true;
+      this.addEvent({
+        id: `var-${this.step}`,
+        step: this.step,
+        type: "variance_instability",
+        description: `Variance spike detected (${(varianceChange12 * 100).toFixed(1)}% change)`,
+      });
+    }
+    
+    // Basin merge detection (depth difference < 0.05)
     if (this.lastBasinCount > 0 && stats.basinCount !== this.lastBasinCount) {
       const diff = stats.basinCount - this.lastBasinCount;
-      if (Math.abs(diff) >= 2) {
+      if (diff < 0 && Math.abs(diff) >= 1) {
+        this.reactiveEvents.basinMerge = true;
         this.addEvent({
           id: `basin-${this.step}`,
           step: this.step,
-          type: diff > 0 ? "basin_split" : "basin_merge",
-          description: `Basin ${diff > 0 ? 'split' : 'merge'}: ${this.lastBasinCount} → ${stats.basinCount}`,
+          type: "basin_merge",
+          description: `Basin merge: ${this.lastBasinCount} → ${stats.basinCount}`,
+        });
+      } else if (diff >= 2) {
+        this.addEvent({
+          id: `basin-${this.step}`,
+          step: this.step,
+          type: "basin_split",
+          description: `Basin split: ${this.lastBasinCount} → ${stats.basinCount}`,
         });
       }
     }
     
+    // Approaching stability detection (variance derivative < 0.001)
+    if (this.varianceHistory.length >= 3) {
+      const recentVariance = this.varianceHistory.slice(-3);
+      const varianceDerivative = Math.abs(recentVariance[2] - recentVariance[0]) / 2;
+      if (varianceDerivative < 0.001 && stats.variance < 0.05) {
+        this.reactiveEvents.approachingStability = true;
+      }
+    }
+    
+    // Criticality detection - high variance sensitivity
+    const isHighSensitivity = stats.variance > 0.1 && stats.variance < 0.2;
+    if (isHighSensitivity && stats.basinCount > 2) {
+      this.reactiveEvents.enterCriticality = true;
+    }
+    
+    // Chaos detection - very high variance and rapid change
+    const isInChaos = stats.variance > 0.25 && varianceChange12 > 0.2;
+    if (isInChaos && !this.wasInChaos) {
+      this.reactiveEvents.enterChaos = true;
+    }
+    if (!isInChaos && this.wasInChaos) {
+      this.reactiveEvents.exitChaos = true;
+    }
+    this.wasInChaos = isInChaos;
+    
+    // Boundary fracture detection - curvature max spike
+    const curvatureMax = this.computeCurvatureMax();
+    if (this.lastCurvatureMax > 0 && curvatureMax > this.lastCurvatureMax * 1.5) {
+      this.reactiveEvents.boundaryFracture = true;
+    }
+    this.lastCurvatureMax = curvatureMax;
+    
     this.lastVariance = stats.variance;
     this.lastBasinCount = stats.basinCount;
+  }
+  
+  private computeCurvatureMax(): number {
+    let maxCurv = 0;
+    for (let y = 1; y < this.height - 1; y++) {
+      for (let x = 1; x < this.width - 1; x++) {
+        const laplacian = Math.abs(this.computeLaplacian(x, y));
+        if (laplacian > maxCurv) maxCurv = laplacian;
+      }
+    }
+    return maxCurv;
   }
 
   private addEvent(event: StructuralEvent): void {
@@ -323,6 +416,16 @@ export class SFDEngine {
 
   clearEvents(): void {
     this.structuralEvents = [];
+  }
+  
+  getReactiveEvents(): typeof this.reactiveEvents {
+    return { ...this.reactiveEvents };
+  }
+  
+  getSimulationPhase(): "idle" | "firstMotion" | "running" {
+    if (!this.isRunning) return "idle";
+    if (this.step < 15) return "firstMotion";
+    return "running";
   }
 
   private updateBasinMap(): void {

@@ -21,7 +21,7 @@ interface OnboardingStep {
 const steps: OnboardingStep[] = [
   {
     title: LANGUAGE.ONBOARDING.WELCOME_TITLE,
-    description: LANGUAGE.ONBOARDING.WELCOME_BODY_INTUITIVE,
+    description: LANGUAGE.ONBOARDING.WELCOME_BODY.intuitive,
     icon: Waves,
   },
   {

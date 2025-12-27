@@ -23,6 +23,7 @@ import type { SimulationParameters, SimulationState, FieldData, ProbeData, Opera
 import { defaultParameters, mobileParameters } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
+import { getStatusLine, type ReactiveEvents, type SimulationState as LanguageSimState } from "@/lib/language";
 
 export default function SimulationPage() {
   const isMobile = useIsMobile();
@@ -60,6 +61,8 @@ export default function SimulationPage() {
   const [basinMap, setBasinMap] = useState<BasinMap | null>(null);
   const [varianceChange, setVarianceChange] = useState(0);
   const prevVarianceRef = useRef(0);
+  const [reactiveEvents, setReactiveEvents] = useState<Partial<ReactiveEvents>>({});
+  const [simulationPhase, setSimulationPhase] = useState<"idle" | "firstMotion" | "running">("idle");
   
   const showDualViewRef = useRef(showDualView);
   const derivedTypeRef = useRef(derivedType);
@@ -97,6 +100,8 @@ export default function SimulationPage() {
       
       setVarianceChange(newState.variance - prevVarianceRef.current);
       prevVarianceRef.current = newState.variance;
+      setReactiveEvents(engine.getReactiveEvents());
+      setSimulationPhase(engine.getSimulationPhase());
       
       if (showDualViewRef.current) {
         setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
@@ -241,6 +246,13 @@ export default function SimulationPage() {
     operatorContributions.tension,
     state.isRunning,
     varianceChange
+  );
+  
+  const dynamicStatusLine = getStatusLine(
+    interpretationMode,
+    state.isRunning ? simulationPhase : "idle",
+    null,
+    reactiveEvents
   );
 
   if (isMobile) {
@@ -421,7 +433,7 @@ export default function SimulationPage() {
       <div className="flex flex-1 overflow-hidden">
         <main className="relative bg-gray-950 flex-1 flex flex-col">
               <div className="text-center py-2 px-4 text-xs text-gray-300 bg-gray-900/50 border-b border-gray-800">
-                {getInterpretationText(interpretationSentence, interpretationMode)}
+                {dynamicStatusLine}
               </div>
               <div className="flex-1 relative">
               {showDualView ? (

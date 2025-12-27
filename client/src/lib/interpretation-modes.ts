@@ -1,9 +1,8 @@
-import { LANGUAGE, type InterpretationModeKey, type RegimeKey } from "./language";
+import { LANGUAGE, type InterpretationMode, type RegimeKey, type ReactiveEvents, getStatusLine } from "./language";
 
-export type InterpretationMode = 
-  | "technical"
-  | "structural"
-  | "intuitive";
+export type { InterpretationMode };
+
+export type InterpretationModeKey = "TECHNICAL" | "STRUCTURAL" | "INTUITIVE";
 
 export interface ModeLabels {
   name: string;
@@ -34,11 +33,23 @@ function toLanguageMode(mode: InterpretationMode): InterpretationModeKey {
   }
 }
 
+function fromLanguageMode(mode: InterpretationModeKey): InterpretationMode {
+  switch (mode) {
+    case "TECHNICAL":
+      return "technical";
+    case "STRUCTURAL":
+      return "structural";
+    case "INTUITIVE":
+    default:
+      return "intuitive";
+  }
+}
+
 export const interpretationModes: Record<InterpretationMode, ModeLabels> = {
   "technical": {
-    name: LANGUAGE.META.TECHNICAL,
-    header: LANGUAGE.META.TECHNICAL,
-    subtitle: LANGUAGE.META.TECHNICAL_DESC,
+    name: LANGUAGE.MODES.technical.name,
+    header: LANGUAGE.MODES.technical.name,
+    subtitle: LANGUAGE.MODES.technical.description,
     operators: {
       curvature: "Curvature (K)",
       tension: "Tension (T)",
@@ -52,9 +63,9 @@ export const interpretationModes: Record<InterpretationMode, ModeLabels> = {
     },
   },
   "structural": {
-    name: LANGUAGE.META.STRUCTURAL,
-    header: LANGUAGE.META.STRUCTURAL,
-    subtitle: LANGUAGE.META.STRUCTURAL_DESC,
+    name: LANGUAGE.MODES.structural.name,
+    header: LANGUAGE.MODES.structural.name,
+    subtitle: LANGUAGE.MODES.structural.description,
     operators: {
       curvature: "Curvature Operator",
       tension: "Tension Operator",
@@ -68,9 +79,9 @@ export const interpretationModes: Record<InterpretationMode, ModeLabels> = {
     },
   },
   "intuitive": {
-    name: LANGUAGE.META.INTUITIVE,
-    header: LANGUAGE.META.INTUITIVE,
-    subtitle: LANGUAGE.META.INTUITIVE_DESC,
+    name: LANGUAGE.MODES.intuitive.name,
+    header: LANGUAGE.MODES.intuitive.name,
+    subtitle: LANGUAGE.MODES.intuitive.description,
     operators: {
       curvature: "Bending",
       tension: "Spreading",
@@ -86,9 +97,9 @@ export const interpretationModes: Record<InterpretationMode, ModeLabels> = {
 };
 
 export const modeOptions: { value: InterpretationMode; label: string }[] = [
-  { value: "technical", label: LANGUAGE.META.TECHNICAL },
-  { value: "structural", label: LANGUAGE.META.STRUCTURAL },
-  { value: "intuitive", label: LANGUAGE.META.INTUITIVE },
+  { value: "technical", label: LANGUAGE.MODES.technical.name },
+  { value: "structural", label: LANGUAGE.MODES.structural.name },
+  { value: "intuitive", label: LANGUAGE.MODES.intuitive.name },
 ];
 
 export interface InterpretationSentence {
@@ -97,13 +108,15 @@ export interface InterpretationSentence {
   intuitive: string;
 }
 
+type DetectedRegime = "STABLE" | "DRIFTING" | "ACCUMULATING" | "EDGE_OF_TRANSITION" | "RECONFIGURING" | "DISPERSION" | "NEW_BASELINE" | "CYCLING";
+
 export function detectRegime(
   basinCount: number,
   variance: number,
   energy: number,
   varianceChange: number,
   isRunning: boolean
-): RegimeKey {
+): DetectedRegime {
   if (!isRunning) {
     return "STABLE";
   }
@@ -119,16 +132,12 @@ export function detectRegime(
   const highEnergy = energy > 1.5;
   const lowEnergy = energy < 0.3;
 
-  // Prioritize variance change to distinguish accumulating from reconfiguring
-  // Only RECONFIGURING when variance is rising FAST AND already high
   if (varianceRisingFast && highVariance) {
     return "RECONFIGURING";
   }
-  // ACCUMULATING: variance is rising but not yet at crisis level, or rising slowly with high variance
   if (varianceRising && !varianceRisingFast) {
     return "ACCUMULATING";
   }
-  // EDGE_OF_TRANSITION: high variance but stable (not rising or falling)
   if (highVariance && !varianceRising && !varianceFalling) {
     return "EDGE_OF_TRANSITION";
   }
@@ -151,6 +160,57 @@ export function detectRegime(
   return "STABLE";
 }
 
+const detectedRegimeLabels: Record<DetectedRegime, { label: string; technical: string; structural: string; intuitive: string }> = {
+  STABLE: {
+    label: "Stable Regime",
+    intuitive: "Everything is calm and mostly balanced. Small changes fade out quickly.",
+    structural: "Low gradients, low curvature. System returns to equilibrium after small disturbances.",
+    technical: "\u03A6_t \u2192 0, negative divergence, high SR.",
+  },
+  DRIFTING: {
+    label: "Drift Regime",
+    intuitive: "The system is slowly shifting in a direction.",
+    structural: "Coherent directional gradient. The system moves toward a new basin.",
+    technical: "Persistent low-frequency gradient alignment.",
+  },
+  ACCUMULATING: {
+    label: "Tension Accumulation",
+    intuitive: "Stress is quietly building. Nothing dramatic yet.",
+    structural: "Increasing TI and CC. Pre-critical buildup.",
+    technical: "\u2202TI/\u2202t > 0, PCG approaching threshold.",
+  },
+  EDGE_OF_TRANSITION: {
+    label: "Transition Edge",
+    intuitive: "Right at the border of change. A nudge could tip it.",
+    structural: "TE zone widening. High sensitivity to fluctuations.",
+    technical: "\u03BB_min(J) \u2248 0, bifurcation imminent.",
+  },
+  RECONFIGURING: {
+    label: "Reconfiguration Event",
+    intuitive: "A major shift is happening right now.",
+    structural: "Topology reorganizes. Constraints are redistributed.",
+    technical: "SRE trigger: PCG > threshold; immediate \u0394\u03A6 across manifold.",
+  },
+  DISPERSION: {
+    label: "Dispersion Phase",
+    intuitive: "The system is cooling off after the shift.",
+    structural: "EDO smooths out leftover tension.",
+    technical: "High-frequency components dampen; SR rises.",
+  },
+  NEW_BASELINE: {
+    label: "New Baseline",
+    intuitive: "A new normal has formed.",
+    structural: "Stable configuration established in a new basin.",
+    technical: "SR stable; new equilibrium manifold.",
+  },
+  CYCLING: {
+    label: "Dynamic Cycling",
+    intuitive: "The system is repeatedly shifting, never quite settling.",
+    structural: "Oscillatory constraint realignments.",
+    technical: "Limit-cycle attractor or structural resonance pattern.",
+  },
+};
+
 export function generateInterpretationSentence(
   basinCount: number,
   variance: number,
@@ -161,7 +221,7 @@ export function generateInterpretationSentence(
   varianceChange: number = 0
 ): InterpretationSentence {
   const regime = detectRegime(basinCount, variance, energy, varianceChange, isRunning);
-  const regimeData = LANGUAGE.REGIMES[regime];
+  const regimeData = detectedRegimeLabels[regime];
 
   if (!isRunning) {
     return {
@@ -172,9 +232,9 @@ export function generateInterpretationSentence(
   }
 
   return {
-    technical: `${regimeData.LABEL}: ${regimeData.TECHNICAL}`,
-    structural: `${regimeData.LABEL}: ${regimeData.STRUCTURAL}`,
-    intuitive: `${regimeData.LABEL}: ${regimeData.INTUITIVE}`,
+    technical: `${regimeData.label}: ${regimeData.technical}`,
+    structural: `${regimeData.label}: ${regimeData.structural}`,
+    intuitive: `${regimeData.label}: ${regimeData.intuitive}`,
   };
 }
 
@@ -201,5 +261,5 @@ export function getModeLabels(mode: InterpretationMode): ModeLabels {
   return interpretationModes[mode] || interpretationModes["intuitive"];
 }
 
-export { LANGUAGE, toLanguageMode };
-export type { InterpretationModeKey, RegimeKey };
+export { LANGUAGE, toLanguageMode, fromLanguageMode };
+export type { RegimeKey };

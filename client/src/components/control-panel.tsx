@@ -16,7 +16,7 @@ import { OperatorSensitivity } from "./operator-sensitivity";
 import { StructuralSignatureBar } from "./structural-signature";
 import { EventLog } from "./event-log";
 import { PresetMenu } from "./preset-menu";
-import { RegimeDisplay } from "./regime-display";
+import { LegacyRegimeDisplay } from "./regime-display";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, modeOptions, detectRegime, toLanguageMode } from "@/lib/interpretation-modes";
 import { LANGUAGE } from "@/lib/language";
@@ -346,7 +346,7 @@ export function ControlPanel({
           </TabsContent>
 
           <TabsContent value="analysis" className="m-0 p-3 space-y-4">
-            <RegimeDisplay regime={currentRegime} mode={languageMode} />
+            <LegacyRegimeDisplay regime={currentRegime} mode={languageMode} />
 
             <div className="space-y-2 pt-2 border-t border-border">
               <div className="text-xs font-medium text-muted-foreground">Operator Contributions</div>
