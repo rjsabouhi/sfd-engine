@@ -54,6 +54,19 @@ export class SFDEngine {
   private lastBasinCount: number = 0;
   private varianceHistory: number[] = [];
   private varianceHistorySize: number = 20;
+  
+  // Cached analytics - updated periodically to avoid per-frame computation
+  private cachedSignature: StructuralSignature | null = null;
+  private signatureCacheInterval: number = 15; // Update every N steps
+  private lastSignatureCacheStep: number = 0;
+  
+  // Cached derived fields - reuse typed arrays
+  private cachedDerivedFields: Map<string, DerivedField> = new Map();
+  private derivedFieldCacheInterval: number = 10;
+  private lastDerivedFieldCacheStep: number = 0;
+  
+  // Ring buffer sampling - only save every N frames to reduce allocations
+  private ringBufferSampleInterval: number = 3;
 
   constructor(params: SimulationParameters = defaultParameters) {
     this.params = { ...params };
@@ -87,6 +100,10 @@ export class SFDEngine {
     this.lastBasinCount = 0;
     this.varianceHistory = [];
     this.basinMap = null;
+    this.cachedSignature = null;
+    this.lastSignatureCacheStep = 0;
+    this.cachedDerivedFields.clear();
+    this.lastDerivedFieldCacheStep = 0;
     this.updateBasinMap();
   }
 
@@ -160,6 +177,9 @@ export class SFDEngine {
   }
 
   private saveToRingBuffer(): void {
+    // Only save every N frames to reduce memory allocations
+    if (this.step % this.ringBufferSampleInterval !== 0) return;
+    
     const snapshot: FrameSnapshot = {
       grid: new Float32Array(this.grid),
       step: this.step,
@@ -245,6 +265,12 @@ export class SFDEngine {
     if (this.step - this.lastBasinMapStep >= this.basinMapUpdateInterval) {
       this.updateBasinMap();
       this.lastBasinMapStep = this.step;
+    }
+    
+    // Update cached signature periodically
+    if (this.step - this.lastSignatureCacheStep >= this.signatureCacheInterval) {
+      this.cachedSignature = this.computeStructuralSignature();
+      this.lastSignatureCacheStep = this.step;
     }
   }
 
@@ -512,6 +538,79 @@ export class SFDEngine {
 
   getOperatorContributions(): OperatorContributions {
     return { ...this.operatorContributions };
+  }
+
+  getCachedSignature(): StructuralSignature {
+    // Return cached signature or compute if not yet available
+    if (!this.cachedSignature) {
+      this.cachedSignature = this.computeStructuralSignature();
+    }
+    return this.cachedSignature;
+  }
+
+  getCachedDerivedField(type: "curvature" | "tension" | "coupling" | "variance"): DerivedField {
+    // Check if we need to refresh (every N steps)
+    const needsRefresh = this.step - this.lastDerivedFieldCacheStep >= this.derivedFieldCacheInterval;
+    
+    if (needsRefresh || !this.cachedDerivedFields.has(type)) {
+      // Reuse existing typed array if possible
+      const existing = this.cachedDerivedFields.get(type);
+      const grid = existing && existing.grid.length === this.width * this.height 
+        ? existing.grid 
+        : new Float32Array(this.width * this.height);
+      
+      this.computeDerivedFieldInto(type, grid);
+      
+      const field: DerivedField = { type, grid, width: this.width, height: this.height };
+      this.cachedDerivedFields.set(type, field);
+      
+      if (needsRefresh) {
+        this.lastDerivedFieldCacheStep = this.step;
+      }
+    }
+    
+    return this.cachedDerivedFields.get(type)!;
+  }
+
+  private computeDerivedFieldInto(type: "curvature" | "tension" | "coupling" | "variance", grid: Float32Array): void {
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        const idx = y * this.width + x;
+        const value = this.grid[idx];
+        
+        switch (type) {
+          case "curvature": {
+            const laplacian = this.computeLaplacian(x, y);
+            grid[idx] = Math.tanh(laplacian * this.params.curvatureGain);
+            break;
+          }
+          case "tension": {
+            const gx = (this.getValue(x + 1, y) - this.getValue(x - 1, y)) / 2;
+            const gy = (this.getValue(x, y + 1) - this.getValue(x, y - 1)) / 2;
+            const gradMag = gx * gx + gy * gy;
+            grid[idx] = -gradMag / (1 + Math.abs(gradMag));
+            break;
+          }
+          case "coupling": {
+            const blurred = this.computeGaussianBlur(x, y);
+            grid[idx] = this.params.couplingWeight * blurred - (1 - this.params.couplingWeight) * value;
+            break;
+          }
+          case "variance": {
+            let variance = 0;
+            const localMean = this.computeLocalMean(x, y);
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                const v = this.getValue(x + dx, y + dy);
+                variance += (v - localMean) * (v - localMean);
+              }
+            }
+            grid[idx] = variance / 9;
+            break;
+          }
+        }
+      }
+    }
   }
 
   getHistoryLength(): number {
