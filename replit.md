@@ -49,6 +49,19 @@ Added real-time reactive event detection for dynamic status narration:
 - Simulation phase tracking: idle/firstMotion/running
 - Dynamic status line using `getStatusLine()` with priority-based event selection
 
+### Hidden Diagnostic Suite (December 27, 2024)
+Added comprehensive development/debugging tools accessible via CTRL+SHIFT+D:
+- **Seedable RNG**: Mulberry32 PRNG for reproducible simulations
+- **5-Tab Diagnostic Panel**: Solver, Consistency, Events, Render, Internals
+- **Solver Diagnostics**: Energy functional tracking, variance monitor, stability alerts
+- **Consistency Checker**: Determinism verification comparing two runs from same seed
+- **Event Logger**: Searchable, filterable event history with export
+- **Render Stats**: Frame timing, FPS, dropped frames tracking
+- **Internals Explorer**: Grid stats, gradient magnitude, curvature, Laplacian distribution
+- **Export Tools**: Full diagnostics JSON, frame window, event log, determinism reports
+- **Frame-by-Frame Mode**: Sandbox stepping through simulation history
+- **Zero Performance Cost**: Panel only updates when visible, intervals cleared when hidden
+
 ### Engine Enhancements
 - Ring buffer for temporal history (100 frames, ~36MB for 300x300 grid)
 - Operator contribution tracking per update step
@@ -57,6 +70,8 @@ Added real-time reactive event detection for dynamic status narration:
 - Probe data computation for field inspection
 - Variance change tracking for regime detection
 - Reactive event detection with empirically-tuned thresholds
+- Seedable mulberry32 PRNG for determinism testing
+- Diagnostic data getters for solver, render, and internal metrics
 
 ## System Architecture
 
@@ -92,6 +107,7 @@ Added real-time reactive event detection for dynamic status narration:
 - `EventLog` - Structural event history
 - `NotebookMode` - Researcher reference panel
 - `StructuralSignatureBar` - Quick metrics display
+- `DiagnosticPanel` - Hidden developer tools (CTRL+SHIFT+D)
 
 ### Data Flow
 1. SFDEngine class manages simulation state and grid data
