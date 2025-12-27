@@ -343,63 +343,33 @@ export default function SimulationPage() {
           <h1 className="text-base font-semibold" data-testid="text-title">SFD Engine</h1>
         </div>
         
-        <div className="flex items-center gap-1">
-          <Button
-            variant={showBasins ? "default" : "ghost"}
-            size="icon"
-            onClick={() => setShowBasins(!showBasins)}
-            data-testid="button-basins-toolbar"
-            className="h-7 w-7"
-          >
-            <Map className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant={showDualView ? "default" : "ghost"}
-            size="icon"
-            onClick={() => setShowDualView(!showDualView)}
-            data-testid="button-dual-toolbar"
-            className="h-7 w-7"
-          >
-            <Columns className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant={bottomPanelOpen ? "default" : "ghost"}
-            size="icon"
-            onClick={() => setBottomPanelOpen(!bottomPanelOpen)}
-            data-testid="button-bottom-panel"
-            className="h-7 w-7"
-          >
-            {bottomPanelOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronUp className="h-3.5 w-3.5" />}
-          </Button>
-          
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" data-testid="button-help" className="h-7 w-7">
-                <HelpCircle className="h-3.5 w-3.5" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>About Structural Field Dynamics</DialogTitle>
-                <DialogDescription className="pt-4 space-y-3 text-sm">
-                  <p>
-                    Structural Field Dynamics (SFD) is a geometric model of complex
-                    adaptive systems. This simulation demonstrates operator-driven
-                    field evolution on a 2D manifold.
-                  </p>
-                  <p><strong>The Five Operators:</strong></p>
-                  <ul className="list-disc pl-4 space-y-1">
-                    <li><strong>Curvature (K)</strong> — Responds to local curvature via discrete Laplacian</li>
-                    <li><strong>Gradient-Tension (T)</strong> — Drives tension waves based on gradient magnitude</li>
-                    <li><strong>Neighbor-Coupling (C)</strong> — Creates local clustering through Gaussian blur</li>
-                    <li><strong>Attractor-Formation (A)</strong> — Forms threshold-like basin structures</li>
-                    <li><strong>Global Redistribution (R)</strong> — Maintains coherence through mean-field shift</li>
-                  </ul>
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
-        </div>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon" data-testid="button-help" className="h-7 w-7">
+              <HelpCircle className="h-3.5 w-3.5" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>About Structural Field Dynamics</DialogTitle>
+              <DialogDescription className="pt-4 space-y-3 text-sm">
+                <p>
+                  Structural Field Dynamics (SFD) is a geometric model of complex
+                  adaptive systems. This simulation demonstrates operator-driven
+                  field evolution on a 2D manifold.
+                </p>
+                <p><strong>The Five Operators:</strong></p>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li><strong>Curvature (K)</strong> — Responds to local curvature via discrete Laplacian</li>
+                  <li><strong>Gradient-Tension (T)</strong> — Drives tension waves based on gradient magnitude</li>
+                  <li><strong>Neighbor-Coupling (C)</strong> — Creates local clustering through Gaussian blur</li>
+                  <li><strong>Attractor-Formation (A)</strong> — Forms threshold-like basin structures</li>
+                  <li><strong>Global Redistribution (R)</strong> — Maintains coherence through mean-field shift</li>
+                </ul>
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </header>
 
       <div className="flex-1 overflow-hidden flex">
@@ -532,6 +502,8 @@ export default function SimulationPage() {
                 currentHistoryIndex={currentHistoryIndex}
                 isPlaybackMode={isPlaybackMode}
                 showBasins={showBasins}
+                showDualView={showDualView}
+                bottomPanelOpen={bottomPanelOpen}
                 onParamsChange={handleParamsChange}
                 onPlay={handlePlay}
                 onPause={handlePause}
@@ -545,6 +517,8 @@ export default function SimulationPage() {
                 onClearEvents={handleClearEvents}
                 onExportEvents={handleExportEvents}
                 onShowBasinsChange={setShowBasins}
+                onShowDualViewChange={setShowDualView}
+                onBottomPanelChange={setBottomPanelOpen}
               />
         </aside>
       </div>

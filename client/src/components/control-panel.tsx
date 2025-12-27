@@ -31,6 +31,8 @@ interface ControlPanelProps {
   currentHistoryIndex: number;
   isPlaybackMode: boolean;
   showBasins: boolean;
+  showDualView: boolean;
+  bottomPanelOpen: boolean;
   onParamsChange: (params: Partial<SimulationParameters>) => void;
   onPlay: () => void;
   onPause: () => void;
@@ -44,6 +46,8 @@ interface ControlPanelProps {
   onClearEvents: () => void;
   onExportEvents: () => void;
   onShowBasinsChange: (show: boolean) => void;
+  onShowDualViewChange: (show: boolean) => void;
+  onBottomPanelChange: (open: boolean) => void;
 }
 
 interface ParameterSliderProps {
@@ -102,6 +106,8 @@ export function ControlPanel({
   currentHistoryIndex,
   isPlaybackMode,
   showBasins,
+  showDualView,
+  bottomPanelOpen,
   onParamsChange,
   onPlay,
   onPause,
@@ -115,6 +121,8 @@ export function ControlPanel({
   onClearEvents,
   onExportEvents,
   onShowBasinsChange,
+  onShowDualViewChange,
+  onBottomPanelChange,
 }: ControlPanelProps) {
   const [weightsOpen, setWeightsOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -178,28 +186,43 @@ export function ControlPanel({
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs">Colormap</Label>
-                <Select value={colormap} onValueChange={(v) => onColormapChange(v as "inferno" | "viridis")}>
-                  <SelectTrigger className="h-8 text-xs" data-testid="select-colormap">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="inferno">Inferno</SelectItem>
-                    <SelectItem value="viridis">Viridis</SelectItem>
-                  </SelectContent>
-                </Select>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Colormap</Label>
+              <Select value={colormap} onValueChange={(v) => onColormapChange(v as "inferno" | "viridis")}>
+                <SelectTrigger className="h-8 text-xs" data-testid="select-colormap">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="inferno">Inferno</SelectItem>
+                  <SelectItem value="viridis">Viridis</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              <div className="flex flex-col items-center gap-1">
+                <Label className="text-xs">Basins</Label>
+                <Switch
+                  checked={showBasins}
+                  onCheckedChange={onShowBasinsChange}
+                  data-testid="switch-show-basins"
+                />
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Show Basins</Label>
-                <div className="flex items-center h-8">
-                  <Switch
-                    checked={showBasins}
-                    onCheckedChange={onShowBasinsChange}
-                    data-testid="switch-show-basins"
-                  />
-                </div>
+              <div className="flex flex-col items-center gap-1">
+                <Label className="text-xs">Dual View</Label>
+                <Switch
+                  checked={showDualView}
+                  onCheckedChange={onShowDualViewChange}
+                  data-testid="switch-dual-view"
+                />
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <Label className="text-xs">Bottom</Label>
+                <Switch
+                  checked={bottomPanelOpen}
+                  onCheckedChange={onBottomPanelChange}
+                  data-testid="switch-bottom-panel"
+                />
               </div>
             </div>
 
