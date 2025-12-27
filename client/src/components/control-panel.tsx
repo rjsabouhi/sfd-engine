@@ -153,7 +153,7 @@ export function ControlPanel({
           </TabsTrigger>
           <TabsTrigger value="notebook" className="text-xs gap-1 px-2">
             <BookOpen className="h-3 w-3" />
-            Info
+            Notebook
           </TabsTrigger>
           <TabsTrigger value="export" className="text-xs gap-1 px-2">
             <Download className="h-3 w-3" />
