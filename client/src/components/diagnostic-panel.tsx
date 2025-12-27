@@ -274,28 +274,52 @@ export function DiagnosticPanel({
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-        <TabsList className="w-full justify-start bg-transparent border-b border-white/10 rounded-none px-1 h-8 flex-wrap gap-0">
-          <TabsTrigger value="solver" className="text-xs px-2 py-1 h-7 data-[state=active]:bg-white/10">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Solver
-          </TabsTrigger>
-          <TabsTrigger value="consistency" className="text-xs px-2 py-1 h-7 data-[state=active]:bg-white/10">
-            <GitCompare className="h-3 w-3 mr-1" />
-            Consistency
-          </TabsTrigger>
-          <TabsTrigger value="events" className="text-xs px-2 py-1 h-7 data-[state=active]:bg-white/10">
-            <List className="h-3 w-3 mr-1" />
-            Events
-          </TabsTrigger>
-          <TabsTrigger value="render" className="text-xs px-2 py-1 h-7 data-[state=active]:bg-white/10">
-            <Monitor className="h-3 w-3 mr-1" />
-            Render
-          </TabsTrigger>
-          <TabsTrigger value="internals" className="text-xs px-2 py-1 h-7 data-[state=active]:bg-white/10">
-            <Database className="h-3 w-3 mr-1" />
-            Internals
-          </TabsTrigger>
-        </TabsList>
+        <div className="border-b border-white/10 px-2 py-1.5 shrink-0">
+          <div className="grid grid-cols-3 gap-1 mb-1">
+            <button 
+              onClick={() => setActiveTab("solver")}
+              className={`flex items-center justify-center gap-1 text-xs px-1 py-1.5 rounded ${activeTab === "solver" ? "bg-white/15 text-white" : "text-white/60 hover:text-white hover:bg-white/5"}`}
+              data-testid="tab-solver"
+            >
+              <CheckCircle className="h-3 w-3 shrink-0" />
+              <span>Solver</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab("consistency")}
+              className={`flex items-center justify-center gap-1 text-xs px-1 py-1.5 rounded ${activeTab === "consistency" ? "bg-white/15 text-white" : "text-white/60 hover:text-white hover:bg-white/5"}`}
+              data-testid="tab-consistency"
+            >
+              <GitCompare className="h-3 w-3 shrink-0" />
+              <span>Check</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab("events")}
+              className={`flex items-center justify-center gap-1 text-xs px-1 py-1.5 rounded ${activeTab === "events" ? "bg-white/15 text-white" : "text-white/60 hover:text-white hover:bg-white/5"}`}
+              data-testid="tab-events"
+            >
+              <List className="h-3 w-3 shrink-0" />
+              <span>Events</span>
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-1">
+            <button 
+              onClick={() => setActiveTab("render")}
+              className={`flex items-center justify-center gap-1 text-xs px-1 py-1.5 rounded ${activeTab === "render" ? "bg-white/15 text-white" : "text-white/60 hover:text-white hover:bg-white/5"}`}
+              data-testid="tab-render"
+            >
+              <Monitor className="h-3 w-3 shrink-0" />
+              <span>Render</span>
+            </button>
+            <button 
+              onClick={() => setActiveTab("internals")}
+              className={`flex items-center justify-center gap-1 text-xs px-1 py-1.5 rounded ${activeTab === "internals" ? "bg-white/15 text-white" : "text-white/60 hover:text-white hover:bg-white/5"}`}
+              data-testid="tab-internals"
+            >
+              <Database className="h-3 w-3 shrink-0" />
+              <span>Internals</span>
+            </button>
+          </div>
+        </div>
 
         <ScrollArea className="flex-1">
           <TabsContent value="solver" className="m-0 p-3 space-y-3">
