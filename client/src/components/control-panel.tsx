@@ -77,6 +77,7 @@ export function ControlPanel({
   onStep,
   onColormapChange,
 }: ControlPanelProps) {
+  const [coreOpen, setCoreOpen] = useState(true);
   const [operatorsOpen, setOperatorsOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
@@ -134,58 +135,71 @@ export function ControlPanel({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Core Parameters</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <ParameterSlider
-              label="Timestep (dt)"
-              value={params.dt}
-              min={0.01}
-              max={0.2}
-              step={0.01}
-              tooltip="Controls simulation speed and stability"
-              onChange={(v) => onParamsChange({ dt: v })}
-            />
-            <ParameterSlider
-              label="Curvature Gain"
-              value={params.curvatureGain}
-              min={0.1}
-              max={10}
-              step={0.1}
-              tooltip="Sensitivity to local curvature changes"
-              onChange={(v) => onParamsChange({ curvatureGain: v })}
-            />
-            <ParameterSlider
-              label="Coupling Weight"
-              value={params.couplingWeight}
-              min={0}
-              max={1}
-              step={0.05}
-              tooltip="Balance between local and neighborhood values"
-              onChange={(v) => onParamsChange({ couplingWeight: v })}
-            />
-            <ParameterSlider
-              label="Attractor Strength"
-              value={params.attractorStrength}
-              min={0.1}
-              max={10}
-              step={0.1}
-              tooltip="Intensity of basin formation"
-              onChange={(v) => onParamsChange({ attractorStrength: v })}
-            />
-            <ParameterSlider
-              label="Redistribution"
-              value={params.redistributionRate}
-              min={0}
-              max={1}
-              step={0.05}
-              tooltip="Global energy redistribution rate"
-              onChange={(v) => onParamsChange({ redistributionRate: v })}
-            />
-          </CardContent>
-        </Card>
+        <Collapsible open={coreOpen} onOpenChange={setCoreOpen}>
+          <Card>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="pb-3 cursor-pointer hover-elevate rounded-t-lg" data-testid="button-toggle-core">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">Core Parameters</CardTitle>
+                  {coreOpen ? (
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="space-y-4 pt-0">
+                <ParameterSlider
+                  label="Timestep (dt)"
+                  value={params.dt}
+                  min={0.01}
+                  max={0.2}
+                  step={0.01}
+                  tooltip="Controls simulation speed and stability"
+                  onChange={(v) => onParamsChange({ dt: v })}
+                />
+                <ParameterSlider
+                  label="Curvature Gain"
+                  value={params.curvatureGain}
+                  min={0.1}
+                  max={10}
+                  step={0.1}
+                  tooltip="Sensitivity to local curvature changes"
+                  onChange={(v) => onParamsChange({ curvatureGain: v })}
+                />
+                <ParameterSlider
+                  label="Coupling Weight"
+                  value={params.couplingWeight}
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  tooltip="Balance between local and neighborhood values"
+                  onChange={(v) => onParamsChange({ couplingWeight: v })}
+                />
+                <ParameterSlider
+                  label="Attractor Strength"
+                  value={params.attractorStrength}
+                  min={0.1}
+                  max={10}
+                  step={0.1}
+                  tooltip="Intensity of basin formation"
+                  onChange={(v) => onParamsChange({ attractorStrength: v })}
+                />
+                <ParameterSlider
+                  label="Redistribution"
+                  value={params.redistributionRate}
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  tooltip="Global energy redistribution rate"
+                  onChange={(v) => onParamsChange({ redistributionRate: v })}
+                />
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         <Collapsible open={operatorsOpen} onOpenChange={setOperatorsOpen}>
           <Card>
