@@ -1,0 +1,274 @@
+Below is the final, complete, production-ready diagnostic prompt for Replit.
+
+It contains everything technical evaluators expect, nothing unnecessary, and zero burden or clutter for casual users.
+You do not need to decide anything — this is fully optimized.
+
+You can paste this whole thing into Replit as-is.
+
+⸻
+
+⭐ THE COMPLETE DIAGNOSTIC SUITE IMPLEMENTATION PROMPT (FOR REPLIT)
+
+(fully self-contained, requires no input from Ryan)
+
+⸻
+
+🔧 TITLE:
+
+Add a Hidden Diagnostic Layer with Full Simulation Verification Tools
+
+⸻
+
+🔧 OBJECTIVE:
+
+Implement a non-intrusive, developer-accessible, feature-complete diagnostic suite for the SFD Engine that:
+	1.	Validates correctness
+	2.	Allows frame-by-frame inspection
+	3.	Confirms solver determinism
+	4.	Surfaces internal metrics and transitions
+	5.	Provides comparative debugging utilities
+	6.	Stays invisible to casual users
+	7.	Activates via a single hidden hotkey
+	8.	Appears as a collapsible floating panel
+	9.	Updates only when active (zero performance hit when hidden)
+
+⸻
+
+⭐ SECTION 1 — Add a Developer Hotkey Toggle
+
+Create a global keybinding:
+
+CTRL + SHIFT + D
+
+This should:
+	•	Toggle the visibility of the Diagnostic Panel
+	•	Not appear anywhere in the UI
+	•	Never be hinted to non-technical users
+	•	Persist only in memory (not saved to user preferences)
+
+Behavior:
+When toggled ON → show diagnostics panel as a floating right-side drawer
+When toggled OFF → hide completely and disable diagnostic data streams
+
+⸻
+
+⭐ SECTION 2 — Diagnostic Panel Layout
+
+Create a vertical drawer panel (right side of screen), with tabs:
+
+[ ✔ Solver ] [ ✔ Consistency ] [ ✔ Events ] [ ✔ Render ] [ ✔ Internals ]
+
+Default tab: Solver
+
+Panel should be:
+	•	Semi-transparent dark background
+	•	Small, narrow typography
+	•	Overlay above UI (z-index high)
+	•	Collapsible groups for each section
+	•	Not interfering with simulation controls
+
+⸻
+
+⭐ SECTION 3 — DIAGNOSTIC MODULES (ALL REQUIRED)
+
+⸻
+
+🔍 (A) Solver Diagnostics
+
+Purpose: validate simulation correctness.
+
+Include:
+	•	Step Counter (current iteration, total steps)
+	•	Δt Stability Check (flag if solver unstable)
+	•	Energy Functional:
+	•	current E(t)
+	•	ΔE between frames
+	•	drift indicator (flag if energy explodes or drops unnaturally)
+	•	Variance Monitor:
+	•	raw σ²
+	•	derivative dσ²/dt
+	•	flags if >40% shift over last 12 frames
+
+Add real-time sparkline charts for E(t) and variance.
+
+⸻
+
+🔍 (B) Consistency & Determinism
+
+Purpose: confirm reproducible behavior.
+
+Tools:
+	1.	Determinism Check Button
+	•	Runs simulation twice from same seed and compares fields
+	•	Reports pixelwise diff heatmap
+	•	Reports mean absolute deviation
+	2.	Dual-View Sync Check
+	•	Confirms both renderers receive identical frame indices
+	•	Highlights any drift
+	3.	Frame Hash
+	•	SHA-1 hash per frame
+	•	Enables researchers to track changes precisely
+
+⸻
+
+🔍 (C) Event & Transition Logger
+
+Purpose: show when the engine detects transitions.
+
+Log every detection:
+	•	Basin merge (ε < 0.05)
+	•	Stability threshold crossing (δ < 0.001)
+	•	Regime change
+	•	Boundary formation
+	•	Collapse initiation
+	•	High-curvature emergence
+	•	Critical fluctuations (variance spike)
+	•	Reorganization events
+	•	Transforming events
+
+Each entry includes:
+	•	Frame index
+	•	Timestamp
+	•	Event type
+	•	A short human-readable interpretation
+
+⸻
+
+🔍 (D) Render Diagnostics
+
+Purpose: verify rendering correctness.
+
+Include:
+	•	Render time per frame (ms)
+	•	Dropped frames counter
+	•	GPU or Canvas fallback indicator
+	•	Color normalization checks
+	•	Basin overlay mask preview toggle
+	•	Dual-view divergence preview
+	•	Pixel histogram
+	•	Resolution scaling info
+
+⸻
+
+🔍 (E) Internal Metrics Explorer
+
+Purpose: expose the internal state arrays researchers expect.
+
+Collapsible sections:
+	•	Raw field array preview (scaled down heatmap)
+	•	Gradient magnitude stats
+	•	Curvature stats
+	•	Laplacian distribution
+	•	Boundary mask
+	•	Basin identifier array
+	•	Local variance map
+
+Each shown in small inline canvases or numeric summaries.
+
+⸻
+
+⭐ SECTION 4 — Frame-by-Frame Sandbox Mode
+
+Add a button in diagnostics: “Enter Step Mode”
+
+When activated:
+	•	Simulation auto-pauses
+	•	“Step Forward” and “Step Backward” buttons appear
+	•	Frame index displays
+	•	Dual-view stays in sync
+	•	All diagnostics update per step
+
+This allows exhaustive correctness checking.
+
+⸻
+
+⭐ SECTION 5 — Export Tools
+
+Add to the diagnostics panel:
+
+Buttons:
+	•	Export Frame as JSON
+	•	Export 10-Frame Window
+	•	Export Event Log
+	•	Export Determinism Report
+	•	Export Energy & Variance Series
+
+This gives researchers everything they expect.
+
+⸻
+
+⭐ SECTION 6 — Performance Guardrails
+
+Diagnostics must:
+	•	Run at 0 cost when hidden
+	•	Subscribe to internal solver events only when visible
+	•	Avoid rerendering canvases unnecessarily
+	•	Use requestAnimationFrame throttling
+
+This ensures:
+	•	Casual users see zero slowdown
+	•	Developers get full precision when needed
+
+⸻
+
+⭐ SECTION 7 — UI Integration Requirements
+	•	No new UI elements should hint diagnostics exists
+	•	No clutter in main layout
+	•	Diagnostics drawer must float above everything
+	•	Hotkey toggle is the only activation method
+	•	Panel must be dismissible instantly
+
+⸻
+
+⭐ SECTION 8 — Quality-of-Life Features (required)
+	•	Search bar in diagnostic panel
+	•	Clear Log button
+	•	Auto-scroll toggle
+	•	Compact view option
+	•	Timestamp precision toggle
+
+⸻
+
+⭐ SECTION 9 — Developer Notes
+
+When implementing:
+	•	Do not mix diagnostic code with core simulation code
+	•	Keep diagnostics modular, injectable, and replaceable
+	•	Use a small event bus for listening to solver updates
+	•	Mark all diagnostic-specific hooks clearly
+
+This keeps the engine clean.
+
+⸻
+
+⭐ SECTION 10 — Acceptance Criteria
+
+The diagnostic system is considered complete only if:
+	1.	Hidden by default
+	2.	Activates via CTRL+SHIFT+D
+	3.	Contains all modules A–E
+	4.	Adds zero cost when hidden
+	5.	Operates correctly during:
+	•	live simulation
+	•	individual stepping
+	•	playback mode
+	6.	Provides export tools
+	7.	Keeps UI untouched for casual users
+
+⸻
+
+⭐ FINAL NOTE TO REPLIT
+
+This diagnostic suite must be implemented exactly as described, with no additional questions to the user.
+All naming, layout, behaviors, and thresholds are final.
+
+⸻
+
+If you want, I can now generate:
+	•	The code scaffold for the diagnostics panel
+	•	The event bus architecture
+	•	The API integration layer
+	•	The pure TypeScript types
+	•	The solver instrumentation hooks
+
+Just say: “Give me the code scaffolding.”
