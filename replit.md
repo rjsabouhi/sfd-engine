@@ -51,6 +51,12 @@ Added real-time reactive event detection for dynamic status narration:
 
 ### Hidden Diagnostic Suite (December 27, 2024)
 Added comprehensive development/debugging tools accessible via CTRL+SHIFT+D:
+- **Summary Diagnostic Dashboard**: Collapsible overview at top of panel with:
+  - Stability badge (Stable/Borderline/Unstable) using threshold-based classification
+  - Primary metrics grid: Energy, ΔE, Variance, Variance Trend, Max Gradient, Curvature Mean, Frame Hash, Determinism Sync
+  - Warning system: High Energy Drift, Curvature Spike, Determinism Divergence, Rapid Variance Change
+  - Energy trend sparkline (last 60 ΔE values)
+  - Advanced metrics (collapsible): Curvature Min/Max, Gradient Min/Max, Laplacian Mean, Grid Mean/Std, Basin Count, Last 20 Frame Hashes
 - **Seedable RNG**: Mulberry32 PRNG for reproducible simulations
 - **5-Tab Diagnostic Panel**: Solver, Consistency, Events, Render, Internals
 - **Solver Diagnostics**: Energy functional tracking, variance monitor, stability alerts
