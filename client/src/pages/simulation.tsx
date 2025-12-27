@@ -129,9 +129,10 @@ export default function SimulationPage() {
           prevBasinCountRef.current = newState.basinCount;
           
           // Use engine's debounced field state - hysteresis is managed by the engine
+          // Only update React state when the debounced state actually changes
           const candidateState = computeFieldState(newState.variance, basinCountChanged, currentEvents);
           const debouncedState = engine.getDebouncedFieldState(candidateState);
-          setFieldState(debouncedState);
+          setFieldState(prev => prev !== debouncedState ? debouncedState : prev);
         }
       });
     });

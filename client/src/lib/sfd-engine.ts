@@ -150,7 +150,8 @@ export class SFDEngine {
   // Field state hysteresis - stored on engine to survive callback rebindings
   private displayedFieldState: "calm" | "unsettled" | "reorganizing" | "transforming" = "calm";
   private fieldStateHoldUntil: number = 0; // timestamp when state can next change
-  private fieldStateMinHoldMs: number = 3000; // 3 seconds minimum between changes
+  private fieldStateMinHoldMs: number = 5000; // 5 seconds minimum between changes
+  private lastFieldStateUpdateTime: number = 0;
 
   constructor(params: SimulationParameters = defaultParameters) {
     this.params = { ...params };
@@ -507,8 +508,10 @@ export class SFDEngine {
     
     // If candidate is different and hold period has passed, allow change
     if (candidateState !== this.displayedFieldState && now >= this.fieldStateHoldUntil) {
+      console.log(`[FieldState] Changing from ${this.displayedFieldState} to ${candidateState} at step ${this.step}, holdUntil was ${this.fieldStateHoldUntil}, now is ${now}`);
       this.displayedFieldState = candidateState;
       this.fieldStateHoldUntil = now + this.fieldStateMinHoldMs;
+      this.lastFieldStateUpdateTime = now;
     }
     
     return this.displayedFieldState;
