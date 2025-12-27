@@ -425,7 +425,7 @@ export default function SimulationPage() {
               )}
             </main>
         
-        <aside className="w-96 border-l border-border bg-card flex flex-col overflow-hidden">
+        <aside className="w-[420px] border-l border-border bg-card flex flex-col overflow-hidden">
           <ControlPanel
                 params={params}
                 state={state}
