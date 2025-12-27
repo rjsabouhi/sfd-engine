@@ -7,7 +7,9 @@ import { HoverProbe } from "@/components/hover-probe";
 import { DualFieldView } from "@/components/dual-field-view";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { HelpCircle, Waves, Play, Pause, RotateCcw, Settings2 } from "lucide-react";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { HelpCircle, Waves, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
@@ -71,6 +73,8 @@ export default function SimulationPage() {
   const [probeData, setProbeData] = useState<ProbeData | null>(null);
   const [probeVisible, setProbeVisible] = useState(false);
   const [probePosition, setProbePosition] = useState({ x: 0, y: 0 });
+  const [bottomPanelOpen, setBottomPanelOpen] = useState(false);
+  const [bottomPanelTab, setBottomPanelTab] = useState<"dual" | "notebook" | "export">("dual");
 
   const modeLabels = interpretationModes[interpretationMode];
 
@@ -331,149 +335,271 @@ export default function SimulationPage() {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      <header className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border bg-card/50">
+      <header className="flex items-center justify-between gap-4 px-3 py-2 border-b border-border bg-card/50">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-8 h-8 rounded-md bg-primary/10">
-            <Waves className="h-4 w-4 text-primary" />
+          <div className="flex items-center justify-center w-7 h-7 rounded-md bg-primary/10">
+            <Waves className="h-3.5 w-3.5 text-primary" />
           </div>
-          <div>
-            <h1 className="text-lg font-semibold leading-tight" data-testid="text-title">
-              SFD Engine
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Structural Field Dynamics
-            </p>
-          </div>
+          <h1 className="text-base font-semibold" data-testid="text-title">SFD Engine</h1>
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" data-testid="button-help">
-              <HelpCircle className="h-4 w-4" />
+        
+        <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 mr-2 px-2 py-1 rounded-md bg-muted/50">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleStepBackward}
+              disabled={state.isRunning || historyLength === 0}
+              data-testid="button-step-back-toolbar"
+              className="h-7 w-7"
+            >
+              <StepBack className="h-3.5 w-3.5" />
             </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>About Structural Field Dynamics</DialogTitle>
-              <DialogDescription className="pt-4 space-y-3 text-sm">
-                <p>
-                  Structural Field Dynamics (SFD) is a geometric model of complex
-                  adaptive systems. This simulation demonstrates operator-driven
-                  field evolution on a 2D manifold.
-                </p>
-                <p>
-                  <strong>The Five Operators:</strong>
-                </p>
-                <ul className="list-disc pl-4 space-y-1">
-                  <li><strong>Curvature (K)</strong> — Responds to local curvature via discrete Laplacian</li>
-                  <li><strong>Gradient-Tension (T)</strong> — Drives tension waves based on gradient magnitude</li>
-                  <li><strong>Neighbor-Coupling (C)</strong> — Creates local clustering through Gaussian blur</li>
-                  <li><strong>Attractor-Formation (A)</strong> — Forms threshold-like basin structures</li>
-                  <li><strong>Global Redistribution (R)</strong> — Maintains coherence through mean-field shift</li>
-                </ul>
-                <p>
-                  <strong>Emergent Behaviors:</strong> Basin formation, attractor merging/splitting,
-                  curvature-driven symmetry breaking, metastable equilibria, and tension waves.
-                </p>
-              </DialogDescription>
-            </DialogHeader>
-          </DialogContent>
-        </Dialog>
+            {state.isRunning ? (
+              <Button size="sm" onClick={handlePause} data-testid="button-pause-toolbar" className="h-7 px-3">
+                <Pause className="h-3.5 w-3.5 mr-1" />
+                Pause
+              </Button>
+            ) : (
+              <Button size="sm" onClick={handlePlay} data-testid="button-play-toolbar" className="h-7 px-3">
+                <Play className="h-3.5 w-3.5 mr-1" />
+                Run
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleStep}
+              disabled={state.isRunning}
+              data-testid="button-step-toolbar"
+              className="h-7 w-7"
+            >
+              <StepForward className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleReset}
+              data-testid="button-reset-toolbar"
+              className="h-7 w-7"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-1 text-xs font-mono text-muted-foreground mr-2">
+            <span data-testid="text-step-toolbar">t={state.step}</span>
+            <span className="text-muted-foreground/50">|</span>
+            <span data-testid="text-fps-toolbar">{state.fps}fps</span>
+          </div>
+
+          <Button
+            variant={showBasins ? "default" : "ghost"}
+            size="icon"
+            onClick={() => setShowBasins(!showBasins)}
+            data-testid="button-basins-toolbar"
+            className="h-7 w-7"
+          >
+            <Map className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant={showDualView ? "default" : "ghost"}
+            size="icon"
+            onClick={() => setShowDualView(!showDualView)}
+            data-testid="button-dual-toolbar"
+            className="h-7 w-7"
+          >
+            <Columns className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant={bottomPanelOpen ? "default" : "ghost"}
+            size="icon"
+            onClick={() => setBottomPanelOpen(!bottomPanelOpen)}
+            data-testid="button-bottom-panel"
+            className="h-7 w-7"
+          >
+            {bottomPanelOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronUp className="h-3.5 w-3.5" />}
+          </Button>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" data-testid="button-help" className="h-7 w-7">
+                <HelpCircle className="h-3.5 w-3.5" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>About Structural Field Dynamics</DialogTitle>
+                <DialogDescription className="pt-4 space-y-3 text-sm">
+                  <p>
+                    Structural Field Dynamics (SFD) is a geometric model of complex
+                    adaptive systems. This simulation demonstrates operator-driven
+                    field evolution on a 2D manifold.
+                  </p>
+                  <p><strong>The Five Operators:</strong></p>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li><strong>Curvature (K)</strong> — Responds to local curvature via discrete Laplacian</li>
+                    <li><strong>Gradient-Tension (T)</strong> — Drives tension waves based on gradient magnitude</li>
+                    <li><strong>Neighbor-Coupling (C)</strong> — Creates local clustering through Gaussian blur</li>
+                    <li><strong>Attractor-Formation (A)</strong> — Forms threshold-like basin structures</li>
+                    <li><strong>Global Redistribution (R)</strong> — Maintains coherence through mean-field shift</li>
+                  </ul>
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+        </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        <main className={`relative bg-gray-950 ${showDualView ? 'flex-1' : 'flex-1'}`}>
-          {showDualView ? (
-            <div className="flex h-full">
-              <div className="flex-1 relative">
-                <VisualizationCanvas 
-                  field={field} 
-                  colormap={colormap}
-                  basinMap={basinMap}
-                  showBasins={showBasins}
-                  onHover={handleHover}
-                  onHoverEnd={handleHoverEnd}
-                />
+      <div className="flex-1 overflow-hidden flex">
+        <div className="flex-1 flex flex-col min-w-0">
+          <main className={`relative bg-gray-950 ${bottomPanelOpen ? 'flex-[7]' : 'flex-1'}`}>
+            {showDualView ? (
+              <div className="flex h-full">
+                <div className="flex-1 relative">
+                  <VisualizationCanvas 
+                    field={field} 
+                    colormap={colormap}
+                    basinMap={basinMap}
+                    showBasins={showBasins}
+                    onHover={handleHover}
+                    onHoverEnd={handleHoverEnd}
+                  />
+                </div>
+                <div className="w-px bg-border" />
+                <div className="flex-1">
+                  <DualFieldView
+                    derivedField={derivedField}
+                    derivedType={derivedType}
+                    onTypeChange={setDerivedType}
+                  />
+                </div>
               </div>
-              <div className="w-px bg-border" />
-              <div className="flex-1">
-                <DualFieldView
-                  derivedField={derivedField}
-                  derivedType={derivedType}
-                  onTypeChange={setDerivedType}
-                />
-              </div>
-            </div>
-          ) : (
-            <VisualizationCanvas 
-              field={field} 
-              colormap={colormap}
-              basinMap={basinMap}
-              showBasins={showBasins}
-              onHover={handleHover}
-              onHoverEnd={handleHoverEnd}
+            ) : (
+              <VisualizationCanvas 
+                field={field} 
+                colormap={colormap}
+                basinMap={basinMap}
+                showBasins={showBasins}
+                onHover={handleHover}
+                onHoverEnd={handleHoverEnd}
+              />
+            )}
+            
+            <HoverProbe
+              data={probeData}
+              modeLabels={modeLabels}
+              visible={probeVisible}
+              position={probePosition}
             />
-          )}
+            
+            {state.isRunning && (
+              <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <span className="text-xs font-mono text-white/70">Running</span>
+              </div>
+            )}
+            {isPlaybackMode && (
+              <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-yellow-500/80 backdrop-blur-sm rounded px-2 py-1">
+                <span className="text-xs font-mono text-black">Playback Mode</span>
+              </div>
+            )}
+          </main>
           
-          <HoverProbe
-            data={probeData}
-            modeLabels={modeLabels}
-            visible={probeVisible}
-            position={probePosition}
-          />
-          
-          <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
-            <span className="text-xs font-mono text-white/70" data-testid="text-step-overlay">
-              Step: {state.step.toLocaleString()}
-            </span>
-          </div>
-          {state.isRunning && (
-            <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-              </span>
-              <span className="text-xs font-mono text-white/70">Running</span>
+          {bottomPanelOpen && (
+            <div className="flex-[3] bg-card border-t border-border overflow-hidden min-h-[150px]">
+              <Tabs value={bottomPanelTab} onValueChange={(v) => setBottomPanelTab(v as typeof bottomPanelTab)} className="h-full flex flex-col">
+                <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent px-2 h-9 shrink-0">
+                  <TabsTrigger value="dual" className="text-xs">Derived Field</TabsTrigger>
+                  <TabsTrigger value="notebook" className="text-xs">Notebook</TabsTrigger>
+                  <TabsTrigger value="export" className="text-xs">Export</TabsTrigger>
+                </TabsList>
+                <div className="flex-1 overflow-auto p-3">
+                  <TabsContent value="dual" className="m-0 h-full">
+                    {!showDualView ? (
+                      <DualFieldView
+                        derivedField={derivedField}
+                        derivedType={derivedType}
+                        onTypeChange={setDerivedType}
+                      />
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Dual view is shown in the main canvas area above.</p>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="notebook" className="m-0">
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                      <h4 className="text-sm font-semibold mb-2">Current Parameters</h4>
+                      <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                        <div>dt = {params.dt.toFixed(3)}</div>
+                        <div>K = {params.curvatureGain.toFixed(2)}</div>
+                        <div>C = {params.couplingWeight.toFixed(2)}</div>
+                        <div>A = {params.attractorStrength.toFixed(2)}</div>
+                        <div>R = {params.redistributionRate.toFixed(2)}</div>
+                        <div>Grid: {params.gridSize}x{params.gridSize}</div>
+                      </div>
+                      <h4 className="text-sm font-semibold mt-4 mb-2">Field Equation</h4>
+                      <code className="text-xs block bg-muted p-2 rounded">
+                        dF/dt = wK*K(F) + wT*T(F) + wC*C(F) + wA*A(F) + wR*R(F)
+                      </code>
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="export" className="m-0">
+                    <div className="flex flex-wrap gap-2">
+                      <Button size="sm" variant="outline" onClick={handleExportPNG} data-testid="button-export-png-bottom">
+                        <Download className="h-3.5 w-3.5 mr-1" />
+                        PNG Snapshot
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={handleExportJSON} data-testid="button-export-json-bottom">
+                        <Download className="h-3.5 w-3.5 mr-1" />
+                        Settings JSON
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={handleExportEvents} data-testid="button-export-events-bottom">
+                        <Download className="h-3.5 w-3.5 mr-1" />
+                        Event Log
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </div>
+              </Tabs>
             </div>
           )}
-          {isPlaybackMode && (
-            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-yellow-500/80 backdrop-blur-sm rounded px-2 py-1">
-              <span className="text-xs font-mono text-black">Playback Mode</span>
-            </div>
-          )}
-        </main>
-
-        <aside className="w-96 border-l border-border bg-card flex flex-col overflow-hidden">
+        </div>
+        
+        <aside className="w-80 border-l border-border bg-card flex flex-col overflow-hidden shrink-0">
           <ControlPanel
-            params={params}
-            state={state}
-            colormap={colormap}
-            interpretationMode={interpretationMode}
-            operatorContributions={operatorContributions}
-            structuralSignature={structuralSignature}
-            events={events}
-            historyLength={historyLength}
-            currentHistoryIndex={currentHistoryIndex}
-            isPlaybackMode={isPlaybackMode}
-            showBasins={showBasins}
-            showDualView={showDualView}
-            onParamsChange={handleParamsChange}
-            onPlay={handlePlay}
-            onPause={handlePause}
-            onReset={handleReset}
-            onStep={handleStep}
-            onStepBackward={handleStepBackward}
-            onSeekFrame={handleSeekFrame}
-            onExitPlayback={handleExitPlayback}
-            onColormapChange={setColormap}
-            onInterpretationModeChange={setInterpretationMode}
-            onClearEvents={handleClearEvents}
-            onExportEvents={handleExportEvents}
-            onExportPNG={handleExportPNG}
-            onExportJSON={handleExportJSON}
-            onExportGIF={handleExportGIF}
-            onShowBasinsChange={setShowBasins}
-            onShowDualViewChange={setShowDualView}
-          />
+                params={params}
+                state={state}
+                colormap={colormap}
+                interpretationMode={interpretationMode}
+                operatorContributions={operatorContributions}
+                structuralSignature={structuralSignature}
+                events={events}
+                historyLength={historyLength}
+                currentHistoryIndex={currentHistoryIndex}
+                isPlaybackMode={isPlaybackMode}
+                showBasins={showBasins}
+                showDualView={showDualView}
+                onParamsChange={handleParamsChange}
+                onPlay={handlePlay}
+                onPause={handlePause}
+                onReset={handleReset}
+                onStep={handleStep}
+                onStepBackward={handleStepBackward}
+                onSeekFrame={handleSeekFrame}
+                onExitPlayback={handleExitPlayback}
+                onColormapChange={setColormap}
+                onInterpretationModeChange={setInterpretationMode}
+                onClearEvents={handleClearEvents}
+                onExportEvents={handleExportEvents}
+                onExportPNG={handleExportPNG}
+                onExportJSON={handleExportJSON}
+                onExportGIF={handleExportGIF}
+                onShowBasinsChange={setShowBasins}
+                onShowDualViewChange={setShowDualView}
+              />
         </aside>
       </div>
     </div>
