@@ -7,7 +7,6 @@ import { HoverProbe } from "@/components/hover-probe";
 import { DualFieldView } from "@/components/dual-field-view";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HelpCircle, Waves, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -370,10 +369,8 @@ export default function SimulationPage() {
         </Dialog>
       </header>
 
-      <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
-        <ResizablePanel defaultSize={75} minSize={40}>
-          <div className="h-full flex flex-col">
-            <main className="relative bg-gray-950 flex-1">
+      <div className="flex flex-1 overflow-hidden">
+        <main className="relative bg-gray-950 flex-1">
               {showDualView ? (
                 <div className="grid grid-cols-2 gap-px h-full bg-border">
                   <div className="relative bg-gray-950 flex items-center justify-center">
@@ -427,13 +424,8 @@ export default function SimulationPage() {
                 </div>
               )}
             </main>
-          </div>
-        </ResizablePanel>
         
-        <ResizableHandle withHandle />
-        
-        <ResizablePanel defaultSize={25} minSize={15} maxSize={50}>
-          <aside className="h-full border-l border-border bg-card flex flex-col overflow-hidden">
+        <aside className="w-80 border-l border-border bg-card flex flex-col overflow-hidden">
           <ControlPanel
                 params={params}
                 state={state}
@@ -464,9 +456,8 @@ export default function SimulationPage() {
                 onShowBasinsChange={setShowBasins}
                 onShowDualViewChange={setShowDualView}
               />
-          </aside>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+        </aside>
+      </div>
     </div>
   );
 }
