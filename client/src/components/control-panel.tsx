@@ -124,6 +124,7 @@ export function ControlPanel({
   onShowBasinsChange,
   onShowDualViewChange,
 }: ControlPanelProps) {
+  const [coreParamsOpen, setCoreParamsOpen] = useState(true);
   const [weightsOpen, setWeightsOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [metricsOpen, setMetricsOpen] = useState(false);
@@ -279,14 +280,21 @@ export function ControlPanel({
           </TabsContent>
 
           <TabsContent value="params" className="m-0 p-3 space-y-4">
-            <div className="space-y-3">
-              <div className="text-xs font-medium text-muted-foreground">Core Parameters</div>
-              <ParameterSlider label="Timestep (dt)" value={params.dt} min={0.01} max={0.2} step={0.01} tooltip="Controls simulation speed and stability" onChange={(v) => onParamsChange({ dt: v })} testId="slider-timestep" />
-              <ParameterSlider label={modeLabels.operators.curvature} value={params.curvatureGain} min={0.1} max={10} step={0.1} tooltip="Sensitivity to local curvature changes" onChange={(v) => onParamsChange({ curvatureGain: v })} testId="slider-curvature-gain" />
-              <ParameterSlider label={modeLabels.operators.coupling} value={params.couplingWeight} min={0} max={1} step={0.05} tooltip="Balance between local and neighborhood values" onChange={(v) => onParamsChange({ couplingWeight: v })} testId="slider-coupling-weight" />
-              <ParameterSlider label={modeLabels.operators.attractor} value={params.attractorStrength} min={0.1} max={10} step={0.1} tooltip="Intensity of basin formation" onChange={(v) => onParamsChange({ attractorStrength: v })} testId="slider-attractor-strength" />
-              <ParameterSlider label="Redistribution" value={params.redistributionRate} min={0} max={1} step={0.05} tooltip="Global energy redistribution rate" onChange={(v) => onParamsChange({ redistributionRate: v })} testId="slider-redistribution" />
-            </div>
+            <Collapsible open={coreParamsOpen} onOpenChange={setCoreParamsOpen}>
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center justify-between w-full py-2 text-xs font-medium text-muted-foreground hover-elevate rounded px-2" data-testid="button-toggle-core-params">
+                  Core Parameters
+                  {coreParamsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-3 pt-2">
+                <ParameterSlider label="Timestep (dt)" value={params.dt} min={0.01} max={0.2} step={0.01} tooltip="Controls simulation speed and stability" onChange={(v) => onParamsChange({ dt: v })} testId="slider-timestep" />
+                <ParameterSlider label={modeLabels.operators.curvature} value={params.curvatureGain} min={0.1} max={10} step={0.1} tooltip="Sensitivity to local curvature changes" onChange={(v) => onParamsChange({ curvatureGain: v })} testId="slider-curvature-gain" />
+                <ParameterSlider label={modeLabels.operators.coupling} value={params.couplingWeight} min={0} max={1} step={0.05} tooltip="Balance between local and neighborhood values" onChange={(v) => onParamsChange({ couplingWeight: v })} testId="slider-coupling-weight" />
+                <ParameterSlider label={modeLabels.operators.attractor} value={params.attractorStrength} min={0.1} max={10} step={0.1} tooltip="Intensity of basin formation" onChange={(v) => onParamsChange({ attractorStrength: v })} testId="slider-attractor-strength" />
+                <ParameterSlider label="Redistribution" value={params.redistributionRate} min={0} max={1} step={0.05} tooltip="Global energy redistribution rate" onChange={(v) => onParamsChange({ redistributionRate: v })} testId="slider-redistribution" />
+              </CollapsibleContent>
+            </Collapsible>
 
             <Collapsible open={weightsOpen} onOpenChange={setWeightsOpen}>
               <CollapsibleTrigger asChild>
