@@ -5,6 +5,7 @@ import { ControlPanel } from "@/components/control-panel";
 import { MobileControlPanel } from "@/components/mobile-control-panel";
 import { HoverProbe } from "@/components/hover-probe";
 import { DualFieldView } from "@/components/dual-field-view";
+import { OnboardingModal } from "@/components/onboarding-modal";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -370,6 +371,7 @@ export default function SimulationPage() {
 
   return (
     <div className="flex flex-col h-screen bg-background">
+      <OnboardingModal />
       <header className="flex items-center justify-between gap-4 px-3 py-2 border-b border-border bg-card/50">
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center w-7 h-7 rounded-md bg-primary/10">
