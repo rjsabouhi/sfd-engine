@@ -71,12 +71,6 @@ export default function SimulationPage() {
   const frameCountRef = useRef(0);
   const lastDerivedCacheStepRef = useRef(0);
   
-  // Time-based hysteresis for field state to prevent flickering
-  // Uses wall-clock time for more reliable debouncing
-  const lastFieldStateChangeTimeRef = useRef(Date.now());
-  const currentDisplayedStateRef = useRef<FieldState>("calm");
-  // Minimum milliseconds before any state change (3 seconds)
-  const MIN_STATE_HOLD_MS = 3000;
   
   const showDualViewRef = useRef(showDualView);
   const derivedTypeRef = useRef(derivedType);
@@ -134,17 +128,10 @@ export default function SimulationPage() {
           const basinCountChanged = prevBasinCountRef.current !== null && newState.basinCount !== prevBasinCountRef.current;
           prevBasinCountRef.current = newState.basinCount;
           
-          // Time-based hysteresis for field state - only change if enough time has passed
+          // Use engine's debounced field state - hysteresis is managed by the engine
           const candidateState = computeFieldState(newState.variance, basinCountChanged, currentEvents);
-          const now = Date.now();
-          const timeSinceChange = now - lastFieldStateChangeTimeRef.current;
-          
-          // Only update if state is different AND enough time has passed
-          if (candidateState !== currentDisplayedStateRef.current && timeSinceChange >= MIN_STATE_HOLD_MS) {
-            currentDisplayedStateRef.current = candidateState;
-            lastFieldStateChangeTimeRef.current = now;
-            setFieldState(candidateState);
-          }
+          const debouncedState = engine.getDebouncedFieldState(candidateState);
+          setFieldState(debouncedState);
         }
       });
     });

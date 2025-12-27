@@ -146,6 +146,11 @@ export class SFDEngine {
   private lastFrameTimeMs: number = 0;
   private droppedFrames: number = 0;
   private targetFrameTime: number = 16.67; // 60fps target
+  
+  // Field state hysteresis - stored on engine to survive callback rebindings
+  private displayedFieldState: "calm" | "unsettled" | "reorganizing" | "transforming" = "calm";
+  private fieldStateHoldUntil: number = 0; // timestamp when state can next change
+  private fieldStateMinHoldMs: number = 3000; // 3 seconds minimum between changes
 
   constructor(params: SimulationParameters = defaultParameters) {
     this.params = { ...params };
@@ -492,6 +497,21 @@ export class SFDEngine {
   
   getReactiveEvents(): typeof this.reactiveEvents {
     return { ...this.reactiveEvents };
+  }
+  
+  // Get the debounced field state - manages hysteresis internally
+  getDebouncedFieldState(
+    candidateState: "calm" | "unsettled" | "reorganizing" | "transforming"
+  ): "calm" | "unsettled" | "reorganizing" | "transforming" {
+    const now = Date.now();
+    
+    // If candidate is different and hold period has passed, allow change
+    if (candidateState !== this.displayedFieldState && now >= this.fieldStateHoldUntil) {
+      this.displayedFieldState = candidateState;
+      this.fieldStateHoldUntil = now + this.fieldStateMinHoldMs;
+    }
+    
+    return this.displayedFieldState;
   }
   
   getSimulationPhase(): "idle" | "firstMotion" | "running" {
