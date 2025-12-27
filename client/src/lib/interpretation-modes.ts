@@ -1,6 +1,8 @@
+import { LANGUAGE, type InterpretationModeKey, type RegimeKey } from "./language";
+
 export type InterpretationMode = 
   | "technical"
-  | "structural-dynamics"
+  | "structural"
   | "intuitive";
 
 export interface ModeLabels {
@@ -20,11 +22,23 @@ export interface ModeLabels {
   };
 }
 
+function toLanguageMode(mode: InterpretationMode): InterpretationModeKey {
+  switch (mode) {
+    case "technical":
+      return "TECHNICAL";
+    case "structural":
+      return "STRUCTURAL";
+    case "intuitive":
+    default:
+      return "INTUITIVE";
+  }
+}
+
 export const interpretationModes: Record<InterpretationMode, ModeLabels> = {
   "technical": {
-    name: "Technical",
-    header: "Technical View",
-    subtitle: "Mathematically accurate operator terminology.",
+    name: LANGUAGE.META.TECHNICAL,
+    header: LANGUAGE.META.TECHNICAL,
+    subtitle: LANGUAGE.META.TECHNICAL_DESC,
     operators: {
       curvature: "Curvature (K)",
       tension: "Tension (T)",
@@ -37,10 +51,10 @@ export const interpretationModes: Record<InterpretationMode, ModeLabels> = {
       variance: "Variance",
     },
   },
-  "structural-dynamics": {
-    name: "Structural Dynamics",
-    header: "Structural Dynamics View",
-    subtitle: "Domain-general scientific language.",
+  "structural": {
+    name: LANGUAGE.META.STRUCTURAL,
+    header: LANGUAGE.META.STRUCTURAL,
+    subtitle: LANGUAGE.META.STRUCTURAL_DESC,
     operators: {
       curvature: "Curvature Operator",
       tension: "Tension Operator",
@@ -54,9 +68,9 @@ export const interpretationModes: Record<InterpretationMode, ModeLabels> = {
     },
   },
   "intuitive": {
-    name: "Intuitive",
-    header: "Intuitive View",
-    subtitle: "Safe, non-metaphorical descriptions.",
+    name: LANGUAGE.META.INTUITIVE,
+    header: LANGUAGE.META.INTUITIVE,
+    subtitle: LANGUAGE.META.INTUITIVE_DESC,
     operators: {
       curvature: "Bending",
       tension: "Spreading",
@@ -72,15 +86,63 @@ export const interpretationModes: Record<InterpretationMode, ModeLabels> = {
 };
 
 export const modeOptions: { value: InterpretationMode; label: string }[] = [
-  { value: "technical", label: "Technical" },
-  { value: "structural-dynamics", label: "Structural Dynamics" },
-  { value: "intuitive", label: "Intuitive" },
+  { value: "technical", label: LANGUAGE.META.TECHNICAL },
+  { value: "structural", label: LANGUAGE.META.STRUCTURAL },
+  { value: "intuitive", label: LANGUAGE.META.INTUITIVE },
 ];
 
 export interface InterpretationSentence {
   technical: string;
-  structuralDynamics: string;
+  structural: string;
   intuitive: string;
+}
+
+export function detectRegime(
+  basinCount: number,
+  variance: number,
+  energy: number,
+  varianceChange: number,
+  isRunning: boolean
+): RegimeKey {
+  if (!isRunning) {
+    return "STABLE";
+  }
+
+  const highVariance = variance > 0.15;
+  const lowVariance = variance < 0.02;
+  const varianceRising = varianceChange > 0.01;
+  const varianceFalling = varianceChange < -0.01;
+  const manyBasins = basinCount > 5;
+  const fewBasins = basinCount <= 2;
+  const highEnergy = energy > 1.5;
+  const lowEnergy = energy < 0.3;
+
+  if (highVariance && varianceRising) {
+    return "RECONFIGURING";
+  }
+  if (highVariance && !varianceRising && !varianceFalling) {
+    return "EDGE_OF_TRANSITION";
+  }
+  if (varianceRising && !highVariance) {
+    return "ACCUMULATING";
+  }
+  if (varianceFalling && !lowVariance) {
+    return "DISPERSION";
+  }
+  if (lowVariance && fewBasins && lowEnergy) {
+    return "STABLE";
+  }
+  if (lowVariance && fewBasins) {
+    return "NEW_BASELINE";
+  }
+  if (manyBasins && !lowVariance && !highVariance) {
+    return "CYCLING";
+  }
+  if (!highVariance && !lowVariance) {
+    return "DRIFTING";
+  }
+
+  return "STABLE";
 }
 
 export function generateInterpretationSentence(
@@ -89,54 +151,25 @@ export function generateInterpretationSentence(
   energy: number,
   curvatureContrib: number,
   tensionContrib: number,
-  isRunning: boolean
+  isRunning: boolean,
+  varianceChange: number = 0
 ): InterpretationSentence {
-  const highCurvature = curvatureContrib > 0.3;
-  const highTension = tensionContrib > 0.3;
-  const highVariance = variance > 0.1;
-  const lowVariance = variance < 0.02;
-  const manyBasins = basinCount > 5;
-  const fewBasins = basinCount <= 2;
-  
+  const regime = detectRegime(basinCount, variance, energy, varianceChange, isRunning);
+  const regimeData = LANGUAGE.REGIMES[regime];
+
   if (!isRunning) {
     return {
       technical: "Simulation paused. Press Run to evolve the field.",
-      structuralDynamics: "The field is at rest. Start the simulation to observe structural evolution.",
+      structural: "The field is at rest. Start the simulation to observe structural evolution.",
       intuitive: "The pattern is still. Press Run to see it change.",
     };
   }
-  
-  let technical = "Local operator dynamics are ";
-  let structuralDynamics = "Local interactions are causing the field to ";
-  let intuitive = "The pattern is ";
-  
-  if (highCurvature && highVariance) {
-    technical += "increasing curvature and amplifying structural variance.";
-    structuralDynamics += "bend more sharply while becoming more varied.";
-    intuitive += "becoming more uneven with stronger bends forming.";
-  } else if (highCurvature && lowVariance) {
-    technical += "increasing curvature while reducing structural variance.";
-    structuralDynamics += "bend more sharply while stabilizing its overall pattern.";
-    intuitive += "settling into a stronger overall shape with distinct bends.";
-  } else if (highTension && manyBasins) {
-    technical += "driving tension gradients across multiple basin regions.";
-    structuralDynamics += "spread and redistribute energy across many distinct regions.";
-    intuitive += "spreading out into many separate areas.";
-  } else if (fewBasins && lowVariance) {
-    technical += "converging toward a stable low-energy configuration.";
-    structuralDynamics += "settle into a uniform, stable structure.";
-    intuitive += "becoming more even and settled.";
-  } else if (manyBasins) {
-    technical += "maintaining multi-basin structural complexity.";
-    structuralDynamics += "sustain multiple distinct structural regions.";
-    intuitive += "holding several separate regions.";
-  } else {
-    technical += "evolving through balanced operator contributions.";
-    structuralDynamics += "evolve through balanced local interactions.";
-    intuitive += "changing gradually across the field.";
-  }
-  
-  return { technical, structuralDynamics, intuitive };
+
+  return {
+    technical: `${regimeData.LABEL}: ${regimeData.TECHNICAL}`,
+    structural: `${regimeData.LABEL}: ${regimeData.STRUCTURAL}`,
+    intuitive: `${regimeData.LABEL}: ${regimeData.INTUITIVE}`,
+  };
 }
 
 export function getInterpretationText(
@@ -146,8 +179,8 @@ export function getInterpretationText(
   switch (mode) {
     case "technical":
       return sentence.technical;
-    case "structural-dynamics":
-      return sentence.structuralDynamics;
+    case "structural":
+      return sentence.structural;
     case "intuitive":
     default:
       return sentence.intuitive;
@@ -161,3 +194,6 @@ export function getDefaultModeLabels(): ModeLabels {
 export function getModeLabels(mode: InterpretationMode): ModeLabels {
   return interpretationModes[mode] || interpretationModes["intuitive"];
 }
+
+export { LANGUAGE, toLanguageMode };
+export type { InterpretationModeKey, RegimeKey };

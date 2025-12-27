@@ -58,6 +58,8 @@ export default function SimulationPage() {
   const [derivedType, setDerivedType] = useState<"curvature" | "tension" | "coupling" | "variance">("curvature");
   const [derivedField, setDerivedField] = useState<DerivedField | null>(null);
   const [basinMap, setBasinMap] = useState<BasinMap | null>(null);
+  const [varianceChange, setVarianceChange] = useState(0);
+  const prevVarianceRef = useRef(0);
   
   const showDualViewRef = useRef(showDualView);
   const derivedTypeRef = useRef(derivedType);
@@ -92,6 +94,9 @@ export default function SimulationPage() {
       setCurrentHistoryIndex(engine.getCurrentHistoryIndex());
       setIsPlaybackMode(engine.isInPlaybackMode());
       setBasinMap(engine.getBasinMap());
+      
+      setVarianceChange(newState.variance - prevVarianceRef.current);
+      prevVarianceRef.current = newState.variance;
       
       if (showDualViewRef.current) {
         setDerivedField(engine.computeDerivedField(derivedTypeRef.current));
@@ -234,7 +239,8 @@ export default function SimulationPage() {
     state.energy,
     operatorContributions.curvature,
     operatorContributions.tension,
-    state.isRunning
+    state.isRunning,
+    varianceChange
   );
 
   if (isMobile) {
@@ -503,6 +509,7 @@ export default function SimulationPage() {
                 onExportJSON={handleExportJSON}
                 onShowBasinsChange={setShowBasins}
                 onShowDualViewChange={setShowDualView}
+                varianceChange={varianceChange}
               />
         </aside>
       </div>

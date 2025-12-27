@@ -1,0 +1,226 @@
+/*  
+==========================================================
+SFD SIMULATOR LANGUAGE ENGINE — FULL TEXT PAYLOAD (v1.0)
+==========================================================
+This file defines ALL textual content for the SFD Simulator.
+It includes:
+- Three communication modes: TECHNICAL, STRUCTURAL, INTUITIVE
+- All labels, tooltips, onboarding text, warnings, and regime definitions
+- All metric descriptions across modes
+- All UI strings required to populate the entire interface
+
+Every string is structured as:
+LANGUAGE.MODE.KEY = "text"
+
+You will load this file into your front-end state system
+and call it dynamically based on the user's selected mode.
+==========================================================
+*/
+
+
+export const LANGUAGE = {
+
+  /* ===========================
+     MODE DESCRIPTIONS (the toggle)
+     =========================== */
+
+  META: {
+    TECHNICAL: "Technical Mode",
+    STRUCTURAL: "Structural Mode",
+    INTUITIVE: "Intuitive Mode",
+
+    TECHNICAL_DESC:
+      "Displays raw system operators, gradients, and differential behavior. Best for research-grade analysis.",
+    STRUCTURAL_DESC:
+      "Describes how the system reorganizes, stabilizes, or approaches transitions. Ideal for conceptual understanding.",
+    INTUITIVE_DESC:
+      "Provides clear, everyday-language explanations of what the system is doing. No math required.",
+  },
+
+
+  /* ===========================
+     ONBOARDING TEXT
+     =========================== */
+
+  ONBOARDING: {
+    WELCOME_TITLE: "Welcome to the Structural Field Dynamics Simulator",
+    WELCOME_BODY_INTUITIVE:
+      "This tool lets you explore how complex systems shift, adapt, stabilize, or reorganize. You're looking at a living model of how structure changes when pressure builds or patterns destabilize.",
+    WELCOME_BODY_STRUCTURAL:
+      "This simulator models constraints, gradients, micro-fluctuations, and phase transitions as a unified dynamic field. You will see how local tensions accumulate, disperse, or reorganize the entire system.",
+    WELCOME_BODY_TECHNICAL:
+      "This interface exposes operator-level field metrics: local gradient magnitudes, instability thresholds, constraint curvature, spectral pressure, transition edges, and post-critical smoothing regimes. Ideal for advanced analysis.",
+    GET_STARTED: "Begin Exploration",
+  },
+
+
+  /* ===========================
+     METRIC DESCRIPTIONS
+     =========================== */
+
+  METRICS: {
+
+    /* ---- FIELD GRADIENT (FG) ---- */
+
+    FG: {
+      LABEL: "Field Gradient (FG)",
+
+      INTUITIVE:
+        "How fast things are changing in this area. High FG means the system is tugging, stretching, or shifting strongly.",
+      STRUCTURAL:
+        "Gradient intensity showing how sharply local conditions differ from their surroundings. High FG indicates tension buildup and pre-transition behavior.",
+      TECHNICAL:
+        "∂Φ/∂x magnitude. A measure of local differential steepness in the constraint field, identifying micro-instability vectors.",
+    },
+
+    /* ---- CONSTRAINT CURVATURE (CC) ---- */
+
+    CC: {
+      LABEL: "Constraint Curvature (CC)",
+
+      INTUITIVE:
+        "How ‘bent’ or ‘warped’ the local structure is. Higher curvature = more structural strain or compression.",
+      STRUCTURAL:
+        "Measures the deviation of local structure from equilibrium geometry. High CC signals structural folding or incipient reconfiguration.",
+      TECHNICAL:
+        "κ = ∇·(∇Φ). Second-order curvature operator indicating local compressive or expansive constraint topology.",
+    },
+
+    /* ---- TENSION INDEX (TI) ---- */
+
+    TI: {
+      LABEL: "Tension Index (TI)",
+
+      INTUITIVE:
+        "How much stress is stored here. High tension means the system is holding more than it prefers.",
+      STRUCTURAL:
+        "Represents stored structural energy that has not yet dispersed. High TI typically precedes a field-wide reorganization.",
+      TECHNICAL:
+        "TI = ||∇Φ|| weighted by local constraint density. Indicates metastable stress accumulation.",
+    },
+
+    /* ---- TRANSITION EDGE (TE) ---- */
+
+    TE: {
+      LABEL: "Transition Edge (TE)",
+
+      INTUITIVE:
+        "The border between stability and change. When this rises, the system is near a shift.",
+      STRUCTURAL:
+        "A boundary contour where local instability surpasses smoothing forces. The system becomes sensitive to perturbations.",
+      TECHNICAL:
+        "TE is the manifold region where λ_min(J) approaches 0. A soft bifurcation zone indicating criticality proximity.",
+    },
+
+    /* ---- RECONFIGURATION INDEX (RI) ---- */
+
+    RI: {
+      LABEL: "Reconfiguration Index (RI)",
+
+      INTUITIVE:
+        "How close the system is to a major change. Higher values mean a reconfiguration may occur soon.",
+      STRUCTURAL:
+        "Tracks approach to the Pre-Critical Gradient threshold. Rising RI marks coordinated drift toward systemic transition.",
+      TECHNICAL:
+        "RI measures global integral of PCG-aligned gradients weighted by constraint harmonics.",
+    },
+
+    /* ---- STABILITY RESIDUE (SR) ---- */
+
+    SR: {
+      LABEL: "Stability Residue (SR)",
+
+      INTUITIVE:
+        "How much stability remains after the last shift. High SR = the system has ‘settled’. Low SR = still shaking.",
+      STRUCTURAL:
+        "Quantifies post-transition smoothing. Reflects the EDO (Entropic Dispersion Operator) effect after reconfiguration.",
+      TECHNICAL:
+        "SR = ∫ EDO Φ_t dt. Residual stabilization metric.",
+    },
+  },
+
+
+  /* ===========================
+     REGIMES (the 8 states)
+     =========================== */
+
+  REGIMES: {
+
+    STABLE: {
+      LABEL: "Stable Regime",
+      INTUITIVE: "Everything is calm and mostly balanced. Small changes fade out quickly.",
+      STRUCTURAL: "Low gradients, low curvature. System returns to equilibrium after small disturbances.",
+      TECHNICAL: "Φ_t → 0, negative divergence, high SR.",
+    },
+
+    DRIFTING: {
+      LABEL: "Drift Regime",
+      INTUITIVE: "The system is slowly shifting in a direction.",
+      STRUCTURAL: "Coherent directional gradient. The system moves toward a new basin.",
+      TECHNICAL: "Persistent low-frequency gradient alignment.",
+    },
+
+    ACCUMULATING: {
+      LABEL: "Tension Accumulation",
+      INTUITIVE: "Stress is quietly building. Nothing dramatic yet.",
+      STRUCTURAL: "Increasing TI and CC. Pre-critical buildup.",
+      TECHNICAL: "∂TI/∂t > 0, PCG approaching threshold.",
+    },
+
+    EDGE_OF_TRANSITION: {
+      LABEL: "Transition Edge",
+      INTUITIVE: "Right at the border of change. A nudge could tip it.",
+      STRUCTURAL: "TE zone widening. High sensitivity to fluctuations.",
+      TECHNICAL: "λ_min(J) ≈ 0, bifurcation imminent.",
+    },
+
+    RECONFIGURING: {
+      LABEL: "Reconfiguration Event",
+      INTUITIVE: "A major shift is happening right now.",
+      STRUCTURAL: "Topology reorganizes. Constraints are redistributed.",
+      TECHNICAL: "SRE trigger: PCG > threshold; immediate ΔΦ across manifold.",
+    },
+
+    DISPERSION: {
+      LABEL: "Dispersion Phase",
+      INTUITIVE: "The system is cooling off after the shift.",
+      STRUCTURAL: "EDO smooths out leftover tension.",
+      TECHNICAL: "High-frequency components dampen; SR rises.",
+    },
+
+    NEW_BASELINE: {
+      LABEL: "New Baseline",
+      INTUITIVE: "A new normal has formed.",
+      STRUCTURAL: "Stable configuration established in a new basin.",
+      TECHNICAL: "SR stable; new equilibrium manifold.",
+    },
+
+    CYCLING: {
+      LABEL: "Dynamic Cycling",
+      INTUITIVE: "The system is repeatedly shifting, never quite settling.",
+      STRUCTURAL: "Oscillatory constraint realignments.",
+      TECHNICAL: "Limit-cycle attractor or structural resonance pattern.",
+    },
+  },
+
+
+  /* ===========================
+     UI ELEMENT TEXT
+     =========================== */
+
+  UI: {
+
+    RESET: "Reset Simulation",
+    RANDOMIZE: "Randomize Field",
+    MODE_TOGGLE: "Language Mode",
+    METRICS_PANEL: "Field Metrics",
+    REGIME_PANEL: "Current Regime",
+    COLORBAR_LABEL: "Intensity Scale",
+
+    TOOLTIP_MORE: "Tap to expand",
+    TOOLTIP_LESS: "Tap to collapse",
+
+    SHARE_BUTTON: "Share Snapshot",
+    EXPORT_BUTTON: "Export Data",
+  },
+};

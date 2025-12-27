@@ -16,8 +16,10 @@ import { OperatorSensitivity } from "./operator-sensitivity";
 import { StructuralSignatureBar } from "./structural-signature";
 import { EventLog } from "./event-log";
 import { PresetMenu } from "./preset-menu";
+import { RegimeDisplay } from "./regime-display";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
-import { getModeLabels, modeOptions } from "@/lib/interpretation-modes";
+import { getModeLabels, modeOptions, detectRegime, toLanguageMode } from "@/lib/interpretation-modes";
+import type { RegimeKey } from "@/lib/language";
 
 interface ControlPanelProps {
   params: SimulationParameters;
@@ -32,6 +34,7 @@ interface ControlPanelProps {
   isPlaybackMode: boolean;
   showBasins: boolean;
   showDualView: boolean;
+  varianceChange?: number;
   onParamsChange: (params: Partial<SimulationParameters>) => void;
   onPlay: () => void;
   onPause: () => void;
@@ -123,6 +126,7 @@ export function ControlPanel({
   onExportJSON,
   onShowBasinsChange,
   onShowDualViewChange,
+  varianceChange = 0,
 }: ControlPanelProps) {
   const [coreParamsOpen, setCoreParamsOpen] = useState(true);
   const [weightsOpen, setWeightsOpen] = useState(false);
@@ -130,6 +134,14 @@ export function ControlPanel({
   const [metricsOpen, setMetricsOpen] = useState(false);
 
   const modeLabels = getModeLabels(interpretationMode);
+  const languageMode = toLanguageMode(interpretationMode);
+  const currentRegime = detectRegime(
+    state.basinCount,
+    state.variance,
+    state.energy,
+    varianceChange,
+    state.isRunning
+  );
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -333,7 +345,9 @@ export function ControlPanel({
           </TabsContent>
 
           <TabsContent value="analysis" className="m-0 p-3 space-y-4">
-            <div className="space-y-2">
+            <RegimeDisplay regime={currentRegime} mode={languageMode} />
+
+            <div className="space-y-2 pt-2 border-t border-border">
               <div className="text-xs font-medium text-muted-foreground">Operator Contributions</div>
               <OperatorSensitivity contributions={operatorContributions} modeLabels={modeLabels} />
             </div>

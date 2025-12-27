@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Waves, Play, Sliders, Keyboard, ArrowRight, ArrowLeft, X } from "lucide-react";
+import { LANGUAGE } from "@/lib/language";
 
 const ONBOARDING_STORAGE_KEY = "sfd-onboarding-complete";
 
@@ -19,8 +20,8 @@ interface OnboardingStep {
 
 const steps: OnboardingStep[] = [
   {
-    title: "Welcome to SFD Engine",
-    description: "This is a structural field explorer. Watch as mathematical operators shape patterns across a 2D surface. The colors show how values change across the field.",
+    title: LANGUAGE.ONBOARDING.WELCOME_TITLE,
+    description: LANGUAGE.ONBOARDING.WELCOME_BODY_INTUITIVE,
     icon: Waves,
   },
   {
@@ -128,7 +129,7 @@ export function OnboardingModal() {
               data-testid="button-onboarding-next"
             >
               {isLastStep ? (
-                "Get Started"
+                LANGUAGE.ONBOARDING.GET_STARTED
               ) : (
                 <>
                   Next
