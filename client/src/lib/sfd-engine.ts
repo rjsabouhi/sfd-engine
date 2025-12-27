@@ -87,6 +87,7 @@ export class SFDEngine {
     this.lastBasinCount = 0;
     this.varianceHistory = [];
     this.basinMap = null;
+    this.updateBasinMap();
   }
 
   reset(): void {
