@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Info, Sliders, Activity, Settings2 } from "lucide-react";
+import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Info, Sliders, Activity, Settings2, BookOpen, Download } from "lucide-react";
 import type { SimulationParameters, SimulationState, OperatorContributions, StructuralSignature, StructuralEvent } from "@shared/schema";
 import { defaultParameters } from "@shared/schema";
 import { StatisticsPanel } from "./statistics-panel";
@@ -32,7 +32,6 @@ interface ControlPanelProps {
   isPlaybackMode: boolean;
   showBasins: boolean;
   showDualView: boolean;
-  bottomPanelOpen: boolean;
   onParamsChange: (params: Partial<SimulationParameters>) => void;
   onPlay: () => void;
   onPause: () => void;
@@ -45,9 +44,10 @@ interface ControlPanelProps {
   onInterpretationModeChange: (mode: InterpretationMode) => void;
   onClearEvents: () => void;
   onExportEvents: () => void;
+  onExportPNG: () => void;
+  onExportJSON: () => void;
   onShowBasinsChange: (show: boolean) => void;
   onShowDualViewChange: (show: boolean) => void;
-  onBottomPanelChange: (open: boolean) => void;
 }
 
 interface ParameterSliderProps {
@@ -107,7 +107,6 @@ export function ControlPanel({
   isPlaybackMode,
   showBasins,
   showDualView,
-  bottomPanelOpen,
   onParamsChange,
   onPlay,
   onPause,
@@ -120,9 +119,10 @@ export function ControlPanel({
   onInterpretationModeChange,
   onClearEvents,
   onExportEvents,
+  onExportPNG,
+  onExportJSON,
   onShowBasinsChange,
   onShowDualViewChange,
-  onBottomPanelChange,
 }: ControlPanelProps) {
   const [weightsOpen, setWeightsOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -138,18 +138,26 @@ export function ControlPanel({
       </div>
 
       <Tabs defaultValue="controls" className="flex-1 flex flex-col overflow-hidden">
-        <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent px-2 h-9 shrink-0">
-          <TabsTrigger value="controls" className="text-xs gap-1">
+        <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent px-1 h-9 shrink-0 flex-wrap">
+          <TabsTrigger value="controls" className="text-xs gap-1 px-2">
             <Play className="h-3 w-3" />
             Controls
           </TabsTrigger>
-          <TabsTrigger value="params" className="text-xs gap-1">
+          <TabsTrigger value="params" className="text-xs gap-1 px-2">
             <Sliders className="h-3 w-3" />
             Params
           </TabsTrigger>
-          <TabsTrigger value="analysis" className="text-xs gap-1">
+          <TabsTrigger value="analysis" className="text-xs gap-1 px-2">
             <Activity className="h-3 w-3" />
             Analysis
+          </TabsTrigger>
+          <TabsTrigger value="notebook" className="text-xs gap-1 px-2">
+            <BookOpen className="h-3 w-3" />
+            Info
+          </TabsTrigger>
+          <TabsTrigger value="export" className="text-xs gap-1 px-2">
+            <Download className="h-3 w-3" />
+            Export
           </TabsTrigger>
         </TabsList>
 
@@ -199,9 +207,9 @@ export function ControlPanel({
               </Select>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col items-center gap-1">
-                <Label className="text-xs">Basins</Label>
+                <Label className="text-xs">Show Basins</Label>
                 <Switch
                   checked={showBasins}
                   onCheckedChange={onShowBasinsChange}
@@ -214,14 +222,6 @@ export function ControlPanel({
                   checked={showDualView}
                   onCheckedChange={onShowDualViewChange}
                   data-testid="switch-dual-view"
-                />
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <Label className="text-xs">Bottom</Label>
-                <Switch
-                  checked={bottomPanelOpen}
-                  onCheckedChange={onBottomPanelChange}
-                  data-testid="switch-bottom-panel"
                 />
               </div>
             </div>
@@ -314,6 +314,56 @@ export function ControlPanel({
             <div className="space-y-2 pt-2 border-t border-border">
               <div className="text-xs font-medium text-muted-foreground">Event Log ({events.length})</div>
               <EventLog events={events} onClear={onClearEvents} onExport={onExportEvents} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="notebook" className="m-0 p-3 space-y-4">
+            <div className="space-y-3">
+              <div className="text-xs font-medium text-muted-foreground">Current Parameters</div>
+              <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-muted/30 p-2 rounded">
+                <div>dt = {params.dt.toFixed(3)}</div>
+                <div>K = {params.curvatureGain.toFixed(2)}</div>
+                <div>C = {params.couplingWeight.toFixed(2)}</div>
+                <div>A = {params.attractorStrength.toFixed(2)}</div>
+                <div>R = {params.redistributionRate.toFixed(2)}</div>
+                <div>Grid: {params.gridSize}x{params.gridSize}</div>
+              </div>
+            </div>
+            
+            <div className="space-y-2 pt-2 border-t border-border">
+              <div className="text-xs font-medium text-muted-foreground">Field Equation</div>
+              <code className="text-xs block bg-muted p-2 rounded font-mono">
+                dF/dt = wK*K(F) + wT*T(F) + wC*C(F) + wA*A(F) + wR*R(F)
+              </code>
+            </div>
+
+            <div className="space-y-2 pt-2 border-t border-border">
+              <div className="text-xs font-medium text-muted-foreground">Operator Weights</div>
+              <div className="grid grid-cols-5 gap-1 text-xs font-mono bg-muted/30 p-2 rounded text-center">
+                <div>wK={params.wK.toFixed(1)}</div>
+                <div>wT={params.wT.toFixed(1)}</div>
+                <div>wC={params.wC.toFixed(1)}</div>
+                <div>wA={params.wA.toFixed(1)}</div>
+                <div>wR={params.wR.toFixed(1)}</div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="export" className="m-0 p-3 space-y-3">
+            <div className="text-xs font-medium text-muted-foreground">Export Options</div>
+            <div className="space-y-2">
+              <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportPNG} data-testid="button-export-png">
+                <Download className="h-3.5 w-3.5 mr-2" />
+                PNG Snapshot
+              </Button>
+              <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportJSON} data-testid="button-export-json">
+                <Download className="h-3.5 w-3.5 mr-2" />
+                Settings JSON
+              </Button>
+              <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportEvents} data-testid="button-export-events">
+                <Download className="h-3.5 w-3.5 mr-2" />
+                Event Log
+              </Button>
             </div>
           </TabsContent>
         </div>

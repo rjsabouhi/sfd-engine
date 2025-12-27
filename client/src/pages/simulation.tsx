@@ -73,9 +73,7 @@ export default function SimulationPage() {
   const [probeData, setProbeData] = useState<ProbeData | null>(null);
   const [probeVisible, setProbeVisible] = useState(false);
   const [probePosition, setProbePosition] = useState({ x: 0, y: 0 });
-  const [bottomPanelOpen, setBottomPanelOpen] = useState(true);
-  const [bottomPanelTab, setBottomPanelTab] = useState<"dual" | "notebook" | "export">("dual");
-
+  
   const modeLabels = interpretationModes[interpretationMode];
 
   useEffect(() => {
@@ -374,7 +372,7 @@ export default function SimulationPage() {
 
       <div className="flex-1 overflow-hidden flex">
         <div className="flex-1 flex flex-col min-w-0">
-          <main className={`relative bg-gray-950 ${bottomPanelOpen ? 'flex-[7]' : 'flex-1'}`}>
+          <main className="relative bg-gray-950 flex-1">
             {showDualView ? (
               <div className="flex h-full">
                 <div className="flex-1 relative">
@@ -429,64 +427,6 @@ export default function SimulationPage() {
               </div>
             )}
           </main>
-          
-          {bottomPanelOpen && (
-            <div className="flex-[3] bg-card border-t border-border overflow-hidden min-h-[150px]">
-              <Tabs value={bottomPanelTab} onValueChange={(v) => setBottomPanelTab(v as typeof bottomPanelTab)} className="h-full flex flex-col">
-                <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent px-2 h-9 shrink-0">
-                  <TabsTrigger value="dual" className="text-xs">Derived Field</TabsTrigger>
-                  <TabsTrigger value="notebook" className="text-xs">Notebook</TabsTrigger>
-                  <TabsTrigger value="export" className="text-xs">Export</TabsTrigger>
-                </TabsList>
-                <div className="flex-1 overflow-auto p-3">
-                  <TabsContent value="dual" className="m-0 h-full">
-                    {!showDualView ? (
-                      <DualFieldView
-                        derivedField={derivedField}
-                        derivedType={derivedType}
-                        onTypeChange={setDerivedType}
-                      />
-                    ) : (
-                      <p className="text-sm text-muted-foreground">Dual view is shown in the main canvas area above.</p>
-                    )}
-                  </TabsContent>
-                  <TabsContent value="notebook" className="m-0">
-                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                      <h4 className="text-sm font-semibold mb-2">Current Parameters</h4>
-                      <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-                        <div>dt = {params.dt.toFixed(3)}</div>
-                        <div>K = {params.curvatureGain.toFixed(2)}</div>
-                        <div>C = {params.couplingWeight.toFixed(2)}</div>
-                        <div>A = {params.attractorStrength.toFixed(2)}</div>
-                        <div>R = {params.redistributionRate.toFixed(2)}</div>
-                        <div>Grid: {params.gridSize}x{params.gridSize}</div>
-                      </div>
-                      <h4 className="text-sm font-semibold mt-4 mb-2">Field Equation</h4>
-                      <code className="text-xs block bg-muted p-2 rounded">
-                        dF/dt = wK*K(F) + wT*T(F) + wC*C(F) + wA*A(F) + wR*R(F)
-                      </code>
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="export" className="m-0">
-                    <div className="flex flex-wrap gap-2">
-                      <Button size="sm" variant="outline" onClick={handleExportPNG} data-testid="button-export-png-bottom">
-                        <Download className="h-3.5 w-3.5 mr-1" />
-                        PNG Snapshot
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={handleExportJSON} data-testid="button-export-json-bottom">
-                        <Download className="h-3.5 w-3.5 mr-1" />
-                        Settings JSON
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={handleExportEvents} data-testid="button-export-events-bottom">
-                        <Download className="h-3.5 w-3.5 mr-1" />
-                        Event Log
-                      </Button>
-                    </div>
-                  </TabsContent>
-                </div>
-              </Tabs>
-            </div>
-          )}
         </div>
         
         <aside className="w-80 border-l border-border bg-card flex flex-col overflow-hidden shrink-0">
@@ -503,7 +443,6 @@ export default function SimulationPage() {
                 isPlaybackMode={isPlaybackMode}
                 showBasins={showBasins}
                 showDualView={showDualView}
-                bottomPanelOpen={bottomPanelOpen}
                 onParamsChange={handleParamsChange}
                 onPlay={handlePlay}
                 onPause={handlePause}
@@ -516,9 +455,10 @@ export default function SimulationPage() {
                 onInterpretationModeChange={setInterpretationMode}
                 onClearEvents={handleClearEvents}
                 onExportEvents={handleExportEvents}
+                onExportPNG={handleExportPNG}
+                onExportJSON={handleExportJSON}
                 onShowBasinsChange={setShowBasins}
                 onShowDualViewChange={setShowDualView}
-                onBottomPanelChange={setBottomPanelOpen}
               />
         </aside>
       </div>
