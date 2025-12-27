@@ -43,7 +43,9 @@ export interface DiagnosticInternalsData {
   gradientMagnitudeStats: { min: number; max: number; mean: number };
   curvatureStats: { min: number; max: number; mean: number };
   laplacianDistribution: number[];
+  laplacianMean: number;
   basinCount: number;
+  frameHashHistory: string[];
 }
 
 export interface DeterminismReport {
@@ -137,6 +139,8 @@ export class SFDEngine {
   private currentSeed: number = Date.now();
   private rng: () => number = Math.random;
   private energyHistory: number[] = [];
+  private frameHashHistory: string[] = [];
+  private maxFrameHashHistory: number = 20;
   private energyHistorySize: number = 100;
   private lastEnergy: number = 0;
   private lastFrameTimeMs: number = 0;
@@ -1091,16 +1095,19 @@ export class SFDEngine {
       }
     }
     
-    // Laplacian distribution (10 bins)
+    // Laplacian distribution (10 bins) and mean
     const laplacianDist = new Array(10).fill(0);
+    let laplacianSum = 0;
     for (let y = 1; y < this.height - 1; y++) {
       for (let x = 1; x < this.width - 1; x++) {
         const lap = this.computeLaplacian(x, y);
+        laplacianSum += lap;
         const normalized = (lap + 1) / 2; // Assume roughly -1 to 1 range
         const bin = Math.min(9, Math.max(0, Math.floor(normalized * 10)));
         laplacianDist[bin]++;
       }
     }
+    const laplacianMean = laplacianSum / gradCount;
     
     const stats = this.computeStatistics();
     
@@ -1117,7 +1124,9 @@ export class SFDEngine {
         mean: curvSum / gradCount 
       },
       laplacianDistribution: laplacianDist,
+      laplacianMean,
       basinCount: stats.basinCount,
+      frameHashHistory: [...this.frameHashHistory],
     };
   }
   
@@ -1127,7 +1136,15 @@ export class SFDEngine {
     for (let i = 0; i < this.grid.length; i += 100) {
       hash = ((hash << 5) - hash + Math.floor(this.grid[i] * 1000000)) | 0;
     }
-    return hash.toString(16).padStart(8, '0');
+    const hashStr = hash.toString(16).padStart(8, '0');
+    
+    // Add to history
+    this.frameHashHistory.push(hashStr);
+    if (this.frameHashHistory.length > this.maxFrameHashHistory) {
+      this.frameHashHistory.shift();
+    }
+    
+    return hashStr;
   }
   
   runDeterminismCheck(stepsToRun: number = 100): DeterminismReport {

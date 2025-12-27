@@ -28,6 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import type { SFDEngine, DiagnosticSolverData, DiagnosticRenderData, DiagnosticInternalsData, DeterminismReport } from "@/lib/sfd-engine";
 import type { StructuralEvent } from "@shared/schema";
+import { SummaryDiagnostics } from "./summary-diagnostics";
 
 interface DiagnosticPanelProps {
   engine: SFDEngine | null;
@@ -137,13 +138,14 @@ export function DiagnosticPanel({
     
     const startTime = performance.now();
     
-    if (activeTab === "solver") {
-      setSolverData(engine.getDiagnosticSolverData());
-      setFrameHash(engine.computeFrameHash());
-    } else if (activeTab === "render") {
+    // Always fetch solver and internals data for Summary panel
+    setSolverData(engine.getDiagnosticSolverData());
+    setFrameHash(engine.computeFrameHash());
+    setInternalsData(engine.getDiagnosticInternalsData());
+    
+    // Fetch tab-specific data
+    if (activeTab === "render") {
       setRenderData(engine.getDiagnosticRenderData());
-    } else if (activeTab === "internals") {
-      setInternalsData(engine.getDiagnosticInternalsData());
     }
     
     const elapsed = performance.now() - startTime;
@@ -272,6 +274,14 @@ export function DiagnosticPanel({
           <X className="h-4 w-4" />
         </Button>
       </div>
+
+      <SummaryDiagnostics
+        solverData={solverData}
+        internalsData={internalsData}
+        frameHash={frameHash}
+        determinismReport={determinismReport}
+        energyHistory={solverData?.energyHistory || []}
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
         <div className="border-b border-white/10 px-2 py-1.5 shrink-0">

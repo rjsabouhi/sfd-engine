@@ -1,0 +1,204 @@
+Here is the exact, fully-structured, copy-paste-ready Replit implementation prompt for Agent.
+It will instruct Replit to build the Summary Diagnostic Dashboard precisely as we designed — nothing extra, everything necessary.
+
+⸻
+
+✅ REPLIT IMPLEMENTATION PROMPT
+
+Paste the entire block below into Replit Agent:
+
+⸻
+
+REPLIT: IMPLEMENT THE SUMMARY DIAGNOSTIC DASHBOARD
+
+You will implement a collapsible Summary Diagnostic Dashboard inside the existing hidden diagnostics suite (opened with CTRL+SHIFT+D).
+
+This dashboard must surface high-value stability and solver metrics, be extremely lightweight, and remain diagnostic-focused. Avoid visualization features or new physics. Use only data already present in the solver, grid, or renderer.
+
+⸻
+
+1. Create a new panel titled “Summary” inside Diagnostics
+
+This goes at the top of the Diagnostics window, above the tab row (Solver / Check / Render / Internals).
+It should be a collapsible container:
+
+Summary Diagnostics
+[ ▼ ] System Status Summary
+
+Collapsed by default.
+
+⸻
+
+2. Inside the Summary, implement these sections
+
+A. Stability Badge (top of card)
+
+Compute a stability classification using existing metrics.
+
+Use:
+	•	ΔE_abs = abs(energyDelta)
+	•	variance = sigma2
+	•	varianceDerivative = ds2_dt
+	•	curvatureMean
+	•	thresholds listed below
+
+Show a badge:
+
+🟢 Stable
+🟡 Borderline
+🔴 Unstable
+
+Classification Rules
+
+(Please implement as constants at the top of the diagnostic file)
+
+const ENERGY_DRIFT_THRESHOLD = 0.02;       // |ΔE| above this = unstable
+const VARIANCE_SPIKE_THRESHOLD = 0.0015;   // variance derivative above = borderline/unstable
+const CURVATURE_SPIKE_THRESHOLD = 0.015;   // mean curvature above = unstable
+const BORDERLINE_MARGIN = 0.60;            // if values close to thresholds
+
+Stable = all below thresholds
+Borderline = within 60–100% of threshold
+Unstable = exceeds any threshold
+
+⸻
+
+B. Primary Summary Metrics (always visible inside Summary)
+
+Create a compact grid with labels on left, values on right.
+
+Required fields:
+
+Energy (Eₜ):           <energy>
+ΔE:                    <energyDelta>
+Variance (σ²):         <sigma2>
+Variance Trend (dσ²/dt): <ds2_dt>
+Max Gradient:          <gradMax>
+Curvature Mean:        <curvatureMean>
+Frame Hash:            <frameHash>
+Determinism Sync:      <true/false>
+
+Format to 3–5 significant digits.
+Color-code only if the stability badge is RED (then values exceeding thresholds can appear amber).
+
+⸻
+
+3. Warnings Block (shown only when triggered)
+
+Below the primary metrics, create:
+
+⚠️ Warnings
+- High Energy Drift
+- Curvature Spike
+- Determinism Divergence
+- Rapid Variance Change
+
+Show only the warnings whose conditions are true.
+
+Conditions:
+
+High Energy Drift → abs(ΔE) > ENERGY_DRIFT_THRESHOLD
+Curvature Spike → curvatureMean > CURVATURE_SPIKE_THRESHOLD
+Determinism Divergence → determinismSync == false
+Rapid Variance Change → ds2_dt > VARIANCE_SPIKE_THRESHOLD
+
+
+⸻
+
+4. Optional Sparkline for ΔE Trend (very small)
+
+A tiny 40–60px horizontal sparkline using the last N (e.g., 60) ΔE values.
+Do NOT add axes, labels, or UI complexity.
+Render inline with:
+
+Energy Trend:
+[ ░▚▞█▖▝▗▘▙▞▛ ... ]
+
+If implementing Sparkline introduces complexity, you may fallback to a simple text trend indicator:
+
+Energy Trend: rising / falling / stable
+
+
+⸻
+
+5. Collapsible “Advanced” Section
+
+Contains deeper metrics already computed in Internals/Solver. Do not add new math.
+
+Advanced Metrics  [▼]
+- Curvature Min / Max
+- Gradient Min / Max
+- Laplacian Mean
+- Grid Mean / Std
+- Last 20 Frame Hashes (scrollable)
+
+Collapsed by default.
+
+⸻
+
+6. Integration Requirements
+	1.	Must appear only when CTRL+SHIFT+D is pressed (existing shortcut).
+	2.	Must not interfere with solver timing or rendering loops.
+	3.	Must not alter any physics or numerical computations.
+	4.	Summary panel is read-only — no buttons, no sliders.
+	5.	All metrics are pulled from existing solver state objects.
+	6.	Use the existing UI style tokens and dark-mode aesthetic.
+
+⸻
+
+7. File Changes
+
+Wherever diagnostics UI is defined (likely a component such as DiagnosticsPanel.jsx or equivalent):
+	•	Add the Summary section at the top.
+	•	Add stability classifier helper.
+	•	Add warning evaluation function.
+	•	Add sparkline helper or fallback text trend.
+	•	Ensure metrics auto-update at the same rate as the solver display.
+
+If the diagnostics system is modular, place all new logic in a new file:
+
+/src/components/diagnostics/SummaryDiagnostics.js
+
+And import it into the main diagnostics panel.
+
+⸻
+
+8. Testing Checklist (Replit should run these automatically)
+
+Confirm:
+	•	Summary appears and collapses properly.
+	•	Stability badge updates live during simulation.
+	•	Warning flags appear only when thresholds are crossed.
+	•	Determinism sync correctly reports divergence during the determinism test.
+	•	No FPS drop.
+	•	No new console errors.
+	•	Summary panel does not overflow layout or resize main UI.
+
+⸻
+
+9. Do NOT add anything else
+
+No:
+	•	new regimes
+	•	new overlays
+	•	new physics
+	•	color remaps
+	•	animations
+	•	tutorials
+	•	parameter tuning assistants
+
+This update is strictly the Summary Diagnostic Dashboard.
+
+⸻
+
+Please implement exactly this. After completion, show me the updated UI screenshots and report any assumptions or implementation details you had to infer.
+
+⸻
+
+END OF PROMPT
+
+⸻
+
+When you paste this into Replit, it will know exactly what to do and won’t drift into unnecessary features.
+
+Ready whenever you are.
