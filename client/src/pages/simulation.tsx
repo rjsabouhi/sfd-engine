@@ -7,6 +7,7 @@ import { MobileControlPanel } from "@/components/mobile-control-panel";
 import { HoverProbe } from "@/components/hover-probe";
 import { DualFieldView } from "@/components/dual-field-view";
 import { OnboardingModal } from "@/components/onboarding-modal";
+import { DiagnosticPanel } from "@/components/diagnostic-panel";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -65,6 +66,7 @@ export default function SimulationPage() {
   const [reactiveEvents, setReactiveEvents] = useState<Partial<ReactiveEvents>>({});
   const [simulationPhase, setSimulationPhase] = useState<"idle" | "firstMotion" | "running">("idle");
   const [fieldState, setFieldState] = useState<FieldState>("calm");
+  const [diagnosticsVisible, setDiagnosticsVisible] = useState(false);
   const prevBasinCountRef = useRef<number | null>(null);
   const frameCountRef = useRef(0);
   const lastDerivedCacheStepRef = useRef(0);
@@ -139,6 +141,18 @@ export default function SimulationPage() {
       setDerivedField(engineRef.current.computeDerivedField(derivedType));
     }
   }, [showDualView, derivedType]);
+
+  // Hidden diagnostic hotkey: CTRL+SHIFT+D
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        e.preventDefault();
+        setDiagnosticsVisible(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleParamsChange = useCallback((newParams: Partial<SimulationParameters>) => {
     setParams((prev) => {
@@ -577,6 +591,22 @@ export default function SimulationPage() {
               />
         </aside>
       </div>
+      
+      {/* Hidden Diagnostic Panel - CTRL+SHIFT+D to toggle */}
+      <DiagnosticPanel
+        engine={engineRef.current}
+        isVisible={diagnosticsVisible}
+        onClose={() => setDiagnosticsVisible(false)}
+        events={events}
+        isRunning={state.isRunning}
+        currentHistoryIndex={currentHistoryIndex}
+        historyLength={historyLength}
+        onStepBackward={handleStepBackward}
+        onStepForward={handleStepForward}
+        onSeekFrame={handleSeekFrame}
+        onPlay={handlePlay}
+        onPause={handlePause}
+      />
     </div>
   );
 }
