@@ -108,7 +108,7 @@ export default function SimulationPage() {
           setIsPlaybackMode(engine.isInPlaybackMode());
         }
         
-        if (showDualViewRef.current && frameCount % 3 === 0) {
+        if (showDualViewRef.current) {
           const newDerivedField = engine.getCachedDerivedField(derivedTypeRef.current);
           const currentCacheStep = engine.getLastDerivedFieldCacheStep();
           if (currentCacheStep !== lastDerivedCacheStepRef.current) {

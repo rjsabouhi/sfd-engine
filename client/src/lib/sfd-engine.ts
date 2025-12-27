@@ -76,7 +76,7 @@ export class SFDEngine {
   
   // Cached derived fields - reuse typed arrays
   private cachedDerivedFields: Map<string, DerivedField> = new Map();
-  private derivedFieldCacheInterval: number = 10;
+  private derivedFieldCacheInterval: number = 3;
   private lastDerivedFieldCacheStep: number = 0;
   
   // Ring buffer sampling - only save every N frames to reduce allocations
