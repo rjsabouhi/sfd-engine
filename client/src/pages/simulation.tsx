@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { unstable_batchedUpdates } from "react-dom";
 import { SFDEngine } from "@/lib/sfd-engine";
 import { VisualizationCanvas } from "@/components/visualization-canvas";
 import { ControlPanel } from "@/components/control-panel";
@@ -65,6 +66,7 @@ export default function SimulationPage() {
   const [simulationPhase, setSimulationPhase] = useState<"idle" | "firstMotion" | "running">("idle");
   const [fieldState, setFieldState] = useState<FieldState>("calm");
   const prevBasinCountRef = useRef<number | null>(null);
+  const frameCountRef = useRef(0);
   
   const showDualViewRef = useRef(showDualView);
   const derivedTypeRef = useRef(derivedType);
@@ -90,29 +92,40 @@ export default function SimulationPage() {
     engineRef.current = engine;
 
     engine.onStateUpdate((newState, newField) => {
-      setState(newState);
-      setField(newField);
-      setOperatorContributions(engine.getOperatorContributions());
-      setStructuralSignature(engine.getCachedSignature());
-      setEvents(engine.getEvents());
-      setHistoryLength(engine.getHistoryLength());
-      setCurrentHistoryIndex(engine.getCurrentHistoryIndex());
-      setIsPlaybackMode(engine.isInPlaybackMode());
-      setBasinMap(engine.getBasinMap());
+      frameCountRef.current += 1;
+      const frameCount = frameCountRef.current;
       
-      setVarianceChange(newState.variance - prevVarianceRef.current);
-      prevVarianceRef.current = newState.variance;
-      const currentEvents = engine.getReactiveEvents();
-      setReactiveEvents(currentEvents);
-      setSimulationPhase(engine.getSimulationPhase());
-      
-      const basinCountChanged = prevBasinCountRef.current !== null && newState.basinCount !== prevBasinCountRef.current;
-      prevBasinCountRef.current = newState.basinCount;
-      setFieldState(computeFieldState(newState.variance, basinCountChanged, currentEvents));
-      
-      if (showDualViewRef.current) {
-        setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
-      }
+      unstable_batchedUpdates(() => {
+        setState(newState);
+        setField(newField);
+        
+        if (frameCount % 3 === 0) {
+          setOperatorContributions(engine.getOperatorContributions());
+          setStructuralSignature(engine.getCachedSignature());
+          setHistoryLength(engine.getHistoryLength());
+          setCurrentHistoryIndex(engine.getCurrentHistoryIndex());
+          setIsPlaybackMode(engine.isInPlaybackMode());
+          
+          if (showDualViewRef.current) {
+            setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
+          }
+        }
+        
+        if (frameCount % 5 === 0) {
+          setEvents(engine.getEvents());
+          setBasinMap(engine.getBasinMap());
+          
+          setVarianceChange(newState.variance - prevVarianceRef.current);
+          prevVarianceRef.current = newState.variance;
+          const currentEvents = engine.getReactiveEvents();
+          setReactiveEvents(currentEvents);
+          setSimulationPhase(engine.getSimulationPhase());
+          
+          const basinCountChanged = prevBasinCountRef.current !== null && newState.basinCount !== prevBasinCountRef.current;
+          prevBasinCountRef.current = newState.basinCount;
+          setFieldState(computeFieldState(newState.variance, basinCountChanged, currentEvents));
+        }
+      });
     });
 
     return () => {
