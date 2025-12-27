@@ -1,0 +1,227 @@
+REPLIT PROMPT — Add Full Research-Grade Upgrade Suite to SFD Engine
+
+System role:
+You are updating an existing Python/HTML/CSS interactive simulation tool called SFD Engine.
+This is a continuous 2D dynamical field updated iteratively based on operator functions: curvature, tension, coupling, and attractor bias.
+The current implementation already updates the field and renders it with Plotly or Canvas.
+
+Your task is to add a full suite of research-grade features to the app, while preserving the existing architecture and visual style (dark minimalist aesthetic).
+Do NOT rewrite the engine — extend it.
+Do NOT introduce domain assumptions.
+Everything must remain substrate-agnostic.
+
+⸻
+
+⭐ GOAL: Implement the 12 Upgrades Exactly as Specified
+
+Below is the complete functionality list.
+Implement these as modular components I can toggle or extend later.
+
+⸻
+
+1. Field State Inspector (Hover Probe Tool)
+
+When user hovers over the field:
+
+Compute & display in a small overlay:
+	•	local curvature
+	•	local tension
+	•	local coupling value
+	•	gradient magnitude
+	•	basin ID (if basin mode enabled)
+	•	neighborhood variance
+
+Technical requirements:
+	•	Use existing field arrays; compute derivatives via numpy gradient.
+	•	Must update live without freezing simulation.
+	•	Display in fixed-position tooltip panel.
+
+⸻
+
+2. Temporal Playback Controls
+
+Add UI controls:
+	•	Pause / Resume
+	•	Step Forward One Frame
+	•	Step Backward One Frame
+	•	Timeline Scrubber Slider
+
+Implementation details:
+	•	Store past N frames in a ring buffer (configurable).
+	•	Scrubber updates field display without updating simulation state.
+
+⸻
+
+3. Preset Structural Regimes Menu
+
+A dropdown with presets NOT tied to domains, but to operator regimes:
+
+Create these presets:
+	•	“High Curvature Regime”
+	•	“Tension Dominant”
+	•	“Weak Coupling / Basin Explosion”
+	•	“Meta-Stability Plateau”
+	•	“Constraint Collapse Demo”
+
+Each preset updates the operator weight parameters.
+
+⸻
+
+4. Export Options
+
+Implement:
+	•	Export Frame as PNG
+	•	Export Operator Settings as JSON
+	•	Export Entire Run as MP4 (render frames → ffmpeg)
+
+Place export buttons in sidebar.
+
+⸻
+
+5. Basin Mapper Overlay
+
+Implement toggle: Show Basins
+
+Algorithm:
+	•	Find local minima via simple gradient descent or hill-climb.
+	•	Label each pixel by ID of basin.
+	•	Color basins lightly beneath main visualization (alpha ~0.25).
+	•	Update every N frames to avoid performance hit.
+
+⸻
+
+6. Phase Transition Detector
+
+Automatically detect structural events.
+
+Trigger an alert if ANY of these detected:
+	•	global variance spike
+	•	sudden change in basin count
+	•	tension derivative exceeds threshold
+	•	operator sensitivity spikes
+
+Display a subtle label:
+
+“Structural Event Detected (t = X)”
+
+Log in event list (see #8).
+
+⸻
+
+7. Dual-Field View
+
+Add split-screen toggle.
+
+When activated, show:
+
+Left = Field visualization
+Right = Derived visualization (dropdown):
+	•	curvature heatmap
+	•	tension gradient map
+	•	coupling flow lines
+	•	variance map
+
+Implement with CSS flexbox or Plotly subplots.
+
+⸻
+
+8. Structural Recorder (Event Log)
+
+Add scrollable panel displaying entries like:
+
+t = 134 | Basin merge (IDs 7 → 3)
+t = 201 | Curvature spike at (120, 88)
+t = 255 | Variance instability detected
+
+Events come from:
+	•	basin mapper
+	•	phase transition detector
+	•	operator threshold triggers
+
+Store logs in memory + allow export as .txt.
+
+⸻
+
+9. Operator Sensitivity Visualizer
+
+In sidebar, add mini-bar-graph indicating % contribution of:
+	•	Curvature Operator
+	•	Tension Operator
+	•	Coupling Operator
+	•	Attractor Operator
+
+Compute by normalized absolute contribution per update:
+
+contrib_K = mean(abs(w_K * K(F)))
+contrib_T = mean(abs(w_T * T(F)))
+...
+
+Normalize to sum to 1.
+
+⸻
+
+10. Structural Signature Bar
+
+A compact horizontal panel showing:
+	•	basin_count
+	•	avg_basin_depth
+	•	global_curvature (mean Laplacian)
+	•	tension_variance
+	•	stability metric = 1 / (1 + variance_of_field)
+
+Must auto-update every frame.
+
+Display as clean minimal labels (dark theme).
+
+⸻
+
+11. Notebook Mode (Researcher View)
+
+Add a toggle that opens a right-side drawer showing:
+	•	the exact PDE-like update equation currently in use
+	•	operator pseudocode
+	•	current parameter values
+	•	time derivative values
+	•	textual commentary on structural regime (optional simple heuristics)
+
+Ensure:
+	•	clear monospace formatting
+	•	not overwhelming visually
+	•	updates once per frame
+
+⸻
+
+12. Meta-Interpretation / Structural Folding View (Optional Toggle)
+
+This is purely visual.
+
+Implement:
+	•	A low-alpha overlay showing “field folding” patterns
+	•	Compute via dimensionality reduction (PCA on local patch vectors) OR a simpler gradient-flow streamline visualization
+	•	No domain claims
+	•	Purely aesthetic + structural intuition
+
+Place behind main field (z-index lower).
+
+⸻
+
+⭐ ADDITIONAL REQUIREMENTS
+	•	Maintain dark minimalist UI (charcoal background, neon accent colors).
+	•	Keep computation efficient: downsample derived fields if necessary.
+	•	All new components must be modular Python/JS functions for later editing.
+	•	Do not change core update loop unless necessary.
+	•	Preserve all existing functionality.
+
+⸻
+
+⭐ OUTPUT FORMAT FOR THIS TASK
+
+Your output should include:
+	1.	Updated file structure
+	2.	All new/updated Python modules
+	3.	UI components (HTML/CSS)
+	4.	JavaScript bindings for interactive controls
+	5.	Instructions for running the system on Replit
+	6.	Comments explaining each feature
+
+Make sure the final result is a functional, runnable Replit application.
