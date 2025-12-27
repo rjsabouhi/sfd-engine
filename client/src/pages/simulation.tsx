@@ -71,10 +71,15 @@ export default function SimulationPage() {
   const frameCountRef = useRef(0);
   const lastDerivedCacheStepRef = useRef(0);
   
-  // Debouncing for field state to prevent flickering
-  const candidateFieldStateRef = useRef<FieldState>("calm");
-  const fieldStateStableCountRef = useRef(0);
-  const FIELD_STATE_DEBOUNCE_FRAMES = 15; // ~0.5s at 30fps
+  // Severity-based hysteresis for field state to prevent flickering
+  // Escalations happen immediately, downgrades require sustained stability
+  const fieldStateSeverity: Record<FieldState, number> = {
+    calm: 0, unsettled: 1, reorganizing: 2, transforming: 3
+  };
+  const lastFieldStateChangeStepRef = useRef(0);
+  const currentDisplayedStateRef = useRef<FieldState>("calm");
+  // Minimum steps required before downgrading (at ~30fps, 90 steps = ~3 seconds)
+  const DOWNGRADE_HOLD_STEPS = 90;
   
   const showDualViewRef = useRef(showDualView);
   const derivedTypeRef = useRef(derivedType);
@@ -132,19 +137,26 @@ export default function SimulationPage() {
           const basinCountChanged = prevBasinCountRef.current !== null && newState.basinCount !== prevBasinCountRef.current;
           prevBasinCountRef.current = newState.basinCount;
           
-          // Debounced field state update to prevent flickering
-          const newCandidateState = computeFieldState(newState.variance, basinCountChanged, currentEvents);
-          if (newCandidateState === candidateFieldStateRef.current) {
-            fieldStateStableCountRef.current += 1;
-          } else {
-            candidateFieldStateRef.current = newCandidateState;
-            fieldStateStableCountRef.current = 0;
-          }
+          // Severity-based hysteresis for field state
+          const candidateState = computeFieldState(newState.variance, basinCountChanged, currentEvents);
+          const currentSeverity = fieldStateSeverity[currentDisplayedStateRef.current];
+          const candidateSeverity = fieldStateSeverity[candidateState];
+          const stepsSinceChange = newState.step - lastFieldStateChangeStepRef.current;
           
-          // Only update displayed state after candidate has been stable for enough frames
-          if (fieldStateStableCountRef.current >= FIELD_STATE_DEBOUNCE_FRAMES) {
-            setFieldState(newCandidateState);
+          // Escalations (higher severity) happen immediately
+          // Downgrades (lower severity) require sustained stability
+          if (candidateSeverity > currentSeverity) {
+            // Escalate immediately
+            currentDisplayedStateRef.current = candidateState;
+            lastFieldStateChangeStepRef.current = newState.step;
+            setFieldState(candidateState);
+          } else if (candidateSeverity < currentSeverity && stepsSinceChange >= DOWNGRADE_HOLD_STEPS) {
+            // Downgrade only after sufficient hold time
+            currentDisplayedStateRef.current = candidateState;
+            lastFieldStateChangeStepRef.current = newState.step;
+            setFieldState(candidateState);
           }
+          // If same severity or not enough time for downgrade, keep current displayed state
         }
       });
     });
