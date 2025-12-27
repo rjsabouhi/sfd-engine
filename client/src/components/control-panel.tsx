@@ -19,6 +19,7 @@ import { PresetMenu } from "./preset-menu";
 import { RegimeDisplay } from "./regime-display";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, modeOptions, detectRegime, toLanguageMode } from "@/lib/interpretation-modes";
+import { LANGUAGE } from "@/lib/language";
 import type { RegimeKey } from "@/lib/language";
 
 interface ControlPanelProps {
@@ -338,7 +339,7 @@ export function ControlPanel({
                 <ParameterSlider label="Grid Size" value={params.gridSize} min={50} max={400} step={10} tooltip="Resolution of simulation grid (requires reset)" onChange={(v) => onParamsChange({ gridSize: v })} testId="slider-grid-size" />
                 <ParameterSlider label="Coupling Radius" value={params.couplingRadius} min={0.5} max={5} step={0.25} tooltip="Radius for Gaussian blur in coupling operator" onChange={(v) => onParamsChange({ couplingRadius: v })} testId="slider-coupling-radius" />
                 <Button variant="secondary" size="sm" className="w-full" onClick={() => onParamsChange(defaultParameters)} data-testid="button-reset-params">
-                  Reset to Defaults
+                  {LANGUAGE.UI.RESET}
                 </Button>
               </CollapsibleContent>
             </Collapsible>
