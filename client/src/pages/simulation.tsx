@@ -71,6 +71,11 @@ export default function SimulationPage() {
   const frameCountRef = useRef(0);
   const lastDerivedCacheStepRef = useRef(0);
   
+  // Debouncing for field state to prevent flickering
+  const candidateFieldStateRef = useRef<FieldState>("calm");
+  const fieldStateStableCountRef = useRef(0);
+  const FIELD_STATE_DEBOUNCE_FRAMES = 15; // ~0.5s at 30fps
+  
   const showDualViewRef = useRef(showDualView);
   const derivedTypeRef = useRef(derivedType);
   
@@ -126,7 +131,20 @@ export default function SimulationPage() {
           
           const basinCountChanged = prevBasinCountRef.current !== null && newState.basinCount !== prevBasinCountRef.current;
           prevBasinCountRef.current = newState.basinCount;
-          setFieldState(computeFieldState(newState.variance, basinCountChanged, currentEvents));
+          
+          // Debounced field state update to prevent flickering
+          const newCandidateState = computeFieldState(newState.variance, basinCountChanged, currentEvents);
+          if (newCandidateState === candidateFieldStateRef.current) {
+            fieldStateStableCountRef.current += 1;
+          } else {
+            candidateFieldStateRef.current = newCandidateState;
+            fieldStateStableCountRef.current = 0;
+          }
+          
+          // Only update displayed state after candidate has been stable for enough frames
+          if (fieldStateStableCountRef.current >= FIELD_STATE_DEBOUNCE_FRAMES) {
+            setFieldState(newCandidateState);
+          }
         }
       });
     });
