@@ -1,6 +1,5 @@
 import { useRef, useEffect, useCallback } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import type { DerivedField } from "@shared/schema";
 
 interface DualFieldViewProps {
@@ -91,44 +90,41 @@ export function DualFieldView({ derivedField, derivedType, onTypeChange }: DualF
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-2 border-b border-border">
-        <div className="space-y-1">
-          <Label className="text-xs">Derived Field</Label>
-          <Select value={derivedType} onValueChange={(v) => onTypeChange(v as typeof derivedType)}>
-            <SelectTrigger className="h-8" data-testid="select-derived-field">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="curvature">Curvature Heatmap</SelectItem>
-              <SelectItem value="tension">Tension Gradient</SelectItem>
-              <SelectItem value="coupling">Coupling Flow</SelectItem>
-              <SelectItem value="variance">Variance Map</SelectItem>
-            </SelectContent>
-          </Select>
+    <div className="relative h-full bg-gray-950 flex items-center justify-center">
+      {derivedField ? (
+        <canvas
+          ref={canvasRef}
+          className="rounded-md max-w-full max-h-full"
+          style={{ 
+            imageRendering: "auto",
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+          }}
+          data-testid="canvas-derived-field"
+        />
+      ) : (
+        <div className="text-muted-foreground text-sm">
+          Computing derived field...
         </div>
+      )}
+      
+      <div className="absolute top-2 left-2 right-2">
+        <Select value={derivedType} onValueChange={(v) => onTypeChange(v as typeof derivedType)}>
+          <SelectTrigger className="h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20" data-testid="select-derived-field">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="curvature">Curvature Heatmap</SelectItem>
+            <SelectItem value="tension">Tension Gradient</SelectItem>
+            <SelectItem value="coupling">Coupling Flow</SelectItem>
+            <SelectItem value="variance">Variance Map</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
-      <div className="flex-1 flex items-center justify-center bg-gray-950 p-2">
-        {derivedField ? (
-          <canvas
-            ref={canvasRef}
-            className="rounded-md max-w-full max-h-full"
-            style={{ 
-              imageRendering: "auto",
-              width: "100%",
-              height: "100%",
-              objectFit: "contain",
-            }}
-            data-testid="canvas-derived-field"
-          />
-        ) : (
-          <div className="text-muted-foreground text-sm">
-            Computing derived field...
-          </div>
-        )}
-      </div>
-      <div className="p-2 border-t border-border text-center">
-        <span className="text-xs text-muted-foreground">{typeLabels[derivedType]}</span>
+      
+      <div className="absolute bottom-2 left-0 right-0 text-center">
+        <span className="text-xs text-white/70 bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded">{typeLabels[derivedType]}</span>
       </div>
     </div>
   );
