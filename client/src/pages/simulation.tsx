@@ -73,7 +73,7 @@ export default function SimulationPage() {
   const [probeData, setProbeData] = useState<ProbeData | null>(null);
   const [probeVisible, setProbeVisible] = useState(false);
   const [probePosition, setProbePosition] = useState({ x: 0, y: 0 });
-  const [bottomPanelOpen, setBottomPanelOpen] = useState(false);
+  const [bottomPanelOpen, setBottomPanelOpen] = useState(true);
   const [bottomPanelTab, setBottomPanelTab] = useState<"dual" | "notebook" | "export">("dual");
 
   const modeLabels = interpretationModes[interpretationMode];
