@@ -1,4 +1,5 @@
 export type InterpretationMode = 
+  | "field-state"
   | "structural-dynamics"
   | "energy-stability"
   | "attractors-phase"
@@ -22,6 +23,22 @@ export interface ModeLabels {
 }
 
 export const interpretationModes: Record<InterpretationMode, ModeLabels> = {
+  "field-state": {
+    name: "Field State (Raw)",
+    header: "Field State View",
+    subtitle: "View the raw evolving field before applying operator-level interpretations.",
+    operators: {
+      curvature: "Curvature (K)",
+      tension: "Tension (T)",
+      coupling: "Coupling (C)",
+      attractor: "Attractor (A)",
+    },
+    stats: {
+      energy: "Field Energy",
+      basins: "Basins",
+      variance: "Variance",
+    },
+  },
   "structural-dynamics": {
     name: "Structural Dynamics",
     header: "Structural Dynamics View",
@@ -89,6 +106,7 @@ export const interpretationModes: Record<InterpretationMode, ModeLabels> = {
 };
 
 export const modeOptions: { value: InterpretationMode; label: string }[] = [
+  { value: "field-state", label: "Field State (Raw)" },
   { value: "structural-dynamics", label: "Structural Dynamics" },
   { value: "energy-stability", label: "Energy & Stability" },
   { value: "attractors-phase", label: "Attractors & Phase Space" },

@@ -1,0 +1,145 @@
+You are the coding agent responsible for updating the UI/UX of the SFD Engine research simulator.  
+Implement ALL of the following changes exactly as specified.
+
+============================================================
+I. GLOBAL ONBOARDING & FIRST-USE EXPERIENCE
+============================================================
+
+1. Add a subtle onboarding banner ABOVE the main visualization canvas with the text:
+
+   “This is the structural field: each pixel represents local constraint density.”
+
+   Requirements:
+   - Small font (12–14px)
+   - Muted gray (#A0A0A0)
+   - No border, minimal padding
+   - Banner should be visible when the simulator loads
+   - Banner should fade out ONLY AFTER the user presses “Run Simulation (Apply SFD Operators)”
+
+2. Add a small hint BELOW the canvas:
+
+   “Press ‘Run Simulation’ to begin evolving the field. Patterns will emerge as the system reorganizes.”
+
+   Requirements:
+   - Muted gray text
+   - 12px font, centered
+   - Always visible in paused state
+
+3. Change the default colormap to **Viridis** on page load.
+   (Inferno remains available in the selector.)
+
+============================================================
+II. RUN BUTTON & INTERACTION CONTROLS
+============================================================
+
+4. Replace the label on the current "Run" button with:
+
+   “Run Simulation (Apply SFD Operators)”
+
+5. Update the tooltip to:
+
+   “Begin evolving the field using the SFD operator cycle.”
+
+============================================================
+III. INTERPRETATION MODE & STRUCTURAL PRESETS
+============================================================
+
+6. Change the default Interpretation Mode to:
+
+   “Field State (Raw)”
+
+   Add tooltip:
+   “View the raw evolving field before applying operator-level interpretations.”
+
+7. Rename the dropdown labeled “Structural Presets” to:
+
+   “Dynamic Regimes”
+
+   Update tooltip:
+   “Select a pre-configured SFD operator regime to explore characteristic system behaviors.”
+
+============================================================
+IV. METRICS PANEL RESTRUCTURING
+============================================================
+
+8. Collapse the Real-time Metrics panel by default.
+
+9. Replace the expanded panel with a single clickable header:
+
+   “Show Simulation Metrics”
+
+   Behavior:
+   - On click: expand to display full metrics panel
+   - On collapse: hide metrics panel again
+   - Optional: remember toggle state during the session (implement only if easy)
+
+10. When expanded, ensure all metrics remain visible AND neatly grouped:
+    - Structural Basins
+    - Depth
+    - Curvature
+    - Field Energy
+    - Stability
+    - Variance
+    - EPS
+    - Step count
+
+============================================================
+V. VISUAL CLARITY, DEFAULT STATES, AND LAYOUT CLEANUP
+============================================================
+
+11. Ensure Dual View is OFF by default on page load.
+
+12. Ensure “Show Basins” is OFF by default.
+
+13. Reorder right-hand controls so they appear in this exact sequence:
+
+   (1) Run Simulation button  
+   (2) Colormap selector  
+   (3) Show Basins toggle  
+   (4) Dual View toggle  
+   (5) Interpretation Mode dropdown  
+   (6) Dynamic Regimes dropdown  
+   (7) Metrics toggle (“Show Simulation Metrics”)  
+   (8) Timeline panel (if present)
+
+14. Add a subtle divider line between control groups for readability.
+
+15. Make sure the left-hand panel (logs, console, code output) can be hidden or collapsed so first-time users see a clean interface.
+
+============================================================
+VI. BEHAVIORAL UPDATES & POLISH
+============================================================
+
+16. When the user presses “Run Simulation (Apply SFD Operators)”:
+    - fade out the onboarding banner above the canvas
+    - keep the hint text below the canvas
+    - begin simulation immediately without additional clicks
+    - ensure the default Viridis colormap is applied
+
+17. If Dynamic Regimes are selected mid-simulation:
+    - smoothly reinitialize OR reparameterize the solver (whichever your engine already supports)
+    - update the UI to reflect the applied regime
+
+18. If Interpretation Mode is changed mid-simulation:
+    - update visualization immediately
+    - do not restart or reset the simulation
+
+============================================================
+VII. FINAL VERIFICATION
+============================================================
+
+After implementing all changes:
+
+- Ensure UI loads cleanly with no visual clutter.
+- Ensure the first visible elements guide the user intuitively.
+- Ensure that “Run Simulation (Apply SFD Operators)” works as before.
+- Ensure no console errors appear.
+- Ensure all tooltips work.
+- Ensure all renamed elements update correctly across components.
+
+Confirm visually that the user experience now follows the intended cognitive arc:
+  “What is this?” → “I understand what I’m seeing” → “I know what to click” → “Oh my god.”
+
+============================================================
+
+Implement ALL items.

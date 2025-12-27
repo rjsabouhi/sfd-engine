@@ -38,9 +38,11 @@ export default function SimulationPage() {
     fps: 0,
   });
   const [field, setField] = useState<FieldData | null>(null);
-  const [colormap, setColormap] = useState<"inferno" | "viridis">("inferno");
+  const [colormap, setColormap] = useState<"inferno" | "viridis">("viridis");
   const [controlsOpen, setControlsOpen] = useState(false);
-  const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("structural-dynamics");
+  const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("field-state");
+  const [showOnboardingBanner, setShowOnboardingBanner] = useState(true);
+  const [hasEverRun, setHasEverRun] = useState(false);
   
   const [operatorContributions, setOperatorContributions] = useState<OperatorContributions>({
     curvature: 0.2, tension: 0.2, coupling: 0.2, attractor: 0.2, redistribution: 0.2,
@@ -118,6 +120,8 @@ export default function SimulationPage() {
 
   const handlePlay = useCallback(() => {
     engineRef.current?.start();
+    setShowOnboardingBanner(false);
+    setHasEverRun(true);
   }, []);
 
   const handlePause = useCallback(() => {
@@ -370,7 +374,13 @@ export default function SimulationPage() {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <main className="relative bg-gray-950 flex-1">
+        <main className="relative bg-gray-950 flex-1 flex flex-col">
+              {showOnboardingBanner && (
+                <div className="text-center py-1.5 text-xs text-gray-400 transition-opacity duration-500">
+                  This is the structural field: each pixel represents local constraint density.
+                </div>
+              )}
+              <div className="flex-1 relative">
               {showDualView ? (
                 <div className="grid grid-cols-2 gap-px h-full bg-border">
                   <div className="relative bg-gray-950 flex items-center justify-center">
@@ -421,6 +431,12 @@ export default function SimulationPage() {
               {isPlaybackMode && (
                 <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-yellow-500/80 backdrop-blur-sm rounded px-2 py-1">
                   <span className="text-xs font-mono text-black">Playback Mode</span>
+                </div>
+              )}
+              </div>
+              {!state.isRunning && (
+                <div className="text-center py-1.5 text-xs text-gray-400">
+                  Press 'Run Simulation' to begin evolving the field. Patterns will emerge as the system reorganizes.
                 </div>
               )}
             </main>
