@@ -370,66 +370,71 @@ export default function SimulationPage() {
         </Dialog>
       </header>
 
-      <div className="flex-1 overflow-hidden flex">
-        <div className="flex-1 flex flex-col min-w-0">
-          <main className="relative bg-gray-950 flex-1">
-            {showDualView ? (
-              <div className="flex h-full">
-                <div className="flex-1 relative">
-                  <VisualizationCanvas 
-                    field={field} 
-                    colormap={colormap}
-                    basinMap={basinMap}
-                    showBasins={showBasins}
-                    onHover={handleHover}
-                    onHoverEnd={handleHoverEnd}
-                  />
+      <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
+        <ResizablePanel defaultSize={75} minSize={40}>
+          <div className="h-full flex flex-col">
+            <main className="relative bg-gray-950 flex-1">
+              {showDualView ? (
+                <div className="flex h-full">
+                  <div className="flex-1 relative">
+                    <VisualizationCanvas 
+                      field={field} 
+                      colormap={colormap}
+                      basinMap={basinMap}
+                      showBasins={showBasins}
+                      onHover={handleHover}
+                      onHoverEnd={handleHoverEnd}
+                    />
+                  </div>
+                  <div className="w-px bg-border" />
+                  <div className="flex-1">
+                    <DualFieldView
+                      derivedField={derivedField}
+                      derivedType={derivedType}
+                      onTypeChange={setDerivedType}
+                    />
+                  </div>
                 </div>
-                <div className="w-px bg-border" />
-                <div className="flex-1">
-                  <DualFieldView
-                    derivedField={derivedField}
-                    derivedType={derivedType}
-                    onTypeChange={setDerivedType}
-                  />
-                </div>
-              </div>
-            ) : (
-              <VisualizationCanvas 
-                field={field} 
-                colormap={colormap}
-                basinMap={basinMap}
-                showBasins={showBasins}
-                onHover={handleHover}
-                onHoverEnd={handleHoverEnd}
+              ) : (
+                <VisualizationCanvas 
+                  field={field} 
+                  colormap={colormap}
+                  basinMap={basinMap}
+                  showBasins={showBasins}
+                  onHover={handleHover}
+                  onHoverEnd={handleHoverEnd}
+                />
+              )}
+              
+              <HoverProbe
+                data={probeData}
+                modeLabels={modeLabels}
+                visible={probeVisible}
+                position={probePosition}
               />
-            )}
-            
-            <HoverProbe
-              data={probeData}
-              modeLabels={modeLabels}
-              visible={probeVisible}
-              position={probePosition}
-            />
-            
-            {state.isRunning && (
-              <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-                <span className="text-xs font-mono text-white/70">Running</span>
-              </div>
-            )}
-            {isPlaybackMode && (
-              <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-yellow-500/80 backdrop-blur-sm rounded px-2 py-1">
-                <span className="text-xs font-mono text-black">Playback Mode</span>
-              </div>
-            )}
-          </main>
-        </div>
+              
+              {state.isRunning && (
+                <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  <span className="text-xs font-mono text-white/70">Running</span>
+                </div>
+              )}
+              {isPlaybackMode && (
+                <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-yellow-500/80 backdrop-blur-sm rounded px-2 py-1">
+                  <span className="text-xs font-mono text-black">Playback Mode</span>
+                </div>
+              )}
+            </main>
+          </div>
+        </ResizablePanel>
         
-        <aside className="w-80 border-l border-border bg-card flex flex-col overflow-hidden shrink-0">
+        <ResizableHandle withHandle />
+        
+        <ResizablePanel defaultSize={25} minSize={15} maxSize={50}>
+          <aside className="h-full border-l border-border bg-card flex flex-col overflow-hidden">
           <ControlPanel
                 params={params}
                 state={state}
@@ -460,8 +465,9 @@ export default function SimulationPage() {
                 onShowBasinsChange={setShowBasins}
                 onShowDualViewChange={setShowDualView}
               />
-        </aside>
-      </div>
+          </aside>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }
