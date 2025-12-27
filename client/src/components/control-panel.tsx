@@ -17,7 +17,7 @@ import { StructuralSignatureBar } from "./structural-signature";
 import { EventLog } from "./event-log";
 import { PresetMenu } from "./preset-menu";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
-import { interpretationModes, modeOptions } from "@/lib/interpretation-modes";
+import { getModeLabels, modeOptions } from "@/lib/interpretation-modes";
 
 interface ControlPanelProps {
   params: SimulationParameters;
@@ -129,7 +129,7 @@ export function ControlPanel({
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [metricsOpen, setMetricsOpen] = useState(false);
 
-  const modeLabels = interpretationModes[interpretationMode];
+  const modeLabels = getModeLabels(interpretationMode);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">

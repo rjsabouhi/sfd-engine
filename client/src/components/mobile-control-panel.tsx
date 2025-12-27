@@ -9,7 +9,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import type { SimulationParameters } from "@shared/schema";
 import { mobileParameters } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
-import { interpretationModes, modeOptions } from "@/lib/interpretation-modes";
+import { getModeLabels, modeOptions } from "@/lib/interpretation-modes";
 
 interface MobileControlPanelProps {
   params: SimulationParameters;
@@ -63,7 +63,7 @@ export function MobileControlPanel({
   const [coreOpen, setCoreOpen] = useState(true);
   const [operatorsOpen, setOperatorsOpen] = useState(false);
 
-  const modeLabels = interpretationModes[interpretationMode];
+  const modeLabels = getModeLabels(interpretationMode);
 
   return (
     <div className="space-y-4 pb-4">

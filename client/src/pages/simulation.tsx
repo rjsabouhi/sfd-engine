@@ -22,7 +22,7 @@ import {
 import type { SimulationParameters, SimulationState, FieldData, ProbeData, OperatorContributions, StructuralSignature, StructuralEvent, DerivedField, BasinMap } from "@shared/schema";
 import { defaultParameters, mobileParameters } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
-import { interpretationModes, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
+import { getModeLabels, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
 
 export default function SimulationPage() {
   const isMobile = useIsMobile();
@@ -74,7 +74,7 @@ export default function SimulationPage() {
   const [probeVisible, setProbeVisible] = useState(false);
   const [probePosition, setProbePosition] = useState({ x: 0, y: 0 });
   
-  const modeLabels = interpretationModes[interpretationMode];
+  const modeLabels = getModeLabels(interpretationMode);
 
   useEffect(() => {
     const initialParams = isMobile ? mobileParameters : defaultParameters;
