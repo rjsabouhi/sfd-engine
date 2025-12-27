@@ -83,23 +83,30 @@ export default function SimulationPage() {
     setParams(initialParams);
     const engine = new SFDEngine(initialParams);
     engineRef.current = engine;
+    
+    let frameCounter = 0;
 
     engine.onStateUpdate((newState, newField) => {
       setState(newState);
       setField(newField);
       setOperatorContributions(engine.getOperatorContributions());
-      setStructuralSignature(engine.computeStructuralSignature());
-      setEvents(engine.getEvents());
       setHistoryLength(engine.getHistoryLength());
       setCurrentHistoryIndex(engine.getCurrentHistoryIndex());
       setIsPlaybackMode(engine.isInPlaybackMode());
-      setBasinMap(engine.getBasinMap());
       
       setVarianceChange(newState.variance - prevVarianceRef.current);
       prevVarianceRef.current = newState.variance;
       
-      if (showDualViewRef.current) {
-        setDerivedField(engine.computeDerivedField(derivedTypeRef.current));
+      // Throttle expensive operations - only run every 10 frames
+      frameCounter++;
+      if (frameCounter % 10 === 0) {
+        setStructuralSignature(engine.computeStructuralSignature());
+        setEvents(engine.getEvents());
+        setBasinMap(engine.getBasinMap());
+        
+        if (showDualViewRef.current) {
+          setDerivedField(engine.computeDerivedField(derivedTypeRef.current));
+        }
       }
     });
 

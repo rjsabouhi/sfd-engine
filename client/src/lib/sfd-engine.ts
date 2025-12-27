@@ -459,10 +459,11 @@ export class SFDEngine {
     const stats = this.computeStatistics();
     
     let totalCurvature = 0;
-    let totalTensionVar = 0;
-    let tensionMean = 0;
-    const tensions: number[] = [];
+    let tensionSum = 0;
+    let tensionSumSq = 0;
+    const n = this.grid.length;
     
+    // Single pass - compute sums for both curvature and tension variance
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         const laplacian = this.computeLaplacian(x, y);
@@ -471,33 +472,39 @@ export class SFDEngine {
         const gx = (this.getValue(x + 1, y) - this.getValue(x - 1, y)) / 2;
         const gy = (this.getValue(x, y + 1) - this.getValue(x, y - 1)) / 2;
         const t = gx * gx + gy * gy;
-        tensions.push(t);
-        tensionMean += t;
+        tensionSum += t;
+        tensionSumSq += t * t;
       }
     }
     
-    tensionMean /= this.grid.length;
-    for (const t of tensions) {
-      totalTensionVar += (t - tensionMean) * (t - tensionMean);
-    }
-    totalTensionVar /= this.grid.length;
+    // Variance = E[X^2] - E[X]^2 (avoids storing array)
+    const tensionMean = tensionSum / n;
+    const totalTensionVar = (tensionSumSq / n) - (tensionMean * tensionMean);
     
     let avgBasinDepth = 0;
     if (this.basinMap && this.basinMap.count > 0) {
       const basinMins: number[] = new Array(this.basinMap.count).fill(Infinity);
-      for (let i = 0; i < this.grid.length; i++) {
+      for (let i = 0; i < n; i++) {
         const bid = this.basinMap.labels[i];
         if (bid >= 0 && this.grid[i] < basinMins[bid]) {
           basinMins[bid] = this.grid[i];
         }
       }
-      avgBasinDepth = basinMins.filter(v => v !== Infinity).reduce((a, b) => a + Math.abs(b), 0) / this.basinMap.count;
+      let depthSum = 0;
+      let count = 0;
+      for (let i = 0; i < basinMins.length; i++) {
+        if (basinMins[i] !== Infinity) {
+          depthSum += Math.abs(basinMins[i]);
+          count++;
+        }
+      }
+      avgBasinDepth = count > 0 ? depthSum / count : 0;
     }
     
     return {
       basinCount: stats.basinCount,
       avgBasinDepth,
-      globalCurvature: totalCurvature / this.grid.length,
+      globalCurvature: totalCurvature / n,
       tensionVariance: totalTensionVar,
       stabilityMetric: 1 / (1 + stats.variance),
     };
