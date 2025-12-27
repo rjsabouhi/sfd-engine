@@ -3,8 +3,6 @@ import { SFDEngine } from "@/lib/sfd-engine";
 import { VisualizationCanvas } from "@/components/visualization-canvas";
 import { ControlPanel } from "@/components/control-panel";
 import { MobileControlPanel } from "@/components/mobile-control-panel";
-import { StatisticsPanel } from "@/components/statistics-panel";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { HelpCircle, Waves, Play, Pause, RotateCcw, Settings2 } from "lucide-react";
@@ -90,31 +88,28 @@ export default function SimulationPage() {
               </h1>
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" data-testid="button-help-mobile">
-                  <HelpCircle className="h-4 w-4" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-[90vw]">
-                <DialogHeader>
-                  <DialogTitle>About SFD</DialogTitle>
-                  <DialogDescription className="pt-4 space-y-2 text-sm">
-                    <p>
-                      Structural Field Dynamics simulates complex adaptive systems
-                      through operator-driven field evolution.
-                    </p>
-                    <p>
-                      <strong>Operators:</strong> Curvature, Gradient-Tension,
-                      Neighbor-Coupling, Attractor-Formation, Global Redistribution
-                    </p>
-                  </DialogDescription>
-                </DialogHeader>
-              </DialogContent>
-            </Dialog>
-            <ThemeToggle />
-          </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" data-testid="button-help-mobile">
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-[90vw]">
+              <DialogHeader>
+                <DialogTitle>About SFD</DialogTitle>
+                <DialogDescription className="pt-4 space-y-2 text-sm">
+                  <p>
+                    Structural Field Dynamics simulates complex adaptive systems
+                    through operator-driven field evolution.
+                  </p>
+                  <p>
+                    <strong>Operators:</strong> Curvature, Gradient-Tension,
+                    Neighbor-Coupling, Attractor-Formation, Global Redistribution
+                  </p>
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
         </header>
 
         <main className="flex-1 relative bg-gray-950 min-h-0">
@@ -220,42 +215,39 @@ export default function SimulationPage() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" data-testid="button-help">
-                <HelpCircle className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>About Structural Field Dynamics</DialogTitle>
-                <DialogDescription className="pt-4 space-y-3 text-sm">
-                  <p>
-                    Structural Field Dynamics (SFD) is a geometric model of complex
-                    adaptive systems. This simulation demonstrates operator-driven
-                    field evolution on a 2D manifold.
-                  </p>
-                  <p>
-                    <strong>The Five Operators:</strong>
-                  </p>
-                  <ul className="list-disc pl-4 space-y-1">
-                    <li><strong>Curvature (K)</strong> — Responds to local curvature via discrete Laplacian</li>
-                    <li><strong>Gradient-Tension (T)</strong> — Drives tension waves based on gradient magnitude</li>
-                    <li><strong>Neighbor-Coupling (C)</strong> — Creates local clustering through Gaussian blur</li>
-                    <li><strong>Attractor-Formation (A)</strong> — Forms threshold-like basin structures</li>
-                    <li><strong>Global Redistribution (R)</strong> — Maintains coherence through mean-field shift</li>
-                  </ul>
-                  <p>
-                    <strong>Emergent Behaviors:</strong> Basin formation, attractor merging/splitting,
-                    curvature-driven symmetry breaking, metastable equilibria, and tension waves.
-                  </p>
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
-          <ThemeToggle />
-        </div>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon" data-testid="button-help">
+              <HelpCircle className="h-4 w-4" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>About Structural Field Dynamics</DialogTitle>
+              <DialogDescription className="pt-4 space-y-3 text-sm">
+                <p>
+                  Structural Field Dynamics (SFD) is a geometric model of complex
+                  adaptive systems. This simulation demonstrates operator-driven
+                  field evolution on a 2D manifold.
+                </p>
+                <p>
+                  <strong>The Five Operators:</strong>
+                </p>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li><strong>Curvature (K)</strong> — Responds to local curvature via discrete Laplacian</li>
+                  <li><strong>Gradient-Tension (T)</strong> — Drives tension waves based on gradient magnitude</li>
+                  <li><strong>Neighbor-Coupling (C)</strong> — Creates local clustering through Gaussian blur</li>
+                  <li><strong>Attractor-Formation (A)</strong> — Forms threshold-like basin structures</li>
+                  <li><strong>Global Redistribution (R)</strong> — Maintains coherence through mean-field shift</li>
+                </ul>
+                <p>
+                  <strong>Emergent Behaviors:</strong> Basin formation, attractor merging/splitting,
+                  curvature-driven symmetry breaking, metastable equilibria, and tension waves.
+                </p>
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </header>
 
       <div className="flex flex-1 overflow-hidden">

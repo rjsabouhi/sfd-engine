@@ -122,6 +122,10 @@
   --destructive-foreground: 0 15% 98%;
   --input: 220 15% 35%;
   --ring: 275 85% 32%;
+  --slider-track: 260 20% 25%;
+  --slider-range: 270 35% 65%;
+  --slider-thumb: 270 30% 75%;
+  --slider-thumb-border: 270 25% 55%;
   --chart-1: 275 75% 72%;
   --chart-2: 190 75% 72%;
   --chart-3: 30 75% 72%;
