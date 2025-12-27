@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/dialog";
 import type { SimulationParameters, SimulationState, FieldData } from "@shared/schema";
 import { defaultParameters, mobileParameters } from "@shared/schema";
+import type { InterpretationMode } from "@/lib/interpretation-modes";
+import { interpretationModes } from "@/lib/interpretation-modes";
 
 export default function SimulationPage() {
   const isMobile = useIsMobile();
@@ -33,6 +35,9 @@ export default function SimulationPage() {
   const [field, setField] = useState<FieldData | null>(null);
   const [colormap, setColormap] = useState<"inferno" | "viridis">("inferno");
   const [controlsOpen, setControlsOpen] = useState(false);
+  const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("structural-dynamics");
+
+  const modeLabels = interpretationModes[interpretationMode];
 
   useEffect(() => {
     const initialParams = isMobile ? mobileParameters : defaultParameters;
@@ -170,8 +175,10 @@ export default function SimulationPage() {
                 <MobileControlPanel
                   params={params}
                   colormap={colormap}
+                  interpretationMode={interpretationMode}
                   onParamsChange={handleParamsChange}
                   onColormapChange={setColormap}
+                  onInterpretationModeChange={setInterpretationMode}
                 />
               </SheetContent>
             </Sheet>
@@ -186,11 +193,11 @@ export default function SimulationPage() {
               <div className="text-sm font-mono" data-testid="text-fps-mobile">{state.fps}</div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Energy</div>
+              <div className="text-xs text-muted-foreground">{modeLabels.stats.energy}</div>
               <div className="text-sm font-mono" data-testid="text-energy-mobile">{state.energy.toFixed(3)}</div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Basins</div>
+              <div className="text-xs text-muted-foreground">{modeLabels.stats.basins}</div>
               <div className="text-sm font-mono" data-testid="text-basins-mobile">{state.basinCount}</div>
             </div>
           </div>
@@ -274,12 +281,14 @@ export default function SimulationPage() {
             params={params}
             state={state}
             colormap={colormap}
+            interpretationMode={interpretationMode}
             onParamsChange={handleParamsChange}
             onPlay={handlePlay}
             onPause={handlePause}
             onReset={handleReset}
             onStep={handleStep}
             onColormapChange={setColormap}
+            onInterpretationModeChange={setInterpretationMode}
           />
         </aside>
       </div>

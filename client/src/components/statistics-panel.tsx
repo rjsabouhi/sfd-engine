@@ -1,9 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Activity, Gauge, Layers, Timer } from "lucide-react";
 import type { SimulationState } from "@shared/schema";
+import type { ModeLabels } from "@/lib/interpretation-modes";
 
 interface StatisticsPanelProps {
   state: SimulationState;
+  modeLabels: ModeLabels;
 }
 
 interface MetricCardProps {
@@ -11,9 +13,10 @@ interface MetricCardProps {
   label: string;
   value: string | number;
   unit?: string;
+  testId: string;
 }
 
-function MetricCard({ icon: Icon, label, value, unit }: MetricCardProps) {
+function MetricCard({ icon: Icon, label, value, unit, testId }: MetricCardProps) {
   return (
     <Card className="bg-card/50">
       <CardContent className="p-3">
@@ -22,7 +25,7 @@ function MetricCard({ icon: Icon, label, value, unit }: MetricCardProps) {
           <span className="text-xs text-muted-foreground">{label}</span>
         </div>
         <div className="flex items-baseline gap-1">
-          <span className="text-lg font-mono font-semibold" data-testid={`stat-${label.toLowerCase().replace(/\s/g, '-')}`}>
+          <span className="text-lg font-mono font-semibold" data-testid={testId}>
             {value}
           </span>
           {unit && <span className="text-xs text-muted-foreground">{unit}</span>}
@@ -32,7 +35,7 @@ function MetricCard({ icon: Icon, label, value, unit }: MetricCardProps) {
   );
 }
 
-export function StatisticsPanel({ state }: StatisticsPanelProps) {
+export function StatisticsPanel({ state, modeLabels }: StatisticsPanelProps) {
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
@@ -43,26 +46,30 @@ export function StatisticsPanel({ state }: StatisticsPanelProps) {
           icon={Timer}
           label="Step"
           value={state.step.toLocaleString()}
+          testId="stat-step"
         />
         <MetricCard
           icon={Activity}
           label="FPS"
           value={state.fps}
+          testId="stat-fps"
         />
         <MetricCard
           icon={Gauge}
-          label="Energy"
+          label={modeLabels.stats.energy}
           value={state.energy.toFixed(4)}
+          testId="stat-energy"
         />
         <MetricCard
           icon={Layers}
-          label="Basins"
+          label={modeLabels.stats.basins}
           value={state.basinCount}
+          testId="stat-basins"
         />
       </div>
       <div className="pt-2 border-t border-border">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Variance</span>
+          <span className="text-muted-foreground">{modeLabels.stats.variance}</span>
           <span className="font-mono" data-testid="stat-variance">
             {state.variance.toFixed(6)}
           </span>

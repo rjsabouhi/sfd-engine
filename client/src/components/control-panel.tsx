@@ -10,17 +10,21 @@ import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Info } fro
 import type { SimulationParameters, SimulationState } from "@shared/schema";
 import { defaultParameters } from "@shared/schema";
 import { StatisticsPanel } from "./statistics-panel";
+import type { InterpretationMode, ModeLabels } from "@/lib/interpretation-modes";
+import { interpretationModes, modeOptions } from "@/lib/interpretation-modes";
 
 interface ControlPanelProps {
   params: SimulationParameters;
   state: SimulationState;
   colormap: "inferno" | "viridis";
+  interpretationMode: InterpretationMode;
   onParamsChange: (params: Partial<SimulationParameters>) => void;
   onPlay: () => void;
   onPause: () => void;
   onReset: () => void;
   onStep: () => void;
   onColormapChange: (colormap: "inferno" | "viridis") => void;
+  onInterpretationModeChange: (mode: InterpretationMode) => void;
 }
 
 interface ParameterSliderProps {
@@ -31,9 +35,10 @@ interface ParameterSliderProps {
   step: number;
   tooltip?: string;
   onChange: (value: number) => void;
+  testId: string;
 }
 
-function ParameterSlider({ label, value, min, max, step, tooltip, onChange }: ParameterSliderProps) {
+function ParameterSlider({ label, value, min, max, step, tooltip, onChange, testId }: ParameterSliderProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-2">
@@ -60,7 +65,7 @@ function ParameterSlider({ label, value, min, max, step, tooltip, onChange }: Pa
         max={max}
         step={step}
         onValueChange={([v]) => onChange(v)}
-        data-testid={`slider-${label.toLowerCase().replace(/\s/g, '-')}`}
+        data-testid={testId}
       />
     </div>
   );
@@ -70,20 +75,45 @@ export function ControlPanel({
   params,
   state,
   colormap,
+  interpretationMode,
   onParamsChange,
   onPlay,
   onPause,
   onReset,
   onStep,
   onColormapChange,
+  onInterpretationModeChange,
 }: ControlPanelProps) {
   const [coreOpen, setCoreOpen] = useState(true);
   const [operatorsOpen, setOperatorsOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
+  const modeLabels = interpretationModes[interpretationMode];
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex-1 overflow-y-auto space-y-4 p-4">
+        <div className="space-y-2 pb-2 border-b border-border">
+          <div className="text-base font-semibold">{modeLabels.header}</div>
+          <p className="text-xs text-muted-foreground">{modeLabels.subtitle}</p>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-sm">Interpretation Mode</Label>
+          <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
+            <SelectTrigger data-testid="select-interpretation-mode">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {modeOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Simulation Controls</CardTitle>
@@ -159,33 +189,37 @@ export function ControlPanel({
                   step={0.01}
                   tooltip="Controls simulation speed and stability"
                   onChange={(v) => onParamsChange({ dt: v })}
+                  testId="slider-timestep"
                 />
                 <ParameterSlider
-                  label="Curvature Gain"
+                  label={modeLabels.operators.curvature}
                   value={params.curvatureGain}
                   min={0.1}
                   max={10}
                   step={0.1}
                   tooltip="Sensitivity to local curvature changes"
                   onChange={(v) => onParamsChange({ curvatureGain: v })}
+                  testId="slider-curvature-gain"
                 />
                 <ParameterSlider
-                  label="Coupling Weight"
+                  label={modeLabels.operators.coupling}
                   value={params.couplingWeight}
                   min={0}
                   max={1}
                   step={0.05}
                   tooltip="Balance between local and neighborhood values"
                   onChange={(v) => onParamsChange({ couplingWeight: v })}
+                  testId="slider-coupling-weight"
                 />
                 <ParameterSlider
-                  label="Attractor Strength"
+                  label={modeLabels.operators.attractor}
                   value={params.attractorStrength}
                   min={0.1}
                   max={10}
                   step={0.1}
                   tooltip="Intensity of basin formation"
                   onChange={(v) => onParamsChange({ attractorStrength: v })}
+                  testId="slider-attractor-strength"
                 />
                 <ParameterSlider
                   label="Redistribution"
@@ -195,6 +229,7 @@ export function ControlPanel({
                   step={0.05}
                   tooltip="Global energy redistribution rate"
                   onChange={(v) => onParamsChange({ redistributionRate: v })}
+                  testId="slider-redistribution"
                 />
               </CardContent>
             </CollapsibleContent>
@@ -218,40 +253,44 @@ export function ControlPanel({
             <CollapsibleContent>
               <CardContent className="space-y-4 pt-0">
                 <ParameterSlider
-                  label="Curvature (wK)"
+                  label={`${modeLabels.operators.curvature} Weight`}
                   value={params.wK}
                   min={0}
                   max={5}
                   step={0.1}
                   tooltip="Weight of curvature operator"
                   onChange={(v) => onParamsChange({ wK: v })}
+                  testId="slider-wk"
                 />
                 <ParameterSlider
-                  label="Tension (wT)"
+                  label={`${modeLabels.operators.tension} Weight`}
                   value={params.wT}
                   min={0}
                   max={5}
                   step={0.1}
                   tooltip="Weight of gradient-tension operator"
                   onChange={(v) => onParamsChange({ wT: v })}
+                  testId="slider-wt"
                 />
                 <ParameterSlider
-                  label="Coupling (wC)"
+                  label={`${modeLabels.operators.coupling} Weight`}
                   value={params.wC}
                   min={0}
                   max={5}
                   step={0.1}
                   tooltip="Weight of neighbor-coupling operator"
                   onChange={(v) => onParamsChange({ wC: v })}
+                  testId="slider-wc"
                 />
                 <ParameterSlider
-                  label="Attractor (wA)"
+                  label={`${modeLabels.operators.attractor} Weight`}
                   value={params.wA}
                   min={0}
                   max={5}
                   step={0.1}
                   tooltip="Weight of attractor-formation operator"
                   onChange={(v) => onParamsChange({ wA: v })}
+                  testId="slider-wa"
                 />
                 <ParameterSlider
                   label="Redistribution (wR)"
@@ -261,6 +300,7 @@ export function ControlPanel({
                   step={0.1}
                   tooltip="Weight of global redistribution operator"
                   onChange={(v) => onParamsChange({ wR: v })}
+                  testId="slider-wr"
                 />
               </CardContent>
             </CollapsibleContent>
@@ -291,6 +331,7 @@ export function ControlPanel({
                   step={10}
                   tooltip="Resolution of simulation grid (requires reset)"
                   onChange={(v) => onParamsChange({ gridSize: v })}
+                  testId="slider-grid-size"
                 />
                 <ParameterSlider
                   label="Coupling Radius"
@@ -300,6 +341,7 @@ export function ControlPanel({
                   step={0.25}
                   tooltip="Radius for Gaussian blur in coupling operator"
                   onChange={(v) => onParamsChange({ couplingRadius: v })}
+                  testId="slider-coupling-radius"
                 />
                 <div className="pt-2">
                   <Button
@@ -319,7 +361,7 @@ export function ControlPanel({
       </div>
 
       <div className="border-t border-border p-4 bg-card/30">
-        <StatisticsPanel state={state} />
+        <StatisticsPanel state={state} modeLabels={modeLabels} />
       </div>
     </div>
   );

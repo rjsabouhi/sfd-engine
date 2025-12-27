@@ -7,13 +7,17 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { SimulationParameters } from "@shared/schema";
-import { defaultParameters, mobileParameters } from "@shared/schema";
+import { mobileParameters } from "@shared/schema";
+import type { InterpretationMode } from "@/lib/interpretation-modes";
+import { interpretationModes, modeOptions } from "@/lib/interpretation-modes";
 
 interface MobileControlPanelProps {
   params: SimulationParameters;
   colormap: "inferno" | "viridis";
+  interpretationMode: InterpretationMode;
   onParamsChange: (params: Partial<SimulationParameters>) => void;
   onColormapChange: (colormap: "inferno" | "viridis") => void;
+  onInterpretationModeChange: (mode: InterpretationMode) => void;
 }
 
 interface ParameterSliderProps {
@@ -23,9 +27,10 @@ interface ParameterSliderProps {
   max: number;
   step: number;
   onChange: (value: number) => void;
+  testId: string;
 }
 
-function ParameterSlider({ label, value, min, max, step, onChange }: ParameterSliderProps) {
+function ParameterSlider({ label, value, min, max, step, onChange, testId }: ParameterSliderProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
@@ -41,7 +46,7 @@ function ParameterSlider({ label, value, min, max, step, onChange }: ParameterSl
         step={step}
         onValueChange={([v]) => onChange(v)}
         className="touch-none"
-        data-testid={`slider-mobile-${label.toLowerCase().replace(/\s/g, '-')}`}
+        data-testid={testId}
       />
     </div>
   );
@@ -50,14 +55,39 @@ function ParameterSlider({ label, value, min, max, step, onChange }: ParameterSl
 export function MobileControlPanel({
   params,
   colormap,
+  interpretationMode,
   onParamsChange,
   onColormapChange,
+  onInterpretationModeChange,
 }: MobileControlPanelProps) {
   const [coreOpen, setCoreOpen] = useState(true);
   const [operatorsOpen, setOperatorsOpen] = useState(false);
 
+  const modeLabels = interpretationModes[interpretationMode];
+
   return (
     <div className="space-y-4 pb-4">
+      <div className="space-y-2 pb-3 border-b border-border">
+        <div className="text-sm font-semibold">{modeLabels.header}</div>
+        <p className="text-xs text-muted-foreground">{modeLabels.subtitle}</p>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-sm">Interpretation Mode</Label>
+        <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
+          <SelectTrigger className="h-12" data-testid="select-interpretation-mode-mobile">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {modeOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="space-y-2">
         <Label className="text-sm">Colormap</Label>
         <Select value={colormap} onValueChange={(v) => onColormapChange(v as "inferno" | "viridis")}>
@@ -94,30 +124,34 @@ export function MobileControlPanel({
                 max={0.2}
                 step={0.01}
                 onChange={(v) => onParamsChange({ dt: v })}
+                testId="slider-mobile-timestep"
               />
               <ParameterSlider
-                label="Curvature"
+                label={modeLabels.operators.curvature}
                 value={params.curvatureGain}
                 min={0.1}
                 max={10}
                 step={0.1}
                 onChange={(v) => onParamsChange({ curvatureGain: v })}
+                testId="slider-mobile-curvature"
               />
               <ParameterSlider
-                label="Coupling"
+                label={modeLabels.operators.coupling}
                 value={params.couplingWeight}
                 min={0}
                 max={1}
                 step={0.05}
                 onChange={(v) => onParamsChange({ couplingWeight: v })}
+                testId="slider-mobile-coupling"
               />
               <ParameterSlider
-                label="Attractor"
+                label={modeLabels.operators.attractor}
                 value={params.attractorStrength}
                 min={0.1}
                 max={10}
                 step={0.1}
                 onChange={(v) => onParamsChange({ attractorStrength: v })}
+                testId="slider-mobile-attractor"
               />
             </CardContent>
           </CollapsibleContent>
@@ -141,36 +175,40 @@ export function MobileControlPanel({
           <CollapsibleContent>
             <CardContent className="space-y-5 pt-0">
               <ParameterSlider
-                label="Curvature (wK)"
+                label={`${modeLabels.operators.curvature} Weight`}
                 value={params.wK}
                 min={0}
                 max={5}
                 step={0.1}
                 onChange={(v) => onParamsChange({ wK: v })}
+                testId="slider-mobile-wk"
               />
               <ParameterSlider
-                label="Tension (wT)"
+                label={`${modeLabels.operators.tension} Weight`}
                 value={params.wT}
                 min={0}
                 max={5}
                 step={0.1}
                 onChange={(v) => onParamsChange({ wT: v })}
+                testId="slider-mobile-wt"
               />
               <ParameterSlider
-                label="Coupling (wC)"
+                label={`${modeLabels.operators.coupling} Weight`}
                 value={params.wC}
                 min={0}
                 max={5}
                 step={0.1}
                 onChange={(v) => onParamsChange({ wC: v })}
+                testId="slider-mobile-wc"
               />
               <ParameterSlider
-                label="Attractor (wA)"
+                label={`${modeLabels.operators.attractor} Weight`}
                 value={params.wA}
                 min={0}
                 max={5}
                 step={0.1}
                 onChange={(v) => onParamsChange({ wA: v })}
+                testId="slider-mobile-wa"
               />
             </CardContent>
           </CollapsibleContent>
