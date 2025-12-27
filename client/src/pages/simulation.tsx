@@ -41,9 +41,7 @@ export default function SimulationPage() {
   const [colormap, setColormap] = useState<"inferno" | "viridis">("viridis");
   const [controlsOpen, setControlsOpen] = useState(false);
   const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("intuitive");
-  const [showOnboardingBanner, setShowOnboardingBanner] = useState(true);
-  const [hasEverRun, setHasEverRun] = useState(false);
-  
+    
   const [operatorContributions, setOperatorContributions] = useState<OperatorContributions>({
     curvature: 0.2, tension: 0.2, coupling: 0.2, attractor: 0.2, redistribution: 0.2,
   });
@@ -120,8 +118,6 @@ export default function SimulationPage() {
 
   const handlePlay = useCallback(() => {
     engineRef.current?.start();
-    setShowOnboardingBanner(false);
-    setHasEverRun(true);
   }, []);
 
   const handlePause = useCallback(() => {
@@ -473,11 +469,6 @@ export default function SimulationPage() {
                 </div>
               )}
               </div>
-              {!state.isRunning && (
-                <div className="text-center py-1.5 text-xs text-gray-400">
-                  Press 'Run Simulation' to begin evolving the field. Patterns will emerge as the system reorganizes.
-                </div>
-              )}
             </main>
         
         <aside className="w-[420px] border-l border-border bg-card flex flex-col overflow-hidden">
