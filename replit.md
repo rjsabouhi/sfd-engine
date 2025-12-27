@@ -38,6 +38,17 @@ Added a comprehensive LANGUAGE engine (`client/src/lib/language.ts`) for all UI 
 - **LANGUAGE.UI**: Common UI strings (Reset, Export, etc.)
 - Regime detection system analyzes basin count, variance, energy, and variance change
 
+### Reactive Event System (December 27, 2024)
+Added real-time reactive event detection for dynamic status narration:
+- **Variance Spike**: Detected when variance changes >40% over 12 steps
+- **Basin Merge**: Detected when basins decrease
+- **Boundary Fracture**: Detected when curvature max spikes >1.5x
+- **Approaching Stability**: Variance derivative <0.001 with low variance
+- **Enter/Exit Criticality**: High variance sensitivity (0.1-0.2) with multiple basins
+- **Enter/Exit Chaos**: Very high variance (>0.25) with rapid change
+- Simulation phase tracking: idle/firstMotion/running
+- Dynamic status line using `getStatusLine()` with priority-based event selection
+
 ### Engine Enhancements
 - Ring buffer for temporal history (100 frames, ~36MB for 300x300 grid)
 - Operator contribution tracking per update step
@@ -45,6 +56,7 @@ Added a comprehensive LANGUAGE engine (`client/src/lib/language.ts`) for all UI 
 - Derived field computation (curvature, tension, coupling, variance maps)
 - Probe data computation for field inspection
 - Variance change tracking for regime detection
+- Reactive event detection with empirically-tuned thresholds
 
 ## System Architecture
 
