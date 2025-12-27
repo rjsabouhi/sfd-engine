@@ -344,55 +344,6 @@ export default function SimulationPage() {
         </div>
         
         <div className="flex items-center gap-1">
-          <div className="flex items-center gap-1 mr-2 px-2 py-1 rounded-md bg-muted/50">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleStepBackward}
-              disabled={state.isRunning || historyLength === 0}
-              data-testid="button-step-back-toolbar"
-              className="h-7 w-7"
-            >
-              <StepBack className="h-3.5 w-3.5" />
-            </Button>
-            {state.isRunning ? (
-              <Button size="sm" onClick={handlePause} data-testid="button-pause-toolbar" className="h-7 px-3">
-                <Pause className="h-3.5 w-3.5 mr-1" />
-                Pause
-              </Button>
-            ) : (
-              <Button size="sm" onClick={handlePlay} data-testid="button-play-toolbar" className="h-7 px-3">
-                <Play className="h-3.5 w-3.5 mr-1" />
-                Run
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleStep}
-              disabled={state.isRunning}
-              data-testid="button-step-toolbar"
-              className="h-7 w-7"
-            >
-              <StepForward className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleReset}
-              data-testid="button-reset-toolbar"
-              className="h-7 w-7"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-1 text-xs font-mono text-muted-foreground mr-2">
-            <span data-testid="text-step-toolbar">t={state.step}</span>
-            <span className="text-muted-foreground/50">|</span>
-            <span data-testid="text-fps-toolbar">{state.fps}fps</span>
-          </div>
-
           <Button
             variant={showBasins ? "default" : "ghost"}
             size="icon"
