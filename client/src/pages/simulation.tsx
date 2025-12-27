@@ -23,7 +23,7 @@ import type { SimulationParameters, SimulationState, FieldData, ProbeData, Opera
 import { defaultParameters, mobileParameters } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
-import { getStatusLine, type ReactiveEvents, type SimulationState as LanguageSimState } from "@/lib/language";
+import { getStatusLine, computeFieldState, getFieldStateLabel, type ReactiveEvents, type SimulationState as LanguageSimState, type FieldState } from "@/lib/language";
 
 export default function SimulationPage() {
   const isMobile = useIsMobile();
@@ -63,6 +63,8 @@ export default function SimulationPage() {
   const prevVarianceRef = useRef(0);
   const [reactiveEvents, setReactiveEvents] = useState<Partial<ReactiveEvents>>({});
   const [simulationPhase, setSimulationPhase] = useState<"idle" | "firstMotion" | "running">("idle");
+  const [fieldState, setFieldState] = useState<FieldState>("calm");
+  const prevBasinCountRef = useRef<number | null>(null);
   
   const showDualViewRef = useRef(showDualView);
   const derivedTypeRef = useRef(derivedType);
@@ -100,8 +102,13 @@ export default function SimulationPage() {
       
       setVarianceChange(newState.variance - prevVarianceRef.current);
       prevVarianceRef.current = newState.variance;
-      setReactiveEvents(engine.getReactiveEvents());
+      const currentEvents = engine.getReactiveEvents();
+      setReactiveEvents(currentEvents);
       setSimulationPhase(engine.getSimulationPhase());
+      
+      const basinCountChanged = prevBasinCountRef.current !== null && newState.basinCount !== prevBasinCountRef.current;
+      prevBasinCountRef.current = newState.basinCount;
+      setFieldState(computeFieldState(newState.variance, basinCountChanged, currentEvents));
       
       if (showDualViewRef.current) {
         setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
@@ -432,8 +439,16 @@ export default function SimulationPage() {
 
       <div className="flex flex-1 overflow-hidden">
         <main className="relative bg-gray-950 flex-1 flex flex-col">
-              <div className="text-center py-2 px-4 text-xs text-gray-300 bg-gray-900/50 border-b border-gray-800">
-                {dynamicStatusLine}
+              <div className="flex items-center justify-center gap-3 py-2 px-4 text-xs text-gray-300 bg-gray-900/50 border-b border-gray-800">
+                <span className={`px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider ${
+                  fieldState === "calm" ? "bg-green-900/50 text-green-300" :
+                  fieldState === "unsettled" ? "bg-yellow-900/50 text-yellow-300" :
+                  fieldState === "reorganizing" ? "bg-orange-900/50 text-orange-300" :
+                  "bg-red-900/50 text-red-300"
+                }`} data-testid="badge-field-state">
+                  {getFieldStateLabel(interpretationMode, fieldState)}
+                </span>
+                <span data-testid="text-status-line">{dynamicStatusLine}</span>
               </div>
               <div className="flex-1 relative">
               {showDualView ? (

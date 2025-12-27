@@ -438,6 +438,23 @@ export function getFieldStateLabel(mode: InterpretationMode, state: FieldState):
   return LANGUAGE.MODES[mode].metricsStates[state];
 }
 
+export function computeFieldState(
+  variance: number,
+  basinCountChanged: boolean,
+  events: Partial<ReactiveEvents>
+): FieldState {
+  if (events.boundaryFracture || events.basinMerge || events.enterChaos) {
+    return "transforming";
+  }
+  if (basinCountChanged || events.enterCriticality) {
+    return "reorganizing";
+  }
+  if (variance > 0.10 || events.varianceSpike) {
+    return "unsettled";
+  }
+  return "calm";
+}
+
 export function getMetricsLabel(mode: InterpretationMode): string {
   return LANGUAGE.MODES[mode].metricsLabel;
 }

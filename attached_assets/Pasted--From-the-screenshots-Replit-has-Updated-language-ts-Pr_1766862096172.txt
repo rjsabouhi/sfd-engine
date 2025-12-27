@@ -1,0 +1,153 @@
+
+From the screenshots, Replit has:
+	•	Updated language.ts
+	•	Propagated the new language structure across all imports
+	•	Added reactive event detection to sfd-engine.ts
+	•	Added UI hooks for dynamic status narration
+	•	Patched compatibility issues
+	•	Updated the status line render logic
+	•	Updated metrics + regime components
+	•	Fully restarted & confirmed the application is running
+	•	Completed all planned tasks for Phase 3
+
+Replit is now waiting for direction on Phase 4: Validation & Tuning.
+
+Here is the precise instruction Replit needs next, formatted exactly as a task list they can execute:
+
+⸻
+
+✅ NEXT STEPS FOR REPLIT — PHASE 4: VALIDATION & TUNING
+
+Replit, proceed with the following tasks in order:
+
+⸻
+
+1. Validate reactive event detection thresholds in live simulation
+
+Check the following conditions while running a simulation in each regime:
+
+a. Variance Spike Detection
+
+Verify that spikes are detected when
+variance(t) - variance(t-12) > 0.40
+
+b. Boundary Fracture Detection
+
+Verify that fractures trigger when local curvature change
+Δcurv > 0.15 across neighboring cells.
+
+c. Basin Merge Detection
+
+Use the architect-approved merge threshold:
+basin_depth_difference < 0.05
+
+d. Stability Transition Detection
+
+Transition recognized when
+variance_derivative < 0.001
+
+Task:
+Run the engine across Uniform, Multi-Basin, and Near-Critical regimes and log whether events are firing as expected.
+
+⸻
+
+2. Validate the status line priority system
+
+For each detected event, check:
+	•	The highest-priority event is displayed.
+	•	Lower-priority messages queue correctly.
+	•	First-motion lines trigger only once per run.
+	•	Idle-state lines appear only after stabilization.
+
+Task:
+Simulate several transitions and confirm that the narration library is being pulled from the correct mode & regime context.
+
+⸻
+
+3. Validate the metrics panel’s new four-state system
+
+Test that Intuitive Mode metrics state changes correctly among:
+	•	calm
+	•	unsettled
+	•	reorganizing
+	•	transforming
+
+Use thresholds:
+	•	calm → unsettled: variance > 0.10
+	•	unsettled → reorganizing: basin_count changes
+	•	reorganizing → transforming: fracture or merge event detected
+
+Task:
+Trigger each condition and confirm the displayed state updates.
+
+⸻
+
+4. Validate mode-aware text rendering (Intuitive / Structural / Technical)
+
+Check the following UI elements use the correct language layer:
+	•	Onboarding modal
+	•	Status line
+	•	Metrics panel
+	•	Regime selector descriptions
+	•	“Watch for” cues
+	•	Idle-state descriptions
+	•	First-motion narration
+
+Task:
+Switch modes and confirm all language sources change appropriately without UI errors.
+
+⸻
+
+5. Validate regime selector behavior
+
+For each regime:
+	•	Ensure narrative summary is displayed
+	•	Ensure the “Watch for…” cue appears
+	•	Ensure paused-state hint appears
+	•	Ensure the regime name is using Structural Field Lexicon Layer 1 correctly
+
+Task:
+Cycle through all 7 regimes and record inconsistencies.
+
+⸻
+
+6. Run a full integration test (end-to-end)
+
+Steps:
+	1.	Load app
+	2.	Select Intuitive Mode
+	3.	Choose “Uniform Field” regime
+	4.	Hit Run Simulation
+	5.	Observe first-motion line
+	6.	Switch to Structural Mode mid-run
+	7.	Verify narration instantly recontextualizes
+	8.	Trigger a basin merge event
+	9.	Verify status & metrics update
+	10.	Pause simulation
+	11.	Verify idle-state line
+	12.	Switch to Technical Mode
+	13.	Verify metric labels & narration shift
+	14.	Stop simulation
+
+Task:
+Report any mismatches in expected language behavior or reactive events.
+
+⸻
+
+7. Prepare for Phase 5 (Onboarding upgrade)
+
+When all tests pass, notify the architect so we can proceed with:
+	•	Creating a guided first-run experience
+	•	Defining the “Start Here” regime
+	•	Introducing vocabulary progression in onboarding
+	•	Building the narrative arc for first-time users
+
+⸻
+
+👉 REPLIT, YOU MAY BEGIN PHASE 4 USING THE ABOVE TASK LIST.
+
+When finished, report:
+	•	Event detection logs
+	•	Status line logs
+	•	Mode-switch logs
+	•	Any errors or mismatches
