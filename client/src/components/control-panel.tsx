@@ -126,7 +126,7 @@ export function ControlPanel({
 }: ControlPanelProps) {
   const [weightsOpen, setWeightsOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [metricsOpen, setMetricsOpen] = useState(true);
+  const [metricsOpen, setMetricsOpen] = useState(false);
 
   const modeLabels = interpretationModes[interpretationMode];
 
@@ -164,17 +164,24 @@ export function ControlPanel({
         <div className="flex-1 overflow-y-auto">
           <TabsContent value="controls" className="m-0 p-3 space-y-4">
             <div className="flex items-center gap-2">
-              {state.isRunning ? (
-                <Button onClick={onPause} className="flex-1" size="sm" data-testid="button-pause">
-                  <Pause className="h-3.5 w-3.5 mr-1.5" />
-                  Pause
-                </Button>
-              ) : (
-                <Button onClick={onPlay} className="flex-1" size="sm" data-testid="button-play">
-                  <Play className="h-3.5 w-3.5 mr-1.5" />
-                  Run
-                </Button>
-              )}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {state.isRunning ? (
+                    <Button onClick={onPause} className="flex-1" size="sm" data-testid="button-pause">
+                      <Pause className="h-3.5 w-3.5 mr-1.5" />
+                      Pause
+                    </Button>
+                  ) : (
+                    <Button onClick={onPlay} className="flex-1" size="sm" data-testid="button-play">
+                      <Play className="h-3.5 w-3.5 mr-1.5" />
+                      Run Simulation
+                    </Button>
+                  )}
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">{state.isRunning ? "Pause simulation" : "Begin evolving the field using the SFD operator cycle."}</p>
+                </TooltipContent>
+              </Tooltip>
               <Button
                 variant="outline"
                 size="icon"
@@ -374,7 +381,7 @@ export function ControlPanel({
           <button className="flex items-center justify-between w-full px-3 py-2 text-xs font-medium text-muted-foreground hover-elevate" data-testid="button-toggle-metrics">
             <span className="flex items-center gap-1.5">
               <Activity className="h-3 w-3" />
-              Real-time Metrics
+              Show Simulation Metrics
             </span>
             {metricsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
           </button>
