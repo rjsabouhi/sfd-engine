@@ -118,6 +118,7 @@ export function ControlPanel({
 }: ControlPanelProps) {
   const [weightsOpen, setWeightsOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [metricsOpen, setMetricsOpen] = useState(true);
 
   const modeLabels = interpretationModes[interpretationMode];
 
@@ -295,10 +296,21 @@ export function ControlPanel({
         </div>
       </Tabs>
 
-      <div className="border-t border-border p-3 bg-card/30 space-y-2 shrink-0">
-        <StructuralSignatureBar signature={structuralSignature} modeLabels={modeLabels} />
-        <StatisticsPanel state={state} modeLabels={modeLabels} />
-      </div>
+      <Collapsible open={metricsOpen} onOpenChange={setMetricsOpen} className="border-t border-border shrink-0">
+        <CollapsibleTrigger asChild>
+          <button className="flex items-center justify-between w-full px-3 py-2 text-xs font-medium text-muted-foreground hover-elevate" data-testid="button-toggle-metrics">
+            <span className="flex items-center gap-1.5">
+              <Activity className="h-3 w-3" />
+              Real-time Metrics
+            </span>
+            {metricsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="px-3 pb-3 space-y-2 bg-card/30">
+          <StructuralSignatureBar signature={structuralSignature} modeLabels={modeLabels} />
+          <StatisticsPanel state={state} modeLabels={modeLabels} />
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 }
