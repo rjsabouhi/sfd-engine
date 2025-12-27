@@ -1,9 +1,7 @@
 export type InterpretationMode = 
-  | "field-state"
+  | "technical"
   | "structural-dynamics"
-  | "energy-stability"
-  | "attractors-phase"
-  | "constraint-flow";
+  | "intuitive";
 
 export interface ModeLabels {
   name: string;
@@ -23,10 +21,10 @@ export interface ModeLabels {
 }
 
 export const interpretationModes: Record<InterpretationMode, ModeLabels> = {
-  "field-state": {
-    name: "Field State (Raw)",
-    header: "Field State View",
-    subtitle: "View the raw evolving field before applying operator-level interpretations.",
+  "technical": {
+    name: "Technical",
+    header: "Technical View",
+    subtitle: "Mathematically accurate operator terminology.",
     operators: {
       curvature: "Curvature (K)",
       tension: "Tension (T)",
@@ -42,12 +40,12 @@ export const interpretationModes: Record<InterpretationMode, ModeLabels> = {
   "structural-dynamics": {
     name: "Structural Dynamics",
     header: "Structural Dynamics View",
-    subtitle: "Local operators shaping global structure.",
+    subtitle: "Domain-general scientific language.",
     operators: {
-      curvature: "Curvature Operator (K)",
-      tension: "Tension Operator (T)",
-      coupling: "Coupling Operator (C)",
-      attractor: "Attractor Influence (A)",
+      curvature: "Curvature Operator",
+      tension: "Tension Operator",
+      coupling: "Coupling Operator",
+      attractor: "Attractor Influence",
     },
     stats: {
       energy: "Field Energy",
@@ -55,60 +53,102 @@ export const interpretationModes: Record<InterpretationMode, ModeLabels> = {
       variance: "Local Variance",
     },
   },
-  "energy-stability": {
-    name: "Energy & Stability",
-    header: "Energy & Stability View",
-    subtitle: "A landscape evolving toward stable configurations.",
+  "intuitive": {
+    name: "Intuitive",
+    header: "Intuitive View",
+    subtitle: "Safe, non-metaphorical descriptions.",
     operators: {
-      curvature: "Stability Curvature",
-      tension: "Gradient Tension",
-      coupling: "Stability Coupling",
-      attractor: "Attractor Bias",
+      curvature: "Bending",
+      tension: "Spreading",
+      coupling: "Blending",
+      attractor: "Settling",
     },
     stats: {
-      energy: "System Energy (E)",
-      basins: "Stability Wells",
-      variance: "Energy Variance",
-    },
-  },
-  "attractors-phase": {
-    name: "Attractors & Phase Space",
-    header: "Attractors & Phase Space View",
-    subtitle: "Tracking basin formation and phase transitions.",
-    operators: {
-      curvature: "Phase Curvature",
-      tension: "Phase Tension",
-      coupling: "Phase Coupling Weight",
-      attractor: "Attractor Pull",
-    },
-    stats: {
-      energy: "Phase Energy",
-      basins: "Attractor Basins",
-      variance: "Phase Variance",
-    },
-  },
-  "constraint-flow": {
-    name: "Constraint Flow",
-    header: "Constraint Flow View",
-    subtitle: "Perturbations redistributing through constraint networks.",
-    operators: {
-      curvature: "Constraint Curvature",
-      tension: "Constraint Pressure",
-      coupling: "Flow Coupling",
-      attractor: "Constraint Bias",
-    },
-    stats: {
-      energy: "Constraint Energy",
-      basins: "Constraint Regions",
-      variance: "Flow Variance",
+      energy: "Overall Activity",
+      basins: "Distinct Regions",
+      variance: "Unevenness",
     },
   },
 };
 
 export const modeOptions: { value: InterpretationMode; label: string }[] = [
-  { value: "field-state", label: "Field State (Raw)" },
+  { value: "technical", label: "Technical" },
   { value: "structural-dynamics", label: "Structural Dynamics" },
-  { value: "energy-stability", label: "Energy & Stability" },
-  { value: "attractors-phase", label: "Attractors & Phase Space" },
-  { value: "constraint-flow", label: "Constraint Flow" },
+  { value: "intuitive", label: "Intuitive" },
 ];
+
+export interface InterpretationSentence {
+  technical: string;
+  structuralDynamics: string;
+  intuitive: string;
+}
+
+export function generateInterpretationSentence(
+  basinCount: number,
+  variance: number,
+  energy: number,
+  curvatureContrib: number,
+  tensionContrib: number,
+  isRunning: boolean
+): InterpretationSentence {
+  const highCurvature = curvatureContrib > 0.3;
+  const highTension = tensionContrib > 0.3;
+  const highVariance = variance > 0.1;
+  const lowVariance = variance < 0.02;
+  const manyBasins = basinCount > 5;
+  const fewBasins = basinCount <= 2;
+  
+  if (!isRunning) {
+    return {
+      technical: "Simulation paused. Press Run to evolve the field.",
+      structuralDynamics: "The field is at rest. Start the simulation to observe structural evolution.",
+      intuitive: "The pattern is still. Press Run to see it change.",
+    };
+  }
+  
+  let technical = "Local operator dynamics are ";
+  let structuralDynamics = "Local interactions are causing the field to ";
+  let intuitive = "The pattern is ";
+  
+  if (highCurvature && highVariance) {
+    technical += "increasing curvature and amplifying structural variance.";
+    structuralDynamics += "bend more sharply while becoming more varied.";
+    intuitive += "becoming more uneven with stronger bends forming.";
+  } else if (highCurvature && lowVariance) {
+    technical += "increasing curvature while reducing structural variance.";
+    structuralDynamics += "bend more sharply while stabilizing its overall pattern.";
+    intuitive += "settling into a stronger overall shape with distinct bends.";
+  } else if (highTension && manyBasins) {
+    technical += "driving tension gradients across multiple basin regions.";
+    structuralDynamics += "spread and redistribute energy across many distinct regions.";
+    intuitive += "spreading out into many separate areas.";
+  } else if (fewBasins && lowVariance) {
+    technical += "converging toward a stable low-energy configuration.";
+    structuralDynamics += "settle into a uniform, stable structure.";
+    intuitive += "becoming more even and settled.";
+  } else if (manyBasins) {
+    technical += "maintaining multi-basin structural complexity.";
+    structuralDynamics += "sustain multiple distinct structural regions.";
+    intuitive += "holding several separate regions.";
+  } else {
+    technical += "evolving through balanced operator contributions.";
+    structuralDynamics += "evolve through balanced local interactions.";
+    intuitive += "changing gradually across the field.";
+  }
+  
+  return { technical, structuralDynamics, intuitive };
+}
+
+export function getInterpretationText(
+  sentence: InterpretationSentence,
+  mode: InterpretationMode
+): string {
+  switch (mode) {
+    case "technical":
+      return sentence.technical;
+    case "structural-dynamics":
+      return sentence.structuralDynamics;
+    case "intuitive":
+      return sentence.intuitive;
+  }
+}

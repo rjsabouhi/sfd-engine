@@ -21,7 +21,7 @@ import {
 import type { SimulationParameters, SimulationState, FieldData, ProbeData, OperatorContributions, StructuralSignature, StructuralEvent, DerivedField, BasinMap } from "@shared/schema";
 import { defaultParameters, mobileParameters } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
-import { interpretationModes } from "@/lib/interpretation-modes";
+import { interpretationModes, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
 
 export default function SimulationPage() {
   const isMobile = useIsMobile();
@@ -40,7 +40,7 @@ export default function SimulationPage() {
   const [field, setField] = useState<FieldData | null>(null);
   const [colormap, setColormap] = useState<"inferno" | "viridis">("viridis");
   const [controlsOpen, setControlsOpen] = useState(false);
-  const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("field-state");
+  const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("intuitive");
   const [showOnboardingBanner, setShowOnboardingBanner] = useState(true);
   const [hasEverRun, setHasEverRun] = useState(false);
   
@@ -202,6 +202,44 @@ export default function SimulationPage() {
     setProbeVisible(false);
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      
+      switch (e.code) {
+        case "Space":
+          e.preventDefault();
+          if (state.isRunning) {
+            handlePause();
+          } else {
+            handlePlay();
+          }
+          break;
+        case "KeyB":
+          setShowBasins((prev) => !prev);
+          break;
+        case "KeyD":
+          setShowDualView((prev) => !prev);
+          break;
+        case "KeyR":
+          handleReset();
+          break;
+      }
+    };
+    
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [state.isRunning, handlePause, handlePlay, handleReset]);
+
+  const interpretationSentence = generateInterpretationSentence(
+    state.basinCount,
+    state.variance,
+    state.energy,
+    operatorContributions.curvature,
+    operatorContributions.tension,
+    state.isRunning
+  );
+
   if (isMobile) {
     return (
       <div className="flex flex-col h-screen bg-background">
@@ -341,7 +379,10 @@ export default function SimulationPage() {
           <div className="flex items-center justify-center w-7 h-7 rounded-md bg-primary/10">
             <Waves className="h-3.5 w-3.5 text-primary" />
           </div>
-          <h1 className="text-base font-semibold" data-testid="text-title">SFD Engine</h1>
+          <div>
+            <h1 className="text-sm font-semibold leading-tight" data-testid="text-title">SFD Engine</h1>
+            <p className="text-xs text-muted-foreground">Structural Field Explorer</p>
+          </div>
         </div>
         
         <Dialog>
@@ -375,11 +416,9 @@ export default function SimulationPage() {
 
       <div className="flex flex-1 overflow-hidden">
         <main className="relative bg-gray-950 flex-1 flex flex-col">
-              {showOnboardingBanner && (
-                <div className="text-center py-1.5 text-xs text-gray-400 transition-opacity duration-500">
-                  This is the structural field: each pixel represents local constraint density.
-                </div>
-              )}
+              <div className="text-center py-2 px-4 text-xs text-gray-300 bg-gray-900/50 border-b border-gray-800">
+                {getInterpretationText(interpretationSentence, interpretationMode)}
+              </div>
               <div className="flex-1 relative">
               {showDualView ? (
                 <div className="grid grid-cols-2 gap-px h-full bg-border">

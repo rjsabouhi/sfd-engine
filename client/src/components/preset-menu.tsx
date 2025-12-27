@@ -9,11 +9,13 @@ interface PresetMenuProps {
 }
 
 const presetLabels: Record<string, string> = {
-  "high-curvature": "High Curvature Regime",
-  "tension-dominant": "Tension Dominant",
-  "weak-coupling": "Weak Coupling / Basin Explosion",
-  "meta-stability": "Meta-Stability Plateau",
-  "constraint-collapse": "Constraint Collapse Demo",
+  "uniform-field": "Uniform Field",
+  "high-curvature": "High-Curvature Regime",
+  "multi-basin": "Multi-Basin System",
+  "near-critical": "Near-Critical State",
+  "transition-edge": "Transition Edge",
+  "entropic-dispersion": "Entropic Dispersion Phase",
+  "post-cooling": "Post-Cooling Phase",
 };
 
 export function PresetMenu({ onApply }: PresetMenuProps) {
