@@ -479,7 +479,7 @@ export default function SimulationPage() {
               </div>
             </main>
         
-        <aside className="w-[420px] border-l border-border bg-card flex flex-col overflow-hidden">
+        <aside className="w-[460px] border-l border-border bg-card flex flex-col overflow-hidden">
           <ControlPanel
                 params={params}
                 state={state}
