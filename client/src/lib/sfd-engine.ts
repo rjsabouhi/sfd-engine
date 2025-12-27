@@ -212,8 +212,12 @@ export class SFDEngine {
         sumA += Math.abs(wA * A);
         sumR += Math.abs(wR * R);
 
-        const delta = wK * K + wT * T + wC * C + wA * A + wR * R;
-        const newValue = Math.tanh(value + dt * delta);
+        let delta = wK * K + wT * T + wC * C + wA * A + wR * R;
+        if (!isFinite(delta)) delta = 0;
+        delta = Math.max(-10, Math.min(10, delta));
+        
+        let newValue = Math.tanh(value + dt * delta);
+        if (!isFinite(newValue)) newValue = 0;
         
         this.tempGrid[idx] = newValue;
       }

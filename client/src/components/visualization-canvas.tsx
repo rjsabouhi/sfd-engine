@@ -107,9 +107,23 @@ export function VisualizationCanvas({
     const data = imageData.data;
     const colors = colormap === "inferno" ? INFERNO_COLORS : VIRIDIS_COLORS;
 
+    let minVal = Infinity, maxVal = -Infinity;
+    for (let i = 0; i < field.grid.length; i++) {
+      const v = field.grid[i];
+      if (isFinite(v)) {
+        if (v < minVal) minVal = v;
+        if (v > maxVal) maxVal = v;
+      }
+    }
+    if (!isFinite(minVal) || !isFinite(maxVal)) {
+      minVal = -1;
+      maxVal = 1;
+    }
+    const range = maxVal - minVal || 1;
+
     for (let i = 0; i < field.grid.length; i++) {
       const value = field.grid[i];
-      const normalized = (value + 1) / 2;
+      const normalized = isFinite(value) ? (value - minVal) / range : 0.5;
       let [r, g, b] = interpolateColor(normalized, colors);
       
       if (showBasins && basinMap && basinMap.labels[i] >= 0) {
