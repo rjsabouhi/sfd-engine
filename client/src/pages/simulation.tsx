@@ -375,8 +375,8 @@ export default function SimulationPage() {
           <div className="h-full flex flex-col">
             <main className="relative bg-gray-950 flex-1">
               {showDualView ? (
-                <div className="flex h-full">
-                  <div className="flex-1 relative">
+                <div className="grid grid-cols-2 gap-px h-full bg-border">
+                  <div className="relative bg-gray-950 flex items-center justify-center">
                     <VisualizationCanvas 
                       field={field} 
                       colormap={colormap}
@@ -386,8 +386,7 @@ export default function SimulationPage() {
                       onHoverEnd={handleHoverEnd}
                     />
                   </div>
-                  <div className="w-px bg-border" />
-                  <div className="flex-1">
+                  <div className="bg-gray-950">
                     <DualFieldView
                       derivedField={derivedField}
                       derivedType={derivedType}
