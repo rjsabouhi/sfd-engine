@@ -57,6 +57,17 @@ export default function SimulationPage() {
   const [derivedField, setDerivedField] = useState<DerivedField | null>(null);
   const [basinMap, setBasinMap] = useState<BasinMap | null>(null);
   
+  const showDualViewRef = useRef(showDualView);
+  const derivedTypeRef = useRef(derivedType);
+  
+  useEffect(() => {
+    showDualViewRef.current = showDualView;
+  }, [showDualView]);
+  
+  useEffect(() => {
+    derivedTypeRef.current = derivedType;
+  }, [derivedType]);
+  
   const [probeData, setProbeData] = useState<ProbeData | null>(null);
   const [probeVisible, setProbeVisible] = useState(false);
   const [probePosition, setProbePosition] = useState({ x: 0, y: 0 });
@@ -80,8 +91,8 @@ export default function SimulationPage() {
       setIsPlaybackMode(engine.isInPlaybackMode());
       setBasinMap(engine.getBasinMap());
       
-      if (showDualView) {
-        setDerivedField(engine.computeDerivedField(derivedType));
+      if (showDualViewRef.current) {
+        setDerivedField(engine.computeDerivedField(derivedTypeRef.current));
       }
     });
 
