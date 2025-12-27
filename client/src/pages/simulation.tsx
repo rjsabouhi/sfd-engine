@@ -108,11 +108,12 @@ export default function SimulationPage() {
           setIsPlaybackMode(engine.isInPlaybackMode());
         }
         
-        if (showDualViewRef.current) {
+        if (showDualViewRef.current && frameCount % 3 === 0) {
+          const newDerivedField = engine.getCachedDerivedField(derivedTypeRef.current);
           const currentCacheStep = engine.getLastDerivedFieldCacheStep();
           if (currentCacheStep !== lastDerivedCacheStepRef.current) {
             lastDerivedCacheStepRef.current = currentCacheStep;
-            setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
+            setDerivedField(newDerivedField);
           }
         }
         
