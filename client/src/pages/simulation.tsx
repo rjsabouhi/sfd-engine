@@ -581,7 +581,6 @@ export default function SimulationPage() {
                 currentHistoryIndex={currentHistoryIndex}
                 isPlaybackMode={isPlaybackMode}
                 showBasins={showBasins}
-                showDualView={showDualView}
                 onParamsChange={handleParamsChange}
                 onPlay={handlePlay}
                 onPause={handlePause}
@@ -594,11 +593,7 @@ export default function SimulationPage() {
                 onInterpretationModeChange={setInterpretationMode}
                 onClearEvents={handleClearEvents}
                 onExportEvents={handleExportEvents}
-                onExportPNG={handleExportPNG}
-                onExportJSON={handleExportJSON}
-                onExportGIF={handleExportGIF}
                 onShowBasinsChange={setShowBasins}
-                onShowDualViewChange={setShowDualView}
               />
         </aside>
       </div>
