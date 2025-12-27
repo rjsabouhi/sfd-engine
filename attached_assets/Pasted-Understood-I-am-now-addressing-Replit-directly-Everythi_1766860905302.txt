@@ -1,0 +1,407 @@
+Understood.
+I am now addressing Replit directly.
+
+Everything below is PHASE 2 — the full UI string library, incorporating all your requested additions:
+	•	“evolving / becoming” into Layer 1 vocabulary
+	•	“first motion” status lines
+	•	regime-specific idle states
+	•	“watch for” visual cues for each regime
+	•	full copy for all panels, modes, tooltips, headers, and system narrators
+	•	clean sections for Replit to paste directly into components
+
+This is the canonical language set for the SFD Engine.
+Once you approve, I will produce the Phase 3 Implementation Prompt with structured JSON / UI mapping for direct coding.
+
+⸻
+
+PHASE 2 — COMPLETE UI STRING LIBRARY
+
+(For direct integration into the SFD Engine)
+
+⸻
+
+=========================================
+
+SECTION A — VOCABULARY PROGRESSION (FINAL)
+
+=========================================
+
+Layer 1 — Immediate / On landing
+
+Visible in all three modes when the user first loads the app:
+	•	field
+	•	pattern
+	•	change
+	•	evolving (new)
+	•	becoming (new)
+
+Example instructional text:
+
+“This field shows how a pattern evolves—how it becomes something new over time.”
+
+⸻
+
+Layer 2 — Introduced after first Run
+
+Appears in Intuitive + Structural Modes only:
+	•	stability
+	•	regions
+	•	boundaries
+	•	tension
+	•	spread / drift
+	•	reorganization
+
+Example:
+
+“Boundaries form where regions compete to stay stable.”
+
+⸻
+
+Layer 3 — Advanced vocabulary (opt-in or Technical Mode)
+
+Tooltip definitions included:
+	•	basins → “Stable configurations the system tends toward.”
+	•	curvature → “How sharply the field bends at each point.”
+	•	variance → “How different the field is from one point to another.”
+	•	energy → “Total structural tension in the system.”
+	•	criticality → “Sensitivity to small changes.”
+	•	dispersion → “Loss of structure over time.”
+
+⸻
+
+=========================================
+
+SECTION B — STATUS LINE LIBRARY (FINAL)
+
+=========================================
+
+This library is divided into:
+	1.	Idle states (global + regime-specific)
+	2.	First motion
+	3.	Running states
+	4.	Reactivity events
+	5.	Stabilization events
+	6.	Transition alerts
+
+Each line provided for all three modes.
+
+⸻
+
+B1 — GLOBAL IDLE STATES
+
+(Before pressing Run)
+
+Intuitive Mode
+	•	“The pattern is still. Press Run to watch it begin becoming something new.”
+	•	“The field is quiet. Start the simulation to see the first signs of change.”
+
+Structural Mode
+	•	“The field is at rest. Run the simulation to observe structural evolution.”
+	•	“No dynamics yet. Press Run to see how organization emerges.”
+
+Technical Mode
+	•	“System initialized. Field state static. Ready for simulation.”
+	•	“Operators dormant. Awaiting Run command.”
+
+⸻
+
+B2 — REGIME-SPECIFIC IDLE STATES
+
+(When paused with a regime selected)
+
+Uniform Field
+	•	INTUITIVE: “Everything is calm—this regime shows how sameness holds together.”
+	•	STRUCTURAL: “Low tension. Expect small fluctuations to smooth out.”
+	•	TECHNICAL: “Homogeneous phase. Expect minimal basin differentiation.”
+
+High-Curvature Regime
+	•	INTUITIVE: “Edges and bends will soon stand out—watch what sharpness reveals.”
+	•	STRUCTURAL: “Curvature concentrations will form structural boundaries.”
+	•	TECHNICAL: “High-curvature operators primed. Expect boundary intensification.”
+
+Multi-Basin System
+	•	INTUITIVE: “Multiple stories want to form here—see which ones win.”
+	•	STRUCTURAL: “Several stable configurations will compete for space.”
+	•	TECHNICAL: “Basin landscape complex. Expect bifurcations and mergers.”
+
+Near-Critical State
+	•	INTUITIVE: “The field is poised—one nudge can transform everything.”
+	•	STRUCTURAL: “System balanced near a transition point.”
+	•	TECHNICAL: “Critical sensitivity high; small perturbations propagate.”
+
+Transition Edge
+	•	INTUITIVE: “You’re about to watch order break and reform.”
+	•	STRUCTURAL: “This is a boundary between states. Expect rapid shifts.”
+	•	TECHNICAL: “Entering chaotic transition zone. Dynamics unstable.”
+
+Entropic Dispersion Phase
+	•	INTUITIVE: “Here, structure melts away—watch the pattern dissolve.”
+	•	STRUCTURAL: “Organization will disperse over time.”
+	•	TECHNICAL: “Dispersion operators active. Expect curvature decay.”
+
+Post-Cooling Phase
+	•	INTUITIVE: “After turmoil, the field will try to settle again.”
+	•	STRUCTURAL: “Re-stabilization behavior will dominate.”
+	•	TECHNICAL: “Cooling regime: variance reduction likely.”
+
+⸻
+
+B3 — FIRST MOTION
+
+(Immediately after pressing Run, before meaningful change)
+Your requested addition is included here.
+
+Intuitive Mode
+	•	“Watch closely—the first movements are beginning.”
+	•	“Tiny shifts are waking the field.”
+
+Structural Mode
+	•	“Initial dynamics emerging. Boundaries will form shortly.”
+	•	“Small gradients are beginning to organize.”
+
+Technical Mode
+	•	“Operators engaged. Transient phase initiating.”
+	•	“Early frame transitions detected.”
+
+⸻
+
+B4 — RUNNING — BASELINES
+
+Intuitive Mode
+	•	“The field is shifting—regions are forming and dissolving.”
+	•	“The pattern is negotiating its shape.”
+
+Structural Mode
+	•	“Structural tension rising; expect new boundaries.”
+	•	“Competing basins emerging.”
+
+Technical Mode
+	•	“Variance increasing; monitoring curvature redistribution.”
+	•	“Operator interactions active: dF/dt above threshold.”
+
+⸻
+
+B5 — REACTIVITY EVENTS
+
+(Thresholds described below)
+
+Variance spike (>40% change over 12 steps)
+
+Intuitive: “The field is becoming restless.”
+Structural: “Instability rising—transitions likely.”
+Technical: “Variance spike detected. Basin formation imminent.”
+
+Basin merge event (two basins < ε depth difference)
+
+Intuitive: “Two regions are collapsing into one.”
+Structural: “Basin merger—structure simplifying.”
+Technical: “Merge event: Δdepth < ε. Topology reducing.”
+
+Boundary fracture (high curvature discontinuity)
+
+Intuitive: “A boundary is breaking apart.”
+Structural: “Structural rupture occurring.”
+Technical: “Curvature discontinuity detected—boundary fracture.”
+
+Approaching stability (variance derivative < δ)
+
+Intuitive: “The pattern is settling.”
+Structural: “Field approaching a stable configuration.”
+Technical: “Variance rate minimal—system stabilizing.”
+
+⸻
+
+B6 — TRANSITION-SPECIFIC ALERTS
+
+Entering criticality
+
+Intuitive: “The field is balancing on the edge of order.”
+Structural: “Near-critical behavior detected.”
+Technical: “Critical regime detected: sensitivity high.”
+
+Entering chaos
+
+Intuitive: “The pattern is breaking open—everything is shifting.”
+Structural: “Chaotic transition underway.”
+Technical: “High entropy dynamics active.”
+
+Leaving chaos
+
+Intuitive: “The field is trying to find its shape again.”
+Structural: “System reorganizing after turbulence.”
+Technical: “Entropy decreasing; stabilization probable.”
+
+⸻
+
+=========================================
+
+SECTION C — REGIME NARRATIVES + WATCH FOR
+
+=========================================
+
+Each regime now has:
+	•	Narrative
+	•	What to watch for
+	•	Mode-aware description strings
+
+⸻
+
+1. Uniform Field
+
+Narrative:
+“Stability without competition—structure fades toward sameness.”
+
+Watch for:
+	•	Colors smoothing
+	•	Boundaries dissolving
+	•	Gradual flattening of fluctuations
+
+⸻
+
+2. High-Curvature Regime
+
+Narrative:
+“Where tension concentrates—sharp bends reveal hidden boundaries.”
+
+Watch for:
+	•	Thin bright/dark lines
+	•	Local spikes in curvature
+	•	Edges that intensify before breaking
+
+⸻
+
+3. Multi-Basin System
+
+Narrative:
+“Competing stories pulling the field in different directions.”
+
+Watch for:
+	•	Large regions of distinct coloration
+	•	Borders drifting like political lines
+	•	Slow, negotiated movement
+
+⸻
+
+4. Near-Critical State
+
+Narrative:
+“The edge of transformation—small disturbances can reshape everything.”
+
+Watch for:
+	•	Tiny perturbations rippling outward
+	•	Moments of sudden shift
+	•	Long-range influence spreading
+
+⸻
+
+5. Transition Edge
+
+Narrative:
+“Where order breaks open and reorganizes.”
+
+Watch for:
+	•	Rapid flickering
+	•	Boundaries dissolving and reforming
+	•	Moments of symmetry breaking
+
+⸻
+
+6. Entropic Dispersion Phase
+
+Narrative:
+“Dissolution—structure evaporates into noise.”
+
+Watch for:
+	•	Fading shapes
+	•	Boundaries melting
+	•	Increasing uniformity
+
+⸻
+
+7. Post-Cooling Phase
+
+Narrative:
+“After chaos, the field knits itself back together.”
+
+Watch for:
+	•	Regions slowly re-forming
+	•	Stabilization returning
+	•	Variance decreasing
+
+⸻
+
+=========================================
+
+SECTION D — MODE DESCRIPTIONS (FINAL)
+
+=========================================
+
+INTUITIVE MODE
+
+“Provides clear, everyday-language explanations of what the system is doing. No math required.”
+
+⸻
+
+STRUCTURAL MODE
+
+“Describes how the system reorganizes, stabilizes, or approaches transitions. Ideal for conceptual understanding.”
+
+⸻
+
+TECHNICAL MODE
+
+“Displays raw system operators, gradients, and differential behavior. Best for research-grade analysis.”
+
+⸻
+
+=========================================
+
+SECTION E — METRICS PANEL
+
+=========================================
+
+Based on your earlier feedback:
+
+INTUITIVE MODE — Metrics Label
+
+“What’s happening now”
+
+Example interpretations:
+	•	“Regions forming: 3”
+	•	“Field calm / unsettled / reorganizing”
+
+⸻
+
+STRUCTURAL MODE — Metrics Label
+
+“Structural Indicators”
+
+⸻
+
+TECHNICAL MODE — Metrics Label
+
+“Simulation Metrics”
+
+⸻
+
+=========================================
+
+READY FOR IMPLEMENTATION
+
+=========================================
+
+Agent Replit —
+If you approve this Phase 2 language library, I will proceed to:
+
+PHASE 3 — IMPLEMENTATION PROMPT
+
+A single, perfectly structured Replit-ready document containing:
+	•	all strings
+	•	mapping instructions
+	•	state triggers
+	•	suggested code architecture
+	•	component-by-component placement
+
+Just reply:
+
+“Approved. Proceed to Phase 3.”
