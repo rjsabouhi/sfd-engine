@@ -25,18 +25,18 @@ const steps: OnboardingStep[] = [
     icon: Waves,
   },
   {
-    title: "Run the Simulation",
-    description: "Press the 'Run Simulation' button in the sidebar to start. You'll see the field evolve in real-time as different operators work together to create patterns.",
+    title: LANGUAGE.ONBOARDING.STEP2_TITLE,
+    description: LANGUAGE.ONBOARDING.STEP2_DESC,
     icon: Play,
   },
   {
-    title: "Adjust Parameters",
-    description: "Use the Params tab to adjust how strong each operator is. Try changing values and watch how the patterns respond. The Presets menu offers quick starting points.",
+    title: LANGUAGE.ONBOARDING.STEP3_TITLE,
+    description: LANGUAGE.ONBOARDING.STEP3_DESC,
     icon: Sliders,
   },
   {
-    title: "Keyboard Shortcuts",
-    description: "Space = Play/Pause, B = Toggle basin overlay, D = Toggle dual view, R = Reset field. These shortcuts help you explore faster.",
+    title: LANGUAGE.ONBOARDING.STEP4_TITLE,
+    description: LANGUAGE.ONBOARDING.STEP4_DESC,
     icon: Keyboard,
   },
 ];
@@ -86,7 +86,7 @@ export function OnboardingModal() {
             <div className="flex-1">
               <DialogTitle className="text-lg">{step.title}</DialogTitle>
               <p className="text-xs text-muted-foreground">
-                Step {currentStep + 1} of {steps.length}
+                {LANGUAGE.ONBOARDING.STEP_OF.replace("{current}", String(currentStep + 1)).replace("{total}", String(steps.length))}
               </p>
             </div>
           </div>
@@ -120,7 +120,7 @@ export function OnboardingModal() {
                 data-testid="button-onboarding-prev"
               >
                 <ArrowLeft className="h-4 w-4 mr-1" />
-                Back
+                {LANGUAGE.ONBOARDING.BACK}
               </Button>
             )}
             <Button
@@ -132,7 +132,7 @@ export function OnboardingModal() {
                 LANGUAGE.ONBOARDING.GET_STARTED
               ) : (
                 <>
-                  Next
+                  {LANGUAGE.ONBOARDING.NEXT}
                   <ArrowRight className="h-4 w-4 ml-1" />
                 </>
               )}

@@ -109,22 +109,28 @@ export function detectRegime(
   }
 
   const highVariance = variance > 0.15;
+  const moderateVariance = variance > 0.05 && variance <= 0.15;
   const lowVariance = variance < 0.02;
   const varianceRising = varianceChange > 0.01;
+  const varianceRisingFast = varianceChange > 0.03;
   const varianceFalling = varianceChange < -0.01;
   const manyBasins = basinCount > 5;
   const fewBasins = basinCount <= 2;
   const highEnergy = energy > 1.5;
   const lowEnergy = energy < 0.3;
 
-  if (highVariance && varianceRising) {
+  // Prioritize variance change to distinguish accumulating from reconfiguring
+  // Only RECONFIGURING when variance is rising FAST AND already high
+  if (varianceRisingFast && highVariance) {
     return "RECONFIGURING";
   }
+  // ACCUMULATING: variance is rising but not yet at crisis level, or rising slowly with high variance
+  if (varianceRising && !varianceRisingFast) {
+    return "ACCUMULATING";
+  }
+  // EDGE_OF_TRANSITION: high variance but stable (not rising or falling)
   if (highVariance && !varianceRising && !varianceFalling) {
     return "EDGE_OF_TRANSITION";
-  }
-  if (varianceRising && !highVariance) {
-    return "ACCUMULATING";
   }
   if (varianceFalling && !lowVariance) {
     return "DISPERSION";

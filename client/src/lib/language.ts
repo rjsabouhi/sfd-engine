@@ -49,7 +49,20 @@ export const LANGUAGE = {
       "This simulator models constraints, gradients, micro-fluctuations, and phase transitions as a unified dynamic field. You will see how local tensions accumulate, disperse, or reorganize the entire system.",
     WELCOME_BODY_TECHNICAL:
       "This interface exposes operator-level field metrics: local gradient magnitudes, instability thresholds, constraint curvature, spectral pressure, transition edges, and post-critical smoothing regimes. Ideal for advanced analysis.",
+    
+    STEP2_TITLE: "Run the Simulation",
+    STEP2_DESC: "Press the 'Run Simulation' button in the sidebar to start. You'll see the field evolve in real-time as different operators work together to create patterns.",
+    
+    STEP3_TITLE: "Adjust Parameters",
+    STEP3_DESC: "Use the Params tab to adjust how strong each operator is. Try changing values and watch how the patterns respond. The Presets menu offers quick starting points.",
+    
+    STEP4_TITLE: "Keyboard Shortcuts",
+    STEP4_DESC: "Space = Play/Pause, B = Toggle basin overlay, D = Toggle dual view, R = Reset field. These shortcuts help you explore faster.",
+    
     GET_STARTED: "Begin Exploration",
+    NEXT: "Next",
+    BACK: "Back",
+    STEP_OF: "Step {current} of {total}",
   },
 
 
