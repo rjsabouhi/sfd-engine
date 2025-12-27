@@ -201,7 +201,7 @@ export function ControlPanel({
               </Button>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="border-t border-border/50 pt-3 space-y-1.5">
               <Label className="text-xs">Colormap</Label>
               <Select value={colormap} onValueChange={(v) => onColormapChange(v as "inferno" | "viridis")}>
                 <SelectTrigger className="h-8 text-xs" data-testid="select-colormap">
@@ -214,7 +214,7 @@ export function ControlPanel({
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="border-t border-border/50 pt-3 grid grid-cols-2 gap-3">
               <div className="flex flex-col items-center gap-1">
                 <Label className="text-xs">Show Basins</Label>
                 <Switch
@@ -233,8 +233,18 @@ export function ControlPanel({
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-xs">Interpretation Mode</Label>
+            <div className="border-t border-border/50 pt-3 space-y-1.5">
+              <div className="flex items-center gap-1.5">
+                <Label className="text-xs">Interpretation Mode</Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-[200px]">
+                    <p className="text-xs">View the raw evolving field before applying operator-level interpretations.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
                 <SelectTrigger className="h-8 text-xs" data-testid="select-interpretation-mode">
                   <SelectValue />
@@ -249,7 +259,9 @@ export function ControlPanel({
               </Select>
             </div>
 
-            <PresetMenu onApply={onParamsChange} />
+            <div className="border-t border-border/50 pt-3">
+              <PresetMenu onApply={onParamsChange} />
+            </div>
 
             <div className="pt-2 border-t border-border">
               <div className="text-xs font-medium text-muted-foreground mb-2">Timeline</div>

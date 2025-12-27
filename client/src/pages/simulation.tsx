@@ -273,7 +273,7 @@ export default function SimulationPage() {
             ) : (
               <Button onClick={handlePlay} className="flex-1 h-12" data-testid="button-play-mobile">
                 <Play className="h-5 w-5 mr-2" />
-                Run
+                Run Simulation
               </Button>
             )}
             <Button
