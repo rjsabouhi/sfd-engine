@@ -67,6 +67,7 @@ export default function SimulationPage() {
   const [fieldState, setFieldState] = useState<FieldState>("calm");
   const prevBasinCountRef = useRef<number | null>(null);
   const frameCountRef = useRef(0);
+  const lastDerivedCacheStepRef = useRef(0);
   
   const showDualViewRef = useRef(showDualView);
   const derivedTypeRef = useRef(derivedType);
@@ -105,8 +106,12 @@ export default function SimulationPage() {
           setHistoryLength(engine.getHistoryLength());
           setCurrentHistoryIndex(engine.getCurrentHistoryIndex());
           setIsPlaybackMode(engine.isInPlaybackMode());
-          
-          if (showDualViewRef.current) {
+        }
+        
+        if (showDualViewRef.current) {
+          const currentCacheStep = engine.getLastDerivedFieldCacheStep();
+          if (currentCacheStep !== lastDerivedCacheStepRef.current) {
+            lastDerivedCacheStepRef.current = currentCacheStep;
             setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
           }
         }

@@ -716,6 +716,10 @@ export class SFDEngine {
     }
   }
 
+  getLastDerivedFieldCacheStep(): number {
+    return this.lastDerivedFieldCacheStep;
+  }
+
   getHistoryLength(): number {
     return this.ringBuffer.length;
   }
