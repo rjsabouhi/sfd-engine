@@ -42,6 +42,7 @@ interface ControlPanelProps {
   onReset: () => void;
   onStep: () => void;
   onStepBackward: () => void;
+  onStepForward: () => void;
   onSeekFrame: (index: number) => void;
   onExitPlayback: () => void;
   onColormapChange: (colormap: "inferno" | "viridis") => void;
@@ -117,6 +118,7 @@ export function ControlPanel({
   onReset,
   onStep,
   onStepBackward,
+  onStepForward,
   onSeekFrame,
   onExitPlayback,
   onColormapChange,
@@ -285,7 +287,7 @@ export function ControlPanel({
                 isPlaybackMode={isPlaybackMode}
                 isRunning={state.isRunning}
                 onStepBackward={onStepBackward}
-                onStepForward={onStep}
+                onStepForward={onStepForward}
                 onSeek={onSeekFrame}
                 onExitPlayback={onExitPlayback}
               />

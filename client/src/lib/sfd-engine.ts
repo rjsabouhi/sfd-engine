@@ -740,6 +740,7 @@ export class SFDEngine {
       const snapshot = this.ringBuffer[this.currentPlaybackIndex];
       this.grid = new Float32Array(snapshot.grid);
       this.step = snapshot.step;
+      this.invalidateDerivedFieldCache();
       this.notifyUpdate();
       return true;
     }
@@ -754,6 +755,7 @@ export class SFDEngine {
       const snapshot = this.ringBuffer[this.currentPlaybackIndex];
       this.grid = new Float32Array(snapshot.grid);
       this.step = snapshot.step;
+      this.invalidateDerivedFieldCache();
       this.notifyUpdate();
       return true;
     } else {
@@ -769,7 +771,13 @@ export class SFDEngine {
     const snapshot = this.ringBuffer[index];
     this.grid = new Float32Array(snapshot.grid);
     this.step = snapshot.step;
+    this.invalidateDerivedFieldCache();
     this.notifyUpdate();
+  }
+  
+  private invalidateDerivedFieldCache(): void {
+    // Force derived fields to recompute on next getCachedDerivedField call
+    this.lastDerivedFieldCacheStep = -Infinity;
   }
 
   exitPlaybackMode(): void {

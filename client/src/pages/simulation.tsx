@@ -165,11 +165,33 @@ export default function SimulationPage() {
   }, []);
 
   const handleStepBackward = useCallback(() => {
-    engineRef.current?.stepBackward();
+    const engine = engineRef.current;
+    if (engine) {
+      engine.stepBackward();
+      if (showDualViewRef.current) {
+        setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
+      }
+    }
   }, []);
 
   const handleSeekFrame = useCallback((index: number) => {
-    engineRef.current?.seekToFrame(index);
+    const engine = engineRef.current;
+    if (engine) {
+      engine.seekToFrame(index);
+      if (showDualViewRef.current) {
+        setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
+      }
+    }
+  }, []);
+
+  const handleStepForward = useCallback(() => {
+    const engine = engineRef.current;
+    if (engine) {
+      engine.stepForwardInHistory();
+      if (showDualViewRef.current) {
+        setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
+      }
+    }
   }, []);
 
   const handleExitPlayback = useCallback(() => {
@@ -540,6 +562,7 @@ export default function SimulationPage() {
                 onReset={handleReset}
                 onStep={handleStep}
                 onStepBackward={handleStepBackward}
+                onStepForward={handleStepForward}
                 onSeekFrame={handleSeekFrame}
                 onExitPlayback={handleExitPlayback}
                 onColormapChange={setColormap}
