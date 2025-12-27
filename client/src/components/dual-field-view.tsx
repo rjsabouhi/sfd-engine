@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { DerivedField } from "@shared/schema";
 
@@ -40,15 +40,28 @@ function interpolateColor(t: number): [number, number, number] {
   ];
 }
 
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 10;
+
 export function DualFieldView({ derivedField, derivedType, onTypeChange }: DualFieldViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
   const render = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !derivedField) return;
+    const container = containerRef.current;
+    if (!canvas || !container || !derivedField) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+
+    setContainerSize({ width: container.clientWidth, height: container.clientHeight });
 
     canvas.width = derivedField.width;
     canvas.height = derivedField.height;
@@ -82,6 +95,69 @@ export function DualFieldView({ derivedField, derivedType, onTypeChange }: DualF
     render();
   }, [render]);
 
+  useEffect(() => {
+    const handleResize = () => render();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [render]);
+
+  const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    
+    const container = containerRef.current;
+    if (!container || !derivedField) return;
+    
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left - rect.width / 2;
+    const mouseY = e.clientY - rect.top - rect.height / 2;
+    
+    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom * zoomFactor));
+    
+    if (newZoom !== zoom) {
+      const scale = newZoom / zoom;
+      const newPanX = mouseX - scale * (mouseX - pan.x);
+      const newPanY = mouseY - scale * (mouseY - pan.y);
+      
+      setZoom(newZoom);
+      setPan({ x: newPanX, y: newPanY });
+    }
+  }, [zoom, pan, derivedField]);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (zoom > 1 && e.button === 0) {
+      setIsPanning(true);
+      setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+    }
+  }, [zoom, pan]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (isPanning) {
+      const newPanX = e.clientX - panStart.x;
+      const newPanY = e.clientY - panStart.y;
+      
+      const size = Math.min(containerSize.width, containerSize.height);
+      const maxPan = (size * (zoom - 1)) / 2;
+      setPan({
+        x: Math.max(-maxPan, Math.min(maxPan, newPanX)),
+        y: Math.max(-maxPan, Math.min(maxPan, newPanY)),
+      });
+    }
+  }, [isPanning, panStart, containerSize, zoom]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsPanning(false);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsPanning(false);
+  }, []);
+
+  const handleDoubleClick = useCallback(() => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, []);
+
   const typeLabels: Record<string, string> = {
     curvature: "Curvature Heatmap",
     tension: "Tension Gradient Map",
@@ -89,17 +165,33 @@ export function DualFieldView({ derivedField, derivedType, onTypeChange }: DualF
     variance: "Local Variance Map",
   };
 
+  const zoomPercent = Math.round(zoom * 100);
+  const size = Math.min(containerSize.width, containerSize.height);
+
   return (
-    <div className="relative h-full bg-gray-950 flex items-center justify-center">
+    <div 
+      ref={containerRef}
+      className="relative h-full bg-gray-950 flex items-center justify-center overflow-hidden"
+      onWheel={handleWheel}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
+      onDoubleClick={handleDoubleClick}
+      style={{ cursor: zoom > 1 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair' }}
+    >
       {derivedField ? (
         <canvas
           ref={canvasRef}
-          className="rounded-md max-w-full max-h-full"
+          className="rounded-md"
           style={{ 
-            imageRendering: "auto",
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
+            imageRendering: zoom > 2 ? "pixelated" : "auto",
+            width: `${size || '100%'}px`,
+            height: `${size || '100%'}px`,
+            maxWidth: '100%',
+            maxHeight: '100%',
+            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+            transformOrigin: 'center center',
           }}
           data-testid="canvas-derived-field"
         />
@@ -109,7 +201,7 @@ export function DualFieldView({ derivedField, derivedType, onTypeChange }: DualF
         </div>
       )}
       
-      <div className="absolute top-2 left-2 right-2">
+      <div className="absolute top-2 left-2 right-2 z-10">
         <Select value={derivedType} onValueChange={(v) => onTypeChange(v as typeof derivedType)}>
           <SelectTrigger className="h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20" data-testid="select-derived-field">
             <SelectValue />
@@ -123,8 +215,11 @@ export function DualFieldView({ derivedField, derivedType, onTypeChange }: DualF
         </Select>
       </div>
       
-      <div className="absolute bottom-2 left-0 right-0 text-center">
-        <span className="text-xs text-white/70 bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded">{typeLabels[derivedType]}</span>
+      <div className="absolute bottom-2 left-0 right-0 text-center z-10">
+        <span className="text-xs text-white/70 bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded">
+          {typeLabels[derivedType]}
+          {zoom > 1 && ` | ${zoomPercent}%`}
+        </span>
       </div>
     </div>
   );

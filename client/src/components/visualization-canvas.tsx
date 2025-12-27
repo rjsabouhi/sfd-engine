@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback, useState } from "react";
-import type { FieldData, BasinMap, ProbeData } from "@shared/schema";
+import type { FieldData, BasinMap } from "@shared/schema";
 
 interface VisualizationCanvasProps {
   field: FieldData | null;
@@ -67,6 +67,9 @@ function interpolateColor(t: number, colormap: typeof INFERNO_COLORS): [number, 
   ];
 }
 
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 10;
+
 export function VisualizationCanvas({ 
   field, 
   colormap = "inferno", 
@@ -77,6 +80,12 @@ export function VisualizationCanvas({
 }: VisualizationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [canvasSize, setCanvasSize] = useState(0);
 
   const render = useCallback(() => {
     const canvas = canvasRef.current;
@@ -89,11 +98,10 @@ export function VisualizationCanvas({
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
     const size = Math.min(containerWidth, containerHeight);
+    setCanvasSize(size);
     
     canvas.width = field.width;
     canvas.height = field.height;
-    canvas.style.width = `${size}px`;
-    canvas.style.height = `${size}px`;
 
     const imageData = ctx.createImageData(field.width, field.height);
     const data = imageData.data;
@@ -133,43 +141,112 @@ export function VisualizationCanvas({
     return () => window.removeEventListener("resize", handleResize);
   }, [render]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!field || !onHover) return;
+  const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
     
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = containerRef.current;
+    if (!container || !field) return;
     
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = field.width / rect.width;
-    const scaleY = field.height / rect.height;
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left - rect.width / 2;
+    const mouseY = e.clientY - rect.top - rect.height / 2;
     
-    const x = Math.floor((e.clientX - rect.left) * scaleX);
-    const y = Math.floor((e.clientY - rect.top) * scaleY);
+    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom * zoomFactor));
     
-    if (x >= 0 && x < field.width && y >= 0 && y < field.height) {
-      onHover(x, y, e.clientX, e.clientY);
+    if (newZoom !== zoom) {
+      const scale = newZoom / zoom;
+      const newPanX = mouseX - scale * (mouseX - pan.x);
+      const newPanY = mouseY - scale * (mouseY - pan.y);
+      
+      setZoom(newZoom);
+      setPan({ x: newPanX, y: newPanY });
     }
-  }, [field, onHover]);
+  }, [zoom, pan, field]);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (zoom > 1 && e.button === 0) {
+      setIsPanning(true);
+      setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+    }
+  }, [zoom, pan]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (isPanning) {
+      const newPanX = e.clientX - panStart.x;
+      const newPanY = e.clientY - panStart.y;
+      
+      const maxPan = (canvasSize * (zoom - 1)) / 2;
+      setPan({
+        x: Math.max(-maxPan, Math.min(maxPan, newPanX)),
+        y: Math.max(-maxPan, Math.min(maxPan, newPanY)),
+      });
+    } else if (field && onHover) {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = field.width / rect.width;
+      const scaleY = field.height / rect.height;
+      
+      const x = Math.floor((e.clientX - rect.left) * scaleX);
+      const y = Math.floor((e.clientY - rect.top) * scaleY);
+      
+      if (x >= 0 && x < field.width && y >= 0 && y < field.height) {
+        onHover(x, y, e.clientX, e.clientY);
+      }
+    }
+  }, [isPanning, panStart, canvasSize, zoom, field, onHover]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsPanning(false);
+  }, []);
 
   const handleMouseLeave = useCallback(() => {
+    setIsPanning(false);
     onHoverEnd?.();
   }, [onHoverEnd]);
+
+  const handleDoubleClick = useCallback(() => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, []);
+
+  const zoomPercent = Math.round(zoom * 100);
 
   return (
     <div 
       ref={containerRef}
-      className="relative w-full h-full flex items-center justify-center bg-gray-950"
+      className="relative w-full h-full flex items-center justify-center bg-gray-950 overflow-hidden"
+      onWheel={handleWheel}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
+      onDoubleClick={handleDoubleClick}
+      style={{ cursor: zoom > 1 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair' }}
       data-testid="visualization-container"
     >
       {field ? (
-        <canvas
-          ref={canvasRef}
-          className="rounded-md"
-          style={{ imageRendering: "auto" }}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          data-testid="canvas-visualization"
-        />
+        <>
+          <canvas
+            ref={canvasRef}
+            className="rounded-md"
+            style={{ 
+              imageRendering: zoom > 2 ? "pixelated" : "auto",
+              width: `${canvasSize}px`,
+              height: `${canvasSize}px`,
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+              transformOrigin: 'center center',
+            }}
+            data-testid="canvas-visualization"
+          />
+          {zoom > 1 && (
+            <div className="absolute bottom-2 left-2 bg-background/80 text-xs px-2 py-1 rounded text-muted-foreground" data-testid="zoom-indicator">
+              {zoomPercent}% (double-click to reset)
+            </div>
+          )}
+        </>
       ) : (
         <div className="text-muted-foreground text-sm">
           Initializing simulation...
