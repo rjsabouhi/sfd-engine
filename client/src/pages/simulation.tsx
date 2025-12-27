@@ -3,6 +3,8 @@ import { SFDEngine } from "@/lib/sfd-engine";
 import { VisualizationCanvas } from "@/components/visualization-canvas";
 import { ControlPanel } from "@/components/control-panel";
 import { MobileControlPanel } from "@/components/mobile-control-panel";
+import { HoverProbe } from "@/components/hover-probe";
+import { DualFieldView } from "@/components/dual-field-view";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { HelpCircle, Waves, Play, Pause, RotateCcw, Settings2 } from "lucide-react";
@@ -15,7 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import type { SimulationParameters, SimulationState, FieldData } from "@shared/schema";
+import type { SimulationParameters, SimulationState, FieldData, ProbeData, OperatorContributions, StructuralSignature, StructuralEvent, DerivedField, BasinMap } from "@shared/schema";
 import { defaultParameters, mobileParameters } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { interpretationModes } from "@/lib/interpretation-modes";
@@ -23,6 +25,8 @@ import { interpretationModes } from "@/lib/interpretation-modes";
 export default function SimulationPage() {
   const isMobile = useIsMobile();
   const engineRef = useRef<SFDEngine | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  
   const [params, setParams] = useState<SimulationParameters>(defaultParameters);
   const [state, setState] = useState<SimulationState>({
     step: 0,
@@ -36,6 +40,26 @@ export default function SimulationPage() {
   const [colormap, setColormap] = useState<"inferno" | "viridis">("inferno");
   const [controlsOpen, setControlsOpen] = useState(false);
   const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("structural-dynamics");
+  
+  const [operatorContributions, setOperatorContributions] = useState<OperatorContributions>({
+    curvature: 0.2, tension: 0.2, coupling: 0.2, attractor: 0.2, redistribution: 0.2,
+  });
+  const [structuralSignature, setStructuralSignature] = useState<StructuralSignature>({
+    basinCount: 0, avgBasinDepth: 0, globalCurvature: 0, tensionVariance: 0, stabilityMetric: 1,
+  });
+  const [events, setEvents] = useState<StructuralEvent[]>([]);
+  const [historyLength, setHistoryLength] = useState(0);
+  const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
+  const [isPlaybackMode, setIsPlaybackMode] = useState(false);
+  const [showBasins, setShowBasins] = useState(false);
+  const [showDualView, setShowDualView] = useState(false);
+  const [derivedType, setDerivedType] = useState<"curvature" | "tension" | "coupling" | "variance">("curvature");
+  const [derivedField, setDerivedField] = useState<DerivedField | null>(null);
+  const [basinMap, setBasinMap] = useState<BasinMap | null>(null);
+  
+  const [probeData, setProbeData] = useState<ProbeData | null>(null);
+  const [probeVisible, setProbeVisible] = useState(false);
+  const [probePosition, setProbePosition] = useState({ x: 0, y: 0 });
 
   const modeLabels = interpretationModes[interpretationMode];
 
@@ -48,12 +72,29 @@ export default function SimulationPage() {
     engine.onStateUpdate((newState, newField) => {
       setState(newState);
       setField(newField);
+      setOperatorContributions(engine.getOperatorContributions());
+      setStructuralSignature(engine.computeStructuralSignature());
+      setEvents(engine.getEvents());
+      setHistoryLength(engine.getHistoryLength());
+      setCurrentHistoryIndex(engine.getCurrentHistoryIndex());
+      setIsPlaybackMode(engine.isInPlaybackMode());
+      setBasinMap(engine.getBasinMap());
+      
+      if (showDualView) {
+        setDerivedField(engine.computeDerivedField(derivedType));
+      }
     });
 
     return () => {
       engine.stop();
     };
   }, [isMobile]);
+
+  useEffect(() => {
+    if (showDualView && engineRef.current) {
+      setDerivedField(engineRef.current.computeDerivedField(derivedType));
+    }
+  }, [showDualView, derivedType]);
 
   const handleParamsChange = useCallback((newParams: Partial<SimulationParameters>) => {
     setParams((prev) => {
@@ -77,6 +118,72 @@ export default function SimulationPage() {
 
   const handleStep = useCallback(() => {
     engineRef.current?.stepOnce();
+  }, []);
+
+  const handleStepBackward = useCallback(() => {
+    engineRef.current?.stepBackward();
+  }, []);
+
+  const handleSeekFrame = useCallback((index: number) => {
+    engineRef.current?.seekToFrame(index);
+  }, []);
+
+  const handleExitPlayback = useCallback(() => {
+    engineRef.current?.exitPlaybackMode();
+  }, []);
+
+  const handleClearEvents = useCallback(() => {
+    engineRef.current?.clearEvents();
+    setEvents([]);
+  }, []);
+
+  const handleExportEvents = useCallback(() => {
+    const text = events.map(e => `t=${e.step} | ${e.description}`).join('\n');
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sfd-events-${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [events]);
+
+  const handleExportPNG = useCallback(() => {
+    const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
+    if (!canvas) return;
+    const url = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sfd-frame-${state.step}.png`;
+    a.click();
+  }, [state.step]);
+
+  const handleExportJSON = useCallback(() => {
+    const json = engineRef.current?.exportSettings() || '{}';
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sfd-settings-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
+  const handleExportGIF = useCallback(() => {
+    alert('GIF export requires ffmpeg.wasm which is not yet installed. Use PNG export for individual frames.');
+  }, []);
+
+  const handleHover = useCallback((x: number, y: number, screenX: number, screenY: number) => {
+    if (engineRef.current) {
+      const data = engineRef.current.computeProbeData(x, y);
+      setProbeData(data);
+      setProbeVisible(true);
+      setProbePosition({ x: screenX, y: screenY });
+    }
+  }, []);
+
+  const handleHoverEnd = useCallback(() => {
+    setProbeVisible(false);
   }, []);
 
   if (isMobile) {
@@ -118,7 +225,12 @@ export default function SimulationPage() {
         </header>
 
         <main className="flex-1 relative bg-gray-950 min-h-0">
-          <VisualizationCanvas field={field} colormap={colormap} />
+          <VisualizationCanvas 
+            field={field} 
+            colormap={colormap} 
+            basinMap={basinMap}
+            showBasins={showBasins}
+          />
           <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
             <span className="text-xs font-mono text-white/70" data-testid="text-step-overlay-mobile">
               Step: {state.step.toLocaleString()}
@@ -258,8 +370,46 @@ export default function SimulationPage() {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <main className="flex-1 relative bg-gray-950">
-          <VisualizationCanvas field={field} colormap={colormap} />
+        <main className={`relative bg-gray-950 ${showDualView ? 'flex-1' : 'flex-1'}`}>
+          {showDualView ? (
+            <div className="flex h-full">
+              <div className="flex-1 relative">
+                <VisualizationCanvas 
+                  field={field} 
+                  colormap={colormap}
+                  basinMap={basinMap}
+                  showBasins={showBasins}
+                  onHover={handleHover}
+                  onHoverEnd={handleHoverEnd}
+                />
+              </div>
+              <div className="w-px bg-border" />
+              <div className="flex-1">
+                <DualFieldView
+                  derivedField={derivedField}
+                  derivedType={derivedType}
+                  onTypeChange={setDerivedType}
+                />
+              </div>
+            </div>
+          ) : (
+            <VisualizationCanvas 
+              field={field} 
+              colormap={colormap}
+              basinMap={basinMap}
+              showBasins={showBasins}
+              onHover={handleHover}
+              onHoverEnd={handleHoverEnd}
+            />
+          )}
+          
+          <HoverProbe
+            data={probeData}
+            modeLabels={modeLabels}
+            visible={probeVisible}
+            position={probePosition}
+          />
+          
           <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
             <span className="text-xs font-mono text-white/70" data-testid="text-step-overlay">
               Step: {state.step.toLocaleString()}
@@ -274,21 +424,44 @@ export default function SimulationPage() {
               <span className="text-xs font-mono text-white/70">Running</span>
             </div>
           )}
+          {isPlaybackMode && (
+            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-yellow-500/80 backdrop-blur-sm rounded px-2 py-1">
+              <span className="text-xs font-mono text-black">Playback Mode</span>
+            </div>
+          )}
         </main>
 
-        <aside className="w-80 border-l border-border bg-card flex flex-col overflow-hidden">
+        <aside className="w-96 border-l border-border bg-card flex flex-col overflow-hidden">
           <ControlPanel
             params={params}
             state={state}
             colormap={colormap}
             interpretationMode={interpretationMode}
+            operatorContributions={operatorContributions}
+            structuralSignature={structuralSignature}
+            events={events}
+            historyLength={historyLength}
+            currentHistoryIndex={currentHistoryIndex}
+            isPlaybackMode={isPlaybackMode}
+            showBasins={showBasins}
+            showDualView={showDualView}
             onParamsChange={handleParamsChange}
             onPlay={handlePlay}
             onPause={handlePause}
             onReset={handleReset}
             onStep={handleStep}
+            onStepBackward={handleStepBackward}
+            onSeekFrame={handleSeekFrame}
+            onExitPlayback={handleExitPlayback}
             onColormapChange={setColormap}
             onInterpretationModeChange={setInterpretationMode}
+            onClearEvents={handleClearEvents}
+            onExportEvents={handleExportEvents}
+            onExportPNG={handleExportPNG}
+            onExportJSON={handleExportJSON}
+            onExportGIF={handleExportGIF}
+            onShowBasinsChange={setShowBasins}
+            onShowDualViewChange={setShowDualView}
           />
         </aside>
       </div>

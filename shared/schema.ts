@@ -62,6 +62,102 @@ export interface FieldData {
   height: number;
 }
 
+export interface OperatorContributions {
+  curvature: number;
+  tension: number;
+  coupling: number;
+  attractor: number;
+  redistribution: number;
+}
+
+export interface ProbeData {
+  x: number;
+  y: number;
+  value: number;
+  curvature: number;
+  tension: number;
+  coupling: number;
+  gradientMagnitude: number;
+  neighborhoodVariance: number;
+  basinId: number | null;
+}
+
+export interface StructuralEvent {
+  id: string;
+  step: number;
+  type: "basin_merge" | "basin_split" | "curvature_spike" | "variance_instability" | "phase_transition";
+  description: string;
+  location?: { x: number; y: number };
+}
+
+export interface StructuralSignature {
+  basinCount: number;
+  avgBasinDepth: number;
+  globalCurvature: number;
+  tensionVariance: number;
+  stabilityMetric: number;
+}
+
+export interface BasinMap {
+  labels: Int32Array;
+  count: number;
+  width: number;
+  height: number;
+}
+
+export interface DerivedField {
+  type: "curvature" | "tension" | "coupling" | "variance";
+  grid: Float32Array;
+  width: number;
+  height: number;
+}
+
+export const structuralPresets: Record<string, Partial<SimulationParameters>> = {
+  "high-curvature": {
+    curvatureGain: 8.0,
+    wK: 4.0,
+    wT: 0.5,
+    wC: 0.8,
+    wA: 1.0,
+    wR: 0.3,
+  },
+  "tension-dominant": {
+    curvatureGain: 1.5,
+    wK: 0.5,
+    wT: 4.0,
+    wC: 0.6,
+    wA: 1.0,
+    wR: 0.4,
+  },
+  "weak-coupling": {
+    couplingWeight: 0.2,
+    wK: 1.5,
+    wT: 1.0,
+    wC: 0.3,
+    wA: 4.0,
+    wR: 0.2,
+  },
+  "meta-stability": {
+    dt: 0.02,
+    curvatureGain: 1.0,
+    wK: 0.8,
+    wT: 0.6,
+    wC: 1.5,
+    wA: 0.8,
+    wR: 0.8,
+  },
+  "constraint-collapse": {
+    dt: 0.08,
+    curvatureGain: 5.0,
+    attractorStrength: 8.0,
+    wK: 3.0,
+    wT: 2.0,
+    wC: 0.5,
+    wA: 4.0,
+    wR: 0.1,
+  },
+};
+
 export const users = undefined;
 export type InsertUser = { username: string; password: string };
 export type User = { id: string; username: string; password: string };

@@ -3,13 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Info } from "lucide-react";
-import type { SimulationParameters, SimulationState } from "@shared/schema";
+import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Info, Columns } from "lucide-react";
+import type { SimulationParameters, SimulationState, OperatorContributions, StructuralSignature, StructuralEvent } from "@shared/schema";
 import { defaultParameters } from "@shared/schema";
 import { StatisticsPanel } from "./statistics-panel";
+import { TemporalControls } from "./temporal-controls";
+import { OperatorSensitivity } from "./operator-sensitivity";
+import { StructuralSignatureBar } from "./structural-signature";
+import { EventLog } from "./event-log";
+import { PresetMenu } from "./preset-menu";
+import { ExportPanel } from "./export-panel";
+import { NotebookMode } from "./notebook-mode";
 import type { InterpretationMode, ModeLabels } from "@/lib/interpretation-modes";
 import { interpretationModes, modeOptions } from "@/lib/interpretation-modes";
 
@@ -18,13 +26,31 @@ interface ControlPanelProps {
   state: SimulationState;
   colormap: "inferno" | "viridis";
   interpretationMode: InterpretationMode;
+  operatorContributions: OperatorContributions;
+  structuralSignature: StructuralSignature;
+  events: StructuralEvent[];
+  historyLength: number;
+  currentHistoryIndex: number;
+  isPlaybackMode: boolean;
+  showBasins: boolean;
+  showDualView: boolean;
   onParamsChange: (params: Partial<SimulationParameters>) => void;
   onPlay: () => void;
   onPause: () => void;
   onReset: () => void;
   onStep: () => void;
+  onStepBackward: () => void;
+  onSeekFrame: (index: number) => void;
+  onExitPlayback: () => void;
   onColormapChange: (colormap: "inferno" | "viridis") => void;
   onInterpretationModeChange: (mode: InterpretationMode) => void;
+  onClearEvents: () => void;
+  onExportEvents: () => void;
+  onExportPNG: () => void;
+  onExportJSON: () => void;
+  onExportGIF: () => void;
+  onShowBasinsChange: (show: boolean) => void;
+  onShowDualViewChange: (show: boolean) => void;
 }
 
 interface ParameterSliderProps {
@@ -76,17 +102,38 @@ export function ControlPanel({
   state,
   colormap,
   interpretationMode,
+  operatorContributions,
+  structuralSignature,
+  events,
+  historyLength,
+  currentHistoryIndex,
+  isPlaybackMode,
+  showBasins,
+  showDualView,
   onParamsChange,
   onPlay,
   onPause,
   onReset,
   onStep,
+  onStepBackward,
+  onSeekFrame,
+  onExitPlayback,
   onColormapChange,
   onInterpretationModeChange,
+  onClearEvents,
+  onExportEvents,
+  onExportPNG,
+  onExportJSON,
+  onExportGIF,
+  onShowBasinsChange,
+  onShowDualViewChange,
 }: ControlPanelProps) {
   const [coreOpen, setCoreOpen] = useState(true);
   const [operatorsOpen, setOperatorsOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [timelineOpen, setTimelineOpen] = useState(false);
+  const [analysisOpen, setAnalysisOpen] = useState(false);
+  const [eventsOpen, setEventsOpen] = useState(false);
 
   const modeLabels = interpretationModes[interpretationMode];
 
@@ -96,6 +143,24 @@ export function ControlPanel({
         <div className="space-y-2 pb-2 border-b border-border">
           <div className="text-base font-semibold">{modeLabels.header}</div>
           <p className="text-xs text-muted-foreground">{modeLabels.subtitle}</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <NotebookMode
+            params={params}
+            state={state}
+            contributions={operatorContributions}
+            signature={structuralSignature}
+          />
+          <Button
+            variant={showDualView ? "default" : "outline"}
+            size="sm"
+            onClick={() => onShowDualViewChange(!showDualView)}
+            data-testid="button-dual-view"
+          >
+            <Columns className="h-4 w-4 mr-2" />
+            Dual View
+          </Button>
         </div>
 
         <div className="space-y-2">
@@ -113,6 +178,8 @@ export function ControlPanel({
             </SelectContent>
           </Select>
         </div>
+
+        <PresetMenu onApply={onParamsChange} />
 
         <Card>
           <CardHeader className="pb-3">
@@ -150,20 +217,101 @@ export function ControlPanel({
               </Button>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm">Colormap</Label>
-              <Select value={colormap} onValueChange={(v) => onColormapChange(v as "inferno" | "viridis")}>
-                <SelectTrigger data-testid="select-colormap">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="inferno">Inferno</SelectItem>
-                  <SelectItem value="viridis">Viridis</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-sm">Colormap</Label>
+                <Select value={colormap} onValueChange={(v) => onColormapChange(v as "inferno" | "viridis")}>
+                  <SelectTrigger data-testid="select-colormap">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inferno">Inferno</SelectItem>
+                    <SelectItem value="viridis">Viridis</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm">Show Basins</Label>
+                <div className="flex items-center h-9">
+                  <Switch
+                    checked={showBasins}
+                    onCheckedChange={onShowBasinsChange}
+                    data-testid="switch-show-basins"
+                  />
+                </div>
+              </div>
             </div>
+
+            <ExportPanel
+              onExportPNG={onExportPNG}
+              onExportJSON={onExportJSON}
+              onExportGIF={onExportGIF}
+            />
           </CardContent>
         </Card>
+
+        <Collapsible open={timelineOpen} onOpenChange={setTimelineOpen}>
+          <Card>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="pb-3 cursor-pointer hover-elevate rounded-t-lg" data-testid="button-toggle-timeline">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">Timeline Playback</CardTitle>
+                  {timelineOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="pt-0">
+                <TemporalControls
+                  historyLength={historyLength}
+                  currentIndex={currentHistoryIndex}
+                  isPlaybackMode={isPlaybackMode}
+                  isRunning={state.isRunning}
+                  onStepBackward={onStepBackward}
+                  onStepForward={onStep}
+                  onSeek={onSeekFrame}
+                  onExitPlayback={onExitPlayback}
+                />
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+
+        <Collapsible open={analysisOpen} onOpenChange={setAnalysisOpen}>
+          <Card>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="pb-3 cursor-pointer hover-elevate rounded-t-lg" data-testid="button-toggle-analysis">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">Operator Analysis</CardTitle>
+                  {analysisOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="pt-0">
+                <OperatorSensitivity contributions={operatorContributions} modeLabels={modeLabels} />
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+
+        <Collapsible open={eventsOpen} onOpenChange={setEventsOpen}>
+          <Card>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="pb-3 cursor-pointer hover-elevate rounded-t-lg" data-testid="button-toggle-events">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">Event Log</CardTitle>
+                  {eventsOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="pt-0">
+                <EventLog events={events} onClear={onClearEvents} onExport={onExportEvents} />
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         <Collapsible open={coreOpen} onOpenChange={setCoreOpen}>
           <Card>
@@ -171,66 +319,17 @@ export function ControlPanel({
               <CardHeader className="pb-3 cursor-pointer hover-elevate rounded-t-lg" data-testid="button-toggle-core">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">Core Parameters</CardTitle>
-                  {coreOpen ? (
-                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  )}
+                  {coreOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                 </div>
               </CardHeader>
             </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent className="space-y-4 pt-0">
-                <ParameterSlider
-                  label="Timestep (dt)"
-                  value={params.dt}
-                  min={0.01}
-                  max={0.2}
-                  step={0.01}
-                  tooltip="Controls simulation speed and stability"
-                  onChange={(v) => onParamsChange({ dt: v })}
-                  testId="slider-timestep"
-                />
-                <ParameterSlider
-                  label={modeLabels.operators.curvature}
-                  value={params.curvatureGain}
-                  min={0.1}
-                  max={10}
-                  step={0.1}
-                  tooltip="Sensitivity to local curvature changes"
-                  onChange={(v) => onParamsChange({ curvatureGain: v })}
-                  testId="slider-curvature-gain"
-                />
-                <ParameterSlider
-                  label={modeLabels.operators.coupling}
-                  value={params.couplingWeight}
-                  min={0}
-                  max={1}
-                  step={0.05}
-                  tooltip="Balance between local and neighborhood values"
-                  onChange={(v) => onParamsChange({ couplingWeight: v })}
-                  testId="slider-coupling-weight"
-                />
-                <ParameterSlider
-                  label={modeLabels.operators.attractor}
-                  value={params.attractorStrength}
-                  min={0.1}
-                  max={10}
-                  step={0.1}
-                  tooltip="Intensity of basin formation"
-                  onChange={(v) => onParamsChange({ attractorStrength: v })}
-                  testId="slider-attractor-strength"
-                />
-                <ParameterSlider
-                  label="Redistribution"
-                  value={params.redistributionRate}
-                  min={0}
-                  max={1}
-                  step={0.05}
-                  tooltip="Global energy redistribution rate"
-                  onChange={(v) => onParamsChange({ redistributionRate: v })}
-                  testId="slider-redistribution"
-                />
+                <ParameterSlider label="Timestep (dt)" value={params.dt} min={0.01} max={0.2} step={0.01} tooltip="Controls simulation speed and stability" onChange={(v) => onParamsChange({ dt: v })} testId="slider-timestep" />
+                <ParameterSlider label={modeLabels.operators.curvature} value={params.curvatureGain} min={0.1} max={10} step={0.1} tooltip="Sensitivity to local curvature changes" onChange={(v) => onParamsChange({ curvatureGain: v })} testId="slider-curvature-gain" />
+                <ParameterSlider label={modeLabels.operators.coupling} value={params.couplingWeight} min={0} max={1} step={0.05} tooltip="Balance between local and neighborhood values" onChange={(v) => onParamsChange({ couplingWeight: v })} testId="slider-coupling-weight" />
+                <ParameterSlider label={modeLabels.operators.attractor} value={params.attractorStrength} min={0.1} max={10} step={0.1} tooltip="Intensity of basin formation" onChange={(v) => onParamsChange({ attractorStrength: v })} testId="slider-attractor-strength" />
+                <ParameterSlider label="Redistribution" value={params.redistributionRate} min={0} max={1} step={0.05} tooltip="Global energy redistribution rate" onChange={(v) => onParamsChange({ redistributionRate: v })} testId="slider-redistribution" />
               </CardContent>
             </CollapsibleContent>
           </Card>
@@ -242,66 +341,17 @@ export function ControlPanel({
               <CardHeader className="pb-3 cursor-pointer hover-elevate rounded-t-lg" data-testid="button-toggle-operators">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">Operator Weights</CardTitle>
-                  {operatorsOpen ? (
-                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  )}
+                  {operatorsOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                 </div>
               </CardHeader>
             </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent className="space-y-4 pt-0">
-                <ParameterSlider
-                  label={`${modeLabels.operators.curvature} Weight`}
-                  value={params.wK}
-                  min={0}
-                  max={5}
-                  step={0.1}
-                  tooltip="Weight of curvature operator"
-                  onChange={(v) => onParamsChange({ wK: v })}
-                  testId="slider-wk"
-                />
-                <ParameterSlider
-                  label={`${modeLabels.operators.tension} Weight`}
-                  value={params.wT}
-                  min={0}
-                  max={5}
-                  step={0.1}
-                  tooltip="Weight of gradient-tension operator"
-                  onChange={(v) => onParamsChange({ wT: v })}
-                  testId="slider-wt"
-                />
-                <ParameterSlider
-                  label={`${modeLabels.operators.coupling} Weight`}
-                  value={params.wC}
-                  min={0}
-                  max={5}
-                  step={0.1}
-                  tooltip="Weight of neighbor-coupling operator"
-                  onChange={(v) => onParamsChange({ wC: v })}
-                  testId="slider-wc"
-                />
-                <ParameterSlider
-                  label={`${modeLabels.operators.attractor} Weight`}
-                  value={params.wA}
-                  min={0}
-                  max={5}
-                  step={0.1}
-                  tooltip="Weight of attractor-formation operator"
-                  onChange={(v) => onParamsChange({ wA: v })}
-                  testId="slider-wa"
-                />
-                <ParameterSlider
-                  label="Redistribution (wR)"
-                  value={params.wR}
-                  min={0}
-                  max={5}
-                  step={0.1}
-                  tooltip="Weight of global redistribution operator"
-                  onChange={(v) => onParamsChange({ wR: v })}
-                  testId="slider-wr"
-                />
+                <ParameterSlider label={`${modeLabels.operators.curvature} Weight`} value={params.wK} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wK: v })} testId="slider-wk" />
+                <ParameterSlider label={`${modeLabels.operators.tension} Weight`} value={params.wT} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wT: v })} testId="slider-wt" />
+                <ParameterSlider label={`${modeLabels.operators.coupling} Weight`} value={params.wC} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wC: v })} testId="slider-wc" />
+                <ParameterSlider label={`${modeLabels.operators.attractor} Weight`} value={params.wA} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wA: v })} testId="slider-wa" />
+                <ParameterSlider label="Redistribution (wR)" value={params.wR} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wR: v })} testId="slider-wr" />
               </CardContent>
             </CollapsibleContent>
           </Card>
@@ -313,54 +363,25 @@ export function ControlPanel({
               <CardHeader className="pb-3 cursor-pointer hover-elevate rounded-t-lg" data-testid="button-toggle-advanced">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">Advanced Settings</CardTitle>
-                  {advancedOpen ? (
-                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  )}
+                  {advancedOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                 </div>
               </CardHeader>
             </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent className="space-y-4 pt-0">
-                <ParameterSlider
-                  label="Grid Size"
-                  value={params.gridSize}
-                  min={50}
-                  max={400}
-                  step={10}
-                  tooltip="Resolution of simulation grid (requires reset)"
-                  onChange={(v) => onParamsChange({ gridSize: v })}
-                  testId="slider-grid-size"
-                />
-                <ParameterSlider
-                  label="Coupling Radius"
-                  value={params.couplingRadius}
-                  min={0.5}
-                  max={5}
-                  step={0.25}
-                  tooltip="Radius for Gaussian blur in coupling operator"
-                  onChange={(v) => onParamsChange({ couplingRadius: v })}
-                  testId="slider-coupling-radius"
-                />
-                <div className="pt-2">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => onParamsChange(defaultParameters)}
-                    data-testid="button-reset-params"
-                  >
-                    Reset to Defaults
-                  </Button>
-                </div>
+                <ParameterSlider label="Grid Size" value={params.gridSize} min={50} max={400} step={10} tooltip="Resolution of simulation grid (requires reset)" onChange={(v) => onParamsChange({ gridSize: v })} testId="slider-grid-size" />
+                <ParameterSlider label="Coupling Radius" value={params.couplingRadius} min={0.5} max={5} step={0.25} tooltip="Radius for Gaussian blur in coupling operator" onChange={(v) => onParamsChange({ couplingRadius: v })} testId="slider-coupling-radius" />
+                <Button variant="secondary" size="sm" className="w-full" onClick={() => onParamsChange(defaultParameters)} data-testid="button-reset-params">
+                  Reset to Defaults
+                </Button>
               </CardContent>
             </CollapsibleContent>
           </Card>
         </Collapsible>
       </div>
 
-      <div className="border-t border-border p-4 bg-card/30">
+      <div className="border-t border-border p-4 bg-card/30 space-y-3">
+        <StructuralSignatureBar signature={structuralSignature} modeLabels={modeLabels} />
         <StatisticsPanel state={state} modeLabels={modeLabels} />
       </div>
     </div>

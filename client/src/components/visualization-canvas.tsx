@@ -1,9 +1,13 @@
-import { useRef, useEffect, useCallback } from "react";
-import type { FieldData } from "@shared/schema";
+import { useRef, useEffect, useCallback, useState } from "react";
+import type { FieldData, BasinMap, ProbeData } from "@shared/schema";
 
 interface VisualizationCanvasProps {
   field: FieldData | null;
   colormap?: "inferno" | "viridis";
+  basinMap?: BasinMap | null;
+  showBasins?: boolean;
+  onHover?: (x: number, y: number, screenX: number, screenY: number) => void;
+  onHoverEnd?: () => void;
 }
 
 const INFERNO_COLORS = [
@@ -30,6 +34,19 @@ const VIRIDIS_COLORS = [
   [253, 231, 37],
 ];
 
+const BASIN_COLORS = [
+  [255, 99, 132],
+  [54, 162, 235],
+  [255, 206, 86],
+  [75, 192, 192],
+  [153, 102, 255],
+  [255, 159, 64],
+  [199, 199, 199],
+  [83, 102, 255],
+  [255, 99, 255],
+  [99, 255, 132],
+];
+
 function interpolateColor(t: number, colormap: typeof INFERNO_COLORS): [number, number, number] {
   t = Math.max(0, Math.min(1, t));
   const idx = t * (colormap.length - 1);
@@ -50,7 +67,14 @@ function interpolateColor(t: number, colormap: typeof INFERNO_COLORS): [number, 
   ];
 }
 
-export function VisualizationCanvas({ field, colormap = "inferno" }: VisualizationCanvasProps) {
+export function VisualizationCanvas({ 
+  field, 
+  colormap = "inferno", 
+  basinMap,
+  showBasins = false,
+  onHover,
+  onHoverEnd,
+}: VisualizationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -78,7 +102,17 @@ export function VisualizationCanvas({ field, colormap = "inferno" }: Visualizati
     for (let i = 0; i < field.grid.length; i++) {
       const value = field.grid[i];
       const normalized = (value + 1) / 2;
-      const [r, g, b] = interpolateColor(normalized, colors);
+      let [r, g, b] = interpolateColor(normalized, colors);
+      
+      if (showBasins && basinMap && basinMap.labels[i] >= 0) {
+        const basinId = basinMap.labels[i];
+        const basinColor = BASIN_COLORS[basinId % BASIN_COLORS.length];
+        const alpha = 0.25;
+        r = Math.round(r * (1 - alpha) + basinColor[0] * alpha);
+        g = Math.round(g * (1 - alpha) + basinColor[1] * alpha);
+        b = Math.round(b * (1 - alpha) + basinColor[2] * alpha);
+      }
+      
       const pixelIdx = i * 4;
       data[pixelIdx] = r;
       data[pixelIdx + 1] = g;
@@ -87,7 +121,7 @@ export function VisualizationCanvas({ field, colormap = "inferno" }: Visualizati
     }
 
     ctx.putImageData(imageData, 0, 0);
-  }, [field, colormap]);
+  }, [field, colormap, basinMap, showBasins]);
 
   useEffect(() => {
     render();
@@ -98,6 +132,28 @@ export function VisualizationCanvas({ field, colormap = "inferno" }: Visualizati
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [render]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!field || !onHover) return;
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = field.width / rect.width;
+    const scaleY = field.height / rect.height;
+    
+    const x = Math.floor((e.clientX - rect.left) * scaleX);
+    const y = Math.floor((e.clientY - rect.top) * scaleY);
+    
+    if (x >= 0 && x < field.width && y >= 0 && y < field.height) {
+      onHover(x, y, e.clientX, e.clientY);
+    }
+  }, [field, onHover]);
+
+  const handleMouseLeave = useCallback(() => {
+    onHoverEnd?.();
+  }, [onHoverEnd]);
 
   return (
     <div 
@@ -110,6 +166,8 @@ export function VisualizationCanvas({ field, colormap = "inferno" }: Visualizati
           ref={canvasRef}
           className="rounded-md"
           style={{ imageRendering: "auto" }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
           data-testid="canvas-visualization"
         />
       ) : (
