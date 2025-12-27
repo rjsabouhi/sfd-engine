@@ -28,12 +28,23 @@ Added 12 research-grade features for comprehensive field analysis:
 11. **Notebook Mode** - Researcher view with equations, parameters, and regime analysis
 12. **Basin Map Integration** - Visual overlay showing basin boundaries
 
+### Centralized Language System
+Added a comprehensive LANGUAGE engine (`client/src/lib/language.ts`) for all UI text:
+- **Three Interpretation Modes**: Technical, Structural, Intuitive
+- **LANGUAGE.META**: Mode names and descriptions
+- **LANGUAGE.ONBOARDING**: All onboarding step text, button labels
+- **LANGUAGE.METRICS**: 6 metrics (FG, CC, TI, TE, RI, SR) with mode-specific descriptions
+- **LANGUAGE.REGIMES**: 8 system states with mode-aware explanations
+- **LANGUAGE.UI**: Common UI strings (Reset, Export, etc.)
+- Regime detection system analyzes basin count, variance, energy, and variance change
+
 ### Engine Enhancements
 - Ring buffer for temporal history (100 frames, ~36MB for 300x300 grid)
 - Operator contribution tracking per update step
 - Automatic event detection system
 - Derived field computation (curvature, tension, coupling, variance maps)
 - Probe data computation for field inspection
+- Variance change tracking for regime detection
 
 ## System Architecture
 
