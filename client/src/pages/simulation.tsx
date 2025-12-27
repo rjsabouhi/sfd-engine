@@ -109,12 +109,7 @@ export default function SimulationPage() {
         }
         
         if (showDualViewRef.current) {
-          const newDerivedField = engine.getCachedDerivedField(derivedTypeRef.current);
-          const currentCacheStep = engine.getLastDerivedFieldCacheStep();
-          if (currentCacheStep !== lastDerivedCacheStepRef.current) {
-            lastDerivedCacheStepRef.current = currentCacheStep;
-            setDerivedField(newDerivedField);
-          }
+          setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
         }
         
         if (frameCount % 5 === 0) {
