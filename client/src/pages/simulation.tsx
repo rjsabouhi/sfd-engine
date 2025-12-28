@@ -498,15 +498,7 @@ export default function SimulationPage() {
 
       <div className="flex flex-1 overflow-hidden">
         <main className="relative bg-gray-950 flex-1 flex flex-col">
-              <div className="flex items-center justify-center gap-3 py-2 px-4 text-xs text-gray-300 bg-gray-900/50 border-b border-gray-800">
-                <span className={`px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider ${
-                  fieldState === "calm" ? "bg-green-900/50 text-green-300" :
-                  fieldState === "unsettled" ? "bg-yellow-900/50 text-yellow-300" :
-                  fieldState === "reorganizing" ? "bg-orange-900/50 text-orange-300" :
-                  "bg-red-900/50 text-red-300"
-                }`} data-testid="badge-field-state">
-                  {getFieldStateLabel(interpretationMode, fieldState)}
-                </span>
+              <div className="flex items-center justify-center py-2 px-4 text-xs text-gray-300 bg-gray-900/50 border-b border-gray-800">
                 <span data-testid="text-status-line">{dynamicStatusLine}</span>
               </div>
               <div className="flex-1 relative">
