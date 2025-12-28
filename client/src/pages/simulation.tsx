@@ -505,8 +505,10 @@ export default function SimulationPage() {
 
       <div className="flex flex-1 overflow-hidden">
         <main className="relative bg-gray-950 flex-1 flex flex-col">
-          <div className="px-4 py-2 text-xs text-zinc-500">
-            This is the structural field. Run the simulation to observe how patterns emerge.
+          <div className="flex items-center justify-center py-3 border-b border-zinc-800/50">
+            <p className="text-sm text-zinc-400 tracking-wide">
+              This is the structural field. Run the simulation to observe how patterns emerge.
+            </p>
           </div>
           <div className="flex-1 relative">
               {showDualView ? (
