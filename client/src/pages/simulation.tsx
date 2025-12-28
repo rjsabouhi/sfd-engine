@@ -299,9 +299,6 @@ export default function SimulationPage() {
             handlePlay();
           }
           break;
-        case "KeyB":
-          setShowBasins((prev) => !prev);
-          break;
         case "KeyD":
           setShowDualView((prev) => !prev);
           break;

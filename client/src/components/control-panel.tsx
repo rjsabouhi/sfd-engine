@@ -2,12 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Info, Sliders, Activity, Settings2, BookOpen, Download } from "lucide-react";
+import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Info, Sliders, Activity, Settings2, BookOpen, Download, Columns2 } from "lucide-react";
 import type { SimulationParameters, SimulationState, OperatorContributions, StructuralSignature, StructuralEvent } from "@shared/schema";
 import { defaultParameters } from "@shared/schema";
 import { StatisticsPanel } from "./statistics-panel";
@@ -225,22 +224,50 @@ export function ControlPanel({
               </Button>
             </div>
 
-            <div className="border-t border-border/50 pt-3 grid grid-cols-2 gap-3">
-              <div className="flex flex-col items-center gap-1">
-                <Label className="text-xs">Colormap</Label>
-                <Switch
-                  checked={colormap === "viridis"}
-                  onCheckedChange={(checked) => onColormapChange(checked ? "viridis" : "inferno")}
-                  data-testid="switch-colormap"
-                />
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <Label className="text-xs">Dual View</Label>
-                <Switch
-                  checked={showDualView}
-                  onCheckedChange={onShowDualViewChange}
-                  data-testid="switch-dual-view"
-                />
+            <div className="border-t border-border/50 pt-3">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onColormapChange("inferno")}
+                  className={`
+                    relative flex-1 h-10 rounded-sm transition-all duration-150
+                    bg-gradient-to-br from-yellow-500 via-orange-500 to-red-600
+                    ${colormap === "inferno" 
+                      ? "ring-2 ring-white/80 shadow-[0_0_12px_2px_rgba(251,146,60,0.5)]" 
+                      : "opacity-50 hover:opacity-75"}
+                  `}
+                  data-testid="pad-colormap-inferno"
+                >
+                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-medium text-white/90 drop-shadow-sm">
+                    Inferno
+                  </span>
+                </button>
+                <button
+                  onClick={() => onColormapChange("viridis")}
+                  className={`
+                    relative flex-1 h-10 rounded-sm transition-all duration-150
+                    bg-gradient-to-br from-purple-600 via-teal-500 to-yellow-400
+                    ${colormap === "viridis" 
+                      ? "ring-2 ring-white/80 shadow-[0_0_12px_2px_rgba(45,212,191,0.5)]" 
+                      : "opacity-50 hover:opacity-75"}
+                  `}
+                  data-testid="pad-colormap-viridis"
+                >
+                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-medium text-white/90 drop-shadow-sm">
+                    Viridis
+                  </span>
+                </button>
+                <button
+                  onClick={() => onShowDualViewChange(!showDualView)}
+                  className={`
+                    relative h-10 w-10 rounded-sm transition-all duration-150
+                    ${showDualView 
+                      ? "bg-cyan-500 ring-2 ring-white/80 shadow-[0_0_12px_2px_rgba(6,182,212,0.5)]" 
+                      : "bg-zinc-700 opacity-60 hover:opacity-80"}
+                  `}
+                  data-testid="pad-dual-view"
+                >
+                  <Columns2 className={`h-4 w-4 mx-auto ${showDualView ? "text-white" : "text-zinc-400"}`} />
+                </button>
               </div>
             </div>
 
