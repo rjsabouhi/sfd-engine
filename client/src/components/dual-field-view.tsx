@@ -224,56 +224,25 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
   const size = Math.min(containerSize.width, containerSize.height);
 
   return (
-    <div 
-      ref={containerRef}
-      className="relative h-full bg-gray-950 flex items-center justify-center overflow-hidden"
-      onWheel={handleWheel}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
-      onDoubleClick={handleDoubleClick}
-      style={{ cursor: zoom > 1 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair' }}
-    >
-      {(derivedField || (derivedType === "basins" && basinMap)) ? (
-        <canvas
-          ref={canvasRef}
-          className="rounded-md"
-          style={{ 
-            imageRendering: zoom > 2 ? "pixelated" : "auto",
-            width: `${size || '100%'}px`,
-            height: `${size || '100%'}px`,
-            maxWidth: '100%',
-            maxHeight: '100%',
-            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-            transformOrigin: 'center center',
-          }}
-          data-testid="canvas-derived-field"
-        />
-      ) : (
-        <div className="text-muted-foreground text-sm">
-          {derivedType === "basins" ? "Computing basin map..." : "Computing derived field..."}
-        </div>
-      )}
-      
-      <div className="absolute top-2 left-2 right-2 z-10 space-y-1.5">
-        <div className="bg-black/70 backdrop-blur-sm rounded px-2 py-1.5">
-          <div className="text-xs font-medium text-white">Field Projections</div>
-          <div className="text-[10px] text-white/60">Alternate views of the same dynamics</div>
+    <div className="h-full flex flex-col bg-gray-950">
+      <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-zinc-800/50">
+        <div className="min-w-0">
+          <div className="text-xs font-medium text-zinc-300">Field Projections</div>
+          <div className="text-[10px] text-zinc-500 truncate">Alternate views of the same dynamics</div>
         </div>
         <Select value={derivedType} onValueChange={(v) => onTypeChange(v as OverlayType)}>
           <SelectTrigger 
-            className="h-7 text-xs bg-black/70 backdrop-blur-sm border-white/20 text-white"
+            className="h-7 w-32 text-xs bg-zinc-800 border-zinc-700 text-zinc-300"
             data-testid="select-overlay-type"
           >
-            <SelectValue placeholder="Select overlay" />
+            <SelectValue placeholder="Select view" />
           </SelectTrigger>
-          <SelectContent className="bg-gray-900/95 backdrop-blur-sm border-white/20">
+          <SelectContent className="bg-zinc-900 border-zinc-700">
             {OVERLAY_OPTIONS.map((option) => (
               <SelectItem 
                 key={option.value} 
                 value={option.value}
-                className="text-white focus:bg-white/20 focus:text-white"
+                className="text-zinc-300 focus:bg-zinc-800 focus:text-white text-xs"
                 data-testid={`select-overlay-${option.value}`}
               >
                 {option.label}
@@ -283,11 +252,43 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
         </Select>
       </div>
       
-      <div className="absolute bottom-2 left-0 right-0 text-center z-10">
-        <span className="text-xs text-white/70 bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded">
-          {currentLabel}
-          {zoom > 1 && ` | ${zoomPercent}%`}
-        </span>
+      <div 
+        ref={containerRef}
+        className="relative flex-1 flex items-center justify-center overflow-hidden"
+        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onDoubleClick={handleDoubleClick}
+        style={{ cursor: zoom > 1 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair' }}
+      >
+        {(derivedField || (derivedType === "basins" && basinMap)) ? (
+          <canvas
+            ref={canvasRef}
+            className="rounded-sm"
+            style={{ 
+              imageRendering: zoom > 2 ? "pixelated" : "auto",
+              width: `${size || '100%'}px`,
+              height: `${size || '100%'}px`,
+              maxWidth: '100%',
+              maxHeight: '100%',
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+              transformOrigin: 'center center',
+            }}
+            data-testid="canvas-derived-field"
+          />
+        ) : (
+          <div className="text-zinc-500 text-sm">
+            {derivedType === "basins" ? "Computing basin map..." : "Computing derived field..."}
+          </div>
+        )}
+        
+        {zoom > 1 && (
+          <div className="absolute bottom-2 right-2 text-[10px] text-zinc-500 bg-black/50 px-1.5 py-0.5 rounded">
+            {zoomPercent}%
+          </div>
+        )}
       </div>
     </div>
   );
