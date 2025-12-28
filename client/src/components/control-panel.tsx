@@ -209,9 +209,9 @@ export function ControlPanel({
                   className="relative h-10 w-10 rounded-sm transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                   style={{
                     backgroundColor: colormap === "viridis" ? "rgba(12, 74, 110, 0.6)" : "rgba(127, 29, 29, 0.4)",
-                    boxShadow: colormap === "viridis" 
-                      ? "0 0 8px 1px rgba(56, 189, 248, 0.25)" 
-                      : "0 0 8px 1px rgba(248, 113, 113, 0.2)"
+                    border: colormap === "viridis" 
+                      ? "1px solid rgba(125, 211, 252, 0.5)" 
+                      : "1px solid rgba(248, 113, 113, 0.4)"
                   }}
                   data-testid="pad-colormap-toggle"
                 >
@@ -222,7 +222,7 @@ export function ControlPanel({
                   className="relative h-10 w-10 rounded-sm transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                   style={{
                     backgroundColor: showDualView ? "rgba(168, 162, 158, 0.7)" : "rgba(39, 39, 42, 1)",
-                    boxShadow: showDualView ? "0 0 8px 1px rgba(214, 211, 209, 0.2)" : "none"
+                    border: showDualView ? "1px solid rgba(120, 113, 108, 0.6)" : "1px solid transparent"
                   }}
                   data-testid="pad-dual-view"
                 >
