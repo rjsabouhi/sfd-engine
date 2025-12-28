@@ -519,13 +519,13 @@ export default function SimulationPage() {
         <main className="relative bg-gray-950 flex-1 flex flex-col">
           <div className="flex-1 relative">
               {showDualView ? (
-                <div className="grid grid-cols-2 gap-px h-full bg-border">
-                  <div className="h-full flex flex-col bg-background">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-px h-full bg-border">
+                  <div className="h-full min-h-0 flex flex-col bg-background">
                     <div className="px-3 py-2 border-b border-border shrink-0">
                       <h4 className="text-xs font-medium">Structural Field</h4>
                       <p className="text-[10px] text-muted-foreground">Run the simulation to observe how patterns emerge</p>
                     </div>
-                    <div className="relative flex-1 flex items-center justify-center bg-gray-950">
+                    <div className="relative flex-1 min-h-0 flex items-center justify-center bg-gray-950">
                       <VisualizationCanvas 
                         field={field} 
                         colormap={colormap}
@@ -535,7 +535,7 @@ export default function SimulationPage() {
                       />
                     </div>
                   </div>
-                  <div className="h-full bg-background">
+                  <div className="h-full min-h-0 bg-background">
                     <DualFieldView
                       derivedField={derivedField}
                       basinMap={basinMap}

@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { DerivedField, BasinMap } from "@shared/schema";
 
 export type OverlayType = "curvature" | "tension" | "coupling" | "variance" | "basins" | "gradientFlow" | "criticality" | "hysteresis" | "constraintSkeleton" | "stabilityField" | "gradientFlowLines";
@@ -57,18 +58,18 @@ const BASIN_COLORS: [number, number, number][] = [
   [99, 102, 241],
 ];
 
-const OVERLAY_OPTIONS: { value: OverlayType; label: string }[] = [
-  { value: "curvature", label: "Curvature" },
-  { value: "tension", label: "Tension" },
-  { value: "coupling", label: "Coupling" },
-  { value: "variance", label: "Variance" },
-  { value: "basins", label: "Basins" },
-  { value: "gradientFlow", label: "Gradient Flow" },
-  { value: "criticality", label: "Criticality" },
-  { value: "hysteresis", label: "Memory" },
-  { value: "constraintSkeleton", label: "Constraint Skeleton" },
-  { value: "stabilityField", label: "Stability Field" },
-  { value: "gradientFlowLines", label: "Flow Lines" },
+const OVERLAY_OPTIONS: { value: OverlayType; label: string; tooltip: string }[] = [
+  { value: "curvature", label: "Curvature", tooltip: "Local bending intensity of field geometry" },
+  { value: "tension", label: "Tension", tooltip: "Field gradient magnitude / stored potential energy" },
+  { value: "coupling", label: "Coupling", tooltip: "Interaction strength between neighboring field cells" },
+  { value: "variance", label: "Variance", tooltip: "Local instability; degree of disorder" },
+  { value: "basins", label: "Basins", tooltip: "Attractor basin segmentation based on local minima" },
+  { value: "gradientFlow", label: "Gradient Flow", tooltip: "Directional gradient magnitude across the field" },
+  { value: "gradientFlowLines", label: "Flow Lines", tooltip: "Directional propagation paths through the field" },
+  { value: "criticality", label: "Criticality", tooltip: "Regions near phase transition thresholds" },
+  { value: "hysteresis", label: "Memory", tooltip: "Historical state influence on current dynamics" },
+  { value: "constraintSkeleton", label: "Constraint Skeleton", tooltip: "Structural boundaries constraining field evolution" },
+  { value: "stabilityField", label: "Stability Field", tooltip: "Local stability measure across the manifold" },
 ];
 
 export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChange }: DualFieldViewProps) {
@@ -223,30 +224,38 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
   const zoomPercent = Math.round(zoom * 100);
   const size = Math.min(containerSize.width, containerSize.height);
 
+  const currentOption = OVERLAY_OPTIONS.find(o => o.value === derivedType);
+
   return (
     <div className="h-full flex flex-col bg-background">
       <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border shrink-0">
         <div className="min-w-0">
-          <h4 className="text-xs font-medium">Field Projections</h4>
-          <p className="text-[10px] text-muted-foreground truncate">Alternate views of the same dynamics</p>
+          <h4 className="text-xs font-medium">Projection View</h4>
+          <p className="text-[10px] text-muted-foreground truncate">{currentOption?.tooltip || "Select a projection mode"}</p>
         </div>
         <Select value={derivedType} onValueChange={(v) => onTypeChange(v as OverlayType)}>
           <SelectTrigger 
-            className="h-7 w-28 text-xs focus:ring-0 focus:ring-offset-0"
+            className="h-7 w-32 text-xs focus:ring-0 focus:ring-offset-0"
             data-testid="select-overlay-type"
           >
             <SelectValue placeholder="Select view" />
           </SelectTrigger>
           <SelectContent>
             {OVERLAY_OPTIONS.map((option) => (
-              <SelectItem 
-                key={option.value} 
-                value={option.value}
-                className="text-xs"
-                data-testid={`select-overlay-${option.value}`}
-              >
-                {option.label}
-              </SelectItem>
+              <Tooltip key={option.value}>
+                <TooltipTrigger asChild>
+                  <SelectItem 
+                    value={option.value}
+                    className="text-xs"
+                    data-testid={`select-overlay-${option.value}`}
+                  >
+                    {option.label}
+                  </SelectItem>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="max-w-[200px] text-xs">
+                  {option.tooltip}
+                </TooltipContent>
+              </Tooltip>
             ))}
           </SelectContent>
         </Select>

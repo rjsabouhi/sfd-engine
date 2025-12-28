@@ -203,6 +203,10 @@ export function ControlPanel({
             </div>
 
             <div className="border-t border-border/50 pt-3">
+              <LegacyRegimeDisplay regime={currentRegime} mode={languageMode} compact />
+            </div>
+
+            <div className="border-t border-border/50 pt-3">
               <div className="flex gap-2">
                 <button
                   onClick={() => onColormapChange(colormap === "inferno" ? "viridis" : "inferno")}
@@ -251,6 +255,9 @@ export function ControlPanel({
           </TabsContent>
 
           <TabsContent value="params" className="m-0 p-3 space-y-4">
+            <p className="text-xs text-muted-foreground italic border-b border-border/50 pb-2">
+              Adjust the operator weights and simulation parameters.
+            </p>
             <Collapsible open={coreParamsOpen} onOpenChange={setCoreParamsOpen}>
               <CollapsibleTrigger asChild>
                 <button className="flex items-center justify-between w-full py-2 text-xs font-medium text-muted-foreground hover-elevate rounded px-2" data-testid="button-toggle-core-params">
@@ -306,7 +313,7 @@ export function ControlPanel({
           <TabsContent value="analysis" className="m-0 p-3 space-y-4">
             <LegacyRegimeDisplay regime={currentRegime} mode={languageMode} />
 
-            <div className="space-y-2 pt-2 border-t border-border">
+            <div className="space-y-2 border-t border-border pt-2">
               <div className="text-xs font-medium text-muted-foreground">Operator Contributions</div>
               <OperatorSensitivity contributions={operatorContributions} modeLabels={modeLabels} />
             </div>
@@ -318,6 +325,9 @@ export function ControlPanel({
           </TabsContent>
 
           <TabsContent value="notebook" className="m-0 p-3 space-y-4">
+            <p className="text-xs text-muted-foreground italic border-b border-border/50 pb-2">
+              These are the active equations and operator weights governing the field.
+            </p>
             <div className="space-y-3">
               <div className="text-xs font-medium text-muted-foreground">Current Parameters</div>
               <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-muted/30 p-2 rounded">

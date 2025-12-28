@@ -176,20 +176,35 @@ const legacyRegimeVariants: Record<LegacyRegimeKey, "default" | "secondary" | "d
   CYCLING: "outline",
 };
 
+const legacyRegimeDotColors: Record<LegacyRegimeKey, string> = {
+  STABLE: "bg-green-500",
+  DRIFTING: "bg-orange-400",
+  ACCUMULATING: "bg-yellow-400",
+  EDGE_OF_TRANSITION: "bg-red-500",
+  RECONFIGURING: "bg-purple-500",
+  DISPERSION: "bg-blue-400",
+  NEW_BASELINE: "bg-yellow-500",
+  CYCLING: "bg-cyan-400",
+};
+
 export function LegacyRegimeDisplay({ regime, mode, compact = false }: { regime: LegacyRegimeKey; mode: LegacyModeKey; compact?: boolean }) {
   const regimeData = legacyRegimeData[regime];
   const Icon = legacyRegimeIcons[regime];
   const variant = legacyRegimeVariants[regime];
+  const dotColor = legacyRegimeDotColors[regime];
   const description = regimeData[mode];
   
   if (compact) {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <Badge variant={variant} className="gap-1 cursor-help">
-            <Icon className="h-3 w-3" />
-            {regimeData.label}
-          </Badge>
+          <div className="flex items-center gap-2 cursor-help">
+            <span className={`h-2 w-2 rounded-full ${dotColor}`} />
+            <Badge variant={variant} className="gap-1">
+              <Icon className="h-3 w-3" />
+              {regimeData.label}
+            </Badge>
+          </div>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="max-w-[250px]">
           <p className="text-xs">{description}</p>
@@ -201,7 +216,7 @@ export function LegacyRegimeDisplay({ regime, mode, compact = false }: { regime:
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs text-muted-foreground">Current Regime</span>
+        <span className="text-xs text-muted-foreground">Dynamic Regime</span>
         <Tooltip>
           <TooltipTrigger asChild>
             <Info className="h-3 w-3 text-muted-foreground cursor-help" />
@@ -211,7 +226,8 @@ export function LegacyRegimeDisplay({ regime, mode, compact = false }: { regime:
           </TooltipContent>
         </Tooltip>
       </div>
-      <div className="flex items-start gap-2">
+      <div className="flex items-center gap-2">
+        <span className={`h-2.5 w-2.5 rounded-full ${dotColor} shrink-0`} />
         <Badge variant={variant} className="gap-1.5 shrink-0">
           <Icon className="h-3.5 w-3.5" />
           {regimeData.label}
