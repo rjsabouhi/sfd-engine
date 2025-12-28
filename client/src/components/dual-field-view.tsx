@@ -256,7 +256,11 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
         </div>
       )}
       
-      <div className="absolute top-2 left-2 right-2 z-10">
+      <div className="absolute top-2 left-2 right-2 z-10 space-y-1.5">
+        <div className="bg-black/70 backdrop-blur-sm rounded px-2 py-1.5">
+          <div className="text-xs font-medium text-white">Field Projections</div>
+          <div className="text-[10px] text-white/60">Alternate views of the same dynamics</div>
+        </div>
         <Select value={derivedType} onValueChange={(v) => onTypeChange(v as OverlayType)}>
           <SelectTrigger 
             className="h-7 text-xs bg-black/70 backdrop-blur-sm border-white/20 text-white"
