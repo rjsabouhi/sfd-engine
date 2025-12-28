@@ -520,13 +520,13 @@ export default function SimulationPage() {
               {showDualView ? (
                 <div className="grid grid-cols-2 gap-px h-full bg-border">
                   <div className="h-full flex flex-col bg-gray-950">
-                    <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-zinc-800/50">
+                    <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-zinc-800/50 shrink-0">
                       <div className="min-w-0">
                         <div className="text-xs font-medium text-zinc-300">Structural Field</div>
                         <div className="text-[10px] text-zinc-500 truncate">Run the simulation to observe how patterns emerge</div>
                       </div>
                     </div>
-                    <div className="relative flex-1 flex items-center justify-center">
+                    <div className="relative flex-1 flex items-center justify-center p-2">
                       <VisualizationCanvas 
                         field={field} 
                         colormap={colormap}
@@ -536,7 +536,7 @@ export default function SimulationPage() {
                       />
                     </div>
                   </div>
-                  <div className="bg-gray-950">
+                  <div className="h-full bg-gray-950">
                     <DualFieldView
                       derivedField={derivedField}
                       basinMap={basinMap}
@@ -547,13 +547,13 @@ export default function SimulationPage() {
                 </div>
               ) : (
                 <div className="h-full flex flex-col">
-                  <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-zinc-800/50">
+                  <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-zinc-800/50 shrink-0">
                     <div className="min-w-0">
                       <div className="text-xs font-medium text-zinc-300">Structural Field</div>
                       <div className="text-[10px] text-zinc-500 truncate">Run the simulation to observe how patterns emerge</div>
                     </div>
                   </div>
-                  <div className="relative flex-1 flex items-center justify-center">
+                  <div className="relative flex-1 flex items-center justify-center p-4">
                     <VisualizationCanvas 
                       field={field} 
                       colormap={colormap}
