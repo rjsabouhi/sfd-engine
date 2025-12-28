@@ -232,7 +232,7 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
         </div>
         <Select value={derivedType} onValueChange={(v) => onTypeChange(v as OverlayType)}>
           <SelectTrigger 
-            className="h-7 w-28 text-xs"
+            className="h-7 w-28 text-xs focus:ring-0 focus:ring-offset-0"
             data-testid="select-overlay-type"
           >
             <SelectValue placeholder="Select view" />
