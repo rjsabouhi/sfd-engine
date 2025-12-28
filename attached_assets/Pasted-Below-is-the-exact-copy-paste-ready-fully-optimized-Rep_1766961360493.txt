@@ -1,0 +1,111 @@
+Below is the exact, copy-paste-ready, fully optimized Replit Agent prompt that will implement all six landing-page improvements without altering any core logic, visual identity, or math of the SFD Engine.
+
+This is written in the tone and structure Replit’s Agent follows best:
+	•	declarative specification
+	•	explicit UI adjustments
+	•	clear instructions on what to modify and what not to modify
+	•	step-by-step expectations
+	•	final validation criteria
+
+⸻
+
+✅ FULL REPLIT PROMPT — COPY & PASTE
+
+Task:
+Refine the SFD Engine landing UI to optimize first-use clarity, scientific credibility, and user flow. Do not change the underlying simulation logic, rendering pipeline, physics, or visual identity. Only modify front-end layout, initialization, text, grouping, and control visibility according to the specifications below.
+
+⸻
+
+1. Improve Initial Field Initialization
+
+Replace the noise-heavy default initial frame with a structured-yet-neutral seed state that shows faint emergent organization. Requirements:
+	•	A subtle gradient or radial perturbation
+	•	Low contrast
+	•	No strong attractors
+	•	Must hint that structure is latent
+	•	Should feel intentional, not random
+
+Do not add computation overhead. Simple seeded initialization is enough.
+
+⸻
+
+2. Add One-Line Explanatory Text Under “Structural Field”
+
+Under the header “Structural Field”, add this exact line:
+
+Primary field representation showing local state values. Patterns emerge as constraints interact over time.
+
+Match existing typography and spacing.
+
+⸻
+
+3. Visually Emphasize the “Run” Button
+
+Improve discoverability and call-to-action clarity. Requirements:
+	•	Keep the same color theme
+	•	Add a subtle highlight or glow
+	•	Slightly increase button weight or outline
+	•	Do NOT make it garish or off-brand
+	•	Add this small caption under the Run button:
+
+Run the simulation to reveal dynamic structure.
+
+⸻
+
+4. Regroup “Interpretation Mode” + “Dynamic Regimes”
+
+These should be visually and conceptually grouped. Implement the following changes:
+	•	Move “Dynamic Regimes” so it appears directly below “Interpretation Mode” inside the same panel card.
+	•	Add 8–12px vertical spacing to separate them as two conceptual subsections of the same block.
+	•	Add a small label above the dropdown:
+
+System Behavior Presets
+
+No functionality changes.
+
+⸻
+
+5. Update Timeline Placeholder Text
+
+Replace the current “No history available yet” with:
+
+Run a simulation to start the timeline.
+
+No stylistic or positional changes needed.
+
+⸻
+
+6. Move Simulation Metrics Higher
+
+Move the Simulation Metrics summary block upward so that:
+	•	It sits directly under the timeline
+	•	It is visible without scrolling
+	•	It is part of the main workflow panel
+
+Do not visually enlarge it—just reposition.
+
+⸻
+
+Validation Criteria (Important)
+
+Before marking the task complete, ensure all of the following are true:
+	•	The landing page shows a structured subtle seed instead of pure noise.
+	•	The Structural Field header includes the one-line explanation.
+	•	The Run button visually stands out and includes the caption text.
+	•	Interpretation Mode and Dynamic Regimes appear grouped.
+	•	Timeline placeholder text only references running the simulation.
+	•	Simulation Metrics are visible on initial load without scrolling.
+	•	No core simulation code, physics, rendering, or SFD logic was modified.
+
+⸻
+
+Do Not Modify
+	•	Simulation algorithms
+	•	Rendering functions
+	•	Basin extraction logic
+	•	Any mathematical modules
+	•	Color palettes
+	•	Diagnostic suite
+	•	Dynamic Regime definitions
+	•	Keyboard shortcuts
+	•	Export functionality

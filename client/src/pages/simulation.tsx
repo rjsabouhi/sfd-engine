@@ -523,7 +523,7 @@ export default function SimulationPage() {
                   <div className="h-full min-h-0 flex flex-col bg-background">
                     <div className="px-3 py-2 border-b border-border shrink-0">
                       <h4 className="text-xs font-medium">Structural Field</h4>
-                      <p className="text-[10px] text-muted-foreground">Run the simulation to observe how patterns emerge</p>
+                      <p className="text-[10px] text-muted-foreground">Primary field representation showing local state values. Patterns emerge as constraints interact over time.</p>
                     </div>
                     <div className="relative flex-1 min-h-0 flex items-center justify-center bg-gray-950">
                       <VisualizationCanvas 
@@ -548,7 +548,7 @@ export default function SimulationPage() {
                 <div className="h-full flex flex-col bg-background">
                   <div className="px-3 py-2 border-b border-border shrink-0">
                     <h4 className="text-xs font-medium">Structural Field</h4>
-                    <p className="text-[10px] text-muted-foreground">Run the simulation to observe how patterns emerge</p>
+                    <p className="text-[10px] text-muted-foreground">Primary field representation showing local state values. Patterns emerge as constraints interact over time.</p>
                   </div>
                   <div className="relative flex-1 flex items-center justify-center bg-gray-950">
                     <VisualizationCanvas 

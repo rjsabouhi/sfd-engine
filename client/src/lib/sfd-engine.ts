@@ -172,17 +172,31 @@ export class SFDEngine {
     this.currentSeed = seed ?? Date.now();
     this.rng = mulberry32(this.currentSeed);
     
-    for (let i = 0; i < this.grid.length; i++) {
-      this.grid[i] = (this.rng() - 0.5) * 0.1;
-    }
     const cx = this.width / 2;
     const cy = this.height / 2;
+    const maxDist = Math.sqrt(cx * cx + cy * cy);
+    
+    // Create structured subtle seed: radial gradient with gentle perturbations
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
-        const dx = (x - cx) / this.width;
-        const dy = (y - cy) / this.height;
+        const idx = y * this.width + x;
+        const dx = x - cx;
+        const dy = y - cy;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        this.grid[y * this.width + x] += 0.02 * Math.cos(dist * Math.PI * 2);
+        const normalizedDist = dist / maxDist;
+        
+        // Base: subtle radial gradient (center slightly elevated)
+        const radialBase = 0.03 * (1 - normalizedDist * 0.8);
+        
+        // Add gentle angular modulation for latent structure
+        const angle = Math.atan2(dy, dx);
+        const angularMod = 0.008 * Math.sin(angle * 3 + normalizedDist * 4);
+        
+        // Very subtle noise for organic feel (low amplitude)
+        const noise = (this.rng() - 0.5) * 0.015;
+        
+        // Combine: structured yet neutral
+        this.grid[idx] = radialBase + angularMod + noise;
       }
     }
     this.step = 0;

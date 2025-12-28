@@ -26,7 +26,7 @@ export function TemporalControls({
   if (historyLength === 0) {
     return (
       <div className="text-xs text-muted-foreground text-center py-2">
-        No history available yet
+        Run a simulation to start the timeline.
       </div>
     );
   }

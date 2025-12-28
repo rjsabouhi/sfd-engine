@@ -128,21 +128,28 @@ export function ControlPanel({
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="px-3 py-3 border-b border-border shrink-0 space-y-2">
-        <h3 className="text-sm font-semibold">Interpretation Mode</h3>
-        <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
-          <SelectTrigger className="h-8" data-testid="select-interpretation-mode">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {modeOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
+      <div className="px-3 py-3 border-b border-border shrink-0 space-y-3">
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold">Interpretation Mode</h3>
+          <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
+            <SelectTrigger className="h-8" data-testid="select-interpretation-mode">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {modeOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
+        </div>
+        
+        <div className="space-y-2 pt-2 border-t border-border/50">
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Behavior Presets</span>
+          <PresetMenu onApply={onParamsChange} />
+        </div>
       </div>
 
       <Tabs defaultValue="controls" className="flex-1 flex flex-col overflow-hidden">
@@ -171,39 +178,46 @@ export function ControlPanel({
 
         <div className="flex-1 overflow-y-auto">
           <TabsContent value="controls" className="m-0 p-3 space-y-4">
-            <div className="flex items-center gap-2">
-              {state.isRunning ? (
-                <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="button-pause">
-                  <Pause className="h-3.5 w-3.5 mr-1.5" />
-                  Pause
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                {state.isRunning ? (
+                  <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="button-pause">
+                    <Pause className="h-3.5 w-3.5 mr-1.5" />
+                    Pause
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={onPlay} 
+                    variant="default" 
+                    className="flex-1 shadow-[0_0_12px_rgba(59,130,246,0.3)] border border-primary/30" 
+                    size="sm" 
+                    data-testid="button-play"
+                  >
+                    <Play className="h-3.5 w-3.5 mr-1.5" />
+                    Run
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={onStep}
+                  disabled={state.isRunning}
+                  data-testid="button-step"
+                >
+                  <StepForward className="h-3.5 w-3.5" />
                 </Button>
-              ) : (
-                <Button onClick={onPlay} variant="secondary" className="flex-1" size="sm" data-testid="button-play">
-                  <Play className="h-3.5 w-3.5 mr-1.5" />
-                  Run
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={onReset}
+                  data-testid="button-reset"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
                 </Button>
+              </div>
+              {!state.isRunning && (
+                <p className="text-[10px] text-muted-foreground text-center">Run the simulation to reveal dynamic structure.</p>
               )}
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={onStep}
-                disabled={state.isRunning}
-                data-testid="button-step"
-              >
-                <StepForward className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={onReset}
-                data-testid="button-reset"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-
-            <div className="border-t border-border/50 pt-3">
-              <PresetMenu onApply={onParamsChange} />
             </div>
 
             <div className="border-t border-border/50 pt-3">
@@ -248,6 +262,22 @@ export function ControlPanel({
                 onExitPlayback={onExitPlayback}
               />
             </div>
+
+            <Collapsible open={metricsOpen} onOpenChange={setMetricsOpen} className="border-t border-border pt-3">
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-metrics-inline">
+                  <h4 className="text-xs font-medium flex items-center gap-1.5">
+                    <Activity className="h-3 w-3" />
+                    Simulation Metrics
+                  </h4>
+                  {metricsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2 space-y-2">
+                <StructuralSignatureBar signature={structuralSignature} modeLabels={modeLabels} />
+                <StatisticsPanel state={state} modeLabels={modeLabels} />
+              </CollapsibleContent>
+            </Collapsible>
           </TabsContent>
 
           <TabsContent value="params" className="m-0 p-3 space-y-4">
@@ -374,22 +404,6 @@ export function ControlPanel({
           </TabsContent>
         </div>
       </Tabs>
-
-      <Collapsible open={metricsOpen} onOpenChange={setMetricsOpen} className="border-t border-border shrink-0">
-        <CollapsibleTrigger asChild>
-          <button className="flex items-center justify-between w-full px-3 py-2 hover-elevate" data-testid="button-toggle-metrics">
-            <h4 className="text-xs font-medium flex items-center gap-1.5">
-              <Activity className="h-3 w-3" />
-              Simulation Metrics
-            </h4>
-            {metricsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-          </button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="px-3 pb-3 space-y-2 bg-card/30">
-          <StructuralSignatureBar signature={structuralSignature} modeLabels={modeLabels} />
-          <StatisticsPanel state={state} modeLabels={modeLabels} />
-        </CollapsibleContent>
-      </Collapsible>
     </div>
   );
 }
