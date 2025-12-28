@@ -203,7 +203,7 @@ export function ControlPanel({
             </div>
 
             <div className="border-t border-border/50 pt-3">
-              <LegacyRegimeDisplay regime={currentRegime} mode={languageMode} compact />
+              <PresetMenu onApply={onParamsChange} />
             </div>
 
             <div className="border-t border-border/50 pt-3">
@@ -233,10 +233,6 @@ export function ControlPanel({
                   <Columns2 className={`h-4 w-4 mx-auto ${showDualView ? "text-purple-200" : "text-zinc-500"}`} />
                 </button>
               </div>
-            </div>
-
-            <div className="border-t border-border/50 pt-3">
-              <PresetMenu onApply={onParamsChange} />
             </div>
 
             <div className="pt-3 border-t border-border space-y-2">
