@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Info, Sliders, Activity, Settings2, BookOpen, Download, Columns2 } from "lucide-react";
+import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Info, Sliders, Activity, Settings2, BookOpen, Download, Columns2, Flame, Leaf } from "lucide-react";
 import type { SimulationParameters, SimulationState, OperatorContributions, StructuralSignature, StructuralEvent } from "@shared/schema";
 import { defaultParameters } from "@shared/schema";
 import { StatisticsPanel } from "./statistics-panel";
@@ -229,30 +229,26 @@ export function ControlPanel({
                 <button
                   onClick={() => onColormapChange("inferno")}
                   className={`
-                    relative flex-1 h-10 rounded-sm transition-all duration-150
+                    relative h-10 w-10 rounded-sm transition-all duration-150
                     ${colormap === "inferno" 
                       ? "bg-orange-500 ring-2 ring-white/80 shadow-[0_0_12px_2px_rgba(251,146,60,0.5)]" 
                       : "bg-zinc-700 opacity-60 hover:opacity-80"}
                   `}
                   data-testid="pad-colormap-inferno"
                 >
-                  <span className={`absolute inset-0 flex items-center justify-center text-[10px] font-medium drop-shadow-sm ${colormap === "inferno" ? "text-white" : "text-zinc-400"}`}>
-                    Inferno
-                  </span>
+                  <Flame className={`h-4 w-4 mx-auto ${colormap === "inferno" ? "text-white" : "text-zinc-400"}`} />
                 </button>
                 <button
                   onClick={() => onColormapChange("viridis")}
                   className={`
-                    relative flex-1 h-10 rounded-sm transition-all duration-150
+                    relative h-10 w-10 rounded-sm transition-all duration-150
                     ${colormap === "viridis" 
                       ? "bg-teal-500 ring-2 ring-white/80 shadow-[0_0_12px_2px_rgba(45,212,191,0.5)]" 
                       : "bg-zinc-700 opacity-60 hover:opacity-80"}
                   `}
                   data-testid="pad-colormap-viridis"
                 >
-                  <span className={`absolute inset-0 flex items-center justify-center text-[10px] font-medium drop-shadow-sm ${colormap === "viridis" ? "text-white" : "text-zinc-400"}`}>
-                    Viridis
-                  </span>
+                  <Leaf className={`h-4 w-4 mx-auto ${colormap === "viridis" ? "text-white" : "text-zinc-400"}`} />
                 </button>
                 <button
                   onClick={() => onShowDualViewChange(!showDualView)}
