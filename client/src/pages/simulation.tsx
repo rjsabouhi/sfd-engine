@@ -311,7 +311,9 @@ export default function SimulationPage() {
           }
           break;
         case "KeyD":
-          setShowDualView((prev) => !prev);
+          if (!e.ctrlKey && !e.shiftKey && !e.metaKey) {
+            setShowDualView((prev) => !prev);
+          }
           break;
         case "KeyR":
           handleReset();
