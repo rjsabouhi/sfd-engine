@@ -5,7 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Sliders, Activity, Settings2, BookOpen, Download, Columns2, Flame, Leaf } from "lucide-react";
+import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Sliders, Activity, Settings2, BookOpen, Download, Columns2, Palette } from "lucide-react";
 import type { SimulationParameters, SimulationState, OperatorContributions, StructuralSignature, StructuralEvent } from "@shared/schema";
 import { defaultParameters } from "@shared/schema";
 import { StatisticsPanel } from "./statistics-panel";
@@ -23,7 +23,7 @@ import type { RegimeKey } from "@/lib/language";
 interface ControlPanelProps {
   params: SimulationParameters;
   state: SimulationState;
-  colormap: "inferno" | "viridis";
+  colormap: "inferno" | "viridis" | "grayscale";
   interpretationMode: InterpretationMode;
   operatorContributions: OperatorContributions;
   structuralSignature: StructuralSignature;
@@ -42,7 +42,7 @@ interface ControlPanelProps {
   onStepForward: () => void;
   onSeekFrame: (index: number) => void;
   onExitPlayback: () => void;
-  onColormapChange: (colormap: "inferno" | "viridis") => void;
+  onColormapChange: (colormap: "inferno" | "viridis" | "grayscale") => void;
   onInterpretationModeChange: (mode: InterpretationMode) => void;
   onClearEvents: () => void;
   onExportEvents: () => void;
@@ -205,28 +205,16 @@ export function ControlPanel({
             <div className="border-t border-border/50 pt-3">
               <div className="flex gap-2">
                 <button
-                  onClick={() => onColormapChange("inferno")}
+                  onClick={() => onColormapChange(colormap === "grayscale" ? "inferno" : "grayscale")}
                   className={`
                     relative h-10 w-10 rounded-sm transition-all duration-150
-                    ${colormap === "inferno" 
+                    ${colormap !== "grayscale" 
                       ? "bg-zinc-300 ring-1 ring-zinc-200/50" 
                       : "bg-zinc-800 hover:bg-zinc-700"}
                   `}
-                  data-testid="pad-colormap-inferno"
+                  data-testid="pad-colormap-toggle"
                 >
-                  <Flame className={`h-4 w-4 mx-auto ${colormap === "inferno" ? "text-zinc-900" : "text-zinc-500"}`} />
-                </button>
-                <button
-                  onClick={() => onColormapChange("viridis")}
-                  className={`
-                    relative h-10 w-10 rounded-sm transition-all duration-150
-                    ${colormap === "viridis" 
-                      ? "bg-zinc-300 ring-1 ring-zinc-200/50" 
-                      : "bg-zinc-800 hover:bg-zinc-700"}
-                  `}
-                  data-testid="pad-colormap-viridis"
-                >
-                  <Leaf className={`h-4 w-4 mx-auto ${colormap === "viridis" ? "text-zinc-900" : "text-zinc-500"}`} />
+                  <Palette className={`h-4 w-4 mx-auto ${colormap !== "grayscale" ? "text-zinc-900" : "text-zinc-500"}`} />
                 </button>
                 <button
                   onClick={() => onShowDualViewChange(!showDualView)}

@@ -3,7 +3,7 @@ import type { FieldData, BasinMap } from "@shared/schema";
 
 interface VisualizationCanvasProps {
   field: FieldData | null;
-  colormap?: "inferno" | "viridis";
+  colormap?: "inferno" | "viridis" | "grayscale";
   basinMap?: BasinMap | null;
   showBasins?: boolean;
   onHover?: (x: number, y: number, screenX: number, screenY: number) => void;
@@ -32,6 +32,18 @@ const VIRIDIS_COLORS = [
   [109, 205, 89],
   [180, 222, 44],
   [253, 231, 37],
+];
+
+const GRAYSCALE_COLORS = [
+  [0, 0, 0],
+  [32, 32, 32],
+  [64, 64, 64],
+  [96, 96, 96],
+  [128, 128, 128],
+  [160, 160, 160],
+  [192, 192, 192],
+  [224, 224, 224],
+  [255, 255, 255],
 ];
 
 const BASIN_COLORS = [
@@ -105,7 +117,7 @@ export function VisualizationCanvas({
 
     const imageData = ctx.createImageData(field.width, field.height);
     const data = imageData.data;
-    const colors = colormap === "inferno" ? INFERNO_COLORS : VIRIDIS_COLORS;
+    const colors = colormap === "grayscale" ? GRAYSCALE_COLORS : colormap === "inferno" ? INFERNO_COLORS : VIRIDIS_COLORS;
 
     let minVal = Infinity, maxVal = -Infinity;
     for (let i = 0; i < field.grid.length; i++) {
