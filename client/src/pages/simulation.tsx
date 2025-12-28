@@ -43,7 +43,7 @@ export default function SimulationPage() {
     fps: 0,
   });
   const [field, setField] = useState<FieldData | null>(null);
-  const [colormap, setColormap] = useState<"inferno" | "viridis" | "grayscale">("inferno");
+  const [colormap, setColormap] = useState<"inferno" | "viridis" | "grayscale">("viridis");
   const [controlsOpen, setControlsOpen] = useState(false);
   const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("intuitive");
     
