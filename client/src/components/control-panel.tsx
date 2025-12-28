@@ -231,36 +231,36 @@ export function ControlPanel({
                   className={`
                     relative h-10 w-10 rounded-sm transition-all duration-150
                     ${colormap === "inferno" 
-                      ? "bg-orange-500 ring-2 ring-white/80 shadow-[0_0_12px_2px_rgba(251,146,60,0.5)]" 
-                      : "bg-zinc-700 opacity-60 hover:opacity-80"}
+                      ? "bg-amber-400 ring-1 ring-amber-300/50 shadow-[0_0_8px_1px_rgba(251,191,36,0.4)]" 
+                      : "bg-zinc-800 hover:bg-zinc-700"}
                   `}
                   data-testid="pad-colormap-inferno"
                 >
-                  <Flame className={`h-4 w-4 mx-auto ${colormap === "inferno" ? "text-white" : "text-zinc-400"}`} />
+                  <Flame className={`h-4 w-4 mx-auto ${colormap === "inferno" ? "text-zinc-900" : "text-zinc-500"}`} />
                 </button>
                 <button
                   onClick={() => onColormapChange("viridis")}
                   className={`
                     relative h-10 w-10 rounded-sm transition-all duration-150
                     ${colormap === "viridis" 
-                      ? "bg-teal-500 ring-2 ring-white/80 shadow-[0_0_12px_2px_rgba(45,212,191,0.5)]" 
-                      : "bg-zinc-700 opacity-60 hover:opacity-80"}
+                      ? "bg-amber-400 ring-1 ring-amber-300/50 shadow-[0_0_8px_1px_rgba(251,191,36,0.4)]" 
+                      : "bg-zinc-800 hover:bg-zinc-700"}
                   `}
                   data-testid="pad-colormap-viridis"
                 >
-                  <Leaf className={`h-4 w-4 mx-auto ${colormap === "viridis" ? "text-white" : "text-zinc-400"}`} />
+                  <Leaf className={`h-4 w-4 mx-auto ${colormap === "viridis" ? "text-zinc-900" : "text-zinc-500"}`} />
                 </button>
                 <button
                   onClick={() => onShowDualViewChange(!showDualView)}
                   className={`
                     relative h-10 w-10 rounded-sm transition-all duration-150
                     ${showDualView 
-                      ? "bg-cyan-500 ring-2 ring-white/80 shadow-[0_0_12px_2px_rgba(6,182,212,0.5)]" 
-                      : "bg-zinc-700 opacity-60 hover:opacity-80"}
+                      ? "bg-amber-400 ring-1 ring-amber-300/50 shadow-[0_0_8px_1px_rgba(251,191,36,0.4)]" 
+                      : "bg-zinc-800 hover:bg-zinc-700"}
                   `}
                   data-testid="pad-dual-view"
                 >
-                  <Columns2 className={`h-4 w-4 mx-auto ${showDualView ? "text-white" : "text-zinc-400"}`} />
+                  <Columns2 className={`h-4 w-4 mx-auto ${showDualView ? "text-zinc-900" : "text-zinc-500"}`} />
                 </button>
               </div>
             </div>
