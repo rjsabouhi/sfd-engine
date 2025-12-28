@@ -45,7 +45,7 @@ export default function SimulationPage() {
   const [field, setField] = useState<FieldData | null>(null);
   const [colormap, setColormap] = useState<"inferno" | "viridis" | "grayscale">("viridis");
   const [controlsOpen, setControlsOpen] = useState(false);
-  const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("intuitive");
+  const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("structural");
     
   const [operatorContributions, setOperatorContributions] = useState<OperatorContributions>({
     curvature: 0.2, tension: 0.2, coupling: 0.2, attractor: 0.2, redistribution: 0.2,
