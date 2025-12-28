@@ -516,22 +516,25 @@ export default function SimulationPage() {
 
       <div className="flex flex-1 overflow-hidden">
         <main className="relative bg-gray-950 flex-1 flex flex-col">
-          <div className="flex items-center justify-center py-3 border-b border-zinc-800/50">
-            <p className="text-sm text-zinc-400 tracking-wide">
-              This is the structural field. Run the simulation to observe how patterns emerge.
-            </p>
-          </div>
           <div className="flex-1 relative">
               {showDualView ? (
                 <div className="grid grid-cols-2 gap-px h-full bg-border">
-                  <div className="relative bg-gray-950 flex items-center justify-center">
-                    <VisualizationCanvas 
-                      field={field} 
-                      colormap={colormap}
-                      basinMap={basinMap}
-                      onHover={handleHover}
-                      onHoverEnd={handleHoverEnd}
-                    />
+                  <div className="h-full flex flex-col bg-gray-950">
+                    <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-zinc-800/50">
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium text-zinc-300">Structural Field</div>
+                        <div className="text-[10px] text-zinc-500 truncate">Run the simulation to observe how patterns emerge</div>
+                      </div>
+                    </div>
+                    <div className="relative flex-1 flex items-center justify-center">
+                      <VisualizationCanvas 
+                        field={field} 
+                        colormap={colormap}
+                        basinMap={basinMap}
+                        onHover={handleHover}
+                        onHoverEnd={handleHoverEnd}
+                      />
+                    </div>
                   </div>
                   <div className="bg-gray-950">
                     <DualFieldView
@@ -543,13 +546,23 @@ export default function SimulationPage() {
                   </div>
                 </div>
               ) : (
-                <VisualizationCanvas 
-                  field={field} 
-                  colormap={colormap}
-                  basinMap={basinMap}
-                  onHover={handleHover}
-                  onHoverEnd={handleHoverEnd}
-                />
+                <div className="h-full flex flex-col">
+                  <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-zinc-800/50">
+                    <div className="min-w-0">
+                      <div className="text-xs font-medium text-zinc-300">Structural Field</div>
+                      <div className="text-[10px] text-zinc-500 truncate">Run the simulation to observe how patterns emerge</div>
+                    </div>
+                  </div>
+                  <div className="relative flex-1 flex items-center justify-center">
+                    <VisualizationCanvas 
+                      field={field} 
+                      colormap={colormap}
+                      basinMap={basinMap}
+                      onHover={handleHover}
+                      onHoverEnd={handleHoverEnd}
+                    />
+                  </div>
+                </div>
               )}
               
               <HoverProbe
