@@ -206,24 +206,24 @@ export function ControlPanel({
               <div className="flex gap-2">
                 <button
                   onClick={() => onColormapChange(colormap === "inferno" ? "viridis" : "inferno")}
-                  className={`
-                    relative h-10 w-10 rounded-sm transition-all duration-150
-                    ${colormap === "viridis" 
-                      ? "bg-sky-900/60 hover:bg-sky-900/70" 
-                      : "bg-red-900/40 hover:bg-red-900/50"}
-                  `}
+                  className="relative h-10 w-10 rounded-sm transition-all duration-150"
+                  style={{
+                    backgroundColor: colormap === "viridis" ? "rgba(12, 74, 110, 0.6)" : "rgba(127, 29, 29, 0.4)",
+                    boxShadow: colormap === "viridis" 
+                      ? "0 0 8px 1px rgba(56, 189, 248, 0.25)" 
+                      : "0 0 8px 1px rgba(248, 113, 113, 0.2)"
+                  }}
                   data-testid="pad-colormap-toggle"
                 >
                   <Palette className={`h-4 w-4 mx-auto ${colormap === "viridis" ? "text-sky-300/80" : "text-red-400/80"}`} />
                 </button>
                 <button
                   onClick={() => onShowDualViewChange(!showDualView)}
-                  className={`
-                    relative h-10 w-10 rounded-sm transition-all duration-150
-                    ${showDualView 
-                      ? "bg-stone-400/70 hover:bg-stone-400/80" 
-                      : "bg-zinc-800 hover:bg-zinc-700"}
-                  `}
+                  className="relative h-10 w-10 rounded-sm transition-all duration-150"
+                  style={{
+                    backgroundColor: showDualView ? "rgba(168, 162, 158, 0.7)" : "rgba(39, 39, 42, 1)",
+                    boxShadow: showDualView ? "0 0 8px 1px rgba(214, 211, 209, 0.2)" : "none"
+                  }}
                   data-testid="pad-dual-view"
                 >
                   <Columns2 className={`h-4 w-4 mx-auto ${showDualView ? "text-stone-800" : "text-zinc-500"}`} />
