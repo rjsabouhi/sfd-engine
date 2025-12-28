@@ -58,7 +58,7 @@ export default function SimulationPage() {
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
   const [isPlaybackMode, setIsPlaybackMode] = useState(false);
   const [showDualView, setShowDualView] = useState(true);
-  const [derivedType, setDerivedType] = useState<"curvature" | "tension" | "coupling" | "variance" | "basins" | "gradientFlow" | "criticality" | "hysteresis" | "constraintSkeleton" | "stabilityField" | "gradientFlowLines">("coupling");
+  const [derivedType, setDerivedType] = useState<"curvature" | "tension" | "coupling" | "variance" | "basins" | "gradientFlow" | "criticality" | "hysteresis" | "constraintSkeleton" | "stabilityField" | "gradientFlowLines">("constraintSkeleton");
   const [derivedField, setDerivedField] = useState<DerivedField | null>(null);
   const [basinMap, setBasinMap] = useState<BasinMap | null>(null);
   const [varianceChange, setVarianceChange] = useState(0);
