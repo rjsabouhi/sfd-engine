@@ -498,9 +498,6 @@ export default function SimulationPage() {
 
       <div className="flex flex-1 overflow-hidden">
         <main className="relative bg-gray-950 flex-1 flex flex-col">
-              <div className="flex items-center justify-center py-2 px-4 text-xs text-gray-300 bg-gray-900/50 border-b border-gray-800">
-                <span data-testid="text-status-line">{dynamicStatusLine}</span>
-              </div>
               <div className="flex-1 relative">
               {showDualView ? (
                 <div className="grid grid-cols-2 gap-px h-full bg-border">
