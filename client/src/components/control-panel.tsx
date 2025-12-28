@@ -173,12 +173,12 @@ export function ControlPanel({
           <TabsContent value="controls" className="m-0 p-3 space-y-4">
             <div className="flex items-center gap-2">
               {state.isRunning ? (
-                <Button onClick={onPause} className="flex-1" size="sm" data-testid="button-pause">
+                <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="button-pause">
                   <Pause className="h-3.5 w-3.5 mr-1.5" />
                   Pause
                 </Button>
               ) : (
-                <Button onClick={onPlay} className="flex-1" size="sm" data-testid="button-play">
+                <Button onClick={onPlay} variant="secondary" className="flex-1" size="sm" data-testid="button-play">
                   <Play className="h-3.5 w-3.5 mr-1.5" />
                   Run
                 </Button>
@@ -209,7 +209,7 @@ export function ControlPanel({
                   className={`
                     relative h-10 w-10 rounded-sm transition-all duration-150
                     ${colormap === "inferno" 
-                      ? "bg-amber-400 ring-1 ring-amber-300/50 shadow-[0_0_8px_1px_rgba(251,191,36,0.4)]" 
+                      ? "bg-zinc-300 ring-1 ring-zinc-200/50" 
                       : "bg-zinc-800 hover:bg-zinc-700"}
                   `}
                   data-testid="pad-colormap-inferno"
@@ -221,7 +221,7 @@ export function ControlPanel({
                   className={`
                     relative h-10 w-10 rounded-sm transition-all duration-150
                     ${colormap === "viridis" 
-                      ? "bg-amber-400 ring-1 ring-amber-300/50 shadow-[0_0_8px_1px_rgba(251,191,36,0.4)]" 
+                      ? "bg-zinc-300 ring-1 ring-zinc-200/50" 
                       : "bg-zinc-800 hover:bg-zinc-700"}
                   `}
                   data-testid="pad-colormap-viridis"
@@ -233,7 +233,7 @@ export function ControlPanel({
                   className={`
                     relative h-10 w-10 rounded-sm transition-all duration-150
                     ${showDualView 
-                      ? "bg-amber-400 ring-1 ring-amber-300/50 shadow-[0_0_8px_1px_rgba(251,191,36,0.4)]" 
+                      ? "bg-zinc-300 ring-1 ring-zinc-200/50" 
                       : "bg-zinc-800 hover:bg-zinc-700"}
                   `}
                   data-testid="pad-dual-view"

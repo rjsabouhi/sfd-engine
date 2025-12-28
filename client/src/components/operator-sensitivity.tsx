@@ -32,32 +32,33 @@ function Bar({ label, value, color }: BarProps) {
 }
 
 export function OperatorSensitivity({ contributions, modeLabels }: OperatorSensitivityProps) {
+  const barColor = "hsl(0, 0%, 60%)";
   return (
     <div className="space-y-2" data-testid="panel-operator-sensitivity">
       <Bar
         label={modeLabels.operators.curvature.split('(')[0].trim()}
         value={contributions.curvature}
-        color="hsl(280, 70%, 60%)"
+        color={barColor}
       />
       <Bar
         label={modeLabels.operators.tension.split('(')[0].trim()}
         value={contributions.tension}
-        color="hsl(200, 70%, 60%)"
+        color={barColor}
       />
       <Bar
         label={modeLabels.operators.coupling.split('(')[0].trim()}
         value={contributions.coupling}
-        color="hsl(160, 70%, 50%)"
+        color={barColor}
       />
       <Bar
         label={modeLabels.operators.attractor.split('(')[0].trim()}
         value={contributions.attractor}
-        color="hsl(40, 80%, 55%)"
+        color={barColor}
       />
       <Bar
         label="Redistribution"
         value={contributions.redistribution}
-        color="hsl(0, 60%, 55%)"
+        color={barColor}
       />
     </div>
   );
