@@ -231,7 +231,7 @@ export function ControlPanel({
 
             <div className="border-t border-border/50 pt-3 grid grid-cols-3 gap-3">
               <div className="flex flex-col items-center gap-1">
-                <Label className="text-xs">Viridis</Label>
+                <Label className="text-xs">Colormap</Label>
                 <Switch
                   checked={colormap === "viridis"}
                   onCheckedChange={(checked) => onColormapChange(checked ? "viridis" : "inferno")}
