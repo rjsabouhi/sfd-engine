@@ -252,79 +252,83 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
         </div>
       )}
       
-      <div className="absolute top-2 left-2 right-2 z-10 flex gap-1">
-        <Button
-          size="sm"
-          variant={derivedType === "curvature" ? "default" : "outline"}
-          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-          onClick={() => onTypeChange("curvature")}
-          data-testid="button-derived-curvature"
-        >
-          Curvature
-        </Button>
-        <Button
-          size="sm"
-          variant={derivedType === "tension" ? "default" : "outline"}
-          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-          onClick={() => onTypeChange("tension")}
-          data-testid="button-derived-tension"
-        >
-          Tension
-        </Button>
-        <Button
-          size="sm"
-          variant={derivedType === "coupling" ? "default" : "outline"}
-          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-          onClick={() => onTypeChange("coupling")}
-          data-testid="button-derived-coupling"
-        >
-          Coupling
-        </Button>
-        <Button
-          size="sm"
-          variant={derivedType === "variance" ? "default" : "outline"}
-          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-          onClick={() => onTypeChange("variance")}
-          data-testid="button-derived-variance"
-        >
-          Variance
-        </Button>
-        <Button
-          size="sm"
-          variant={derivedType === "basins" ? "default" : "outline"}
-          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-          onClick={() => onTypeChange("basins")}
-          data-testid="button-derived-basins"
-        >
-          Basins
-        </Button>
-        <Button
-          size="sm"
-          variant={derivedType === "gradientFlow" ? "default" : "outline"}
-          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-          onClick={() => onTypeChange("gradientFlow")}
-          data-testid="button-derived-gradientflow"
-        >
-          Flow
-        </Button>
-        <Button
-          size="sm"
-          variant={derivedType === "criticality" ? "default" : "outline"}
-          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-          onClick={() => onTypeChange("criticality")}
-          data-testid="button-derived-criticality"
-        >
-          Critical
-        </Button>
-        <Button
-          size="sm"
-          variant={derivedType === "hysteresis" ? "default" : "outline"}
-          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-          onClick={() => onTypeChange("hysteresis")}
-          data-testid="button-derived-hysteresis"
-        >
-          Memory
-        </Button>
+      <div className="absolute top-2 left-2 right-2 z-10 flex flex-col gap-1">
+        <div className="flex gap-1">
+          <Button
+            size="sm"
+            variant={derivedType === "curvature" ? "default" : "outline"}
+            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+            onClick={() => onTypeChange("curvature")}
+            data-testid="button-derived-curvature"
+          >
+            Curv
+          </Button>
+          <Button
+            size="sm"
+            variant={derivedType === "tension" ? "default" : "outline"}
+            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+            onClick={() => onTypeChange("tension")}
+            data-testid="button-derived-tension"
+          >
+            Tens
+          </Button>
+          <Button
+            size="sm"
+            variant={derivedType === "coupling" ? "default" : "outline"}
+            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+            onClick={() => onTypeChange("coupling")}
+            data-testid="button-derived-coupling"
+          >
+            Coup
+          </Button>
+          <Button
+            size="sm"
+            variant={derivedType === "variance" ? "default" : "outline"}
+            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+            onClick={() => onTypeChange("variance")}
+            data-testid="button-derived-variance"
+          >
+            Var
+          </Button>
+        </div>
+        <div className="flex gap-1">
+          <Button
+            size="sm"
+            variant={derivedType === "basins" ? "default" : "outline"}
+            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+            onClick={() => onTypeChange("basins")}
+            data-testid="button-derived-basins"
+          >
+            Basin
+          </Button>
+          <Button
+            size="sm"
+            variant={derivedType === "gradientFlow" ? "default" : "outline"}
+            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+            onClick={() => onTypeChange("gradientFlow")}
+            data-testid="button-derived-gradientflow"
+          >
+            Flow
+          </Button>
+          <Button
+            size="sm"
+            variant={derivedType === "criticality" ? "default" : "outline"}
+            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+            onClick={() => onTypeChange("criticality")}
+            data-testid="button-derived-criticality"
+          >
+            Crit
+          </Button>
+          <Button
+            size="sm"
+            variant={derivedType === "hysteresis" ? "default" : "outline"}
+            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+            onClick={() => onTypeChange("hysteresis")}
+            data-testid="button-derived-hysteresis"
+          >
+            Mem
+          </Button>
+        </div>
       </div>
       
       <div className="absolute bottom-2 left-0 right-0 text-center z-10">
