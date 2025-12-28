@@ -221,12 +221,12 @@ export function ControlPanel({
                   className={`
                     relative h-10 w-10 rounded-sm transition-all duration-150
                     ${showDualView 
-                      ? "bg-zinc-300 ring-1 ring-zinc-200/50" 
+                      ? "bg-stone-400/70 hover:bg-stone-400/80" 
                       : "bg-zinc-800 hover:bg-zinc-700"}
                   `}
                   data-testid="pad-dual-view"
                 >
-                  <Columns2 className={`h-4 w-4 mx-auto ${showDualView ? "text-zinc-900" : "text-zinc-500"}`} />
+                  <Columns2 className={`h-4 w-4 mx-auto ${showDualView ? "text-stone-800" : "text-zinc-500"}`} />
                 </button>
               </div>
             </div>
