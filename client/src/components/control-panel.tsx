@@ -33,7 +33,6 @@ interface ControlPanelProps {
   historyLength: number;
   currentHistoryIndex: number;
   isPlaybackMode: boolean;
-  showBasins: boolean;
   showDualView: boolean;
   varianceChange?: number;
   onParamsChange: (params: Partial<SimulationParameters>) => void;
@@ -51,7 +50,6 @@ interface ControlPanelProps {
   onExportEvents: () => void;
   onExportPNG: () => void;
   onExportJSON: () => void;
-  onShowBasinsChange: (show: boolean) => void;
   onShowDualViewChange: (show: boolean) => void;
 }
 
@@ -110,7 +108,6 @@ export function ControlPanel({
   historyLength,
   currentHistoryIndex,
   isPlaybackMode,
-  showBasins,
   showDualView,
   onParamsChange,
   onPlay,
@@ -127,7 +124,6 @@ export function ControlPanel({
   onExportEvents,
   onExportPNG,
   onExportJSON,
-  onShowBasinsChange,
   onShowDualViewChange,
   varianceChange = 0,
 }: ControlPanelProps) {
@@ -229,21 +225,13 @@ export function ControlPanel({
               </Button>
             </div>
 
-            <div className="border-t border-border/50 pt-3 grid grid-cols-3 gap-3">
+            <div className="border-t border-border/50 pt-3 grid grid-cols-2 gap-3">
               <div className="flex flex-col items-center gap-1">
                 <Label className="text-xs">Colormap</Label>
                 <Switch
                   checked={colormap === "viridis"}
                   onCheckedChange={(checked) => onColormapChange(checked ? "viridis" : "inferno")}
                   data-testid="switch-colormap"
-                />
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <Label className="text-xs">Basins</Label>
-                <Switch
-                  checked={showBasins}
-                  onCheckedChange={onShowBasinsChange}
-                  data-testid="switch-show-basins"
                 />
               </div>
               <div className="flex flex-col items-center gap-1">

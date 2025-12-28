@@ -56,7 +56,6 @@ export default function SimulationPage() {
   const [historyLength, setHistoryLength] = useState(0);
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
   const [isPlaybackMode, setIsPlaybackMode] = useState(false);
-  const [showBasins, setShowBasins] = useState(false);
   const [showDualView, setShowDualView] = useState(false);
   const [derivedType, setDerivedType] = useState<"curvature" | "tension" | "coupling" | "variance" | "basins" | "gradientFlow" | "criticality" | "hysteresis">("curvature");
   const [derivedField, setDerivedField] = useState<DerivedField | null>(null);
@@ -376,7 +375,6 @@ export default function SimulationPage() {
             field={field} 
             colormap={colormap} 
             basinMap={basinMap}
-            showBasins={showBasins}
           />
           <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
             <span className="text-xs font-mono text-white/70" data-testid="text-step-overlay-mobile">
@@ -518,7 +516,6 @@ export default function SimulationPage() {
                       field={field} 
                       colormap={colormap}
                       basinMap={basinMap}
-                      showBasins={showBasins}
                       onHover={handleHover}
                       onHoverEnd={handleHoverEnd}
                     />
@@ -537,7 +534,6 @@ export default function SimulationPage() {
                   field={field} 
                   colormap={colormap}
                   basinMap={basinMap}
-                  showBasins={showBasins}
                   onHover={handleHover}
                   onHoverEnd={handleHoverEnd}
                 />
@@ -579,7 +575,6 @@ export default function SimulationPage() {
                 historyLength={historyLength}
                 currentHistoryIndex={currentHistoryIndex}
                 isPlaybackMode={isPlaybackMode}
-                showBasins={showBasins}
                 showDualView={showDualView}
                 onParamsChange={handleParamsChange}
                 onPlay={handlePlay}
@@ -596,7 +591,6 @@ export default function SimulationPage() {
                 onExportEvents={handleExportEvents}
                 onExportPNG={handleExportPNG}
                 onExportJSON={handleExportJSON}
-                onShowBasinsChange={setShowBasins}
                 onShowDualViewChange={setShowDualView}
                 varianceChange={varianceChange}
               />
