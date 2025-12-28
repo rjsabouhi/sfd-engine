@@ -209,12 +209,12 @@ export function ControlPanel({
                   className={`
                     relative h-10 w-10 rounded-sm transition-all duration-150
                     ${colormap === "viridis" 
-                      ? "bg-zinc-300 ring-1 ring-zinc-200/50" 
-                      : "bg-zinc-800 hover:bg-zinc-700"}
+                      ? "bg-sky-900/60 hover:bg-sky-900/70" 
+                      : "bg-orange-900/50 hover:bg-orange-900/60"}
                   `}
                   data-testid="pad-colormap-toggle"
                 >
-                  <Palette className={`h-4 w-4 mx-auto ${colormap === "viridis" ? "text-zinc-900" : "text-zinc-500"}`} />
+                  <Palette className={`h-4 w-4 mx-auto ${colormap === "viridis" ? "text-sky-300/80" : "text-orange-300/70"}`} />
                 </button>
                 <button
                   onClick={() => onShowDualViewChange(!showDualView)}
