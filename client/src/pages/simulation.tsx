@@ -97,26 +97,37 @@ export default function SimulationPage() {
     engine.onStateUpdate((newState, newField) => {
       frameCountRef.current += 1;
       const frameCount = frameCountRef.current;
+      const inPlayback = engine.isInPlaybackMode();
       
       unstable_batchedUpdates(() => {
         setState(newState);
         setField(newField);
         
-        if (frameCount % 3 === 0) {
+        // Always update these during playback, otherwise throttle
+        if (inPlayback || frameCount % 3 === 0) {
           setOperatorContributions(engine.getOperatorContributions());
           setStructuralSignature(engine.getCachedSignature());
           setHistoryLength(engine.getHistoryLength());
           setCurrentHistoryIndex(engine.getCurrentHistoryIndex());
-          setIsPlaybackMode(engine.isInPlaybackMode());
+          setIsPlaybackMode(inPlayback);
         }
         
-        if (showDualViewRef.current && derivedTypeRef.current !== "basins") {
-          setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
+        // Always update dual view fields during playback
+        if (showDualViewRef.current) {
+          if (derivedTypeRef.current === "basins") {
+            if (inPlayback || frameCount % 5 === 0) {
+              setBasinMap(engine.getBasinMap());
+            }
+          } else {
+            setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
+          }
         }
         
-        if (frameCount % 5 === 0) {
+        if (inPlayback || frameCount % 5 === 0) {
           setEvents(engine.getEvents());
-          setBasinMap(engine.getBasinMap());
+          if (!showDualViewRef.current || derivedTypeRef.current !== "basins") {
+            setBasinMap(engine.getBasinMap());
+          }
           
           setVarianceChange(newState.variance - prevVarianceRef.current);
           prevVarianceRef.current = newState.variance;
