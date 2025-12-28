@@ -1,11 +1,12 @@
 import { useRef, useEffect, useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
-import type { DerivedField } from "@shared/schema";
+import type { DerivedField, BasinMap } from "@shared/schema";
 
 interface DualFieldViewProps {
   derivedField: DerivedField | null;
-  derivedType: "curvature" | "tension" | "coupling" | "variance";
-  onTypeChange: (type: "curvature" | "tension" | "coupling" | "variance") => void;
+  basinMap: BasinMap | null;
+  derivedType: "curvature" | "tension" | "coupling" | "variance" | "basins";
+  onTypeChange: (type: "curvature" | "tension" | "coupling" | "variance" | "basins") => void;
 }
 
 const PLASMA_COLORS = [
@@ -43,7 +44,18 @@ function interpolateColor(t: number): [number, number, number] {
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 10;
 
-export function DualFieldView({ derivedField, derivedType, onTypeChange }: DualFieldViewProps) {
+const BASIN_COLORS: [number, number, number][] = [
+  [59, 130, 246],   // Blue
+  [34, 197, 94],    // Green
+  [249, 115, 22],   // Orange
+  [168, 85, 247],   // Purple
+  [236, 72, 153],   // Pink
+  [20, 184, 166],   // Teal
+  [245, 158, 11],   // Amber
+  [99, 102, 241],   // Indigo
+];
+
+export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChange }: DualFieldViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -56,12 +68,47 @@ export function DualFieldView({ derivedField, derivedType, onTypeChange }: DualF
   const render = useCallback(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
-    if (!canvas || !container || !derivedField) return;
+    if (!canvas || !container) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     setContainerSize({ width: container.clientWidth, height: container.clientHeight });
+
+    // Handle basins view separately
+    if (derivedType === "basins") {
+      if (!basinMap) return;
+      
+      canvas.width = basinMap.width;
+      canvas.height = basinMap.height;
+      
+      const imageData = ctx.createImageData(basinMap.width, basinMap.height);
+      const data = imageData.data;
+      
+      for (let i = 0; i < basinMap.labels.length; i++) {
+        const basinId = basinMap.labels[i];
+        const pixelIdx = i * 4;
+        
+        if (basinId >= 0) {
+          const color = BASIN_COLORS[basinId % BASIN_COLORS.length];
+          data[pixelIdx] = color[0];
+          data[pixelIdx + 1] = color[1];
+          data[pixelIdx + 2] = color[2];
+          data[pixelIdx + 3] = 255;
+        } else {
+          data[pixelIdx] = 30;
+          data[pixelIdx + 1] = 30;
+          data[pixelIdx + 2] = 30;
+          data[pixelIdx + 3] = 255;
+        }
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+      return;
+    }
+
+    // Handle derived field views
+    if (!derivedField) return;
 
     canvas.width = derivedField.width;
     canvas.height = derivedField.height;
@@ -89,7 +136,7 @@ export function DualFieldView({ derivedField, derivedType, onTypeChange }: DualF
     }
 
     ctx.putImageData(imageData, 0, 0);
-  }, [derivedField]);
+  }, [derivedField, basinMap, derivedType]);
 
   useEffect(() => {
     render();
@@ -163,6 +210,7 @@ export function DualFieldView({ derivedField, derivedType, onTypeChange }: DualF
     tension: "Tension Gradient Map",
     coupling: "Coupling Flow",
     variance: "Local Variance Map",
+    basins: "Basin Map",
   };
 
   const zoomPercent = Math.round(zoom * 100);
@@ -180,7 +228,7 @@ export function DualFieldView({ derivedField, derivedType, onTypeChange }: DualF
       onDoubleClick={handleDoubleClick}
       style={{ cursor: zoom > 1 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair' }}
     >
-      {derivedField ? (
+      {(derivedField || (derivedType === "basins" && basinMap)) ? (
         <canvas
           ref={canvasRef}
           className="rounded-md"
@@ -197,7 +245,7 @@ export function DualFieldView({ derivedField, derivedType, onTypeChange }: DualF
         />
       ) : (
         <div className="text-muted-foreground text-sm">
-          Computing derived field...
+          {derivedType === "basins" ? "Computing basin map..." : "Computing derived field..."}
         </div>
       )}
       
@@ -237,6 +285,15 @@ export function DualFieldView({ derivedField, derivedType, onTypeChange }: DualF
           data-testid="button-derived-variance"
         >
           Variance
+        </Button>
+        <Button
+          size="sm"
+          variant={derivedType === "basins" ? "default" : "outline"}
+          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+          onClick={() => onTypeChange("basins")}
+          data-testid="button-derived-basins"
+        >
+          Basins
         </Button>
       </div>
       

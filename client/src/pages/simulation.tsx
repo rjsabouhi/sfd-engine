@@ -58,7 +58,7 @@ export default function SimulationPage() {
   const [isPlaybackMode, setIsPlaybackMode] = useState(false);
   const [showBasins, setShowBasins] = useState(false);
   const [showDualView, setShowDualView] = useState(false);
-  const [derivedType, setDerivedType] = useState<"curvature" | "tension" | "coupling" | "variance">("curvature");
+  const [derivedType, setDerivedType] = useState<"curvature" | "tension" | "coupling" | "variance" | "basins">("curvature");
   const [derivedField, setDerivedField] = useState<DerivedField | null>(null);
   const [basinMap, setBasinMap] = useState<BasinMap | null>(null);
   const [varianceChange, setVarianceChange] = useState(0);
@@ -514,6 +514,7 @@ export default function SimulationPage() {
                   <div className="bg-gray-950">
                     <DualFieldView
                       derivedField={derivedField}
+                      basinMap={basinMap}
                       derivedType={derivedType}
                       onTypeChange={setDerivedType}
                     />
