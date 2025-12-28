@@ -153,6 +153,10 @@ export class SFDEngine {
   private fieldStateHoldUntil: number = 0; // timestamp when state can next change
   private fieldStateMinHoldMs: number = 5000; // 5 seconds minimum between changes
   private lastFieldStateUpdateTime: number = 0;
+  
+  // Memory buffer for hysteresis/memory visualization
+  private memoryBuffer: Float32Array | null = null;
+  private prevGrid: Float32Array | null = null;
 
   constructor(params: SimulationParameters = defaultParameters) {
     this.params = { ...params };
@@ -200,6 +204,9 @@ export class SFDEngine {
     this.lastCurvatureMax = 0;
     this.wasInChaos = false;
     this.droppedFrames = 0;
+    // Reset memory/hysteresis buffers
+    this.memoryBuffer = new Float32Array(this.width * this.height);
+    this.prevGrid = new Float32Array(this.grid);
     this.resetReactiveEvents();
     this.updateBasinMap();
   }
@@ -367,6 +374,15 @@ export class SFDEngine {
     const temp = this.grid;
     this.grid = this.tempGrid;
     this.tempGrid = temp;
+    
+    // Update memory buffer for hysteresis visualization
+    if (this.memoryBuffer && this.prevGrid) {
+      for (let i = 0; i < this.grid.length; i++) {
+        this.memoryBuffer[i] += Math.abs(this.grid[i] - this.prevGrid[i]);
+      }
+      // Copy current grid to prevGrid for next step
+      this.prevGrid.set(this.grid);
+    }
     
     this.step++;
     
@@ -635,7 +651,7 @@ export class SFDEngine {
     };
   }
 
-  computeDerivedField(type: "curvature" | "tension" | "coupling" | "variance"): DerivedField {
+  computeDerivedField(type: "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality" | "hysteresis"): DerivedField {
     const grid = new Float32Array(this.width * this.height);
     
     for (let y = 0; y < this.height; y++) {
@@ -671,6 +687,33 @@ export class SFDEngine {
               }
             }
             grid[idx] = variance / 9;
+            break;
+          }
+          case "gradientFlow": {
+            // Gradient magnitude visualization
+            const gx = (this.getValue(x + 1, y) - this.getValue(x - 1, y)) / 2;
+            const gy = (this.getValue(x, y + 1) - this.getValue(x, y - 1)) / 2;
+            const mag = Math.sqrt(gx * gx + gy * gy);
+            // Encode direction as angle (0-1) combined with magnitude
+            const angle = Math.atan2(gy, gx);
+            // Normalize angle to 0-1 range and combine with magnitude
+            grid[idx] = (angle + Math.PI) / (2 * Math.PI) * mag;
+            break;
+          }
+          case "criticality": {
+            // Hessian-based criticality - regions near bifurcation
+            const dxx = this.getValue(x + 1, y) - 2 * value + this.getValue(x - 1, y);
+            const dyy = this.getValue(x, y + 1) - 2 * value + this.getValue(x, y - 1);
+            const dxy = (this.getValue(x + 1, y + 1) - this.getValue(x - 1, y + 1) 
+                       - this.getValue(x + 1, y - 1) + this.getValue(x - 1, y - 1)) / 4;
+            const detH = dxx * dyy - dxy * dxy;
+            // High criticality where determinant is near zero (saddle/inflection points)
+            grid[idx] = 1.0 / (Math.abs(detH) + 1e-6);
+            break;
+          }
+          case "hysteresis": {
+            // Memory buffer normalized
+            grid[idx] = this.memoryBuffer ? this.memoryBuffer[idx] : 0;
             break;
           }
         }
@@ -747,7 +790,7 @@ export class SFDEngine {
     return this.cachedSignature;
   }
 
-  getCachedDerivedField(type: "curvature" | "tension" | "coupling" | "variance"): DerivedField {
+  getCachedDerivedField(type: "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality" | "hysteresis"): DerivedField {
     // Check if we need to refresh (every N steps)
     const needsRefresh = this.step - this.lastDerivedFieldCacheStep >= this.derivedFieldCacheInterval;
     
@@ -771,7 +814,7 @@ export class SFDEngine {
     return this.cachedDerivedFields.get(type)!;
   }
 
-  private computeDerivedFieldInto(type: "curvature" | "tension" | "coupling" | "variance", grid: Float32Array): void {
+  private computeDerivedFieldInto(type: "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality" | "hysteresis", grid: Float32Array): void {
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         const idx = y * this.width + x;
@@ -805,6 +848,27 @@ export class SFDEngine {
               }
             }
             grid[idx] = variance / 9;
+            break;
+          }
+          case "gradientFlow": {
+            const gx = (this.getValue(x + 1, y) - this.getValue(x - 1, y)) / 2;
+            const gy = (this.getValue(x, y + 1) - this.getValue(x, y - 1)) / 2;
+            const mag = Math.sqrt(gx * gx + gy * gy);
+            const angle = Math.atan2(gy, gx);
+            grid[idx] = (angle + Math.PI) / (2 * Math.PI) * mag;
+            break;
+          }
+          case "criticality": {
+            const dxx = this.getValue(x + 1, y) - 2 * value + this.getValue(x - 1, y);
+            const dyy = this.getValue(x, y + 1) - 2 * value + this.getValue(x, y - 1);
+            const dxy = (this.getValue(x + 1, y + 1) - this.getValue(x - 1, y + 1) 
+                       - this.getValue(x + 1, y - 1) + this.getValue(x - 1, y - 1)) / 4;
+            const detH = dxx * dyy - dxy * dxy;
+            grid[idx] = 1.0 / (Math.abs(detH) + 1e-6);
+            break;
+          }
+          case "hysteresis": {
+            grid[idx] = this.memoryBuffer ? this.memoryBuffer[idx] : 0;
             break;
           }
         }

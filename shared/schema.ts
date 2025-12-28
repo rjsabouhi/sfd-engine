@@ -106,7 +106,7 @@ export interface BasinMap {
 }
 
 export interface DerivedField {
-  type: "curvature" | "tension" | "coupling" | "variance";
+  type: "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality" | "hysteresis";
   grid: Float32Array;
   width: number;
   height: number;
