@@ -230,14 +230,13 @@ export function ControlPanel({
                   onClick={() => onColormapChange("inferno")}
                   className={`
                     relative flex-1 h-10 rounded-sm transition-all duration-150
-                    bg-gradient-to-br from-yellow-500 via-orange-500 to-red-600
                     ${colormap === "inferno" 
-                      ? "ring-2 ring-white/80 shadow-[0_0_12px_2px_rgba(251,146,60,0.5)]" 
-                      : "opacity-50 hover:opacity-75"}
+                      ? "bg-orange-500 ring-2 ring-white/80 shadow-[0_0_12px_2px_rgba(251,146,60,0.5)]" 
+                      : "bg-zinc-700 opacity-60 hover:opacity-80"}
                   `}
                   data-testid="pad-colormap-inferno"
                 >
-                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-medium text-white/90 drop-shadow-sm">
+                  <span className={`absolute inset-0 flex items-center justify-center text-[10px] font-medium drop-shadow-sm ${colormap === "inferno" ? "text-white" : "text-zinc-400"}`}>
                     Inferno
                   </span>
                 </button>
@@ -245,14 +244,13 @@ export function ControlPanel({
                   onClick={() => onColormapChange("viridis")}
                   className={`
                     relative flex-1 h-10 rounded-sm transition-all duration-150
-                    bg-gradient-to-br from-purple-600 via-teal-500 to-yellow-400
                     ${colormap === "viridis" 
-                      ? "ring-2 ring-white/80 shadow-[0_0_12px_2px_rgba(45,212,191,0.5)]" 
-                      : "opacity-50 hover:opacity-75"}
+                      ? "bg-teal-500 ring-2 ring-white/80 shadow-[0_0_12px_2px_rgba(45,212,191,0.5)]" 
+                      : "bg-zinc-700 opacity-60 hover:opacity-80"}
                   `}
                   data-testid="pad-colormap-viridis"
                 >
-                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-medium text-white/90 drop-shadow-sm">
+                  <span className={`absolute inset-0 flex items-center justify-center text-[10px] font-medium drop-shadow-sm ${colormap === "viridis" ? "text-white" : "text-zinc-400"}`}>
                     Viridis
                   </span>
                 </button>
