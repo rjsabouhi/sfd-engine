@@ -149,20 +149,19 @@ export function ControlPanel({
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="px-3 py-2 border-b border-border shrink-0 space-y-2">
-        <div className="flex items-center gap-2">
-          <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
-            <SelectTrigger className="h-7 text-xs flex-1" data-testid="select-interpretation-mode">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {modeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <div className="text-xs font-medium text-muted-foreground">Interpretation Mode</div>
+        <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
+          <SelectTrigger className="h-7 text-xs" data-testid="select-interpretation-mode">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {modeOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <p className="text-xs text-muted-foreground">{modeLabels.subtitle}</p>
       </div>
 

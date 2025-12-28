@@ -68,6 +68,7 @@ export function MobileControlPanel({
   return (
     <div className="space-y-4 pb-4">
       <div className="space-y-2 pb-3 border-b border-border">
+        <div className="text-sm font-medium text-muted-foreground">Interpretation Mode</div>
         <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
           <SelectTrigger className="h-10" data-testid="select-interpretation-mode-mobile">
             <SelectValue />
