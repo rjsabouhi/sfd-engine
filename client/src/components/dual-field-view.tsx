@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback, useState } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import type { DerivedField } from "@shared/schema";
 
 interface DualFieldViewProps {
@@ -201,18 +201,43 @@ export function DualFieldView({ derivedField, derivedType, onTypeChange }: DualF
         </div>
       )}
       
-      <div className="absolute top-2 left-2 right-2 z-10">
-        <Select value={derivedType} onValueChange={(v) => onTypeChange(v as typeof derivedType)}>
-          <SelectTrigger className="h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20" data-testid="select-derived-field">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="curvature">Curvature Heatmap</SelectItem>
-            <SelectItem value="tension">Tension Gradient</SelectItem>
-            <SelectItem value="coupling">Coupling Flow</SelectItem>
-            <SelectItem value="variance">Variance Map</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="absolute top-2 left-2 right-2 z-10 flex gap-1">
+        <Button
+          size="sm"
+          variant={derivedType === "curvature" ? "default" : "outline"}
+          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+          onClick={() => onTypeChange("curvature")}
+          data-testid="button-derived-curvature"
+        >
+          Curvature
+        </Button>
+        <Button
+          size="sm"
+          variant={derivedType === "tension" ? "default" : "outline"}
+          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+          onClick={() => onTypeChange("tension")}
+          data-testid="button-derived-tension"
+        >
+          Tension
+        </Button>
+        <Button
+          size="sm"
+          variant={derivedType === "coupling" ? "default" : "outline"}
+          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+          onClick={() => onTypeChange("coupling")}
+          data-testid="button-derived-coupling"
+        >
+          Coupling
+        </Button>
+        <Button
+          size="sm"
+          variant={derivedType === "variance" ? "default" : "outline"}
+          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+          onClick={() => onTypeChange("variance")}
+          data-testid="button-derived-variance"
+        >
+          Variance
+        </Button>
       </div>
       
       <div className="absolute bottom-2 left-0 right-0 text-center z-10">
