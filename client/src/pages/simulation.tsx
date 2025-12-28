@@ -58,7 +58,7 @@ export default function SimulationPage() {
   const [isPlaybackMode, setIsPlaybackMode] = useState(false);
   const [showBasins, setShowBasins] = useState(false);
   const [showDualView, setShowDualView] = useState(false);
-  const [derivedType, setDerivedType] = useState<"curvature" | "tension" | "coupling" | "variance" | "basins">("curvature");
+  const [derivedType, setDerivedType] = useState<"curvature" | "tension" | "coupling" | "variance" | "basins" | "gradientFlow" | "criticality" | "hysteresis">("curvature");
   const [derivedField, setDerivedField] = useState<DerivedField | null>(null);
   const [basinMap, setBasinMap] = useState<BasinMap | null>(null);
   const [varianceChange, setVarianceChange] = useState(0);
@@ -111,7 +111,7 @@ export default function SimulationPage() {
           setIsPlaybackMode(engine.isInPlaybackMode());
         }
         
-        if (showDualViewRef.current) {
+        if (showDualViewRef.current && derivedTypeRef.current !== "basins") {
           setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
         }
         
@@ -143,7 +143,7 @@ export default function SimulationPage() {
   }, [isMobile]);
 
   useEffect(() => {
-    if (showDualView && engineRef.current) {
+    if (showDualView && engineRef.current && derivedType !== "basins") {
       setDerivedField(engineRef.current.computeDerivedField(derivedType));
     }
   }, [showDualView, derivedType]);
@@ -189,7 +189,7 @@ export default function SimulationPage() {
     if (engine) {
       engine.stepBackward();
       setFieldState(engine.getPlaybackFieldState());
-      if (showDualViewRef.current) {
+      if (showDualViewRef.current && derivedTypeRef.current !== "basins") {
         setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
       }
     }
@@ -200,7 +200,7 @@ export default function SimulationPage() {
     if (engine) {
       engine.seekToFrame(index);
       setFieldState(engine.getPlaybackFieldState());
-      if (showDualViewRef.current) {
+      if (showDualViewRef.current && derivedTypeRef.current !== "basins") {
         setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
       }
     }
@@ -211,7 +211,7 @@ export default function SimulationPage() {
     if (engine) {
       engine.stepForwardInHistory();
       setFieldState(engine.getPlaybackFieldState());
-      if (showDualViewRef.current) {
+      if (showDualViewRef.current && derivedTypeRef.current !== "basins") {
         setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
       }
     }

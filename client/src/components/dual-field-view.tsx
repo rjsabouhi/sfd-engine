@@ -5,8 +5,8 @@ import type { DerivedField, BasinMap } from "@shared/schema";
 interface DualFieldViewProps {
   derivedField: DerivedField | null;
   basinMap: BasinMap | null;
-  derivedType: "curvature" | "tension" | "coupling" | "variance" | "basins";
-  onTypeChange: (type: "curvature" | "tension" | "coupling" | "variance" | "basins") => void;
+  derivedType: "curvature" | "tension" | "coupling" | "variance" | "basins" | "gradientFlow" | "criticality" | "hysteresis";
+  onTypeChange: (type: "curvature" | "tension" | "coupling" | "variance" | "basins" | "gradientFlow" | "criticality" | "hysteresis") => void;
 }
 
 const PLASMA_COLORS = [
@@ -211,6 +211,9 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
     coupling: "Coupling Flow",
     variance: "Local Variance Map",
     basins: "Basin Map",
+    gradientFlow: "Gradient Flow Map",
+    criticality: "Criticality Map",
+    hysteresis: "Hysteresis (Memory)",
   };
 
   const zoomPercent = Math.round(zoom * 100);
@@ -294,6 +297,33 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
           data-testid="button-derived-basins"
         >
           Basins
+        </Button>
+        <Button
+          size="sm"
+          variant={derivedType === "gradientFlow" ? "default" : "outline"}
+          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+          onClick={() => onTypeChange("gradientFlow")}
+          data-testid="button-derived-gradientflow"
+        >
+          Flow
+        </Button>
+        <Button
+          size="sm"
+          variant={derivedType === "criticality" ? "default" : "outline"}
+          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+          onClick={() => onTypeChange("criticality")}
+          data-testid="button-derived-criticality"
+        >
+          Critical
+        </Button>
+        <Button
+          size="sm"
+          variant={derivedType === "hysteresis" ? "default" : "outline"}
+          className="flex-1 h-7 text-xs bg-black/60 backdrop-blur-sm border-white/20"
+          onClick={() => onTypeChange("hysteresis")}
+          data-testid="button-derived-hysteresis"
+        >
+          Memory
         </Button>
       </div>
       
