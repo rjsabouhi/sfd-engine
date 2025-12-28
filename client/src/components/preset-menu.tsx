@@ -28,7 +28,7 @@ export function PresetMenu({ onApply }: PresetMenuProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-1.5">
-        <Label className="text-sm">Dynamic Regimes</Label>
+        <h4 className="text-xs font-medium">Dynamic Regimes</h4>
         <Tooltip>
           <TooltipTrigger asChild>
             <Info className="h-3 w-3 text-muted-foreground cursor-help" />

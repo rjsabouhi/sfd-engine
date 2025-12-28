@@ -148,10 +148,10 @@ export function ControlPanel({
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="px-3 py-2 border-b border-border shrink-0 space-y-2">
-        <div className="text-xs font-medium text-muted-foreground">Interpretation Mode</div>
+      <div className="px-3 py-3 border-b border-border shrink-0 space-y-2">
+        <h3 className="text-sm font-semibold">Interpretation Mode</h3>
         <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
-          <SelectTrigger className="h-7 text-xs" data-testid="select-interpretation-mode">
+          <SelectTrigger className="h-8" data-testid="select-interpretation-mode">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -162,7 +162,7 @@ export function ControlPanel({
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">{modeLabels.subtitle}</p>
+        <p className="text-xs text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
       </div>
 
       <Tabs defaultValue="controls" className="flex-1 flex flex-col overflow-hidden">
@@ -229,8 +229,8 @@ export function ControlPanel({
               </Button>
             </div>
 
-            <div className="border-t border-border/50 pt-3 space-y-1.5">
-              <Label className="text-xs">Colormap</Label>
+            <div className="border-t border-border/50 pt-3 space-y-2">
+              <h4 className="text-xs font-medium">Colormap</h4>
               <Select value={colormap} onValueChange={(v) => onColormapChange(v as "inferno" | "viridis")}>
                 <SelectTrigger className="h-8 text-xs" data-testid="select-colormap">
                   <SelectValue />
@@ -265,8 +265,8 @@ export function ControlPanel({
               <PresetMenu onApply={onParamsChange} />
             </div>
 
-            <div className="pt-2 border-t border-border">
-              <div className="text-xs font-medium text-muted-foreground mb-2">Timeline</div>
+            <div className="pt-3 border-t border-border space-y-2">
+              <h4 className="text-xs font-medium">Timeline</h4>
               <TemporalControls
                 historyLength={historyLength}
                 currentIndex={currentHistoryIndex}
@@ -401,11 +401,11 @@ export function ControlPanel({
 
       <Collapsible open={metricsOpen} onOpenChange={setMetricsOpen} className="border-t border-border shrink-0">
         <CollapsibleTrigger asChild>
-          <button className="flex items-center justify-between w-full px-3 py-2 text-xs font-medium text-muted-foreground hover-elevate" data-testid="button-toggle-metrics">
-            <span className="flex items-center gap-1.5">
+          <button className="flex items-center justify-between w-full px-3 py-2 hover-elevate" data-testid="button-toggle-metrics">
+            <h4 className="text-xs font-medium flex items-center gap-1.5">
               <Activity className="h-3 w-3" />
-              Show Simulation Metrics
-            </span>
+              Simulation Metrics
+            </h4>
             {metricsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
           </button>
         </CollapsibleTrigger>
