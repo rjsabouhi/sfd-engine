@@ -224,25 +224,25 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
   const size = Math.min(containerSize.width, containerSize.height);
 
   return (
-    <div className="h-full flex flex-col bg-gray-950">
-      <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-zinc-800/50 shrink-0">
+    <div className="h-full flex flex-col bg-background">
+      <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border shrink-0">
         <div className="min-w-0">
-          <div className="text-xs font-medium text-zinc-300">Field Projections</div>
-          <div className="text-[10px] text-zinc-500 truncate">Alternate views of the same dynamics</div>
+          <h4 className="text-xs font-medium">Field Projections</h4>
+          <p className="text-[10px] text-muted-foreground truncate">Alternate views of the same dynamics</p>
         </div>
         <Select value={derivedType} onValueChange={(v) => onTypeChange(v as OverlayType)}>
           <SelectTrigger 
-            className="h-7 w-32 text-xs bg-zinc-800 border-zinc-700 text-zinc-300"
+            className="h-7 w-28 text-xs"
             data-testid="select-overlay-type"
           >
             <SelectValue placeholder="Select view" />
           </SelectTrigger>
-          <SelectContent className="bg-zinc-900 border-zinc-700">
+          <SelectContent>
             {OVERLAY_OPTIONS.map((option) => (
               <SelectItem 
                 key={option.value} 
                 value={option.value}
-                className="text-zinc-300 focus:bg-zinc-800 focus:text-white text-xs"
+                className="text-xs"
                 data-testid={`select-overlay-${option.value}`}
               >
                 {option.label}
@@ -254,7 +254,7 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
       
       <div 
         ref={containerRef}
-        className="relative flex-1 flex items-center justify-center overflow-hidden p-2"
+        className="relative flex-1 flex items-center justify-center overflow-hidden bg-gray-950"
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
