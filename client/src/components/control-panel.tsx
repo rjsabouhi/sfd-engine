@@ -148,8 +148,21 @@ export function ControlPanel({
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="px-3 py-2 border-b border-border shrink-0">
-        <div className="text-sm font-semibold">{modeLabels.header}</div>
+      <div className="px-3 py-2 border-b border-border shrink-0 space-y-2">
+        <div className="flex items-center gap-2">
+          <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
+            <SelectTrigger className="h-7 text-xs flex-1" data-testid="select-interpretation-mode">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {modeOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <p className="text-xs text-muted-foreground">{modeLabels.subtitle}</p>
       </div>
 
@@ -247,32 +260,6 @@ export function ControlPanel({
                   data-testid="switch-dual-view"
                 />
               </div>
-            </div>
-
-            <div className="border-t border-border/50 pt-3 space-y-1.5">
-              <div className="flex items-center gap-1.5">
-                <Label className="text-xs">Interpretation Mode</Label>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-3 w-3 text-muted-foreground cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="max-w-[200px]">
-                    <p className="text-xs">View the raw evolving field before applying operator-level interpretations.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-              <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
-                <SelectTrigger className="h-8 text-xs" data-testid="select-interpretation-mode">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {modeOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             <div className="border-t border-border/50 pt-3">

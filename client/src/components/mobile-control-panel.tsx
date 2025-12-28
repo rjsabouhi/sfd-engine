@@ -68,14 +68,8 @@ export function MobileControlPanel({
   return (
     <div className="space-y-4 pb-4">
       <div className="space-y-2 pb-3 border-b border-border">
-        <div className="text-sm font-semibold">{modeLabels.header}</div>
-        <p className="text-xs text-muted-foreground">{modeLabels.subtitle}</p>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm">Interpretation Mode</Label>
         <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
-          <SelectTrigger className="h-12" data-testid="select-interpretation-mode-mobile">
+          <SelectTrigger className="h-10" data-testid="select-interpretation-mode-mobile">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -86,6 +80,7 @@ export function MobileControlPanel({
             ))}
           </SelectContent>
         </Select>
+        <p className="text-xs text-muted-foreground">{modeLabels.subtitle}</p>
       </div>
 
       <div className="space-y-2">
