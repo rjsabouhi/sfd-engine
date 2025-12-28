@@ -188,6 +188,7 @@ export default function SimulationPage() {
     const engine = engineRef.current;
     if (engine) {
       engine.stepBackward();
+      setFieldState(engine.getPlaybackFieldState());
       if (showDualViewRef.current) {
         setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
       }
@@ -198,6 +199,7 @@ export default function SimulationPage() {
     const engine = engineRef.current;
     if (engine) {
       engine.seekToFrame(index);
+      setFieldState(engine.getPlaybackFieldState());
       if (showDualViewRef.current) {
         setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
       }
@@ -208,6 +210,7 @@ export default function SimulationPage() {
     const engine = engineRef.current;
     if (engine) {
       engine.stepForwardInHistory();
+      setFieldState(engine.getPlaybackFieldState());
       if (showDualViewRef.current) {
         setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
       }

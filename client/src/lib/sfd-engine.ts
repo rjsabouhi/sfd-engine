@@ -15,6 +15,7 @@ interface FrameSnapshot {
   grid: Float32Array;
   step: number;
   stats: { energy: number; variance: number; basinCount: number };
+  fieldState: "calm" | "unsettled" | "reorganizing" | "transforming";
 }
 
 // Diagnostic data types
@@ -292,6 +293,7 @@ export class SFDEngine {
       grid: new Float32Array(this.grid),
       step: this.step,
       stats: this.computeStatistics(),
+      fieldState: this.displayedFieldState, // Capture current field state for playback
     };
     
     if (this.ringBuffer.length < this.ringBufferSize) {
@@ -508,7 +510,6 @@ export class SFDEngine {
     
     // If candidate is different and hold period has passed, allow change
     if (candidateState !== this.displayedFieldState && now >= this.fieldStateHoldUntil) {
-      console.log(`[FieldState] Changing from ${this.displayedFieldState} to ${candidateState} at step ${this.step}, holdUntil was ${this.fieldStateHoldUntil}, now is ${now}`);
       this.displayedFieldState = candidateState;
       this.fieldStateHoldUntil = now + this.fieldStateMinHoldMs;
       this.lastFieldStateUpdateTime = now;
@@ -881,6 +882,14 @@ export class SFDEngine {
 
   isInPlaybackMode(): boolean {
     return this.currentPlaybackIndex >= 0;
+  }
+
+  // Get the field state for the current playback frame (or current live state)
+  getPlaybackFieldState(): "calm" | "unsettled" | "reorganizing" | "transforming" {
+    if (this.currentPlaybackIndex >= 0 && this.currentPlaybackIndex < this.ringBuffer.length) {
+      return this.ringBuffer[this.currentPlaybackIndex].fieldState;
+    }
+    return this.displayedFieldState;
   }
 
   private computeStatistics(): { energy: number; variance: number; basinCount: number } {
