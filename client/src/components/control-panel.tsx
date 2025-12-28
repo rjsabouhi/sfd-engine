@@ -221,12 +221,12 @@ export function ControlPanel({
                   onClick={() => onShowDualViewChange(!showDualView)}
                   className="relative h-10 w-10 rounded-sm transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                   style={{
-                    backgroundColor: showDualView ? "rgba(168, 162, 158, 0.7)" : "rgba(39, 39, 42, 1)",
-                    border: showDualView ? "1px solid rgba(120, 113, 108, 0.6)" : "1px solid transparent"
+                    backgroundColor: showDualView ? "rgba(250, 250, 249, 0.85)" : "rgba(39, 39, 42, 1)",
+                    border: showDualView ? "1px solid rgba(214, 211, 209, 0.8)" : "1px solid transparent"
                   }}
                   data-testid="pad-dual-view"
                 >
-                  <Columns2 className={`h-4 w-4 mx-auto ${showDualView ? "text-stone-800" : "text-zinc-500"}`} />
+                  <Columns2 className={`h-4 w-4 mx-auto ${showDualView ? "text-stone-600" : "text-zinc-500"}`} />
                 </button>
               </div>
             </div>
