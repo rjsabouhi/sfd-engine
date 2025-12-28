@@ -206,7 +206,7 @@ export function ControlPanel({
               <div className="flex gap-2">
                 <button
                   onClick={() => onColormapChange(colormap === "inferno" ? "viridis" : "inferno")}
-                  className="relative h-10 w-10 rounded-sm transition-all duration-150"
+                  className="relative h-10 w-10 rounded-sm transition-all duration-150 focus:outline-none"
                   style={{
                     backgroundColor: colormap === "viridis" ? "rgba(12, 74, 110, 0.6)" : "rgba(127, 29, 29, 0.4)",
                     boxShadow: colormap === "viridis" 
@@ -219,7 +219,7 @@ export function ControlPanel({
                 </button>
                 <button
                   onClick={() => onShowDualViewChange(!showDualView)}
-                  className="relative h-10 w-10 rounded-sm transition-all duration-150"
+                  className="relative h-10 w-10 rounded-sm transition-all duration-150 focus:outline-none"
                   style={{
                     backgroundColor: showDualView ? "rgba(168, 162, 158, 0.7)" : "rgba(39, 39, 42, 1)",
                     boxShadow: showDualView ? "0 0 8px 1px rgba(214, 211, 209, 0.2)" : "none"
