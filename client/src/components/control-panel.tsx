@@ -205,16 +205,16 @@ export function ControlPanel({
             <div className="border-t border-border/50 pt-3">
               <div className="flex gap-2">
                 <button
-                  onClick={() => onColormapChange(colormap === "grayscale" ? "inferno" : "grayscale")}
+                  onClick={() => onColormapChange(colormap === "inferno" ? "viridis" : "inferno")}
                   className={`
                     relative h-10 w-10 rounded-sm transition-all duration-150
-                    ${colormap !== "grayscale" 
+                    ${colormap === "viridis" 
                       ? "bg-zinc-300 ring-1 ring-zinc-200/50" 
                       : "bg-zinc-800 hover:bg-zinc-700"}
                   `}
                   data-testid="pad-colormap-toggle"
                 >
-                  <Palette className={`h-4 w-4 mx-auto ${colormap !== "grayscale" ? "text-zinc-900" : "text-zinc-500"}`} />
+                  <Palette className={`h-4 w-4 mx-auto ${colormap === "viridis" ? "text-zinc-900" : "text-zinc-500"}`} />
                 </button>
                 <button
                   onClick={() => onShowDualViewChange(!showDualView)}
