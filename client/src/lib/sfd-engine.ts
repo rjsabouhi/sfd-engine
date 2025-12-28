@@ -238,6 +238,10 @@ export class SFDEngine {
       this.grid = new Float32Array(this.width * this.height);
       this.tempGrid = new Float32Array(this.width * this.height);
       this.initialize();
+      this.notifyUpdate();
+    } else if (params.couplingRadius !== undefined) {
+      // Radius change affects rendering, notify immediately
+      this.notifyUpdate();
     }
   }
 
