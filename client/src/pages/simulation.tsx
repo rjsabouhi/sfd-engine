@@ -11,7 +11,8 @@ import { DiagnosticPanel } from "@/components/diagnostic-panel";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Waves, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map } from "lucide-react";
+import sfdLogo from "@assets/generated_images/sfd_engine_grid_logo.png";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
@@ -347,9 +348,7 @@ export default function SimulationPage() {
       <div className="flex flex-col h-screen bg-background">
         <header className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-card/50">
           <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-md bg-primary/10">
-              <Waves className="h-4 w-4 text-primary" />
-            </div>
+            <img src={sfdLogo} alt="SFD Engine" className="w-8 h-8 rounded-md" />
             <div>
               <h1 className="text-base font-semibold leading-tight" data-testid="text-title">
                 SFD Engine
@@ -478,9 +477,7 @@ export default function SimulationPage() {
       <OnboardingModal />
       <header className="flex items-center justify-between gap-4 px-3 py-2 border-b border-border bg-card/50">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-7 h-7 rounded-md bg-primary/10">
-            <Waves className="h-3.5 w-3.5 text-primary" />
-          </div>
+          <img src={sfdLogo} alt="SFD Engine" className="w-7 h-7 rounded-md" />
           <div>
             <h1 className="text-sm font-semibold leading-tight" data-testid="text-title">SFD Engine</h1>
             <p className="text-xs text-muted-foreground">Structural Field Explorer</p>
