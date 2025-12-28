@@ -189,8 +189,12 @@ export default function SimulationPage() {
     if (engine) {
       engine.stepBackward();
       setFieldState(engine.getPlaybackFieldState());
-      if (showDualViewRef.current && derivedTypeRef.current !== "basins") {
-        setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
+      if (showDualViewRef.current) {
+        if (derivedTypeRef.current === "basins") {
+          setBasinMap(engine.getBasinMap());
+        } else {
+          setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
+        }
       }
     }
   }, []);
@@ -200,8 +204,12 @@ export default function SimulationPage() {
     if (engine) {
       engine.seekToFrame(index);
       setFieldState(engine.getPlaybackFieldState());
-      if (showDualViewRef.current && derivedTypeRef.current !== "basins") {
-        setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
+      if (showDualViewRef.current) {
+        if (derivedTypeRef.current === "basins") {
+          setBasinMap(engine.getBasinMap());
+        } else {
+          setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
+        }
       }
     }
   }, []);
@@ -211,8 +219,12 @@ export default function SimulationPage() {
     if (engine) {
       engine.stepForwardInHistory();
       setFieldState(engine.getPlaybackFieldState());
-      if (showDualViewRef.current && derivedTypeRef.current !== "basins") {
-        setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
+      if (showDualViewRef.current) {
+        if (derivedTypeRef.current === "basins") {
+          setBasinMap(engine.getBasinMap());
+        } else {
+          setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
+        }
       }
     }
   }, []);

@@ -901,6 +901,7 @@ export class SFDEngine {
       this.grid = new Float32Array(snapshot.grid);
       this.step = snapshot.step;
       this.invalidateDerivedFieldCache();
+      this.updateBasinMap();
       this.notifyUpdate();
       return true;
     }
@@ -916,6 +917,7 @@ export class SFDEngine {
       this.grid = new Float32Array(snapshot.grid);
       this.step = snapshot.step;
       this.invalidateDerivedFieldCache();
+      this.updateBasinMap();
       this.notifyUpdate();
       return true;
     } else {
@@ -932,6 +934,7 @@ export class SFDEngine {
     this.grid = new Float32Array(snapshot.grid);
     this.step = snapshot.step;
     this.invalidateDerivedFieldCache();
+    this.updateBasinMap();
     this.notifyUpdate();
   }
   
