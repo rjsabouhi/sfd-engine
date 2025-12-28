@@ -1,12 +1,14 @@
 import { useRef, useEffect, useCallback, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { DerivedField, BasinMap } from "@shared/schema";
+
+export type OverlayType = "curvature" | "tension" | "coupling" | "variance" | "basins" | "gradientFlow" | "criticality" | "hysteresis" | "constraintSkeleton" | "stabilityField" | "gradientFlowLines";
 
 interface DualFieldViewProps {
   derivedField: DerivedField | null;
   basinMap: BasinMap | null;
-  derivedType: "curvature" | "tension" | "coupling" | "variance" | "basins" | "gradientFlow" | "criticality" | "hysteresis";
-  onTypeChange: (type: "curvature" | "tension" | "coupling" | "variance" | "basins" | "gradientFlow" | "criticality" | "hysteresis") => void;
+  derivedType: OverlayType;
+  onTypeChange: (type: OverlayType) => void;
 }
 
 const PLASMA_COLORS = [
@@ -45,14 +47,28 @@ const MIN_ZOOM = 1;
 const MAX_ZOOM = 10;
 
 const BASIN_COLORS: [number, number, number][] = [
-  [59, 130, 246],   // Blue
-  [34, 197, 94],    // Green
-  [249, 115, 22],   // Orange
-  [168, 85, 247],   // Purple
-  [236, 72, 153],   // Pink
-  [20, 184, 166],   // Teal
-  [245, 158, 11],   // Amber
-  [99, 102, 241],   // Indigo
+  [59, 130, 246],
+  [34, 197, 94],
+  [249, 115, 22],
+  [168, 85, 247],
+  [236, 72, 153],
+  [20, 184, 166],
+  [245, 158, 11],
+  [99, 102, 241],
+];
+
+const OVERLAY_OPTIONS: { value: OverlayType; label: string }[] = [
+  { value: "curvature", label: "Curvature" },
+  { value: "tension", label: "Tension" },
+  { value: "coupling", label: "Coupling" },
+  { value: "variance", label: "Variance" },
+  { value: "basins", label: "Basins" },
+  { value: "gradientFlow", label: "Gradient Flow" },
+  { value: "criticality", label: "Criticality" },
+  { value: "hysteresis", label: "Memory" },
+  { value: "constraintSkeleton", label: "Constraint Skeleton" },
+  { value: "stabilityField", label: "Stability Field" },
+  { value: "gradientFlowLines", label: "Flow Lines" },
 ];
 
 export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChange }: DualFieldViewProps) {
@@ -75,7 +91,6 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
 
     setContainerSize({ width: container.clientWidth, height: container.clientHeight });
 
-    // Handle basins view separately
     if (derivedType === "basins") {
       if (!basinMap) return;
       
@@ -107,7 +122,6 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
       return;
     }
 
-    // Handle derived field views
     if (!derivedField) return;
 
     canvas.width = derivedField.width;
@@ -205,17 +219,7 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
     setPan({ x: 0, y: 0 });
   }, []);
 
-  const typeLabels: Record<string, string> = {
-    curvature: "Curvature Heatmap",
-    tension: "Tension Gradient Map",
-    coupling: "Coupling Flow",
-    variance: "Local Variance Map",
-    basins: "Basin Map",
-    gradientFlow: "Gradient Flow Map",
-    criticality: "Criticality Map",
-    hysteresis: "Hysteresis (Memory)",
-  };
-
+  const currentLabel = OVERLAY_OPTIONS.find(o => o.value === derivedType)?.label || derivedType;
   const zoomPercent = Math.round(zoom * 100);
   const size = Math.min(containerSize.width, containerSize.height);
 
@@ -252,88 +256,32 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
         </div>
       )}
       
-      <div className="absolute top-2 left-2 right-2 z-10 flex flex-col gap-1">
-        <div className="flex gap-1">
-          <Button
-            size="sm"
-            variant={derivedType === "curvature" ? "default" : "outline"}
-            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-            onClick={() => onTypeChange("curvature")}
-            data-testid="button-derived-curvature"
+      <div className="absolute top-2 left-2 right-2 z-10">
+        <Select value={derivedType} onValueChange={(v) => onTypeChange(v as OverlayType)}>
+          <SelectTrigger 
+            className="h-7 text-xs bg-black/70 backdrop-blur-sm border-white/20 text-white"
+            data-testid="select-overlay-type"
           >
-            Curv
-          </Button>
-          <Button
-            size="sm"
-            variant={derivedType === "tension" ? "default" : "outline"}
-            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-            onClick={() => onTypeChange("tension")}
-            data-testid="button-derived-tension"
-          >
-            Tens
-          </Button>
-          <Button
-            size="sm"
-            variant={derivedType === "coupling" ? "default" : "outline"}
-            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-            onClick={() => onTypeChange("coupling")}
-            data-testid="button-derived-coupling"
-          >
-            Coup
-          </Button>
-          <Button
-            size="sm"
-            variant={derivedType === "variance" ? "default" : "outline"}
-            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-            onClick={() => onTypeChange("variance")}
-            data-testid="button-derived-variance"
-          >
-            Var
-          </Button>
-        </div>
-        <div className="flex gap-1">
-          <Button
-            size="sm"
-            variant={derivedType === "basins" ? "default" : "outline"}
-            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-            onClick={() => onTypeChange("basins")}
-            data-testid="button-derived-basins"
-          >
-            Basin
-          </Button>
-          <Button
-            size="sm"
-            variant={derivedType === "gradientFlow" ? "default" : "outline"}
-            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-            onClick={() => onTypeChange("gradientFlow")}
-            data-testid="button-derived-gradientflow"
-          >
-            Flow
-          </Button>
-          <Button
-            size="sm"
-            variant={derivedType === "criticality" ? "default" : "outline"}
-            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-            onClick={() => onTypeChange("criticality")}
-            data-testid="button-derived-criticality"
-          >
-            Crit
-          </Button>
-          <Button
-            size="sm"
-            variant={derivedType === "hysteresis" ? "default" : "outline"}
-            className="flex-1 h-6 text-xs bg-black/60 backdrop-blur-sm border-white/20"
-            onClick={() => onTypeChange("hysteresis")}
-            data-testid="button-derived-hysteresis"
-          >
-            Mem
-          </Button>
-        </div>
+            <SelectValue placeholder="Select overlay" />
+          </SelectTrigger>
+          <SelectContent className="bg-gray-900/95 backdrop-blur-sm border-white/20">
+            {OVERLAY_OPTIONS.map((option) => (
+              <SelectItem 
+                key={option.value} 
+                value={option.value}
+                className="text-white focus:bg-white/20 focus:text-white"
+                data-testid={`select-overlay-${option.value}`}
+              >
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       
       <div className="absolute bottom-2 left-0 right-0 text-center z-10">
         <span className="text-xs text-white/70 bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded">
-          {typeLabels[derivedType]}
+          {currentLabel}
           {zoom > 1 && ` | ${zoomPercent}%`}
         </span>
       </div>

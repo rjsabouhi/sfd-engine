@@ -651,7 +651,7 @@ export class SFDEngine {
     };
   }
 
-  computeDerivedField(type: "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality" | "hysteresis"): DerivedField {
+  computeDerivedField(type: "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality" | "hysteresis" | "constraintSkeleton" | "stabilityField" | "gradientFlowLines"): DerivedField {
     const grid = new Float32Array(this.width * this.height);
     
     for (let y = 0; y < this.height; y++) {
@@ -690,30 +690,47 @@ export class SFDEngine {
             break;
           }
           case "gradientFlow": {
-            // Gradient magnitude visualization
             const gx = (this.getValue(x + 1, y) - this.getValue(x - 1, y)) / 2;
             const gy = (this.getValue(x, y + 1) - this.getValue(x, y - 1)) / 2;
             const mag = Math.sqrt(gx * gx + gy * gy);
-            // Encode direction as angle (0-1) combined with magnitude
             const angle = Math.atan2(gy, gx);
-            // Normalize angle to 0-1 range and combine with magnitude
             grid[idx] = (angle + Math.PI) / (2 * Math.PI) * mag;
             break;
           }
           case "criticality": {
-            // Hessian-based criticality - regions near bifurcation
             const dxx = this.getValue(x + 1, y) - 2 * value + this.getValue(x - 1, y);
             const dyy = this.getValue(x, y + 1) - 2 * value + this.getValue(x, y - 1);
             const dxy = (this.getValue(x + 1, y + 1) - this.getValue(x - 1, y + 1) 
                        - this.getValue(x + 1, y - 1) + this.getValue(x - 1, y - 1)) / 4;
             const detH = dxx * dyy - dxy * dxy;
-            // High criticality where determinant is near zero (saddle/inflection points)
             grid[idx] = 1.0 / (Math.abs(detH) + 1e-6);
             break;
           }
           case "hysteresis": {
-            // Memory buffer normalized
             grid[idx] = this.memoryBuffer ? this.memoryBuffer[idx] : 0;
+            break;
+          }
+          case "constraintSkeleton": {
+            const gx = (this.getValue(x + 1, y) - this.getValue(x - 1, y)) / 2;
+            const gy = (this.getValue(x, y + 1) - this.getValue(x, y - 1)) / 2;
+            const gradMag = Math.sqrt(gx * gx + gy * gy);
+            const laplacian = Math.abs(this.computeLaplacian(x, y));
+            grid[idx] = gradMag < 0.05 ? laplacian : 0;
+            break;
+          }
+          case "stabilityField": {
+            const laplacian = this.computeLaplacian(x, y);
+            const dxx = this.getValue(x + 1, y) - 2 * value + this.getValue(x - 1, y);
+            const dyy = this.getValue(x, y + 1) - 2 * value + this.getValue(x, y - 1);
+            const traceH = dxx + dyy;
+            grid[idx] = traceH < 0 ? Math.abs(traceH) : -Math.abs(traceH) * 0.5;
+            break;
+          }
+          case "gradientFlowLines": {
+            const gx = (this.getValue(x + 1, y) - this.getValue(x - 1, y)) / 2;
+            const gy = (this.getValue(x, y + 1) - this.getValue(x, y - 1)) / 2;
+            const angle = Math.atan2(gy, gx);
+            grid[idx] = (Math.sin(angle * 8) + 1) * 0.5;
             break;
           }
         }
@@ -790,7 +807,7 @@ export class SFDEngine {
     return this.cachedSignature;
   }
 
-  getCachedDerivedField(type: "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality" | "hysteresis"): DerivedField {
+  getCachedDerivedField(type: "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality" | "hysteresis" | "constraintSkeleton" | "stabilityField" | "gradientFlowLines"): DerivedField {
     // Check if we need to refresh (every N steps)
     const needsRefresh = this.step - this.lastDerivedFieldCacheStep >= this.derivedFieldCacheInterval;
     
@@ -814,7 +831,7 @@ export class SFDEngine {
     return this.cachedDerivedFields.get(type)!;
   }
 
-  private computeDerivedFieldInto(type: "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality" | "hysteresis", grid: Float32Array): void {
+  private computeDerivedFieldInto(type: "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality" | "hysteresis" | "constraintSkeleton" | "stabilityField" | "gradientFlowLines", grid: Float32Array): void {
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         const idx = y * this.width + x;
@@ -869,6 +886,28 @@ export class SFDEngine {
           }
           case "hysteresis": {
             grid[idx] = this.memoryBuffer ? this.memoryBuffer[idx] : 0;
+            break;
+          }
+          case "constraintSkeleton": {
+            const gx = (this.getValue(x + 1, y) - this.getValue(x - 1, y)) / 2;
+            const gy = (this.getValue(x, y + 1) - this.getValue(x, y - 1)) / 2;
+            const gradMag = Math.sqrt(gx * gx + gy * gy);
+            const laplacian = Math.abs(this.computeLaplacian(x, y));
+            grid[idx] = gradMag < 0.05 ? laplacian : 0;
+            break;
+          }
+          case "stabilityField": {
+            const dxx = this.getValue(x + 1, y) - 2 * value + this.getValue(x - 1, y);
+            const dyy = this.getValue(x, y + 1) - 2 * value + this.getValue(x, y - 1);
+            const traceH = dxx + dyy;
+            grid[idx] = traceH < 0 ? Math.abs(traceH) : -Math.abs(traceH) * 0.5;
+            break;
+          }
+          case "gradientFlowLines": {
+            const gx = (this.getValue(x + 1, y) - this.getValue(x - 1, y)) / 2;
+            const gy = (this.getValue(x, y + 1) - this.getValue(x, y - 1)) / 2;
+            const angle = Math.atan2(gy, gx);
+            grid[idx] = (Math.sin(angle * 8) + 1) * 0.5;
             break;
           }
         }
