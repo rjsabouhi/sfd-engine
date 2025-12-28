@@ -84,18 +84,6 @@ export function MobileControlPanel({
         <p className="text-sm text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
       </div>
 
-      <div className="space-y-2">
-        <h4 className="text-sm font-medium">Colormap</h4>
-        <Select value={colormap} onValueChange={(v) => onColormapChange(v as "inferno" | "viridis")}>
-          <SelectTrigger className="h-12" data-testid="select-colormap-mobile">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="inferno">Inferno</SelectItem>
-            <SelectItem value="viridis">Viridis</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
 
       <Collapsible open={coreOpen} onOpenChange={setCoreOpen}>
         <Card>

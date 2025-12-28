@@ -229,22 +229,17 @@ export function ControlPanel({
               </Button>
             </div>
 
-            <div className="border-t border-border/50 pt-3 space-y-2">
-              <h4 className="text-xs font-medium">Colormap</h4>
-              <Select value={colormap} onValueChange={(v) => onColormapChange(v as "inferno" | "viridis")}>
-                <SelectTrigger className="h-8 text-xs" data-testid="select-colormap">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="inferno">Inferno</SelectItem>
-                  <SelectItem value="viridis">Viridis</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="border-t border-border/50 pt-3 grid grid-cols-2 gap-3">
+            <div className="border-t border-border/50 pt-3 grid grid-cols-3 gap-3">
               <div className="flex flex-col items-center gap-1">
-                <Label className="text-xs">Show Basins</Label>
+                <Label className="text-xs">Viridis</Label>
+                <Switch
+                  checked={colormap === "viridis"}
+                  onCheckedChange={(checked) => onColormapChange(checked ? "viridis" : "inferno")}
+                  data-testid="switch-colormap"
+                />
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <Label className="text-xs">Basins</Label>
                 <Switch
                   checked={showBasins}
                   onCheckedChange={onShowBasinsChange}
