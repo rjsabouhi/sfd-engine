@@ -210,11 +210,11 @@ export function ControlPanel({
                     relative h-10 w-10 rounded-sm transition-all duration-150
                     ${colormap === "viridis" 
                       ? "bg-sky-900/60 hover:bg-sky-900/70" 
-                      : "bg-orange-900/50 hover:bg-orange-900/60"}
+                      : "bg-red-900/40 hover:bg-red-900/50"}
                   `}
                   data-testid="pad-colormap-toggle"
                 >
-                  <Palette className={`h-4 w-4 mx-auto ${colormap === "viridis" ? "text-sky-300/80" : "text-orange-300/70"}`} />
+                  <Palette className={`h-4 w-4 mx-auto ${colormap === "viridis" ? "text-sky-300/80" : "text-red-400/80"}`} />
                 </button>
                 <button
                   onClick={() => onShowDualViewChange(!showDualView)}
