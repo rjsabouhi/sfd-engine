@@ -223,6 +223,8 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
   const currentLabel = OVERLAY_OPTIONS.find(o => o.value === derivedType)?.label || derivedType;
   const zoomPercent = Math.round(zoom * 100);
   const size = Math.min(containerSize.width, containerSize.height);
+  const visualScale = 0.88;
+  const visualSize = size * visualScale;
 
   const currentOption = OVERLAY_OPTIONS.find(o => o.value === derivedType);
 
@@ -263,27 +265,64 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
       
       <div 
         ref={containerRef}
-        className="relative flex-1 flex items-center justify-center overflow-hidden bg-gray-950"
+        className="relative flex-1 flex items-center justify-center overflow-hidden"
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
         onDoubleClick={handleDoubleClick}
-        style={{ cursor: zoom > 1 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair' }}
+        style={{ 
+          cursor: zoom > 1 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair',
+          backgroundColor: 'rgb(8, 10, 14)',
+        }}
       >
+        {/* Spatial Reference Grid Background */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(70,90,130,0.25) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(70,90,130,0.25) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px',
+            backgroundPosition: 'center center',
+          }}
+        />
+        
+        {/* Grid Origin Crosshair */}
+        <div 
+          className="absolute pointer-events-none"
+          style={{
+            width: '100%',
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(80,100,140,0.4) 30%, rgba(80,100,140,0.6) 50%, rgba(80,100,140,0.4) 70%, transparent 100%)',
+            top: '50%',
+          }}
+        />
+        <div 
+          className="absolute pointer-events-none"
+          style={{
+            width: '1px',
+            height: '100%',
+            background: 'linear-gradient(180deg, transparent 0%, rgba(80,100,140,0.4) 30%, rgba(80,100,140,0.6) 50%, rgba(80,100,140,0.4) 70%, transparent 100%)',
+            left: '50%',
+          }}
+        />
+
         {(derivedField || (derivedType === "basins" && basinMap)) ? (
           <canvas
             ref={canvasRef}
-            className="rounded-sm"
+            className="rounded-md relative"
             style={{ 
               imageRendering: zoom > 2 ? "pixelated" : "auto",
-              width: `${size || '100%'}px`,
-              height: `${size || '100%'}px`,
+              width: `${visualSize || '100%'}px`,
+              height: `${visualSize || '100%'}px`,
               maxWidth: '100%',
               maxHeight: '100%',
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
               transformOrigin: 'center center',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.6), 0 0 1px rgba(255,255,255,0.1)',
             }}
             data-testid="canvas-derived-field"
           />
