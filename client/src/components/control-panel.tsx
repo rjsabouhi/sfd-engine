@@ -138,26 +138,11 @@ export function ControlPanel({
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <Collapsible defaultOpen={false} className="px-3 py-2 border-b border-border shrink-0">
-        <CollapsibleTrigger asChild>
-          <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-presets">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Mode:</span>
-                <span className="text-xs">{modeOptions.find(o => o.value === interpretationMode)?.label}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Preset:</span>
-                <span className="text-xs text-muted-foreground">Click to expand</span>
-              </div>
-            </div>
-            <Settings2 className="h-3.5 w-3.5 text-muted-foreground" />
-          </button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pt-2 space-y-3">
-          <div className="space-y-2">
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Interpretation Mode</span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-1">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider whitespace-nowrap">Mode</span>
             <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
-              <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-interpretation-mode">
+              <SelectTrigger className="h-7 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-interpretation-mode">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -168,17 +153,16 @@ export function ControlPanel({
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
           </div>
-          <div className="space-y-2 pt-2 border-t border-border/50">
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Behavior Presets</span>
+          <div className="flex items-center gap-1.5 flex-1">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider whitespace-nowrap">Preset</span>
             <Select onValueChange={(value) => {
               if (value && structuralPresets[value]) {
                 onParamsChange(structuralPresets[value]);
               }
             }}>
-              <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-preset">
-                <SelectValue placeholder="Select a dynamic regime..." />
+              <SelectTrigger className="h-7 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-preset">
+                <SelectValue placeholder="Select..." />
               </SelectTrigger>
               <SelectContent>
                 {Object.keys(structuralPresets).map((key) => (
@@ -188,8 +172,16 @@ export function ControlPanel({
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground leading-relaxed">Select a pre-configured SFD operator regime to explore characteristic system behaviors.</p>
           </div>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" data-testid="button-toggle-presets">
+              <ChevronDown className="h-3.5 w-3.5" />
+            </Button>
+          </CollapsibleTrigger>
+        </div>
+        <CollapsibleContent className="pt-3 space-y-2">
+          <p className="text-xs text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
+          <p className="text-xs text-muted-foreground leading-relaxed border-t border-border/50 pt-2">Select a pre-configured SFD operator regime to explore characteristic system behaviors.</p>
         </CollapsibleContent>
       </Collapsible>
 
