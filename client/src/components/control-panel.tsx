@@ -181,11 +181,11 @@ export function ControlPanel({
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={onStep}
-                    disabled={state.isRunning}
-                    data-testid="button-step"
+                    onClick={() => onShowDualViewChange(!showDualView)}
+                    className={showDualView ? "bg-purple-900/50 border-purple-400/50" : ""}
+                    data-testid="button-dual-view"
                   >
-                    <StepForward className="h-3.5 w-3.5" />
+                    <Columns2 className={`h-3.5 w-3.5 ${showDualView ? "text-purple-300" : ""}`} />
                   </Button>
                   <Button
                     variant="outline"
@@ -235,30 +235,17 @@ export function ControlPanel({
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent className="pt-2 space-y-2">
-                <div className="flex gap-2">
-                  <Select value={colormap} onValueChange={(v) => onColormapChange(v as "inferno" | "viridis" | "grayscale")}>
-                    <SelectTrigger className="h-8 flex-1 focus:ring-0 focus:ring-offset-0" data-testid="select-colormap">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="inferno">Inferno</SelectItem>
-                      <SelectItem value="viridis">Viridis</SelectItem>
-                      <SelectItem value="grayscale">Grayscale</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <button
-                    onClick={() => onShowDualViewChange(!showDualView)}
-                    className="relative h-8 w-8 rounded-md transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                    style={{
-                      backgroundColor: showDualView ? "#744B93" : "rgba(39, 39, 42, 1)",
-                      border: showDualView ? "1px solid #C4A7E7" : "1px solid rgba(63, 63, 70, 1)"
-                    }}
-                    data-testid="pad-dual-view"
-                  >
-                    <Columns2 className={`h-4 w-4 mx-auto ${showDualView ? "text-purple-200" : "text-zinc-500"}`} />
-                  </button>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">Choose a color palette and toggle dual-field comparison view.</p>
+                <Select value={colormap} onValueChange={(v) => onColormapChange(v as "inferno" | "viridis" | "grayscale")}>
+                  <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-colormap">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inferno">Inferno</SelectItem>
+                    <SelectItem value="viridis">Viridis</SelectItem>
+                    <SelectItem value="grayscale">Grayscale</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground leading-relaxed">Choose a color palette for the field visualization.</p>
               </CollapsibleContent>
             </Collapsible>
 
