@@ -116,7 +116,7 @@ export function ControlPanel({
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [metricsOpen, setMetricsOpen] = useState(false);
   const [interpretationOpen, setInterpretationOpen] = useState(false);
-  const [presetsOpen, setPresetsOpen] = useState(false);
+  const [presetsOpen, setPresetsOpen] = useState(true);
   const [displayOpen, setDisplayOpen] = useState(false);
   const [playbackOpen, setPlaybackOpen] = useState(true);
 
