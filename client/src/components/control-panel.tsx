@@ -205,7 +205,13 @@ export function ControlPanel({
                       Pause
                     </Button>
                   ) : (
-                    <Button onClick={onPlay} variant="secondary" className="flex-1" size="sm" data-testid="button-play">
+                    <Button 
+                      onClick={onPlay} 
+                      variant="secondary" 
+                      className="flex-1 relative ring-1 ring-cyan-500/50 shadow-[0_0_12px_rgba(34,211,238,0.25)]" 
+                      size="sm" 
+                      data-testid="button-play"
+                    >
                       <Play className="h-3.5 w-3.5 mr-1.5" />
                       Run Simulation
                     </Button>
