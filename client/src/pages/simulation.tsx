@@ -618,9 +618,9 @@ export default function SimulationPage() {
       <div className="flex flex-1 overflow-hidden">
         <main className="relative bg-gray-950 flex-1 flex flex-col">
           {/* Unified Dual-Pane Header Ribbon */}
-          <div className={`flex items-stretch border-b border-border shrink-0 ${!showDualView ? 'justify-center' : ''}`}>
+          <div className="flex items-stretch border-b border-border shrink-0">
             {/* Left Pane Header: Structural Field */}
-            <div className={`flex items-center justify-between gap-2 px-3 py-2 ${showDualView ? 'flex-1 border-r border-border' : 'w-full lg:w-1/2'}`}>
+            <div className={`flex items-center justify-between gap-2 px-3 py-2 flex-1 ${showDualView ? 'border-r border-border' : ''}`}>
               <div className="min-w-0">
                 <h4 className="text-xs font-medium">Structural Field</h4>
                 <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation</p>
@@ -809,26 +809,24 @@ export default function SimulationPage() {
                   </div>
                 </div>
               ) : (
-                <div className="h-full flex justify-center bg-border">
-                  <div className="h-full w-full lg:w-1/2 flex flex-col bg-background">
-                    <div className="relative flex-1 flex items-center justify-center bg-gray-950">
-                      <VisualizationCanvas 
-                        field={field} 
-                        colormap={colormap}
-                        basinMap={basinMap}
-                        onHover={handleHover}
-                        onHoverEnd={handleHoverEnd}
-                        onClick={handleFieldClick}
-                        perturbMode={perturbMode}
-                        trajectoryProbePoint={trajectoryProbePoint}
-                      />
-                    </div>
-                    <StructuralFieldFooter 
-                      probeData={probeData} 
-                      basinMap={basinMap} 
-                      isHovering={probeVisible} 
+                <div className="h-full flex flex-col bg-background">
+                  <div className="relative flex-1 flex items-center justify-center bg-gray-950">
+                    <VisualizationCanvas 
+                      field={field} 
+                      colormap={colormap}
+                      basinMap={basinMap}
+                      onHover={handleHover}
+                      onHoverEnd={handleHoverEnd}
+                      onClick={handleFieldClick}
+                      perturbMode={perturbMode}
+                      trajectoryProbePoint={trajectoryProbePoint}
                     />
                   </div>
+                  <StructuralFieldFooter 
+                    probeData={probeData} 
+                    basinMap={basinMap} 
+                    isHovering={probeVisible} 
+                  />
                 </div>
               )}
               
