@@ -478,7 +478,7 @@ export default function SimulationPage() {
   return (
     <div className="flex flex-col h-screen bg-background">
       <OnboardingModal />
-      <header className="relative flex items-center justify-center px-3 py-2 border-b border-border bg-card/50">
+      <header className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-card/50">
         <div className="flex items-center gap-3">
           <img src={sfdLogo} alt="SFD Engine" className="w-7 h-7 rounded-md" />
           <div>
@@ -487,7 +487,7 @@ export default function SimulationPage() {
           </div>
         </div>
         
-        <div className="absolute right-3">
+        <div>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" data-testid="button-help" className="h-7 w-7">
