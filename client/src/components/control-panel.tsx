@@ -451,18 +451,16 @@ export function ControlPanel({
             </Collapsible>
           </TabsContent>
 
-          <TabsContent value="export" className="m-0 p-3 space-y-3 overflow-y-auto relative">
-            <div 
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                backgroundImage: `
-                  linear-gradient(rgba(70,90,130,0.15) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(70,90,130,0.15) 1px, transparent 1px)
-                `,
-                backgroundSize: '20px 20px',
-                backgroundPosition: 'center center',
-              }}
-            />
+          <TabsContent value="export" className="m-0 p-3 space-y-3 overflow-y-auto relative bg-transparent"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(70,90,130,0.25) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(70,90,130,0.25) 1px, transparent 1px)
+              `,
+              backgroundSize: '20px 20px',
+              backgroundPosition: 'center center',
+            }}
+          >
             <div className="text-xs font-medium text-muted-foreground relative z-10">Visual Exports</div>
             <div className="space-y-2 relative z-10">
               <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportPNG} data-testid="button-export-png">
