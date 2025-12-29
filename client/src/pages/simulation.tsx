@@ -12,7 +12,7 @@ import { StructuralFieldFooter } from "@/components/field-footer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -83,6 +83,7 @@ export default function SimulationPage() {
   const lastDerivedCacheStepRef = useRef(0);
   
   // New MVP feature states
+  const [fieldInspectorEnabled, setFieldInspectorEnabled] = useState(true);
   const [perturbMode, setPerturbMode] = useState(false);
   const [trajectoryProbeActive, setTrajectoryProbeActive] = useState(false);
   const [trajectoryProbePoint, setTrajectoryProbePoint] = useState<{ x: number; y: number } | null>(null);
@@ -695,6 +696,16 @@ export default function SimulationPage() {
             <Button
               variant="outline"
               size="sm"
+              onClick={() => setFieldInspectorEnabled(!fieldInspectorEnabled)}
+              data-testid="button-field-inspector"
+              className={`h-6 text-[10px] gap-1 ${fieldInspectorEnabled ? "bg-muted" : ""}`}
+            >
+              <Eye className="h-3 w-3" />
+              Inspector
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => { setPerturbMode(!perturbMode); if (!perturbMode) setTrajectoryProbeActive(false); }}
               data-testid="button-perturb-mode"
               className={`h-6 text-[10px] gap-1 ${perturbMode ? "bg-muted" : ""}`}
@@ -830,12 +841,14 @@ export default function SimulationPage() {
                 </div>
               )}
               
-              <HoverProbe
-                data={probeData}
-                modeLabels={modeLabels}
-                visible={probeVisible}
-                position={probePosition}
-              />
+              {fieldInspectorEnabled && (
+                <HoverProbe
+                  data={probeData}
+                  modeLabels={modeLabels}
+                  visible={probeVisible}
+                  position={probePosition}
+                />
+              )}
               
               {state.isRunning && (
                 <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
