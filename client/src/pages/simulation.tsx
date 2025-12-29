@@ -563,57 +563,59 @@ export default function SimulationPage() {
   return (
     <div className="flex flex-col h-screen bg-background">
       <OnboardingModal ref={onboardingRef} />
-      <header className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-card/50">
-        <div className="flex items-center gap-3">
-          <img src={sfdLogo} alt="SFD Engine" className="w-7 h-7 rounded-md" />
-          <div>
-            <h1 className="text-sm font-semibold leading-tight" data-testid="text-title">SFD Engine</h1>
-            <p className="text-xs text-muted-foreground">Structural Field Explorer</p>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-1">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => onboardingRef.current?.replay()} 
-            data-testid="button-show-intro"
-            className="h-7 text-xs"
-          >
-            Show Intro
-          </Button>
-                    <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" data-testid="button-help" className="h-7 w-7">
-                <HelpCircle className="h-3.5 w-3.5" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>About Structural Field Dynamics</DialogTitle>
-                <DialogDescription className="pt-4 space-y-3 text-sm">
-                  <p>
-                    Structural Field Dynamics (SFD) is a geometric model of complex
-                    adaptive systems. This simulation demonstrates operator-driven
-                    field evolution on a 2D manifold.
-                  </p>
-                  <p><strong>The Five Operators:</strong></p>
-                  <ul className="list-disc pl-4 space-y-1">
-                    <li><strong>Curvature (K)</strong> — Responds to local curvature via discrete Laplacian</li>
-                    <li><strong>Gradient-Tension (T)</strong> — Drives tension waves based on gradient magnitude</li>
-                    <li><strong>Neighbor-Coupling (C)</strong> — Creates local clustering through Gaussian blur</li>
-                    <li><strong>Attractor-Formation (A)</strong> — Forms threshold-like basin structures</li>
-                    <li><strong>Global Redistribution (R)</strong> — Maintains coherence through mean-field shift</li>
-                  </ul>
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </header>
 
       <div className="flex flex-1 overflow-hidden">
         <main className="relative bg-gray-950 flex-1 flex flex-col">
+          {/* Header */}
+          <header className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-card/50 shrink-0">
+            <div className="flex items-center gap-3">
+              <img src={sfdLogo} alt="SFD Engine" className="w-7 h-7 rounded-md" />
+              <div>
+                <h1 className="text-sm font-semibold leading-tight" data-testid="text-title">SFD Engine</h1>
+                <p className="text-xs text-muted-foreground">Structural Field Explorer</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-1">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => onboardingRef.current?.replay()} 
+                data-testid="button-show-intro"
+                className="h-7 text-xs"
+              >
+                Show Intro
+              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon" data-testid="button-help" className="h-7 w-7">
+                    <HelpCircle className="h-3.5 w-3.5" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>About Structural Field Dynamics</DialogTitle>
+                    <DialogDescription className="pt-4 space-y-3 text-sm">
+                      <p>
+                        Structural Field Dynamics (SFD) is a geometric model of complex
+                        adaptive systems. This simulation demonstrates operator-driven
+                        field evolution on a 2D manifold.
+                      </p>
+                      <p><strong>The Five Operators:</strong></p>
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li><strong>Curvature (K)</strong> — Responds to local curvature via discrete Laplacian</li>
+                        <li><strong>Gradient-Tension (T)</strong> — Drives tension waves based on gradient magnitude</li>
+                        <li><strong>Neighbor-Coupling (C)</strong> — Creates local clustering through Gaussian blur</li>
+                        <li><strong>Attractor-Formation (A)</strong> — Forms threshold-like basin structures</li>
+                        <li><strong>Global Redistribution (R)</strong> — Maintains coherence through mean-field shift</li>
+                      </ul>
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </header>
+
           {/* Tools Toolbar */}
           <div className="flex items-center justify-center gap-2 px-3 py-1.5 border-b border-border bg-card/30 shrink-0">
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Tools:</span>
