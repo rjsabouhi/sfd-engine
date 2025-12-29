@@ -99,6 +99,38 @@ export interface StructuralSignature {
   coherence: number; // Composite 0-1 metric combining depth, curvature, tension variance
 }
 
+// Trend-based aggregated metrics for Simulation Metrics panel
+export interface TrendMetrics {
+  // Windowed averages (last N frames)
+  avgEnergy: number;
+  avgVariance: number;
+  avgCurvature: number;
+  avgBasinCount: number;
+  // Trends (positive = increasing, negative = decreasing)
+  energyTrend: number;
+  varianceTrend: number;
+  curvatureTrend: number;
+  // Stability classification counts (over window)
+  stableFrames: number;
+  borderlineFrames: number;
+  unstableFrames: number;
+  currentStability: "stable" | "borderline" | "unstable";
+  // Basin dynamics
+  basinMergeRate: number; // merges per N frames
+  basinCountHistory: number[];
+  // Peak/extreme values
+  peakGradient: number; // max gradient over last N frames
+  peakVariance: number;
+  peakEnergy: number;
+  // Complexity metric (0-1 scale)
+  complexity: number;
+  // Drift/relaxation
+  driftIndicator: number; // positive = drifting, negative = relaxing
+  relaxationRate: number;
+  // Window size used for calculations
+  windowSize: number;
+}
+
 // Human-readable attractor status
 export type AttractorStatus = "None" | "Emerging" | "Stable" | "Multiple";
 

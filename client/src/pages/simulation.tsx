@@ -27,7 +27,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { SimulationParameters, SimulationState, FieldData, ProbeData, OperatorContributions, StructuralSignature, StructuralEvent, DerivedField, BasinMap } from "@shared/schema";
+import type { SimulationParameters, SimulationState, FieldData, ProbeData, OperatorContributions, StructuralSignature, StructuralEvent, DerivedField, BasinMap, TrendMetrics } from "@shared/schema";
 import { defaultParameters, mobileParameters } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
@@ -62,6 +62,7 @@ export default function SimulationPage() {
     basinCount: 0, avgBasinDepth: 0, globalCurvature: 0, tensionVariance: 0, stabilityMetric: 1, coherence: 0.5,
   });
   const [coherenceHistory, setCoherenceHistory] = useState<number[]>([]);
+  const [trendMetrics, setTrendMetrics] = useState<TrendMetrics | null>(null);
   const [events, setEvents] = useState<StructuralEvent[]>([]);
   const [historyLength, setHistoryLength] = useState(0);
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
@@ -129,6 +130,7 @@ export default function SimulationPage() {
           setOperatorContributions(engine.getOperatorContributions());
           setStructuralSignature(engine.getCachedSignature());
           setCoherenceHistory(engine.getCoherenceHistory());
+          setTrendMetrics(engine.getTrendMetrics());
           setHistoryLength(engine.getHistoryLength());
           setCurrentHistoryIndex(engine.getCurrentHistoryIndex());
           setIsPlaybackMode(inPlayback);
@@ -876,6 +878,7 @@ export default function SimulationPage() {
                 operatorContributions={operatorContributions}
                 structuralSignature={structuralSignature}
                 coherenceHistory={coherenceHistory}
+                trendMetrics={trendMetrics}
                 events={events}
                 historyLength={historyLength}
                 currentHistoryIndex={currentHistoryIndex}

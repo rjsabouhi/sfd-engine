@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Sliders, Activity, Settings2, BookOpen, Download, Columns2 } from "lucide-react";
-import type { SimulationParameters, SimulationState, OperatorContributions, StructuralSignature, StructuralEvent } from "@shared/schema";
+import type { SimulationParameters, SimulationState, OperatorContributions, StructuralSignature, StructuralEvent, TrendMetrics } from "@shared/schema";
 import { defaultParameters } from "@shared/schema";
 import { TemporalControls } from "./temporal-controls";
 import { OperatorSensitivity } from "./operator-sensitivity";
@@ -27,6 +27,7 @@ interface ControlPanelProps {
   operatorContributions: OperatorContributions;
   structuralSignature: StructuralSignature;
   coherenceHistory: number[];
+  trendMetrics: TrendMetrics | null;
   events: StructuralEvent[];
   historyLength: number;
   currentHistoryIndex: number;
@@ -94,6 +95,7 @@ export function ControlPanel({
   operatorContributions,
   structuralSignature,
   coherenceHistory,
+  trendMetrics,
   events,
   historyLength,
   currentHistoryIndex,
@@ -253,6 +255,7 @@ export function ControlPanel({
                 <StructuralSignatureBar 
                   signature={structuralSignature} 
                   coherenceHistory={coherenceHistory}
+                  trendMetrics={trendMetrics}
                   state={state}
                   modeLabels={modeLabels} 
                 />

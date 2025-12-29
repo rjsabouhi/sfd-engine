@@ -8,6 +8,7 @@ import {
   BasinMap,
   DerivedField,
   StructuralEvent,
+  TrendMetrics,
   defaultParameters 
 } from "@shared/schema";
 
@@ -162,6 +163,18 @@ export class SFDEngine {
   private memoryBuffer: Float32Array | null = null;
   private prevGrid: Float32Array | null = null;
 
+  // Trend tracking for aggregated metrics
+  private trendWindowSize: number = 30;
+  private energyTrendBuffer: number[] = [];
+  private varianceTrendBuffer: number[] = [];
+  private curvatureTrendBuffer: number[] = [];
+  private gradientPeakBuffer: number[] = [];
+  private basinCountBuffer: number[] = [];
+  private stabilityBuffer: ("stable" | "borderline" | "unstable")[] = [];
+  private basinMergeEvents: number = 0;
+  private lastTrendBasinCount: number = 0;
+  private skeletonComplexityCache: number = 0;
+
   constructor(params: SimulationParameters = defaultParameters) {
     this.params = { ...params };
     this.width = params.gridSize;
@@ -214,6 +227,16 @@ export class SFDEngine {
     // Reset memory/hysteresis buffers
     this.memoryBuffer = new Float32Array(this.width * this.height);
     this.prevGrid = new Float32Array(this.grid);
+    // Reset trend buffers
+    this.energyTrendBuffer = [];
+    this.varianceTrendBuffer = [];
+    this.curvatureTrendBuffer = [];
+    this.gradientPeakBuffer = [];
+    this.basinCountBuffer = [];
+    this.stabilityBuffer = [];
+    this.basinMergeEvents = 0;
+    this.lastTrendBasinCount = 0;
+    this.skeletonComplexityCache = 0;
     this.resetReactiveEvents();
     this.updateBasinMap();
   }
@@ -413,6 +436,9 @@ export class SFDEngine {
 
   private detectEvents(): void {
     const stats = this.computeStatistics();
+    
+    // Update trend buffers for aggregated metrics
+    this.updateTrendBuffers(stats);
     
     // Reset reactive events each frame
     this.resetReactiveEvents();
@@ -847,6 +873,167 @@ export class SFDEngine {
   
   getCoherenceHistory(): number[] {
     return [...this.coherenceHistory];
+  }
+
+  // Update trend tracking buffers - called during simulation step
+  private updateTrendBuffers(stats: { energy: number; variance: number; basinCount: number }): void {
+    const ws = this.trendWindowSize;
+    
+    // Energy
+    this.energyTrendBuffer.push(stats.energy);
+    if (this.energyTrendBuffer.length > ws) this.energyTrendBuffer.shift();
+    
+    // Variance
+    this.varianceTrendBuffer.push(stats.variance);
+    if (this.varianceTrendBuffer.length > ws) this.varianceTrendBuffer.shift();
+    
+    // Global curvature (from cached signature or compute)
+    const signature = this.cachedSignature;
+    if (signature) {
+      this.curvatureTrendBuffer.push(Math.abs(signature.globalCurvature));
+      if (this.curvatureTrendBuffer.length > ws) this.curvatureTrendBuffer.shift();
+    }
+    
+    // Peak gradient - compute max gradient magnitude
+    let maxGrad = 0;
+    for (let y = 1; y < this.height - 1; y += 5) {
+      for (let x = 1; x < this.width - 1; x += 5) {
+        const gx = (this.getValue(x + 1, y) - this.getValue(x - 1, y)) / 2;
+        const gy = (this.getValue(x, y + 1) - this.getValue(x, y - 1)) / 2;
+        const grad = Math.sqrt(gx * gx + gy * gy);
+        if (grad > maxGrad) maxGrad = grad;
+      }
+    }
+    this.gradientPeakBuffer.push(maxGrad);
+    if (this.gradientPeakBuffer.length > ws) this.gradientPeakBuffer.shift();
+    
+    // Basin count
+    this.basinCountBuffer.push(stats.basinCount);
+    if (this.basinCountBuffer.length > ws) this.basinCountBuffer.shift();
+    
+    // Basin merges
+    if (this.lastTrendBasinCount > 0 && stats.basinCount < this.lastTrendBasinCount) {
+      this.basinMergeEvents += (this.lastTrendBasinCount - stats.basinCount);
+    }
+    this.lastTrendBasinCount = stats.basinCount;
+    
+    // Stability classification (using borderline instead of marginal to match UI)
+    const instability = stats.variance * 10 + (signature ? Math.abs(signature.globalCurvature) * 0.5 : 0);
+    const stability: "stable" | "borderline" | "unstable" = 
+      instability < 0.3 ? "stable" : instability < 0.7 ? "borderline" : "unstable";
+    this.stabilityBuffer.push(stability);
+    if (this.stabilityBuffer.length > ws) this.stabilityBuffer.shift();
+    
+    // Skeleton complexity (sample every 10 steps to reduce computation)
+    if (this.step % 10 === 0) {
+      let skeletonSum = 0;
+      for (let y = 1; y < this.height - 1; y += 3) {
+        for (let x = 1; x < this.width - 1; x += 3) {
+          const gx = (this.getValue(x + 1, y) - this.getValue(x - 1, y)) / 2;
+          const gy = (this.getValue(x, y + 1) - this.getValue(x, y - 1)) / 2;
+          const gradMag = Math.sqrt(gx * gx + gy * gy);
+          const laplacian = Math.abs(this.computeLaplacian(x, y));
+          if (gradMag < 0.05) skeletonSum += laplacian;
+        }
+      }
+      this.skeletonComplexityCache = skeletonSum / ((this.width / 3) * (this.height / 3));
+    }
+  }
+
+  // Get aggregated trend metrics for Simulation Metrics panel
+  getTrendMetrics(): TrendMetrics {
+    const ws = this.trendWindowSize;
+    
+    // Compute windowed averages
+    const avgEnergy = this.energyTrendBuffer.length > 0 
+      ? this.energyTrendBuffer.reduce((a, b) => a + b, 0) / this.energyTrendBuffer.length 
+      : 0;
+    const avgVariance = this.varianceTrendBuffer.length > 0 
+      ? this.varianceTrendBuffer.reduce((a, b) => a + b, 0) / this.varianceTrendBuffer.length 
+      : 0;
+    const avgCurvature = this.curvatureTrendBuffer.length > 0 
+      ? this.curvatureTrendBuffer.reduce((a, b) => a + b, 0) / this.curvatureTrendBuffer.length 
+      : 0;
+    
+    // Compute trends (linear regression slope approximation)
+    const computeTrend = (buffer: number[]): number => {
+      if (buffer.length < 3) return 0;
+      const n = buffer.length;
+      const first = buffer.slice(0, Math.floor(n / 3)).reduce((a, b) => a + b, 0) / Math.floor(n / 3);
+      const last = buffer.slice(-Math.floor(n / 3)).reduce((a, b) => a + b, 0) / Math.floor(n / 3);
+      return last - first;
+    };
+    
+    const energyTrend = computeTrend(this.energyTrendBuffer);
+    const varianceTrend = computeTrend(this.varianceTrendBuffer);
+    const curvatureTrend = computeTrend(this.curvatureTrendBuffer);
+    
+    // Count stability classifications in window
+    const stableFrames = this.stabilityBuffer.filter(s => s === "stable").length;
+    const borderlineFrames = this.stabilityBuffer.filter(s => s === "borderline").length;
+    const unstableFrames = this.stabilityBuffer.filter(s => s === "unstable").length;
+    
+    // Current stability based on recent history (last 5 frames)
+    const recentStability = this.stabilityBuffer.slice(-5);
+    const recentCounts = { stable: 0, borderline: 0, unstable: 0 };
+    recentStability.forEach(s => recentCounts[s]++);
+    const currentStability: "stable" | "borderline" | "unstable" = 
+      recentCounts.unstable > 2 ? "unstable" : 
+      recentCounts.borderline > 2 ? "borderline" : "stable";
+    
+    // Basin merge rate (merges per window, normalized)
+    const basinMergeRate = this.trendWindowSize > 0 ? this.basinMergeEvents / this.trendWindowSize : 0;
+    
+    // Average basin count
+    const avgBasinCount = this.basinCountBuffer.length > 0
+      ? this.basinCountBuffer.reduce((a, b) => a + b, 0) / this.basinCountBuffer.length
+      : 0;
+    
+    // Peak values
+    const peakGradient = this.gradientPeakBuffer.length > 0 
+      ? Math.max(...this.gradientPeakBuffer) 
+      : 0;
+    const peakVariance = this.varianceTrendBuffer.length > 0 
+      ? Math.max(...this.varianceTrendBuffer) 
+      : 0;
+    const peakEnergy = this.energyTrendBuffer.length > 0
+      ? Math.max(...this.energyTrendBuffer)
+      : 0;
+    
+    // Complexity metric (0-1 based on variance, basin count, curvature variation)
+    const varianceNorm = Math.min(avgVariance * 20, 1);
+    const basinNorm = Math.min(avgBasinCount / 10, 1);
+    const curvatureNorm = Math.min(Math.abs(avgCurvature) * 50, 1);
+    const complexity = (varianceNorm * 0.4 + basinNorm * 0.35 + curvatureNorm * 0.25);
+    
+    // Drift indicator (energy trend normalized)
+    const driftIndicator = energyTrend * 100;
+    
+    // Relaxation rate (negative variance trend = relaxing)
+    const relaxationRate = -varianceTrend * 100;
+    
+    return {
+      avgEnergy,
+      avgVariance,
+      avgCurvature,
+      avgBasinCount,
+      energyTrend,
+      varianceTrend,
+      curvatureTrend,
+      stableFrames,
+      borderlineFrames,
+      unstableFrames,
+      currentStability,
+      basinMergeRate,
+      basinCountHistory: [...this.basinCountBuffer],
+      peakGradient,
+      peakVariance,
+      peakEnergy,
+      complexity,
+      driftIndicator,
+      relaxationRate,
+      windowSize: ws,
+    };
   }
 
   getCachedSignature(): StructuralSignature {

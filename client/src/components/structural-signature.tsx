@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import type { StructuralSignature, AttractorStatus, FieldMode, SimulationState } from "@shared/schema";
+import { ChevronDown, ChevronUp, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import type { StructuralSignature, AttractorStatus, FieldMode, SimulationState, TrendMetrics } from "@shared/schema";
 import type { ModeLabels } from "@/lib/interpretation-modes";
 
 interface StructuralSignatureBarProps {
   signature: StructuralSignature;
   coherenceHistory: number[];
+  trendMetrics: TrendMetrics | null;
   state: SimulationState;
   modeLabels: ModeLabels;
 }
@@ -130,8 +131,36 @@ function Sparkline({ data, width = 80, height = 20 }: { data: number[]; width?: 
   );
 }
 
-export function StructuralSignatureBar({ signature, coherenceHistory, state, modeLabels }: StructuralSignatureBarProps) {
+// Trend indicator component
+function TrendIndicator({ trend, label }: { trend: number; label?: string }) {
+  const threshold = 0.001;
+  if (Math.abs(trend) < threshold) {
+    return <Minus className="h-3 w-3 text-muted-foreground" />;
+  }
+  if (trend > 0) {
+    return <TrendingUp className="h-3 w-3 text-yellow-500" />;
+  }
+  return <TrendingDown className="h-3 w-3 text-green-500" />;
+}
+
+// Get stability classification color (considers all three states)
+function getStabilityColor(stable: number, borderline: number, unstable: number): string {
+  const total = stable + borderline + unstable;
+  if (total === 0) return "text-muted-foreground";
+  const unstableRatio = unstable / total;
+  const stableRatio = stable / total;
+  // Unstable dominates
+  if (unstableRatio > 0.3) return "text-red-400";
+  // Mostly stable
+  if (stableRatio > 0.7) return "text-green-500";
+  // Mixed
+  if (stableRatio > 0.4) return "text-yellow-500";
+  return "text-red-400";
+}
+
+export function StructuralSignatureBar({ signature, coherenceHistory, trendMetrics, state, modeLabels }: StructuralSignatureBarProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [basinDynamicsOpen, setBasinDynamicsOpen] = useState(false);
   
   const attractor = getAttractorStatus(signature.basinCount, signature.stabilityMetric, signature.avgBasinDepth);
   const fieldMode = getFieldMode(signature, state.variance);
@@ -152,45 +181,80 @@ export function StructuralSignatureBar({ signature, coherenceHistory, state, mod
       case "Multiple": return "text-blue-400";
     }
   };
+
+  // Compute trend-based complexity from metrics
+  const getComplexityLabel = (complexity: number): string => {
+    if (complexity < 0.2) return "Simple";
+    if (complexity < 0.4) return "Moderate";
+    if (complexity < 0.6) return "Complex";
+    return "Highly Complex";
+  };
+  
+  // Determine drift/relaxation state
+  const getDriftState = (): { label: string; color: string } => {
+    if (!trendMetrics) return { label: "Collecting...", color: "text-muted-foreground" };
+    const { energyTrend, varianceTrend } = trendMetrics;
+    if (Math.abs(energyTrend) < 0.0001 && Math.abs(varianceTrend) < 0.0001) {
+      return { label: "Relaxed", color: "text-green-500" };
+    }
+    if (energyTrend > 0.001 || varianceTrend > 0.001) {
+      return { label: "Drifting", color: "text-yellow-500" };
+    }
+    if (energyTrend < -0.001) {
+      return { label: "Relaxing", color: "text-blue-400" };
+    }
+    return { label: "Stable", color: "text-muted-foreground" };
+  };
+  
+  const driftState = getDriftState();
   
   return (
     <div className="space-y-3" data-testid="panel-structural-signature">
-      {/* Core Metrics - 4 key indicators */}
+      {/* Trend-Based Core Metrics */}
       <div className="space-y-2">
-        {/* Structural Coherence */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Structural Coherence</span>
-          <span className="font-mono text-sm font-semibold" data-testid="metric-coherence">
-            {signature.coherence.toFixed(3)}
-          </span>
+        {/* Energy Trend */}
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs text-muted-foreground">Energy (avg)</span>
+          <div className="flex items-center gap-1.5">
+            {trendMetrics && <TrendIndicator trend={trendMetrics.energyTrend} />}
+            <span className="font-mono text-sm font-semibold" data-testid="metric-energy-avg">
+              {trendMetrics ? trendMetrics.avgEnergy.toFixed(4) : "..."}
+            </span>
+          </div>
         </div>
         
-        {/* Stability Index */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Stability Index</span>
-          <span className="font-mono text-sm font-semibold" data-testid="metric-stability">
-            {signature.stabilityMetric.toFixed(3)}
-          </span>
+        {/* Variance Trend */}
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs text-muted-foreground">Variance (avg)</span>
+          <div className="flex items-center gap-1.5">
+            {trendMetrics && <TrendIndicator trend={trendMetrics.varianceTrend} />}
+            <span className="font-mono text-sm font-semibold" data-testid="metric-variance-avg">
+              {trendMetrics ? trendMetrics.avgVariance.toFixed(6) : "..."}
+            </span>
+          </div>
         </div>
         
-        {/* Attractors */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Attractors</span>
-          <span className={`font-mono text-sm font-semibold ${getAttractorColor(attractor.status)}`} data-testid="metric-attractors">
-            {attractorDisplay}
-          </span>
+        {/* Curvature Trend */}
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs text-muted-foreground">Curvature (avg)</span>
+          <div className="flex items-center gap-1.5">
+            {trendMetrics && <TrendIndicator trend={trendMetrics.curvatureTrend} />}
+            <span className="font-mono text-sm font-semibold" data-testid="metric-curvature-avg">
+              {trendMetrics ? trendMetrics.avgCurvature.toFixed(4) : "..."}
+            </span>
+          </div>
         </div>
         
-        {/* Field Mode */}
+        {/* Drift/Relaxation State */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Field Mode</span>
-          <span className="text-xs font-medium text-right max-w-[140px] truncate" data-testid="metric-field-mode" title={fieldMode}>
-            {fieldMode}
+          <span className="text-xs text-muted-foreground">Field State</span>
+          <span className={`text-xs font-medium ${driftState.color}`} data-testid="metric-drift-state">
+            {driftState.label}
           </span>
         </div>
       </div>
       
-      {/* Sparkline */}
+      {/* Stability History Sparkline */}
       <div className="pt-2 border-t border-border/50">
         <div className="flex items-center justify-between mb-1">
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Coherence Trend</span>
@@ -198,11 +262,84 @@ export function StructuralSignatureBar({ signature, coherenceHistory, state, mod
         <Sparkline data={coherenceHistory} width={200} height={24} />
       </div>
       
-      {/* Advanced Metrics - Collapsible */}
+      {/* Stability Classification Summary */}
+      {trendMetrics && (
+        <div className="pt-2 border-t border-border/50">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Stability History</span>
+            <span className={`text-xs font-mono ${getStabilityColor(trendMetrics.stableFrames, trendMetrics.borderlineFrames, trendMetrics.unstableFrames)}`}>
+              {trendMetrics.stableFrames}s / {trendMetrics.borderlineFrames}b / {trendMetrics.unstableFrames}u
+            </span>
+          </div>
+          <div className="flex gap-1 h-1.5">
+            {trendMetrics.stableFrames > 0 && (
+              <div 
+                className="bg-green-500 rounded-full" 
+                style={{ flex: trendMetrics.stableFrames }}
+                title={`Stable: ${trendMetrics.stableFrames} frames`}
+              />
+            )}
+            {trendMetrics.borderlineFrames > 0 && (
+              <div 
+                className="bg-yellow-500 rounded-full" 
+                style={{ flex: trendMetrics.borderlineFrames }}
+                title={`Borderline: ${trendMetrics.borderlineFrames} frames`}
+              />
+            )}
+            {trendMetrics.unstableFrames > 0 && (
+              <div 
+                className="bg-red-400 rounded-full" 
+                style={{ flex: trendMetrics.unstableFrames }}
+                title={`Unstable: ${trendMetrics.unstableFrames} frames`}
+              />
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Basin Dynamics - Collapsible */}
+      <Collapsible open={basinDynamicsOpen} onOpenChange={setBasinDynamicsOpen} className="pt-2 border-t border-border/50">
+        <CollapsibleTrigger asChild>
+          <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-basin-dynamics">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Basin Dynamics</span>
+            {basinDynamicsOpen ? <ChevronUp className="h-3 w-3 text-muted-foreground" /> : <ChevronDown className="h-3 w-3 text-muted-foreground" />}
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-2 space-y-1.5">
+          {trendMetrics ? (
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Avg Basins</span>
+                <span className="font-mono">{trendMetrics.avgBasinCount.toFixed(1)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Merge Rate</span>
+                <span className="font-mono">{(trendMetrics.basinMergeRate * 100).toFixed(1)}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Peak Gradient</span>
+                <span className="font-mono">{trendMetrics.peakGradient.toFixed(4)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Peak Energy</span>
+                <span className="font-mono">{trendMetrics.peakEnergy.toFixed(4)}</span>
+              </div>
+              <div className="flex justify-between col-span-2">
+                <span className="text-muted-foreground">Complexity</span>
+                <span className="font-mono">{getComplexityLabel(trendMetrics.complexity)}</span>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground italic">Collecting trend data...</p>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
+      
+      {/* Advanced Metrics - Collapsible (instantaneous reference) */}
       <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen} className="pt-2 border-t border-border/50">
         <CollapsibleTrigger asChild>
           <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-advanced-metrics">
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Advanced Metrics</span>
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Instantaneous Reference</span>
             {advancedOpen ? <ChevronUp className="h-3 w-3 text-muted-foreground" /> : <ChevronDown className="h-3 w-3 text-muted-foreground" />}
           </button>
         </CollapsibleTrigger>
@@ -217,20 +354,20 @@ export function StructuralSignatureBar({ signature, coherenceHistory, state, mod
               <span className="font-mono">{state.fps}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Basins</span>
-              <span className="font-mono">{signature.basinCount}</span>
+              <span className="text-muted-foreground">Coherence</span>
+              <span className="font-mono">{signature.coherence.toFixed(3)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Depth</span>
-              <span className="font-mono">{signature.avgBasinDepth.toFixed(3)}</span>
+              <span className="text-muted-foreground">Stability</span>
+              <span className="font-mono">{signature.stabilityMetric.toFixed(3)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Curvature</span>
-              <span className="font-mono">{signature.globalCurvature.toFixed(4)}</span>
+              <span className="text-muted-foreground">Attractors</span>
+              <span className={`font-mono ${getAttractorColor(attractor.status)}`}>{attractorDisplay}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">T-Variance</span>
-              <span className="font-mono">{signature.tensionVariance.toFixed(4)}</span>
+              <span className="text-muted-foreground">Field Mode</span>
+              <span className="font-mono text-[10px] truncate max-w-[80px]" title={fieldMode}>{fieldMode}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">{modeLabels.stats.energy}</span>
