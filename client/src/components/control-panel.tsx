@@ -157,7 +157,8 @@ export function ControlPanel({
 
         <div className="flex-1 overflow-y-auto">
           <TabsContent value="controls" className="m-0 p-3 space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-3">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Simulation Playback</span>
               <div className="flex items-center gap-2">
                 {state.isRunning ? (
                   <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="button-pause">
@@ -197,6 +198,16 @@ export function ControlPanel({
                   <RotateCcw className="h-3.5 w-3.5" />
                 </Button>
               </div>
+              <TemporalControls
+                historyLength={historyLength}
+                currentIndex={currentHistoryIndex}
+                isPlaybackMode={isPlaybackMode}
+                isRunning={state.isRunning}
+                onStepBackward={onStepBackward}
+                onStepForward={onStepForward}
+                onSeek={onSeekFrame}
+                onExitPlayback={onExitPlayback}
+              />
               {!state.isRunning && (
                 <p className="text-xs text-muted-foreground leading-relaxed">Run the simulation to reveal dynamic structure.</p>
               )}
@@ -272,20 +283,6 @@ export function ControlPanel({
                 <p className="text-xs text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
               </CollapsibleContent>
             </Collapsible>
-
-            <div className="pt-3 border-t border-border space-y-2">
-              <h4 className="text-xs font-medium">Timeline</h4>
-              <TemporalControls
-                historyLength={historyLength}
-                currentIndex={currentHistoryIndex}
-                isPlaybackMode={isPlaybackMode}
-                isRunning={state.isRunning}
-                onStepBackward={onStepBackward}
-                onStepForward={onStepForward}
-                onSeek={onSeekFrame}
-                onExitPlayback={onExitPlayback}
-              />
-            </div>
 
             <Collapsible open={metricsOpen} onOpenChange={setMetricsOpen} className="border-t border-border pt-3">
               <CollapsibleTrigger asChild>
