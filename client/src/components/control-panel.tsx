@@ -48,7 +48,12 @@ interface ControlPanelProps {
   onExportEvents: () => void;
   onExportPNG: () => void;
   onExportJSON: () => void;
+  onExportAnimation: () => void;
+  onExportSimulationData: () => void;
+  onExportMetrics: () => void;
+  onExportStateSnapshot: () => void;
   onShowDualViewChange: (show: boolean) => void;
+  isExporting?: boolean;
 }
 
 interface ParameterSliderProps {
@@ -109,8 +114,13 @@ export function ControlPanel({
   onExportEvents,
   onExportPNG,
   onExportJSON,
+  onExportAnimation,
+  onExportSimulationData,
+  onExportMetrics,
+  onExportStateSnapshot,
   onShowDualViewChange,
   varianceChange = 0,
+  isExporting = false,
 }: ControlPanelProps) {
   const [coreParamsOpen, setCoreParamsOpen] = useState(true);
   const [weightsOpen, setWeightsOpen] = useState(false);
@@ -430,6 +440,22 @@ export function ControlPanel({
               <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportPNG} data-testid="button-export-png">
                 <Download className="h-3.5 w-3.5 mr-2" />
                 PNG Snapshot
+              </Button>
+              <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportAnimation} disabled={isExporting} data-testid="button-export-animation">
+                <Download className="h-3.5 w-3.5 mr-2" />
+                {isExporting ? "Exporting..." : "Animation Export (GIF)"}
+              </Button>
+              <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportSimulationData} data-testid="button-export-simulation-data">
+                <Download className="h-3.5 w-3.5 mr-2" />
+                Simulation Data (.csv)
+              </Button>
+              <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportMetrics} data-testid="button-export-metrics">
+                <Download className="h-3.5 w-3.5 mr-2" />
+                Metrics Log (.csv)
+              </Button>
+              <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportStateSnapshot} data-testid="button-export-state">
+                <Download className="h-3.5 w-3.5 mr-2" />
+                State Snapshot (.json)
               </Button>
               <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportJSON} data-testid="button-export-json">
                 <Download className="h-3.5 w-3.5 mr-2" />

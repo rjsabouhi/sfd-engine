@@ -1453,4 +1453,53 @@ export class SFDEngine {
     }
     this.lastEnergy = energy;
   }
+
+  // Export methods for new export system
+  getAllFrames(): { grid: Float32Array; step: number; stats: { energy: number; variance: number; basinCount: number } }[] {
+    return this.ringBuffer.map(snapshot => ({
+      grid: new Float32Array(snapshot.grid),
+      step: snapshot.step,
+      stats: { ...snapshot.stats }
+    }));
+  }
+
+  getMetricsHistory(): { step: number; fps: number; basinCount: number; depth: number; curvature: number; tensionVariance: number; stability: number; energy: number; variance: number; timestamp: number }[] {
+    return this.ringBuffer.map((snapshot, index) => ({
+      step: snapshot.step,
+      fps: this.fps,
+      basinCount: snapshot.stats.basinCount,
+      depth: this.cachedSignature?.avgBasinDepth ?? 0,
+      curvature: this.computeCurvatureMeanForExport(),
+      tensionVariance: snapshot.stats.variance,
+      stability: this.cachedSignature?.stabilityMetric ?? 1,
+      energy: snapshot.stats.energy,
+      variance: snapshot.stats.variance,
+      timestamp: Date.now() - (this.ringBuffer.length - index) * 16
+    }));
+  }
+
+  getCurrentFieldSnapshot(): { width: number; height: number; field: number[]; timestamp: number } {
+    return {
+      width: this.width,
+      height: this.height,
+      field: Array.from(this.grid),
+      timestamp: Date.now()
+    };
+  }
+
+  private computeCurvatureMeanForExport(): number {
+    let sum = 0;
+    let count = 0;
+    for (let i = 1; i < this.height - 1; i++) {
+      for (let j = 1; j < this.width - 1; j++) {
+        const idx = i * this.width + j;
+        const laplacian = this.grid[idx - 1] + this.grid[idx + 1] + 
+                         this.grid[idx - this.width] + this.grid[idx + this.width] - 
+                         4 * this.grid[idx];
+        sum += laplacian;
+        count++;
+      }
+    }
+    return count > 0 ? sum / count : 0;
+  }
 }

@@ -1,0 +1,164 @@
+Here is the best possible, production-grade, copy-paste-ready Replit prompt.
+It is refined, tightened, and formatted exactly the way Replit responds best — concise, directive, zero ambiguity, every requirement explicitly actionable.
+
+Paste this verbatim into Replit:
+
+⸻
+
+✅ REPLIT IMPLEMENTATION PROMPT — COPY/PASTE EXACTLY
+
+Upgrade the SFD Engine Export System according to the following complete specification.
+Assume the existing UI framework, button components, state stores, and simulation buffers already exist.
+
+⸻
+
+1. UI CHANGES — EXPORT PANEL
+
+Update the “Export” panel on the right side to include the following buttons in this exact order:
+	1.	PNG Snapshot
+	2.	Animation Export (GIF / MP4)
+	3.	Simulation Data (.csv / .npz)
+	4.	Metrics Log (.csv)
+	5.	State Snapshot (.json)
+	6.	Settings JSON
+	7.	Event Log
+
+Requirements:
+	•	Reuse the same visual styling as existing export buttons.
+	•	Add appropriate icons only if trivial; otherwise keep text-only.
+	•	Maintain vertical spacing uniform with current UI.
+
+⸻
+
+2. EXPORT FUNCTIONALITY REQUIREMENTS
+
+Implement the following functions behind each button.
+
+⸻
+
+2.1 PNG Snapshot
+
+Already implemented — no changes required.
+
+⸻
+
+2.2 Animation Export (GIF / MP4)
+
+Button label: Animation Export (GIF / MP4)
+
+Behavior:
+	•	Collect all frames currently stored in the simulation timeline buffer.
+	•	Attempt MP4 export first (if browser APIs allow).
+	•	If MP4 fails, automatically fallback to GIF export with no user intervention.
+	•	Use a Web Worker or async task to avoid blocking the interface.
+	•	Add an optional progress indicator if easy.
+
+Output filenames:
+	•	sfd-animation-<timestamp>.mp4
+	•	sfd-animation-<timestamp>.gif
+
+⸻
+
+2.3 Simulation Data Export (.csv / .npz)
+
+Button label: Simulation Data (.csv / .npz)
+
+Behavior:
+	•	Export the entire field lattice.
+	•	If multiple frames exist → compress into .npz (via JSZip or similar).
+	•	If only one frame exists → export as .csv.
+
+File naming:
+	•	sfd-simulation-data-<timestamp>.csv
+	•	sfd-simulation-data-<timestamp>.npz
+
+Data content:
+	•	For CSV: 2D flattened field values, comma-separated.
+	•	For NPZ:
+	•	field[i] for each frame
+	•	metadata file with width, height, frame count
+
+⸻
+
+2.4 Metrics Log Export (.csv)
+
+Button label: Metrics Log (.csv)
+
+Export all tracked metrics per frame in a single CSV.
+
+Columns:
+	•	Step
+	•	FPS
+	•	Structural Basins
+	•	Depth
+	•	Curvature
+	•	Tension Variance
+	•	Stability
+	•	Field Energy
+	•	Local Variance (if available)
+	•	Timestamp
+
+File name:
+sfd-metrics-<timestamp>.csv
+
+⸻
+
+2.5 State Snapshot (.json)
+
+Button label: State Snapshot (.json)
+
+Export only the current active frame.
+
+JSON structure:
+
+{
+  "width": W,
+  "height": H,
+  "field": [...values...],
+  "timestamp": <Epoch MS>
+}
+
+File name:
+sfd-state-<timestamp>.json
+
+⸻
+
+2.6 Settings JSON
+
+Leave as-is.
+Just ensure filename follows:
+
+sfd-settings-<timestamp>.json
+
+⸻
+
+2.7 Event Log
+
+Leave as-is.
+Ensure filename follows:
+
+sfd-events-<timestamp>.log
+
+⸻
+
+3. GENERAL REQUIREMENTS
+	•	All export operations must be asynchronous, using Promises or Workers.
+	•	The UI must not freeze during GIF/MP4 generation.
+	•	Use consistent lowercase-hyphen filenames with timestamps.
+	•	Implement a small success toast if trivial:
+	•	“Export complete.”
+
+⸻
+
+4. OPTIONAL (IF EASY)
+
+Add:
+	•	Progress indicator for animation encoding.
+	•	Small preview thumbnail for PNG and GIF exports.
+	•	Size warning if export exceeds 100MB.
+
+These are optional — core implementation has priority.
+
+⸻
+
+END OF PROMPT

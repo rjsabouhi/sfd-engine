@@ -28,6 +28,7 @@ import { defaultParameters, mobileParameters } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
 import { getStatusLine, computeFieldState, getFieldStateLabel, type ReactiveEvents, type SimulationState as LanguageSimState, type FieldState } from "@/lib/language";
+import { exportPNGSnapshot, exportAnimationGIF, exportSimulationData, exportMetricsLog, exportStateSnapshot, exportSettingsJSON, exportEventLog } from "@/lib/export-utils";
 
 export default function SimulationPage() {
   const isMobile = useIsMobile();
@@ -69,6 +70,7 @@ export default function SimulationPage() {
   const [simulationPhase, setSimulationPhase] = useState<"idle" | "firstMotion" | "running">("idle");
   const [fieldState, setFieldState] = useState<FieldState>("calm");
   const [diagnosticsVisible, setDiagnosticsVisible] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const prevBasinCountRef = useRef<number | null>(null);
   const frameCountRef = useRef(0);
   const lastDerivedCacheStepRef = useRef(0);
@@ -252,40 +254,48 @@ export default function SimulationPage() {
     setEvents([]);
   }, []);
 
-  const handleExportEvents = useCallback(() => {
-    const text = events.map(e => `t=${e.step} | ${e.description}`).join('\n');
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `sfd-events-${Date.now()}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const handleExportEvents = useCallback(async () => {
+    await exportEventLog(events);
   }, [events]);
 
-  const handleExportPNG = useCallback(() => {
+  const handleExportPNG = useCallback(async () => {
     const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
-    if (!canvas) return;
-    const url = canvas.toDataURL('image/png');
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `sfd-frame-${state.step}.png`;
-    a.click();
-  }, [state.step]);
-
-  const handleExportJSON = useCallback(() => {
-    const json = engineRef.current?.exportSettings() || '{}';
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `sfd-settings-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    await exportPNGSnapshot(canvas);
   }, []);
 
-  const handleExportGIF = useCallback(() => {
-    alert('GIF export requires ffmpeg.wasm which is not yet installed. Use PNG export for individual frames.');
+  const handleExportJSON = useCallback(async () => {
+    if (engineRef.current) {
+      await exportSettingsJSON(engineRef.current);
+    }
+  }, []);
+
+  const handleExportAnimation = useCallback(async () => {
+    if (!engineRef.current) return;
+    setIsExporting(true);
+    try {
+      const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
+      await exportAnimationGIF(engineRef.current, canvas, colormap);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [colormap]);
+
+  const handleExportSimulationData = useCallback(async () => {
+    if (engineRef.current) {
+      await exportSimulationData(engineRef.current);
+    }
+  }, []);
+
+  const handleExportMetrics = useCallback(async () => {
+    if (engineRef.current) {
+      await exportMetricsLog(engineRef.current);
+    }
+  }, []);
+
+  const handleExportStateSnapshot = useCallback(async () => {
+    if (engineRef.current) {
+      await exportStateSnapshot(engineRef.current);
+    }
   }, []);
 
   const handleHover = useCallback((x: number, y: number, screenX: number, screenY: number) => {
@@ -644,8 +654,13 @@ export default function SimulationPage() {
                 onExportEvents={handleExportEvents}
                 onExportPNG={handleExportPNG}
                 onExportJSON={handleExportJSON}
+                onExportAnimation={handleExportAnimation}
+                onExportSimulationData={handleExportSimulationData}
+                onExportMetrics={handleExportMetrics}
+                onExportStateSnapshot={handleExportStateSnapshot}
                 onShowDualViewChange={setShowDualView}
                 varianceChange={varianceChange}
+                isExporting={isExporting}
               />
         </aside>
       </div>
