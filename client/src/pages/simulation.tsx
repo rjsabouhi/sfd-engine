@@ -616,31 +616,31 @@ export default function SimulationPage() {
       <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border bg-card/30 shrink-0">
         <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Tools:</span>
         <Button
-          variant={perturbMode ? "default" : "outline"}
+          variant="outline"
           size="sm"
           onClick={() => { setPerturbMode(!perturbMode); if (!perturbMode) setTrajectoryProbeActive(false); }}
           data-testid="button-perturb-mode"
-          className="h-6 text-[10px] gap-1"
+          className={`h-6 text-[10px] gap-1 ${perturbMode ? "bg-muted" : ""}`}
         >
           <Zap className="h-3 w-3" />
           Perturb
         </Button>
         <Button
-          variant={trajectoryProbeActive ? "default" : "outline"}
+          variant="outline"
           size="sm"
           onClick={() => { setTrajectoryProbeActive(!trajectoryProbeActive); if (!trajectoryProbeActive) { setPerturbMode(false); } else { setTrajectoryProbePoint(null); } }}
           data-testid="button-trajectory-probe"
-          className="h-6 text-[10px] gap-1"
+          className={`h-6 text-[10px] gap-1 ${trajectoryProbeActive ? "bg-muted" : ""}`}
         >
           <Crosshair className="h-3 w-3" />
           Probe
         </Button>
         <Button
-          variant={diagnosticsVisible ? "default" : "outline"}
+          variant="outline"
           size="sm"
           onClick={() => setDiagnosticsVisible(!diagnosticsVisible)}
           data-testid="button-diagnostics"
-          className="h-6 text-[10px] gap-1"
+          className={`h-6 text-[10px] gap-1 ${diagnosticsVisible ? "bg-muted" : ""}`}
         >
           <Gauge className="h-3 w-3" />
           Diagnostics

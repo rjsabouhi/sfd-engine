@@ -373,11 +373,11 @@ export function DualFieldView({
         {onBlendModeChange && (
           <div className="flex items-center gap-2 mr-2">
             <Button
-              variant={blendMode ? "default" : "outline"}
+              variant="outline"
               size="sm"
               onClick={() => onBlendModeChange(!blendMode)}
               data-testid="button-blend-mode"
-              className="h-6 text-[10px] gap-1"
+              className={`h-6 text-[10px] gap-1 ${blendMode ? "bg-muted" : ""}`}
             >
               <Blend className="h-3 w-3" />
               Blend
