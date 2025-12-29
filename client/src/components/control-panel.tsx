@@ -7,18 +7,27 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Sliders, Activity, Settings2, BookOpen, Download, Columns2 } from "lucide-react";
 import type { SimulationParameters, SimulationState, OperatorContributions, StructuralSignature, StructuralEvent } from "@shared/schema";
-import { defaultParameters } from "@shared/schema";
+import { defaultParameters, structuralPresets } from "@shared/schema";
 import { StatisticsPanel } from "./statistics-panel";
 import { TemporalControls } from "./temporal-controls";
 import { OperatorSensitivity } from "./operator-sensitivity";
 import { StructuralSignatureBar } from "./structural-signature";
 import { EventLog } from "./event-log";
-import { PresetMenu } from "./preset-menu";
 import { LegacyRegimeDisplay } from "./regime-display";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, modeOptions, detectRegime, toLanguageMode } from "@/lib/interpretation-modes";
 import { LANGUAGE } from "@/lib/language";
 import type { RegimeKey } from "@/lib/language";
+
+const presetLabels: Record<string, string> = {
+  "uniform-field": "Uniform Field",
+  "high-curvature": "High-Curvature Regime",
+  "multi-basin": "Multi-Basin System",
+  "near-critical": "Near-Critical State",
+  "transition-edge": "Transition Edge",
+  "entropic-dispersion": "Entropic Dispersion Phase",
+  "post-cooling": "Post-Cooling Phase",
+};
 
 interface ControlPanelProps {
   params: SimulationParameters;
@@ -128,27 +137,61 @@ export function ControlPanel({
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="px-3 py-2 border-b border-border shrink-0 space-y-2">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider whitespace-nowrap">Mode</span>
-          <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
-            <SelectTrigger className="h-7 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-interpretation-mode">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {modeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider whitespace-nowrap">Preset</span>
-          <PresetMenu onApply={onParamsChange} />
-        </div>
-      </div>
+      <Collapsible defaultOpen={false} className="px-3 py-2 border-b border-border shrink-0">
+        <CollapsibleTrigger asChild>
+          <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-presets">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Mode:</span>
+                <span className="text-xs">{modeOptions.find(o => o.value === interpretationMode)?.label}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Preset:</span>
+                <span className="text-xs text-muted-foreground">Click to expand</span>
+              </div>
+            </div>
+            <Settings2 className="h-3.5 w-3.5 text-muted-foreground" />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-2 space-y-3">
+          <div className="space-y-2">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Interpretation Mode</span>
+            <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
+              <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-interpretation-mode">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {modeOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
+          </div>
+          <div className="space-y-2 pt-2 border-t border-border/50">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Behavior Presets</span>
+            <Select onValueChange={(value) => {
+              if (value && structuralPresets[value]) {
+                onParamsChange(structuralPresets[value]);
+              }
+            }}>
+              <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-preset">
+                <SelectValue placeholder="Select a dynamic regime..." />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(structuralPresets).map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {presetLabels[key] || key}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground leading-relaxed">Select a pre-configured SFD operator regime to explore characteristic system behaviors.</p>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       <Tabs defaultValue="controls" className="flex-1 flex flex-col overflow-hidden">
         <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent px-1 h-9 shrink-0 flex-wrap">
