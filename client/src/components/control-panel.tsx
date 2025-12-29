@@ -470,7 +470,7 @@ export function ControlPanel({
               )}
             </div>
             
-            <div className="text-xs font-medium text-muted-foreground pt-2 border-t border-border/50">Data Exports</div>
+            <div className="text-xs font-medium text-muted-foreground">Data Exports</div>
             <div className="space-y-2">
               <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportSimulationData} data-testid="button-export-simulation-data">
                 <Download className="h-3.5 w-3.5 mr-2" />
@@ -500,7 +500,7 @@ export function ControlPanel({
               </Button>
             </div>
             
-            <div className="text-xs font-medium text-muted-foreground pt-2 border-t border-border/50">Research-Grade</div>
+            <div className="text-xs font-medium text-muted-foreground">Research-Grade</div>
             <div className="space-y-2">
               {onExportNumPy && (
                 <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportNumPy} data-testid="button-export-numpy">
