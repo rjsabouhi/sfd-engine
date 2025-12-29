@@ -22,6 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { SimulationParameters, SimulationState, FieldData, ProbeData, OperatorContributions, StructuralSignature, StructuralEvent, DerivedField, BasinMap } from "@shared/schema";
 import { defaultParameters, mobileParameters } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
@@ -521,9 +522,21 @@ export default function SimulationPage() {
               {showDualView ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-px h-full bg-border">
                   <div className="h-full min-h-0 flex flex-col bg-background">
-                    <div className="px-3 py-2 border-b border-border shrink-0">
-                        <h4 className="text-xs font-medium">Structural Field</h4>
-                        <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation showing local state values.</p>
+                    <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border shrink-0">
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-medium">Structural Field</h4>
+                          <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation showing local state values.</p>
+                        </div>
+                        <Select value={colormap} onValueChange={(v) => setColormap(v as "inferno" | "viridis" | "grayscale")}>
+                          <SelectTrigger className="h-7 w-24 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-header">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="viridis">Viridis</SelectItem>
+                            <SelectItem value="inferno">Inferno</SelectItem>
+                            <SelectItem value="grayscale">Grayscale</SelectItem>
+                          </SelectContent>
+                        </Select>
                     </div>
                     <div className="relative flex-1 min-h-0 flex items-center justify-center bg-gray-950">
                       <VisualizationCanvas 
@@ -546,9 +559,21 @@ export default function SimulationPage() {
                 </div>
               ) : (
                 <div className="h-full flex flex-col bg-background">
-                  <div className="px-3 py-2 border-b border-border shrink-0">
-                    <h4 className="text-xs font-medium">Structural Field</h4>
-                    <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation showing local state values.</p>
+                  <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border shrink-0">
+                    <div className="min-w-0">
+                      <h4 className="text-xs font-medium">Structural Field</h4>
+                      <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation showing local state values.</p>
+                    </div>
+                    <Select value={colormap} onValueChange={(v) => setColormap(v as "inferno" | "viridis" | "grayscale")}>
+                      <SelectTrigger className="h-7 w-24 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-single">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="viridis">Viridis</SelectItem>
+                        <SelectItem value="inferno">Inferno</SelectItem>
+                        <SelectItem value="grayscale">Grayscale</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="relative flex-1 flex items-center justify-center bg-gray-950">
                     <VisualizationCanvas 
