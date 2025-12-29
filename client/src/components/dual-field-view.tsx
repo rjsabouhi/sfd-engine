@@ -2,9 +2,9 @@ import { useRef, useEffect, useCallback, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ProjectionViewFooter } from "@/components/field-footer";
-import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Blend } from "lucide-react";
 import type { DerivedField, BasinMap, ProbeData } from "@shared/schema";
 
 export type OverlayType = "curvature" | "tension" | "coupling" | "variance" | "basins" | "gradientFlow" | "criticality" | "hysteresis" | "constraintSkeleton" | "stabilityField" | "gradientFlowLines";
@@ -365,16 +365,16 @@ export function DualFieldView({
         {/* Blend Controls */}
         {onBlendModeChange && (
           <div className="flex items-center gap-2 mr-2">
-            <div className="flex items-center gap-1.5">
-              <Switch
-                id="blend-mode"
-                checked={blendMode}
-                onCheckedChange={onBlendModeChange}
-                className="h-4 w-7"
-                data-testid="switch-blend-mode"
-              />
-              <Label htmlFor="blend-mode" className="text-[10px] text-muted-foreground">Blend</Label>
-            </div>
+            <Button
+              variant={blendMode ? "default" : "outline"}
+              size="sm"
+              onClick={() => onBlendModeChange(!blendMode)}
+              data-testid="button-blend-mode"
+              className="h-6 text-[10px] gap-1"
+            >
+              <Blend className="h-3 w-3" />
+              Blend
+            </Button>
             {blendMode && onBlendOpacityChange && (
               <div className="flex items-center gap-1.5 w-20">
                 <Slider
