@@ -118,7 +118,10 @@ export function ControlPanel({
   const [metricsOpen, setMetricsOpen] = useState(false);
   const [interpretationOpen, setInterpretationOpen] = useState(false);
   const [presetsOpen, setPresetsOpen] = useState(true);
-    const [playbackOpen, setPlaybackOpen] = useState(true);
+  const [playbackOpen, setPlaybackOpen] = useState(true);
+  const [regimeOpen, setRegimeOpen] = useState(true);
+  const [operatorOpen, setOperatorOpen] = useState(true);
+  const [eventLogOpen, setEventLogOpen] = useState(true);
 
   const modeLabels = getModeLabels(interpretationMode);
   const languageMode = toLanguageMode(interpretationMode);
@@ -325,17 +328,41 @@ export function ControlPanel({
           </TabsContent>
 
           <TabsContent value="analysis" className="m-0 p-3 space-y-4">
-            <LegacyRegimeDisplay regime={currentRegime} mode={languageMode} />
+            <Collapsible open={regimeOpen} onOpenChange={setRegimeOpen}>
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-regime">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Regime</span>
+                  {regimeOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <LegacyRegimeDisplay regime={currentRegime} mode={languageMode} />
+              </CollapsibleContent>
+            </Collapsible>
 
-            <div className="space-y-2 border-t border-border pt-2">
-              <div className="text-xs font-medium text-muted-foreground">Operator Contributions</div>
-              <OperatorSensitivity contributions={operatorContributions} modeLabels={modeLabels} />
-            </div>
+            <Collapsible open={operatorOpen} onOpenChange={setOperatorOpen} className="border-t border-border/50 pt-3">
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-operator">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Operator Contributions</span>
+                  {operatorOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <OperatorSensitivity contributions={operatorContributions} modeLabels={modeLabels} />
+              </CollapsibleContent>
+            </Collapsible>
 
-            <div className="space-y-2 pt-2 border-t border-border">
-              <div className="text-xs font-medium text-muted-foreground">Event Log ({events.length})</div>
-              <EventLog events={events} onClear={onClearEvents} onExport={onExportEvents} />
-            </div>
+            <Collapsible open={eventLogOpen} onOpenChange={setEventLogOpen} className="border-t border-border/50 pt-3">
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-event-log">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Event Log ({events.length})</span>
+                  {eventLogOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <EventLog events={events} onClear={onClearEvents} onExport={onExportEvents} />
+              </CollapsibleContent>
+            </Collapsible>
           </TabsContent>
 
           <TabsContent value="notebook" className="m-0 p-3 space-y-4">
