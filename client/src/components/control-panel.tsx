@@ -221,6 +221,18 @@ export function ControlPanel({
               </CollapsibleContent>
             </Collapsible>
 
+            <Collapsible open={presetsOpen} onOpenChange={setPresetsOpen} className="border-t border-border/50 pt-3">
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-presets">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Behavior Presets</span>
+                  {presetsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <PresetMenu onApply={onParamsChange} />
+              </CollapsibleContent>
+            </Collapsible>
+
             <Collapsible open={displayOpen} onOpenChange={setDisplayOpen} className="border-t border-border/50 pt-3">
               <CollapsibleTrigger asChild>
                 <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-display">
@@ -253,18 +265,6 @@ export function ControlPanel({
                   </button>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">Choose a color palette and toggle dual-field comparison view.</p>
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Collapsible open={presetsOpen} onOpenChange={setPresetsOpen} className="border-t border-border/50 pt-3">
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-presets">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Behavior Presets</span>
-                  {presetsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2">
-                <PresetMenu onApply={onParamsChange} />
               </CollapsibleContent>
             </Collapsible>
 
