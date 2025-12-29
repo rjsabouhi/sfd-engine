@@ -1,7 +1,4 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info } from "lucide-react";
 import { structuralPresets, type SimulationParameters } from "@shared/schema";
 
 interface PresetMenuProps {
@@ -27,19 +24,9 @@ export function PresetMenu({ onApply }: PresetMenuProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-1.5">
-        <h4 className="text-xs font-medium">Dynamic Regimes</h4>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Info className="h-3 w-3 text-muted-foreground cursor-help" />
-          </TooltipTrigger>
-          <TooltipContent side="right" className="max-w-[200px]">
-            <p className="text-xs">Select a pre-configured SFD operator regime to explore characteristic system behaviors.</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
+      <h4 className="text-xs font-medium">Dynamic Regimes</h4>
       <Select onValueChange={handleChange}>
-        <SelectTrigger className="focus:ring-0 focus:ring-offset-0" data-testid="select-preset">
+        <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-preset">
           <SelectValue placeholder="Select a regime..." />
         </SelectTrigger>
         <SelectContent>
@@ -50,6 +37,7 @@ export function PresetMenu({ onApply }: PresetMenuProps) {
           ))}
         </SelectContent>
       </Select>
+      <p className="text-xs text-muted-foreground leading-relaxed">Select a pre-configured SFD operator regime to explore characteristic system behaviors.</p>
     </div>
   );
 }
