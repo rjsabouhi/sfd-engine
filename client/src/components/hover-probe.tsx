@@ -1,3 +1,4 @@
+import { useRef, useState, useLayoutEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { ProbeData } from "@shared/schema";
 import type { ModeLabels } from "@/lib/interpretation-modes";
@@ -9,15 +10,47 @@ interface HoverProbeProps {
   position: { x: number; y: number };
 }
 
+const OFFSET = 12;
+
 export function HoverProbe({ data, modeLabels, visible, position }: HoverProbeProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 220, height: 200 });
+
+  useLayoutEffect(() => {
+    if (cardRef.current && visible) {
+      const rect = cardRef.current.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        setDimensions({ width: rect.width, height: rect.height });
+      }
+    }
+  }, [visible, data]);
+
   if (!visible || !data) return null;
+
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  let left = position.x + OFFSET;
+  let top = position.y + OFFSET;
+
+  if (left + dimensions.width > viewportWidth - 10) {
+    left = position.x - dimensions.width - OFFSET;
+  }
+
+  if (top + dimensions.height > viewportHeight - 10) {
+    top = position.y - dimensions.height - OFFSET;
+  }
+
+  if (left < 10) left = 10;
+  if (top < 10) top = 10;
 
   return (
     <Card
-      className="absolute z-50 bg-card/95 backdrop-blur-sm border-border shadow-lg pointer-events-none"
+      ref={cardRef}
+      className="fixed z-50 bg-card/95 backdrop-blur-sm border-border shadow-lg pointer-events-none"
       style={{
-        left: position.x + 8,
-        top: position.y + 8,
+        left,
+        top,
         maxWidth: 220,
       }}
       data-testid="panel-hover-probe"
