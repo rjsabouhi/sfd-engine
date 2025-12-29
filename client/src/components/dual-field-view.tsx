@@ -397,7 +397,7 @@ export function DualFieldView({
             className="h-7 w-32 text-xs focus:ring-0 focus:ring-offset-0"
             data-testid="select-overlay-type"
           >
-            <SelectValue>{currentOption?.label || "Layers"}</SelectValue>
+            <SelectValue placeholder="Layers" />
           </SelectTrigger>
           <SelectContent>
             {OVERLAY_OPTIONS.map((option) => (
