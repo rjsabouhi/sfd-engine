@@ -521,12 +521,9 @@ export default function SimulationPage() {
               {showDualView ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-px h-full bg-border">
                   <div className="h-full min-h-0 flex flex-col bg-background">
-                    <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border shrink-0">
-                      <div className="min-w-0">
+                    <div className="px-3 py-2 border-b border-border shrink-0">
                         <h4 className="text-xs font-medium">Structural Field</h4>
-                        <p className="text-[10px] text-muted-foreground">Primary field representation showing local state values.</p>
-                      </div>
-                      <div className="h-7 w-32 shrink-0"></div>
+                        <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation showing local state values.</p>
                     </div>
                     <div className="relative flex-1 min-h-0 flex items-center justify-center bg-gray-950">
                       <VisualizationCanvas 
