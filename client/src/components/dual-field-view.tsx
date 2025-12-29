@@ -2,6 +2,9 @@ import { useRef, useEffect, useCallback, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ProjectionViewFooter } from "@/components/field-footer";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
 import type { DerivedField, BasinMap, ProbeData } from "@shared/schema";
 
 export type OverlayType = "curvature" | "tension" | "coupling" | "variance" | "basins" | "gradientFlow" | "criticality" | "hysteresis" | "constraintSkeleton" | "stabilityField" | "gradientFlowLines";
@@ -12,6 +15,11 @@ interface DualFieldViewProps {
   derivedType: OverlayType;
   onTypeChange: (type: OverlayType) => void;
   probeData?: ProbeData | null;
+  primaryField?: { grid: Float32Array; width: number; height: number } | null;
+  blendMode?: boolean;
+  blendOpacity?: number;
+  onBlendModeChange?: (enabled: boolean) => void;
+  onBlendOpacityChange?: (opacity: number) => void;
 }
 
 const PLASMA_COLORS = [
@@ -74,7 +82,18 @@ const OVERLAY_OPTIONS: { value: OverlayType; label: string; tooltip: string }[] 
   { value: "stabilityField", label: "Stability Field", tooltip: "Local stability measure across the manifold" },
 ];
 
-export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChange, probeData }: DualFieldViewProps) {
+export function DualFieldView({ 
+  derivedField, 
+  basinMap, 
+  derivedType, 
+  onTypeChange, 
+  probeData,
+  primaryField,
+  blendMode = false,
+  blendOpacity = 0.5,
+  onBlendModeChange,
+  onBlendOpacityChange,
+}: DualFieldViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -256,10 +275,41 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
   return (
     <div className="h-full flex flex-col bg-background">
       <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border shrink-0">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h4 className="text-xs font-medium">Projection View</h4>
           <p className="text-[10px] text-muted-foreground truncate">{currentOption?.tooltip || "Select a projection mode"}</p>
         </div>
+        
+        {/* Blend Controls */}
+        {onBlendModeChange && (
+          <div className="flex items-center gap-2 mr-2">
+            <div className="flex items-center gap-1.5">
+              <Switch
+                id="blend-mode"
+                checked={blendMode}
+                onCheckedChange={onBlendModeChange}
+                className="h-4 w-7"
+                data-testid="switch-blend-mode"
+              />
+              <Label htmlFor="blend-mode" className="text-[10px] text-muted-foreground">Blend</Label>
+            </div>
+            {blendMode && onBlendOpacityChange && (
+              <div className="flex items-center gap-1.5 w-20">
+                <Slider
+                  value={[blendOpacity]}
+                  onValueChange={([v]) => onBlendOpacityChange(v)}
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  className="w-full"
+                  data-testid="slider-blend-opacity"
+                />
+                <span className="text-[9px] text-muted-foreground w-6">{Math.round(blendOpacity * 100)}%</span>
+              </div>
+            )}
+          </div>
+        )}
+        
         <Select value={derivedType} onValueChange={(v) => onTypeChange(v as OverlayType)}>
           <SelectTrigger 
             className="h-7 w-32 text-xs focus:ring-0 focus:ring-offset-0"

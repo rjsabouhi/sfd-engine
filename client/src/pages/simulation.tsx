@@ -12,7 +12,10 @@ import { StructuralFieldFooter } from "@/components/field-footer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import sfdLogo from "@assets/generated_images/3x3_grid_shimmer_logo.png";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -29,7 +32,7 @@ import { defaultParameters, mobileParameters } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
 import { getStatusLine, computeFieldState, getFieldStateLabel, type ReactiveEvents, type SimulationState as LanguageSimState, type FieldState } from "@/lib/language";
-import { exportPNGSnapshot, exportAnimationGIF, exportSimulationData, exportMetricsLog, exportStateSnapshot, exportSettingsJSON, exportEventLog } from "@/lib/export-utils";
+import { exportPNGSnapshot, exportAnimationGIF, exportSimulationData, exportMetricsLog, exportStateSnapshot, exportSettingsJSON, exportEventLog, saveConfiguration, loadConfiguration } from "@/lib/export-utils";
 
 export default function SimulationPage() {
   const isMobile = useIsMobile();
@@ -76,6 +79,14 @@ export default function SimulationPage() {
   const prevBasinCountRef = useRef<number | null>(null);
   const frameCountRef = useRef(0);
   const lastDerivedCacheStepRef = useRef(0);
+  
+  // New MVP feature states
+  const [perturbMode, setPerturbMode] = useState(false);
+  const [trajectoryProbeActive, setTrajectoryProbeActive] = useState(false);
+  const [trajectoryProbePoint, setTrajectoryProbePoint] = useState<{ x: number; y: number } | null>(null);
+  const [blendMode, setBlendMode] = useState(false);
+  const [blendOpacity, setBlendOpacity] = useState(0.5);
+  const configInputRef = useRef<HTMLInputElement>(null);
   
   
   const showDualViewRef = useRef(showDualView);
@@ -311,6 +322,58 @@ export default function SimulationPage() {
 
   const handleHoverEnd = useCallback(() => {
     setProbeVisible(false);
+  }, []);
+
+  // New MVP feature handlers
+  const handleFieldClick = useCallback((x: number, y: number, shiftKey: boolean) => {
+    const engine = engineRef.current;
+    if (!engine) return;
+    
+    if (perturbMode) {
+      const magnitude = shiftKey ? -0.15 : 0.15;
+      engine.perturbField(x, y, magnitude, 5);
+    } else if (trajectoryProbeActive) {
+      setTrajectoryProbePoint({ x, y });
+    }
+  }, [perturbMode, trajectoryProbeActive]);
+
+  const handleJumpToNextEvent = useCallback(() => {
+    const engine = engineRef.current;
+    if (engine) {
+      engine.jumpToNextEvent(state.step);
+      setFieldState(engine.getPlaybackFieldState());
+    }
+  }, [state.step]);
+
+  const handleJumpToPreviousEvent = useCallback(() => {
+    const engine = engineRef.current;
+    if (engine) {
+      engine.jumpToPreviousEvent(state.step);
+      setFieldState(engine.getPlaybackFieldState());
+    }
+  }, [state.step]);
+
+  const handleSaveConfiguration = useCallback(() => {
+    const currentRegime = getFieldStateLabel(interpretationMode, fieldState);
+    saveConfiguration(params, currentRegime, colormap, interpretationMode);
+  }, [params, fieldState, colormap, interpretationMode]);
+
+  const handleLoadConfiguration = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const config = await loadConfiguration(file);
+    if (config) {
+      setParams(config.parameters);
+      setColormap(config.colormap);
+      if (config.mode === "technical" || config.mode === "structural" || config.mode === "intuitive") {
+        setInterpretationMode(config.mode);
+      }
+      engineRef.current?.setParams(config.parameters);
+    }
+    if (configInputRef.current) {
+      configInputRef.current.value = "";
+    }
   }, []);
 
   useEffect(() => {
@@ -549,6 +612,103 @@ export default function SimulationPage() {
         </div>
       </header>
 
+      {/* Tools Toolbar */}
+      <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b border-border bg-card/30 shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Tools:</span>
+          <Button
+            variant={perturbMode ? "default" : "outline"}
+            size="sm"
+            onClick={() => { setPerturbMode(!perturbMode); if (!perturbMode) setTrajectoryProbeActive(false); }}
+            data-testid="button-perturb-mode"
+            className="h-6 text-[10px] gap-1"
+          >
+            <Zap className="h-3 w-3" />
+            Perturb
+          </Button>
+          <Button
+            variant={trajectoryProbeActive ? "default" : "outline"}
+            size="sm"
+            onClick={() => { setTrajectoryProbeActive(!trajectoryProbeActive); if (!trajectoryProbeActive) { setPerturbMode(false); } else { setTrajectoryProbePoint(null); } }}
+            data-testid="button-trajectory-probe"
+            className="h-6 text-[10px] gap-1"
+          >
+            <Crosshair className="h-3 w-3" />
+            Probe
+          </Button>
+          <div className="w-px h-4 bg-border mx-1" />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleJumpToPreviousEvent}
+            disabled={events.length === 0}
+            data-testid="button-jump-prev-event"
+            className="h-6 text-[10px] gap-1"
+          >
+            <SkipForward className="h-3 w-3 rotate-180" />
+            Prev Event
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleJumpToNextEvent}
+            disabled={events.length === 0}
+            data-testid="button-jump-next-event"
+            className="h-6 text-[10px] gap-1"
+          >
+            Next Event
+            <SkipForward className="h-3 w-3" />
+          </Button>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSaveConfiguration}
+            data-testid="button-save-config"
+            className="h-6 text-[10px] gap-1"
+          >
+            <Save className="h-3 w-3" />
+            Save Config
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => configInputRef.current?.click()}
+            data-testid="button-load-config"
+            className="h-6 text-[10px] gap-1"
+          >
+            <Upload className="h-3 w-3" />
+            Load Config
+          </Button>
+          <input
+            ref={configInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleLoadConfiguration}
+            className="hidden"
+          />
+        </div>
+      </div>
+
+      {/* Trajectory Probe Metrics (shown when probe is active and point is set) */}
+      {trajectoryProbeActive && trajectoryProbePoint && probeData && (
+        <div className="flex items-center gap-4 px-3 py-1.5 border-b border-cyan-500/30 bg-cyan-950/20 text-[10px] font-mono shrink-0">
+          <span className="text-cyan-400 font-medium">Probe ({trajectoryProbePoint.x}, {trajectoryProbePoint.y})</span>
+          <span className="text-neutral-400"><span className="text-neutral-500">κ:</span> {probeData.curvature.toFixed(4)}</span>
+          <span className="text-neutral-400"><span className="text-neutral-500">σ²:</span> {probeData.neighborhoodVariance.toFixed(4)}</span>
+          <span className="text-neutral-400"><span className="text-neutral-500">|∇|:</span> {probeData.gradientMagnitude.toFixed(4)}</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTrajectoryProbePoint(null)}
+            className="h-5 text-[10px] ml-auto text-cyan-400"
+          >
+            Clear Probe
+          </Button>
+        </div>
+      )}
+
       <div className="flex flex-1 overflow-hidden">
         <main className="relative bg-gray-950 flex-1 flex flex-col">
           <div className="flex-1 relative">
@@ -578,6 +738,9 @@ export default function SimulationPage() {
                         basinMap={basinMap}
                         onHover={handleHover}
                         onHoverEnd={handleHoverEnd}
+                        onClick={handleFieldClick}
+                        perturbMode={perturbMode}
+                        trajectoryProbePoint={trajectoryProbePoint}
                       />
                     </div>
                     <StructuralFieldFooter 
@@ -593,6 +756,11 @@ export default function SimulationPage() {
                       derivedType={derivedType}
                       onTypeChange={setDerivedType}
                       probeData={probeData}
+                      primaryField={field}
+                      blendMode={blendMode}
+                      blendOpacity={blendOpacity}
+                      onBlendModeChange={setBlendMode}
+                      onBlendOpacityChange={setBlendOpacity}
                     />
                   </div>
                 </div>

@@ -8,6 +8,9 @@ interface VisualizationCanvasProps {
   showBasins?: boolean;
   onHover?: (x: number, y: number, screenX: number, screenY: number) => void;
   onHoverEnd?: () => void;
+  onClick?: (x: number, y: number, shiftKey: boolean) => void;
+  perturbMode?: boolean;
+  trajectoryProbePoint?: { x: number; y: number } | null;
 }
 
 const INFERNO_COLORS = [
@@ -90,6 +93,9 @@ export function VisualizationCanvas({
   showBasins = false,
   onHover,
   onHoverEnd,
+  onClick,
+  perturbMode = false,
+  trajectoryProbePoint,
 }: VisualizationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -239,7 +245,31 @@ export function VisualizationCanvas({
     setPan({ x: 0, y: 0 });
   }, []);
 
+  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!field || !onClick || isPanning) return;
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = field.width / rect.width;
+    const scaleY = field.height / rect.height;
+    
+    const x = Math.floor((e.clientX - rect.left) * scaleX);
+    const y = Math.floor((e.clientY - rect.top) * scaleY);
+    
+    if (x >= 0 && x < field.width && y >= 0 && y < field.height) {
+      onClick(x, y, e.shiftKey);
+    }
+  }, [field, onClick, isPanning]);
+
   const zoomPercent = Math.round(zoom * 100);
+  
+  const getCursor = () => {
+    if (perturbMode) return 'cell';
+    if (zoom > 1) return isPanning ? 'grabbing' : 'grab';
+    return 'crosshair';
+  };
 
   const visualScale = 0.88;
   const visualSize = canvasSize * visualScale;
@@ -254,8 +284,9 @@ export function VisualizationCanvas({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
       onDoubleClick={handleDoubleClick}
+      onClick={handleClick}
       style={{ 
-        cursor: zoom > 1 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair',
+        cursor: getCursor(),
         backgroundColor: 'rgb(8, 10, 14)',
       }}
       data-testid="visualization-container"
@@ -308,6 +339,27 @@ export function VisualizationCanvas({
             }}
             data-testid="canvas-visualization"
           />
+          {trajectoryProbePoint && field && (
+            <div 
+              className="absolute pointer-events-none"
+              style={{
+                left: `calc(50% - ${visualSize/2}px + ${(trajectoryProbePoint.x / field.width) * visualSize}px + ${pan.x}px)`,
+                top: `calc(50% - ${visualSize/2}px + ${(trajectoryProbePoint.y / field.height) * visualSize}px + ${pan.y}px)`,
+                transform: `scale(${zoom})`,
+                transformOrigin: 'center center',
+              }}
+              data-testid="trajectory-probe-marker"
+            >
+              <div 
+                className="w-3 h-3 rounded-full border-2 border-cyan-400 bg-cyan-400/30"
+                style={{ 
+                  boxShadow: '0 0 8px rgba(34, 211, 238, 0.6)',
+                  marginLeft: '-6px',
+                  marginTop: '-6px',
+                }}
+              />
+            </div>
+          )}
           {zoom > 1 && (
             <div className="absolute bottom-2 left-2 bg-background/80 text-xs px-2 py-1 rounded text-muted-foreground" data-testid="zoom-indicator">
               {zoomPercent}% (double-click to reset)

@@ -1040,6 +1040,63 @@ export class SFDEngine {
     return this.currentPlaybackIndex >= 0;
   }
 
+  // Perturbation Tool - Apply local perturbation at a point
+  perturbField(x: number, y: number, magnitude: number = 0.15, radius: number = 5): void {
+    if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
+    
+    // Apply Gaussian-weighted perturbation
+    for (let dy = -radius; dy <= radius; dy++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        const px = x + dx;
+        const py = y + dy;
+        if (px < 0 || px >= this.width || py < 0 || py >= this.height) continue;
+        
+        const distSq = dx * dx + dy * dy;
+        const weight = Math.exp(-distSq / (2 * (radius / 2) * (radius / 2)));
+        const idx = py * this.width + px;
+        this.grid[idx] += magnitude * weight;
+      }
+    }
+    
+    this.invalidateDerivedFieldCache();
+    this.updateBasinMap();
+    this.notifyUpdate();
+  }
+
+  // Jump to next event in event log
+  jumpToNextEvent(currentStep: number): number | null {
+    const events = this.structuralEvents;
+    for (const event of events) {
+      if (event.step > currentStep) {
+        // Find the closest frame in history
+        for (let i = 0; i < this.ringBuffer.length; i++) {
+          if (this.ringBuffer[i].step >= event.step) {
+            this.seekToFrame(i);
+            return event.step;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  // Jump to previous event in event log
+  jumpToPreviousEvent(currentStep: number): number | null {
+    const events = [...this.structuralEvents].reverse();
+    for (const event of events) {
+      if (event.step < currentStep) {
+        // Find the closest frame in history
+        for (let i = this.ringBuffer.length - 1; i >= 0; i--) {
+          if (this.ringBuffer[i].step <= event.step) {
+            this.seekToFrame(i);
+            return event.step;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   // Get the field state for the current playback frame (or current live state)
   getPlaybackFieldState(): "calm" | "unsettled" | "reorganizing" | "transforming" {
     if (this.currentPlaybackIndex >= 0 && this.currentPlaybackIndex < this.ringBuffer.length) {

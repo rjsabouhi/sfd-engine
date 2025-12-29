@@ -1,5 +1,14 @@
 import type { SFDEngine } from "./sfd-engine";
-import type { StructuralEvent } from "@shared/schema";
+import type { StructuralEvent, SimulationParameters } from "@shared/schema";
+
+export interface SFDConfiguration {
+  parameters: SimulationParameters;
+  regime: string;
+  colormap: "inferno" | "viridis" | "cividis";
+  mode: string;
+  version: string;
+  timestamp: string;
+}
 
 function getTimestamp(): string {
   return Date.now().toString();
@@ -22,6 +31,46 @@ export async function exportPNGSnapshot(canvas: HTMLCanvasElement | null): Promi
   a.download = `sfd-snapshot-${getTimestamp()}.png`;
   a.click();
   return true;
+}
+
+export function saveConfiguration(
+  parameters: SimulationParameters,
+  regime: string,
+  colormap: "inferno" | "viridis" | "cividis",
+  mode: string
+): void {
+  const config: SFDConfiguration = {
+    parameters,
+    regime,
+    colormap,
+    mode,
+    version: "1.0",
+    timestamp: new Date().toISOString(),
+  };
+  const json = JSON.stringify(config, null, 2);
+  const blob = new Blob([json], { type: "application/json" });
+  downloadBlob(blob, `sfd-config-${getTimestamp()}.json`);
+}
+
+export function loadConfiguration(file: File): Promise<SFDConfiguration | null> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = e.target?.result as string;
+        const config = JSON.parse(json) as SFDConfiguration;
+        if (config.parameters && config.colormap) {
+          resolve(config);
+        } else {
+          resolve(null);
+        }
+      } catch {
+        resolve(null);
+      }
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsText(file);
+  });
 }
 
 export async function exportAnimationGIF(
