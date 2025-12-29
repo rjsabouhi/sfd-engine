@@ -12,7 +12,7 @@ import { StructuralFieldFooter } from "@/components/field-footer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Activity } from "lucide-react";
 import sfdLogo from "@assets/generated_images/3x3_grid_shimmer_logo.png";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -508,6 +508,16 @@ export default function SimulationPage() {
             className="h-7 text-xs"
           >
             Show Intro
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setDiagnosticsVisible(!diagnosticsVisible)} 
+            data-testid="button-diagnostics"
+            className="h-7 text-xs gap-1.5"
+          >
+            <Activity className="h-3 w-3" />
+            Diagnostics
           </Button>
           <Dialog>
             <DialogTrigger asChild>
