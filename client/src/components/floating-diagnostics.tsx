@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { 
   X, 
-  Activity, 
+  Gauge, 
   GitCompare, 
   List, 
   Monitor, 
@@ -282,7 +282,7 @@ export function FloatingDiagnostics({
       >
         <div className="flex items-center gap-2">
           <GripHorizontal className="h-3.5 w-3.5 text-neutral-500" />
-          <Activity className="h-3.5 w-3.5 text-emerald-400" />
+          <Gauge className="h-3.5 w-3.5 text-white" />
           <span className="text-xs font-medium text-neutral-200">Diagnostics Console</span>
         </div>
         <div className="flex items-center gap-1" data-no-drag>
