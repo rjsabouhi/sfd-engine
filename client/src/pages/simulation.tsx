@@ -521,12 +521,12 @@ export default function SimulationPage() {
               {showDualView ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-px h-full bg-border">
                   <div className="h-full min-h-0 flex flex-col bg-background">
-                    <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border shrink-0">
-                      <div className="min-w-0 flex-1">
+                    <div className="px-3 py-2 border-b border-border shrink-0">
+                      <div className="flex items-center justify-between gap-2">
                         <h4 className="text-xs font-medium">Structural Field</h4>
-                        <p className="text-[10px] text-muted-foreground leading-relaxed">Primary field representation showing local state values</p>
+                        <div className="h-7 w-32 shrink-0"></div>
                       </div>
-                      <div className="h-7 w-32 shrink-0"></div>
+                      <p className="text-[10px] text-muted-foreground leading-relaxed mt-0.5">Primary field representation showing local state values. Patterns emerge as constraints interact over time.</p>
                     </div>
                     <div className="relative flex-1 min-h-0 flex items-center justify-center bg-gray-950">
                       <VisualizationCanvas 
