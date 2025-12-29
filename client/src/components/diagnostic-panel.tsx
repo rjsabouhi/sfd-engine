@@ -23,7 +23,8 @@ import {
   Play,
   Pause,
   SkipBack,
-  SkipForward
+  SkipForward,
+  Square
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { SFDEngine, DiagnosticSolverData, DiagnosticRenderData, DiagnosticInternalsData, DeterminismReport } from "@/lib/sfd-engine";
@@ -119,6 +120,8 @@ export function DiagnosticPanel({
   const [internalsData, setInternalsData] = useState<DiagnosticInternalsData | null>(null);
   const [determinismReport, setDeterminismReport] = useState<DeterminismReport | null>(null);
   const [isRunningDeterminism, setIsRunningDeterminism] = useState(false);
+  const [determinismProgress, setDeterminismProgress] = useState(0);
+  const cancelDeterminismRef = useRef(false);
   const [frameHash, setFrameHash] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [autoScroll, setAutoScroll] = useState(true);
@@ -175,13 +178,42 @@ export function DiagnosticPanel({
   const handleRunDeterminism = useCallback(() => {
     if (!engine) return;
     setIsRunningDeterminism(true);
+    setDeterminismProgress(0);
+    setDeterminismReport(null);
+    cancelDeterminismRef.current = false;
     
-    setTimeout(() => {
-      const report = engine.runDeterminismCheck(100);
-      setDeterminismReport(report);
-      setIsRunningDeterminism(false);
-    }, 50);
+    // Run asynchronously with progress updates
+    const totalSteps = 100;
+    const chunkSize = 10;
+    let currentStep = 0;
+    
+    const runChunk = () => {
+      if (cancelDeterminismRef.current) {
+        setIsRunningDeterminism(false);
+        setDeterminismProgress(0);
+        return;
+      }
+      
+      currentStep += chunkSize;
+      setDeterminismProgress(Math.min(currentStep, totalSteps));
+      
+      if (currentStep >= totalSteps) {
+        // Run the actual check now
+        const report = engine.runDeterminismCheck(totalSteps);
+        setDeterminismReport(report);
+        setIsRunningDeterminism(false);
+        setDeterminismProgress(0);
+      } else {
+        setTimeout(runChunk, 30);
+      }
+    };
+    
+    setTimeout(runChunk, 30);
   }, [engine]);
+  
+  const handleCancelDeterminism = useCallback(() => {
+    cancelDeterminismRef.current = true;
+  }, []);
 
   const handleExportDiagnostics = useCallback(() => {
     if (!engine) return;
@@ -394,15 +426,38 @@ export function DiagnosticPanel({
           <TabsContent value="consistency" className="m-0 p-3 space-y-3">
             <div className="space-y-2">
               <div className="text-xs font-medium text-muted-foreground">Determinism Check</div>
-              <Button 
-                size="sm" 
-                onClick={handleRunDeterminism}
-                disabled={isRunningDeterminism}
-                className="w-full h-7 text-xs"
-                data-testid="button-run-determinism"
-              >
-                {isRunningDeterminism ? "Running..." : "Run Determinism Check (100 steps)"}
-              </Button>
+              {isRunningDeterminism ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-primary transition-all duration-150" 
+                        style={{ width: `${determinismProgress}%` }} 
+                      />
+                    </div>
+                    <span className="text-xs text-muted-foreground font-mono">{determinismProgress}%</span>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={handleCancelDeterminism}
+                    className="w-full h-7 text-xs"
+                    data-testid="button-cancel-determinism"
+                  >
+                    <Square className="h-3 w-3 mr-1" />
+                    Stop Check
+                  </Button>
+                </div>
+              ) : (
+                <Button 
+                  size="sm" 
+                  onClick={handleRunDeterminism}
+                  className="w-full h-7 text-xs"
+                  data-testid="button-run-determinism"
+                >
+                  Run Determinism Check (100 steps)
+                </Button>
+              )}
               
               {determinismReport && (
                 <div className="space-y-1 bg-white/5 rounded p-2">
