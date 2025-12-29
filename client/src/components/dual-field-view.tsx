@@ -238,7 +238,7 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
             className="h-7 w-32 text-xs focus:ring-0 focus:ring-offset-0"
             data-testid="select-overlay-type"
           >
-            <SelectValue placeholder="Select view" />
+            <span>Layers</span>
           </SelectTrigger>
           <SelectContent>
             {OVERLAY_OPTIONS.map((option) => (
