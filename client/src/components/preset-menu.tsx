@@ -39,7 +39,7 @@ export function PresetMenu({ onApply }: PresetMenuProps) {
         </Tooltip>
       </div>
       <Select onValueChange={handleChange}>
-        <SelectTrigger data-testid="select-preset">
+        <SelectTrigger className="focus:ring-0 focus:ring-offset-0" data-testid="select-preset">
           <SelectValue placeholder="Select a regime..." />
         </SelectTrigger>
         <SelectContent>

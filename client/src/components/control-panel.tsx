@@ -132,7 +132,7 @@ export function ControlPanel({
         <div className="space-y-2">
           <h3 className="text-sm font-semibold">Interpretation Mode</h3>
           <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
-            <SelectTrigger className="h-8" data-testid="select-interpretation-mode">
+            <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-interpretation-mode">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
