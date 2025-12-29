@@ -23,20 +23,17 @@ export function PresetMenu({ onApply }: PresetMenuProps) {
   };
 
   return (
-    <div className="space-y-2">
-      <Select onValueChange={handleChange}>
-        <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-preset">
-          <SelectValue placeholder="Select a dynamic regime..." />
-        </SelectTrigger>
-        <SelectContent>
-          {Object.keys(structuralPresets).map((key) => (
-            <SelectItem key={key} value={key}>
-              {presetLabels[key] || key}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <p className="text-xs text-muted-foreground leading-relaxed">Select a pre-configured SFD operator regime to explore characteristic system behaviors.</p>
-    </div>
+    <Select onValueChange={handleChange}>
+      <SelectTrigger className="h-7 text-xs flex-1 focus:ring-0 focus:ring-offset-0" data-testid="select-preset">
+        <SelectValue placeholder="Select a regime..." />
+      </SelectTrigger>
+      <SelectContent>
+        {Object.keys(structuralPresets).map((key) => (
+          <SelectItem key={key} value={key}>
+            {presetLabels[key] || key}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

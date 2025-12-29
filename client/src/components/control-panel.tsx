@@ -128,11 +128,11 @@ export function ControlPanel({
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="px-3 py-3 border-b border-border shrink-0 space-y-3">
-        <div className="space-y-2">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Interpretation Mode</span>
+      <div className="px-3 py-2 border-b border-border shrink-0 space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider whitespace-nowrap">Mode</span>
           <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
-            <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-interpretation-mode">
+            <SelectTrigger className="h-7 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-interpretation-mode">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -143,11 +143,9 @@ export function ControlPanel({
               ))}
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
         </div>
-        
-        <div className="space-y-2 pt-2 border-t border-border/50">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Behavior Presets</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider whitespace-nowrap">Preset</span>
           <PresetMenu onApply={onParamsChange} />
         </div>
       </div>
