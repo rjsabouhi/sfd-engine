@@ -739,89 +739,6 @@ export default function SimulationPage() {
             )}
           </div>
 
-          {/* Tools Toolbar */}
-          <div 
-            className="flex items-center justify-center gap-2 px-3 py-1.5 border-b border-border/50 shrink-0"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(70,90,130,0.25) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(70,90,130,0.25) 1px, transparent 1px)
-              `,
-              backgroundSize: '40px 40px',
-              backgroundPosition: '0 0',
-            }}
-          >
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Tools:</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setFieldInspectorEnabled(!fieldInspectorEnabled)}
-              data-testid="button-field-inspector"
-              className={`h-6 text-[10px] gap-1 ${fieldInspectorEnabled ? "bg-muted" : ""}`}
-            >
-              <Eye className="h-3 w-3" />
-              Inspector
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => { setPerturbMode(!perturbMode); if (!perturbMode) setTrajectoryProbeActive(false); }}
-              data-testid="button-perturb-mode"
-              className={`h-6 text-[10px] gap-1 ${perturbMode ? "bg-muted" : ""}`}
-            >
-              <Zap className="h-3 w-3" />
-              Perturb
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => { setTrajectoryProbeActive(!trajectoryProbeActive); if (!trajectoryProbeActive) { setPerturbMode(false); } else { setTrajectoryProbePoint(null); } }}
-              data-testid="button-trajectory-probe"
-              className={`h-6 text-[10px] gap-1 ${trajectoryProbeActive ? "bg-muted" : ""}`}
-            >
-              <Crosshair className="h-3 w-3" />
-              Probe
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setDiagnosticsVisible(!diagnosticsVisible)}
-              data-testid="button-diagnostics"
-              className={`h-6 text-[10px] gap-1 ${diagnosticsVisible ? "bg-muted" : ""}`}
-            >
-              <Gauge className="h-3 w-3" />
-              Diagnostics
-            </Button>
-            <div className="w-px h-4 bg-border" />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSaveConfiguration}
-              data-testid="button-save-config"
-              className="h-6 text-[10px] gap-1"
-            >
-              <Save className="h-3 w-3" />
-              Save Config
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => configInputRef.current?.click()}
-              data-testid="button-load-config"
-              className="h-6 text-[10px] gap-1"
-            >
-              <Upload className="h-3 w-3" />
-              Load Config
-            </Button>
-            <input
-              ref={configInputRef}
-              type="file"
-              accept=".json"
-              onChange={handleLoadConfiguration}
-              className="hidden"
-            />
-          </div>
-
           {/* Trajectory Probe Metrics (shown when probe is active and point is set) */}
           {trajectoryProbeActive && trajectoryProbePoint && probeData && (
             <div className="flex items-center justify-center gap-4 px-3 py-1.5 border-b border-cyan-500/30 bg-cyan-950/20 text-[10px] font-mono shrink-0">
@@ -840,6 +757,78 @@ export default function SimulationPage() {
             </div>
           )}
           <div className="flex-1 relative">
+              {/* Floating Tools - positioned inside visualization */}
+              <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/40 backdrop-blur-sm border border-white/10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFieldInspectorEnabled(!fieldInspectorEnabled)}
+                  data-testid="button-field-inspector"
+                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${fieldInspectorEnabled ? "bg-white/20 text-white" : ""}`}
+                >
+                  <Eye className="h-3 w-3" />
+                  Inspector
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setPerturbMode(!perturbMode); if (!perturbMode) setTrajectoryProbeActive(false); }}
+                  data-testid="button-perturb-mode"
+                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${perturbMode ? "bg-white/20 text-white" : ""}`}
+                >
+                  <Zap className="h-3 w-3" />
+                  Perturb
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setTrajectoryProbeActive(!trajectoryProbeActive); if (!trajectoryProbeActive) { setPerturbMode(false); } else { setTrajectoryProbePoint(null); } }}
+                  data-testid="button-trajectory-probe"
+                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${trajectoryProbeActive ? "bg-white/20 text-white" : ""}`}
+                >
+                  <Crosshair className="h-3 w-3" />
+                  Probe
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDiagnosticsVisible(!diagnosticsVisible)}
+                  data-testid="button-diagnostics"
+                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${diagnosticsVisible ? "bg-white/20 text-white" : ""}`}
+                >
+                  <Gauge className="h-3 w-3" />
+                  Diagnostics
+                </Button>
+                <div className="w-px h-4 bg-white/20" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSaveConfiguration}
+                  data-testid="button-save-config"
+                  className="h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <Save className="h-3 w-3" />
+                  Save
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => configInputRef.current?.click()}
+                  data-testid="button-load-config"
+                  className="h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <Upload className="h-3 w-3" />
+                  Load
+                </Button>
+                <input
+                  ref={configInputRef}
+                  type="file"
+                  accept=".json"
+                  onChange={handleLoadConfiguration}
+                  className="hidden"
+                />
+              </div>
+              
               {showDualView ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-px h-full bg-border">
                   <div className="h-full min-h-0 flex flex-col bg-background">
