@@ -226,6 +226,22 @@ export function ControlPanel({
               </CollapsibleContent>
             </Collapsible>
 
+            <Collapsible open={metricsOpen} onOpenChange={setMetricsOpen} className="border-t border-border/50 pt-3">
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-metrics-inline">
+                  <h4 className="text-xs font-medium flex items-center gap-1.5">
+                    <Activity className="h-3 w-3" />
+                    Simulation Metrics
+                  </h4>
+                  {metricsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2 space-y-2">
+                <StructuralSignatureBar signature={structuralSignature} modeLabels={modeLabels} />
+                <StatisticsPanel state={state} modeLabels={modeLabels} />
+              </CollapsibleContent>
+            </Collapsible>
+
             <Collapsible open={interpretationOpen} onOpenChange={setInterpretationOpen} className="border-t border-border/50 pt-3">
               <CollapsibleTrigger asChild>
                 <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-interpretation">
@@ -247,22 +263,6 @@ export function ControlPanel({
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Collapsible open={metricsOpen} onOpenChange={setMetricsOpen} className="border-t border-border pt-3">
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-metrics-inline">
-                  <h4 className="text-xs font-medium flex items-center gap-1.5">
-                    <Activity className="h-3 w-3" />
-                    Simulation Metrics
-                  </h4>
-                  {metricsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2 space-y-2">
-                <StructuralSignatureBar signature={structuralSignature} modeLabels={modeLabels} />
-                <StatisticsPanel state={state} modeLabels={modeLabels} />
               </CollapsibleContent>
             </Collapsible>
           </TabsContent>
