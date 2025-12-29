@@ -182,10 +182,9 @@ export function ControlPanel({
                     variant="outline"
                     size="icon"
                     onClick={() => onShowDualViewChange(!showDualView)}
-                    className={showDualView ? "bg-purple-900/50 border-purple-400/50" : ""}
                     data-testid="button-dual-view"
                   >
-                    <Columns2 className={`h-3.5 w-3.5 ${showDualView ? "text-purple-300" : ""}`} />
+                    <Columns2 className="h-3.5 w-3.5" />
                   </Button>
                   <Button
                     variant="outline"
