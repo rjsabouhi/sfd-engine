@@ -612,89 +612,88 @@ export default function SimulationPage() {
         </div>
       </header>
 
-      {/* Tools Toolbar */}
-      <div className="flex items-center justify-center gap-2 px-3 py-1.5 border-b border-border bg-card/30 shrink-0">
-        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Tools:</span>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => { setPerturbMode(!perturbMode); if (!perturbMode) setTrajectoryProbeActive(false); }}
-          data-testid="button-perturb-mode"
-          className={`h-6 text-[10px] gap-1 ${perturbMode ? "bg-muted" : ""}`}
-        >
-          <Zap className="h-3 w-3" />
-          Perturb
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => { setTrajectoryProbeActive(!trajectoryProbeActive); if (!trajectoryProbeActive) { setPerturbMode(false); } else { setTrajectoryProbePoint(null); } }}
-          data-testid="button-trajectory-probe"
-          className={`h-6 text-[10px] gap-1 ${trajectoryProbeActive ? "bg-muted" : ""}`}
-        >
-          <Crosshair className="h-3 w-3" />
-          Probe
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setDiagnosticsVisible(!diagnosticsVisible)}
-          data-testid="button-diagnostics"
-          className={`h-6 text-[10px] gap-1 ${diagnosticsVisible ? "bg-muted" : ""}`}
-        >
-          <Gauge className="h-3 w-3" />
-          Diagnostics
-        </Button>
-        <div className="w-px h-4 bg-border" />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleSaveConfiguration}
-          data-testid="button-save-config"
-          className="h-6 text-[10px] gap-1"
-        >
-          <Save className="h-3 w-3" />
-          Save Config
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => configInputRef.current?.click()}
-          data-testid="button-load-config"
-          className="h-6 text-[10px] gap-1"
-        >
-          <Upload className="h-3 w-3" />
-          Load Config
-        </Button>
-        <input
-          ref={configInputRef}
-          type="file"
-          accept=".json"
-          onChange={handleLoadConfiguration}
-          className="hidden"
-        />
-      </div>
-
-      {/* Trajectory Probe Metrics (shown when probe is active and point is set) */}
-      {trajectoryProbeActive && trajectoryProbePoint && probeData && (
-        <div className="flex items-center gap-4 px-3 py-1.5 border-b border-cyan-500/30 bg-cyan-950/20 text-[10px] font-mono shrink-0">
-          <span className="text-cyan-400 font-medium">Probe ({trajectoryProbePoint.x}, {trajectoryProbePoint.y})</span>
-          <span className="text-neutral-400"><span className="text-neutral-500">κ:</span> {probeData.curvature.toFixed(4)}</span>
-          <span className="text-neutral-400"><span className="text-neutral-500">σ²:</span> {probeData.neighborhoodVariance.toFixed(4)}</span>
-          <span className="text-neutral-400"><span className="text-neutral-500">|∇|:</span> {probeData.gradientMagnitude.toFixed(4)}</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTrajectoryProbePoint(null)}
-            className="h-5 text-[10px] ml-auto text-cyan-400"
-          >
-            Clear Probe
-          </Button>
-        </div>
-      )}
-
       <div className="flex flex-1 overflow-hidden">
         <main className="relative bg-gray-950 flex-1 flex flex-col">
+          {/* Tools Toolbar */}
+          <div className="flex items-center justify-center gap-2 px-3 py-1.5 border-b border-border bg-card/30 shrink-0">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Tools:</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => { setPerturbMode(!perturbMode); if (!perturbMode) setTrajectoryProbeActive(false); }}
+              data-testid="button-perturb-mode"
+              className={`h-6 text-[10px] gap-1 ${perturbMode ? "bg-muted" : ""}`}
+            >
+              <Zap className="h-3 w-3" />
+              Perturb
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => { setTrajectoryProbeActive(!trajectoryProbeActive); if (!trajectoryProbeActive) { setPerturbMode(false); } else { setTrajectoryProbePoint(null); } }}
+              data-testid="button-trajectory-probe"
+              className={`h-6 text-[10px] gap-1 ${trajectoryProbeActive ? "bg-muted" : ""}`}
+            >
+              <Crosshair className="h-3 w-3" />
+              Probe
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDiagnosticsVisible(!diagnosticsVisible)}
+              data-testid="button-diagnostics"
+              className={`h-6 text-[10px] gap-1 ${diagnosticsVisible ? "bg-muted" : ""}`}
+            >
+              <Gauge className="h-3 w-3" />
+              Diagnostics
+            </Button>
+            <div className="w-px h-4 bg-border" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSaveConfiguration}
+              data-testid="button-save-config"
+              className="h-6 text-[10px] gap-1"
+            >
+              <Save className="h-3 w-3" />
+              Save Config
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => configInputRef.current?.click()}
+              data-testid="button-load-config"
+              className="h-6 text-[10px] gap-1"
+            >
+              <Upload className="h-3 w-3" />
+              Load Config
+            </Button>
+            <input
+              ref={configInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleLoadConfiguration}
+              className="hidden"
+            />
+          </div>
+
+          {/* Trajectory Probe Metrics (shown when probe is active and point is set) */}
+          {trajectoryProbeActive && trajectoryProbePoint && probeData && (
+            <div className="flex items-center justify-center gap-4 px-3 py-1.5 border-b border-cyan-500/30 bg-cyan-950/20 text-[10px] font-mono shrink-0">
+              <span className="text-cyan-400 font-medium">Probe ({trajectoryProbePoint.x}, {trajectoryProbePoint.y})</span>
+              <span className="text-neutral-400"><span className="text-neutral-500">κ:</span> {probeData.curvature.toFixed(4)}</span>
+              <span className="text-neutral-400"><span className="text-neutral-500">σ²:</span> {probeData.neighborhoodVariance.toFixed(4)}</span>
+              <span className="text-neutral-400"><span className="text-neutral-500">|∇|:</span> {probeData.gradientMagnitude.toFixed(4)}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setTrajectoryProbePoint(null)}
+                className="h-5 text-[10px] ml-auto text-cyan-400"
+              >
+                Clear Probe
+              </Button>
+            </div>
+          )}
           <div className="flex-1 relative">
               {showDualView ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-px h-full bg-border">
