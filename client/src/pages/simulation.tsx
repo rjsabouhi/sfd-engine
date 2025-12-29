@@ -32,7 +32,7 @@ import { defaultParameters, mobileParameters } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
 import { getStatusLine, computeFieldState, getFieldStateLabel, type ReactiveEvents, type SimulationState as LanguageSimState, type FieldState } from "@/lib/language";
-import { exportPNGSnapshot, exportAnimationGIF, exportSimulationData, exportMetricsLog, exportStateSnapshot, exportSettingsJSON, exportEventLog, saveConfiguration, loadConfiguration } from "@/lib/export-utils";
+import { exportPNGSnapshot, exportAnimationGIF, exportSimulationData, exportMetricsLog, exportStateSnapshot, exportSettingsJSON, exportEventLog, saveConfiguration, loadConfiguration, exportNumPyArray, exportBatchSpec, exportPythonScript, exportOperatorContributions, exportLayersSeparate, exportFullArchive, exportVideoWebM } from "@/lib/export-utils";
 
 export default function SimulationPage() {
   const isMobile = useIsMobile();
@@ -315,6 +315,53 @@ export default function SimulationPage() {
       await exportStateSnapshot(engineRef.current);
     }
   }, []);
+
+  const handleExportNumPy = useCallback(async () => {
+    if (engineRef.current) {
+      await exportNumPyArray(engineRef.current);
+    }
+  }, []);
+
+  const handleExportBatchSpec = useCallback(async () => {
+    if (engineRef.current) {
+      await exportBatchSpec(engineRef.current);
+    }
+  }, []);
+
+  const handleExportPython = useCallback(async () => {
+    if (engineRef.current) {
+      await exportPythonScript(engineRef.current);
+    }
+  }, []);
+
+  const handleExportOperators = useCallback(async () => {
+    if (engineRef.current) {
+      await exportOperatorContributions(engineRef.current);
+    }
+  }, []);
+
+  const handleExportLayers = useCallback(async () => {
+    if (engineRef.current) {
+      await exportLayersSeparate(engineRef.current, "npz");
+    }
+  }, []);
+
+  const handleExportArchive = useCallback(async () => {
+    if (engineRef.current) {
+      await exportFullArchive(engineRef.current, events, colormap);
+    }
+  }, [events, colormap]);
+
+  const handleExportWebM = useCallback(async () => {
+    if (!engineRef.current) return;
+    setIsExporting(true);
+    try {
+      const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
+      await exportVideoWebM(engineRef.current, canvas, colormap);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [colormap]);
 
   const handleHover = useCallback((x: number, y: number, screenX: number, screenY: number) => {
     if (engineRef.current) {
@@ -903,6 +950,13 @@ export default function SimulationPage() {
                 onExportSimulationData={handleExportSimulationData}
                 onExportMetrics={handleExportMetrics}
                 onExportStateSnapshot={handleExportStateSnapshot}
+                onExportNumPy={handleExportNumPy}
+                onExportBatchSpec={handleExportBatchSpec}
+                onExportPython={handleExportPython}
+                onExportOperators={handleExportOperators}
+                onExportLayers={handleExportLayers}
+                onExportArchive={handleExportArchive}
+                onExportWebM={handleExportWebM}
                 onShowDualViewChange={setShowDualView}
                 varianceChange={varianceChange}
                 isExporting={isExporting}

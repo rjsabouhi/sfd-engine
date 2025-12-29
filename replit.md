@@ -68,6 +68,16 @@ Added comprehensive development/debugging tools accessible via CTRL+SHIFT+D:
 - **Frame-by-Frame Mode**: Sandbox stepping through simulation history
 - **Zero Performance Cost**: Panel only updates when visible, intervals cleared when hidden
 
+### Research-Grade Export Suite (December 29, 2024)
+Added comprehensive export capabilities for research use:
+- **Visual Exports**: PNG snapshots, GIF animations, WebM video (MediaRecorder API)
+- **Data Exports**: CSV simulation data, metrics logs, operator contributions, settings JSON
+- **NumPy Array (.npy)**: Binary float32 field data loadable in Python
+- **Python Script (.py)**: Auto-generated reconstruction script with matplotlib visualization
+- **Layer Data (.json)**: Separated curvature, gradient, tension fields computed from primary
+- **Batch Spec (.json)**: Minimal parameter specification for automated testing
+- **Full Archive (.json)**: Comprehensive bundle with field, operators, events, metrics, config
+
 ### Engine Enhancements
 - Ring buffer for temporal history (100 frames, ~36MB for 300x300 grid)
 - Operator contribution tracking per update step

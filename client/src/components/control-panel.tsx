@@ -53,6 +53,13 @@ interface ControlPanelProps {
   onExportSimulationData: () => void;
   onExportMetrics: () => void;
   onExportStateSnapshot: () => void;
+  onExportNumPy?: () => void;
+  onExportBatchSpec?: () => void;
+  onExportPython?: () => void;
+  onExportOperators?: () => void;
+  onExportLayers?: () => void;
+  onExportArchive?: () => void;
+  onExportWebM?: () => void;
   onShowDualViewChange: (show: boolean) => void;
   isExporting?: boolean;
 }
@@ -120,6 +127,13 @@ export function ControlPanel({
   onExportSimulationData,
   onExportMetrics,
   onExportStateSnapshot,
+  onExportNumPy,
+  onExportBatchSpec,
+  onExportPython,
+  onExportOperators,
+  onExportLayers,
+  onExportArchive,
+  onExportWebM,
   onShowDualViewChange,
   varianceChange = 0,
   isExporting = false,
@@ -437,8 +451,8 @@ export function ControlPanel({
             </Collapsible>
           </TabsContent>
 
-          <TabsContent value="export" className="m-0 p-3 space-y-3">
-            <div className="text-xs font-medium text-muted-foreground">Export Options</div>
+          <TabsContent value="export" className="m-0 p-3 space-y-3 overflow-y-auto">
+            <div className="text-xs font-medium text-muted-foreground">Visual Exports</div>
             <div className="space-y-2">
               <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportPNG} data-testid="button-export-png">
                 <Download className="h-3.5 w-3.5 mr-2" />
@@ -446,8 +460,18 @@ export function ControlPanel({
               </Button>
               <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportAnimation} disabled={isExporting} data-testid="button-export-animation">
                 <Download className="h-3.5 w-3.5 mr-2" />
-                {isExporting ? "Exporting..." : "Animation Export (GIF)"}
+                {isExporting ? "Exporting..." : "Animation (GIF)"}
               </Button>
+              {onExportWebM && (
+                <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportWebM} disabled={isExporting} data-testid="button-export-webm">
+                  <Download className="h-3.5 w-3.5 mr-2" />
+                  Video (WebM)
+                </Button>
+              )}
+            </div>
+            
+            <div className="text-xs font-medium text-muted-foreground pt-2 border-t border-border/50">Data Exports</div>
+            <div className="space-y-2">
               <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportSimulationData} data-testid="button-export-simulation-data">
                 <Download className="h-3.5 w-3.5 mr-2" />
                 Simulation Data (.csv)
@@ -456,6 +480,12 @@ export function ControlPanel({
                 <Download className="h-3.5 w-3.5 mr-2" />
                 Metrics Log (.csv)
               </Button>
+              {onExportOperators && (
+                <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportOperators} data-testid="button-export-operators">
+                  <Download className="h-3.5 w-3.5 mr-2" />
+                  Operators (.csv)
+                </Button>
+              )}
               <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportStateSnapshot} data-testid="button-export-state">
                 <Download className="h-3.5 w-3.5 mr-2" />
                 State Snapshot (.json)
@@ -468,6 +498,40 @@ export function ControlPanel({
                 <Download className="h-3.5 w-3.5 mr-2" />
                 Event Log
               </Button>
+            </div>
+            
+            <div className="text-xs font-medium text-muted-foreground pt-2 border-t border-border/50">Research-Grade</div>
+            <div className="space-y-2">
+              {onExportNumPy && (
+                <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportNumPy} data-testid="button-export-numpy">
+                  <Download className="h-3.5 w-3.5 mr-2" />
+                  NumPy Array (.npy)
+                </Button>
+              )}
+              {onExportPython && (
+                <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportPython} data-testid="button-export-python">
+                  <Download className="h-3.5 w-3.5 mr-2" />
+                  Python Script (.py)
+                </Button>
+              )}
+              {onExportLayers && (
+                <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportLayers} data-testid="button-export-layers">
+                  <Download className="h-3.5 w-3.5 mr-2" />
+                  Layer Data (.json)
+                </Button>
+              )}
+              {onExportBatchSpec && (
+                <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportBatchSpec} data-testid="button-export-batch">
+                  <Download className="h-3.5 w-3.5 mr-2" />
+                  Batch Spec (.json)
+                </Button>
+              )}
+              {onExportArchive && (
+                <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportArchive} data-testid="button-export-archive">
+                  <Download className="h-3.5 w-3.5 mr-2" />
+                  Full Archive (.json)
+                </Button>
+              )}
             </div>
           </TabsContent>
         </div>
