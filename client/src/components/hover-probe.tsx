@@ -16,8 +16,8 @@ export function HoverProbe({ data, modeLabels, visible, position }: HoverProbePr
     <Card
       className="absolute z-50 bg-card/95 backdrop-blur-sm border-border shadow-lg pointer-events-none"
       style={{
-        left: position.x + 16,
-        top: position.y + 16,
+        left: position.x + 8,
+        top: position.y + 8,
         maxWidth: 220,
       }}
       data-testid="panel-hover-probe"
