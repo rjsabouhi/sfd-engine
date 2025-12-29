@@ -613,70 +613,66 @@ export default function SimulationPage() {
       </header>
 
       {/* Tools Toolbar */}
-      <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b border-border bg-card/30 shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Tools:</span>
-          <Button
-            variant={perturbMode ? "default" : "outline"}
-            size="sm"
-            onClick={() => { setPerturbMode(!perturbMode); if (!perturbMode) setTrajectoryProbeActive(false); }}
-            data-testid="button-perturb-mode"
-            className="h-6 text-[10px] gap-1"
-          >
-            <Zap className="h-3 w-3" />
-            Perturb
-          </Button>
-          <Button
-            variant={trajectoryProbeActive ? "default" : "outline"}
-            size="sm"
-            onClick={() => { setTrajectoryProbeActive(!trajectoryProbeActive); if (!trajectoryProbeActive) { setPerturbMode(false); } else { setTrajectoryProbePoint(null); } }}
-            data-testid="button-trajectory-probe"
-            className="h-6 text-[10px] gap-1"
-          >
-            <Crosshair className="h-3 w-3" />
-            Probe
-          </Button>
-                  </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant={diagnosticsVisible ? "default" : "outline"}
-            size="sm"
-            onClick={() => setDiagnosticsVisible(!diagnosticsVisible)}
-            data-testid="button-diagnostics"
-            className="h-6 text-[10px] gap-1"
-          >
-            <Gauge className="h-3 w-3" />
-            Diagnostics
-          </Button>
-          <div className="w-px h-4 bg-border" />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSaveConfiguration}
-            data-testid="button-save-config"
-            className="h-6 text-[10px] gap-1"
-          >
-            <Save className="h-3 w-3" />
-            Save Config
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => configInputRef.current?.click()}
-            data-testid="button-load-config"
-            className="h-6 text-[10px] gap-1"
-          >
-            <Upload className="h-3 w-3" />
-            Load Config
-          </Button>
-          <input
-            ref={configInputRef}
-            type="file"
-            accept=".json"
-            onChange={handleLoadConfiguration}
-            className="hidden"
-          />
-        </div>
+      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border bg-card/30 shrink-0">
+        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Tools:</span>
+        <Button
+          variant={perturbMode ? "default" : "outline"}
+          size="sm"
+          onClick={() => { setPerturbMode(!perturbMode); if (!perturbMode) setTrajectoryProbeActive(false); }}
+          data-testid="button-perturb-mode"
+          className="h-6 text-[10px] gap-1"
+        >
+          <Zap className="h-3 w-3" />
+          Perturb
+        </Button>
+        <Button
+          variant={trajectoryProbeActive ? "default" : "outline"}
+          size="sm"
+          onClick={() => { setTrajectoryProbeActive(!trajectoryProbeActive); if (!trajectoryProbeActive) { setPerturbMode(false); } else { setTrajectoryProbePoint(null); } }}
+          data-testid="button-trajectory-probe"
+          className="h-6 text-[10px] gap-1"
+        >
+          <Crosshair className="h-3 w-3" />
+          Probe
+        </Button>
+        <Button
+          variant={diagnosticsVisible ? "default" : "outline"}
+          size="sm"
+          onClick={() => setDiagnosticsVisible(!diagnosticsVisible)}
+          data-testid="button-diagnostics"
+          className="h-6 text-[10px] gap-1"
+        >
+          <Gauge className="h-3 w-3" />
+          Diagnostics
+        </Button>
+        <div className="w-px h-4 bg-border" />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSaveConfiguration}
+          data-testid="button-save-config"
+          className="h-6 text-[10px] gap-1"
+        >
+          <Save className="h-3 w-3" />
+          Save Config
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => configInputRef.current?.click()}
+          data-testid="button-load-config"
+          className="h-6 text-[10px] gap-1"
+        >
+          <Upload className="h-3 w-3" />
+          Load Config
+        </Button>
+        <input
+          ref={configInputRef}
+          type="file"
+          accept=".json"
+          onChange={handleLoadConfiguration}
+          className="hidden"
+        />
       </div>
 
       {/* Trajectory Probe Metrics (shown when probe is active and point is set) */}
