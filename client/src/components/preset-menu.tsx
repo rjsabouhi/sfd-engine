@@ -24,10 +24,9 @@ export function PresetMenu({ onApply }: PresetMenuProps) {
 
   return (
     <div className="space-y-2">
-      <h4 className="text-xs font-medium">Dynamic Regimes</h4>
       <Select onValueChange={handleChange}>
         <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-preset">
-          <SelectValue placeholder="Select a regime..." />
+          <SelectValue placeholder="Select a dynamic regime..." />
         </SelectTrigger>
         <SelectContent>
           {Object.keys(structuralPresets).map((key) => (
