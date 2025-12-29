@@ -387,20 +387,20 @@ export function FloatingDiagnostics({
 
             {activeTab === "check" && (
               <div className="space-y-4">
-                <div>
+                <div className="border border-cyan-500/30 rounded-md p-3 bg-cyan-950/20">
                   <SectionHeader>Determinism Check</SectionHeader>
                   <Button 
                     size="sm" 
                     onClick={handleRunDeterminism}
                     disabled={isRunningDeterminism}
-                    className="w-full h-8 text-xs bg-white/5 hover:bg-white/10 border border-white/10"
+                    className="w-full h-8 text-xs bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/40 text-cyan-100"
                     data-testid="button-run-determinism"
                   >
                     {isRunningDeterminism ? "Running..." : "Run Determinism Check (100 steps)"}
                   </Button>
                   
                   {determinismReport && (
-                    <div className="mt-3 space-y-1 bg-white/5 rounded p-2.5">
+                    <div className="mt-3 space-y-1 bg-black/30 rounded p-2.5 border border-white/10">
                       <StatRow 
                         label="Status" 
                         value={determinismReport.isDeterministic ? "DETERMINISTIC" : "NON-DETERMINISTIC"}
