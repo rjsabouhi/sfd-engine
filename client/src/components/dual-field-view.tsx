@@ -135,6 +135,7 @@ export function DualFieldView({
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
   const [derivedValue, setDerivedValue] = useState<number | null>(null);
+  const [hasUserSelectedOverlay, setHasUserSelectedOverlay] = useState(false);
 
   // Helper to get primary field color using the selected colormap
   const getPrimaryColor = useCallback((value: number, minVal: number, range: number): [number, number, number] => {
@@ -353,6 +354,12 @@ export function DualFieldView({
   const visualSize = size * visualScale;
 
   const currentOption = OVERLAY_OPTIONS.find(o => o.value === derivedType);
+  const displayLabel = hasUserSelectedOverlay ? (currentOption?.label || "Layers") : "Layers";
+
+  const handleOverlayChange = (value: string) => {
+    setHasUserSelectedOverlay(true);
+    onTypeChange(value as OverlayType);
+  };
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -392,12 +399,12 @@ export function DualFieldView({
           </div>
         )}
         
-        <Select value={derivedType} onValueChange={(v) => onTypeChange(v as OverlayType)}>
+        <Select value={derivedType} onValueChange={handleOverlayChange}>
           <SelectTrigger 
             className="h-7 w-32 text-xs focus:ring-0 focus:ring-offset-0"
             data-testid="select-overlay-type"
           >
-            <SelectValue placeholder="Layers" />
+            <span>{displayLabel}</span>
           </SelectTrigger>
           <SelectContent>
             {OVERLAY_OPTIONS.map((option) => (
