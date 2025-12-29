@@ -529,7 +529,7 @@ export default function SimulationPage() {
                         </div>
                         <Select value={colormap} onValueChange={(v) => setColormap(v as "inferno" | "viridis" | "cividis")}>
                           <SelectTrigger className="h-7 w-24 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-header">
-                            <SelectValue />
+                            <span>Color Map</span>
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="viridis">Viridis</SelectItem>
@@ -566,7 +566,7 @@ export default function SimulationPage() {
                     </div>
                     <Select value={colormap} onValueChange={(v) => setColormap(v as "inferno" | "viridis" | "cividis")}>
                       <SelectTrigger className="h-7 w-24 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-single">
-                        <SelectValue />
+                        <span>Color Map</span>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="viridis">Viridis</SelectItem>
