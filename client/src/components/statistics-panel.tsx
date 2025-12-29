@@ -19,16 +19,16 @@ interface MetricCardProps {
 function MetricCard({ icon: Icon, label, value, unit, testId }: MetricCardProps) {
   return (
     <Card className="bg-card/50">
-      <CardContent className="p-3">
-        <div className="flex items-center gap-2 mb-1">
-          <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">{label}</span>
+      <CardContent className="p-2">
+        <div className="flex items-center gap-1 mb-0.5">
+          <Icon className="h-3 w-3 text-muted-foreground" />
+          <span className="text-[10px] text-muted-foreground truncate">{label}</span>
         </div>
-        <div className="flex items-baseline gap-1">
-          <span className="text-lg font-mono font-semibold" data-testid={testId}>
+        <div className="flex items-baseline gap-0.5">
+          <span className="text-sm font-mono font-semibold" data-testid={testId}>
             {value}
           </span>
-          {unit && <span className="text-xs text-muted-foreground">{unit}</span>}
+          {unit && <span className="text-[10px] text-muted-foreground">{unit}</span>}
         </div>
       </CardContent>
     </Card>
@@ -41,7 +41,7 @@ export function StatisticsPanel({ state, modeLabels }: StatisticsPanelProps) {
       <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
         Statistics
       </h3>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-4 gap-1.5">
         <MetricCard
           icon={Timer}
           label="Step"
