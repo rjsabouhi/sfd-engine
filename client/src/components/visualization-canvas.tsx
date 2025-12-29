@@ -273,15 +273,15 @@ export function VisualizationCanvas({
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(100,120,160,0.12) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(100,120,160,0.12) 1px, transparent 1px),
-            linear-gradient(rgba(100,120,160,0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(100,120,160,0.05) 1px, transparent 1px)
+            linear-gradient(rgba(80,100,140,0.35) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(80,100,140,0.35) 1px, transparent 1px),
+            linear-gradient(rgba(80,100,140,0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(80,100,140,0.15) 1px, transparent 1px)
           `,
           backgroundSize: '80px 80px, 80px 80px, 20px 20px, 20px 20px',
           backgroundPosition: 'center center',
-          maskImage: 'radial-gradient(ellipse at center, black 20%, transparent 75%)',
-          WebkitMaskImage: 'radial-gradient(ellipse at center, black 20%, transparent 75%)',
+          maskImage: 'radial-gradient(ellipse at center, black 0%, black 40%, transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at center, black 0%, black 40%, transparent 80%)',
         }}
       />
       
@@ -291,7 +291,7 @@ export function VisualizationCanvas({
         style={{
           width: '100%',
           height: '1px',
-          background: 'linear-gradient(90deg, transparent 0%, rgba(100,120,160,0.15) 35%, rgba(100,120,160,0.25) 50%, rgba(100,120,160,0.15) 65%, transparent 100%)',
+          background: 'linear-gradient(90deg, transparent 0%, rgba(80,100,140,0.4) 30%, rgba(80,100,140,0.6) 50%, rgba(80,100,140,0.4) 70%, transparent 100%)',
           top: '50%',
         }}
       />
@@ -300,7 +300,7 @@ export function VisualizationCanvas({
         style={{
           width: '1px',
           height: '100%',
-          background: 'linear-gradient(180deg, transparent 0%, rgba(100,120,160,0.15) 35%, rgba(100,120,160,0.25) 50%, rgba(100,120,160,0.15) 65%, transparent 100%)',
+          background: 'linear-gradient(180deg, transparent 0%, rgba(80,100,140,0.4) 30%, rgba(80,100,140,0.6) 50%, rgba(80,100,140,0.4) 70%, transparent 100%)',
           left: '50%',
         }}
       />
