@@ -223,11 +223,11 @@ export function ControlPanel({
               )}
             </div>
 
-            <div className="border-t border-border/50 pt-3 space-y-3">
-              <div className="space-y-2">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Color Map</span>
+            <div className="border-t border-border/50 pt-3 space-y-2">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Display Settings</span>
+              <div className="flex gap-2">
                 <Select value={colormap} onValueChange={(v) => onColormapChange(v as "inferno" | "viridis" | "grayscale")}>
-                  <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-colormap">
+                  <SelectTrigger className="h-8 flex-1 focus:ring-0 focus:ring-offset-0" data-testid="select-colormap">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -236,20 +236,19 @@ export function ControlPanel({
                     <SelectItem value="grayscale">Grayscale</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="flex gap-2">
                 <button
                   onClick={() => onShowDualViewChange(!showDualView)}
-                  className="relative h-10 w-10 rounded-sm transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                  className="relative h-8 w-8 rounded-md transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                   style={{
                     backgroundColor: showDualView ? "#744B93" : "rgba(39, 39, 42, 1)",
-                    border: showDualView ? "1px solid #C4A7E7" : "1px solid transparent"
+                    border: showDualView ? "1px solid #C4A7E7" : "1px solid rgba(63, 63, 70, 1)"
                   }}
                   data-testid="pad-dual-view"
                 >
                   <Columns2 className={`h-4 w-4 mx-auto ${showDualView ? "text-purple-200" : "text-zinc-500"}`} />
                 </button>
               </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">Choose a color palette and toggle dual-field comparison view.</p>
             </div>
 
             <div className="pt-3 border-t border-border space-y-2">
