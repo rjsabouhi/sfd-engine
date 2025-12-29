@@ -328,10 +328,10 @@
 @keyframes subtle-pulse {
   0%, 100% {
     opacity: 1;
-    border-color: rgba(94, 234, 212, 0.4);
+    border-color: rgba(94, 234, 212, 0.7);
   }
   50% {
-    opacity: 0.85;
-    border-color: rgba(94, 234, 212, 0.7);
+    opacity: 0.9;
+    border-color: rgba(153, 246, 228, 0.9);
   }
 }
