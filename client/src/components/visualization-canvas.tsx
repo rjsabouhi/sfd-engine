@@ -241,30 +241,72 @@ export function VisualizationCanvas({
 
   const zoomPercent = Math.round(zoom * 100);
 
+  const visualScale = 0.88;
+  const visualSize = canvasSize * visualScale;
+
   return (
     <div 
       ref={containerRef}
-      className="relative w-full h-full flex items-center justify-center bg-gray-950 overflow-hidden"
+      className="relative w-full h-full flex items-center justify-center overflow-hidden"
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
       onDoubleClick={handleDoubleClick}
-      style={{ cursor: zoom > 1 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair' }}
+      style={{ 
+        cursor: zoom > 1 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair',
+        backgroundColor: 'rgb(8, 10, 14)',
+      }}
       data-testid="visualization-container"
     >
+      {/* Spatial Reference Grid Background */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)
+          `,
+          backgroundSize: '80px 80px, 80px 80px, 20px 20px, 20px 20px',
+          backgroundPosition: 'center center',
+        }}
+      />
+      
+      {/* Grid Origin Crosshair */}
+      <div 
+        className="absolute pointer-events-none"
+        style={{
+          width: '100%',
+          height: '1px',
+          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.04) 60%, transparent 100%)',
+          top: '50%',
+        }}
+      />
+      <div 
+        className="absolute pointer-events-none"
+        style={{
+          width: '1px',
+          height: '100%',
+          background: 'linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.04) 60%, transparent 100%)',
+          left: '50%',
+        }}
+      />
+
       {field ? (
         <>
           <canvas
             ref={canvasRef}
-            className="rounded-md"
+            className="rounded-md relative"
             style={{ 
               imageRendering: zoom > 2 ? "pixelated" : "auto",
-              width: `${canvasSize}px`,
-              height: `${canvasSize}px`,
+              width: `${visualSize}px`,
+              height: `${visualSize}px`,
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
               transformOrigin: 'center center',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.6), 0 0 1px rgba(255,255,255,0.1)',
             }}
             data-testid="canvas-visualization"
           />
