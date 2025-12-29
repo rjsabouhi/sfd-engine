@@ -613,7 +613,7 @@ export default function SimulationPage() {
       </header>
 
       {/* Tools Toolbar */}
-      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border bg-card/30 shrink-0">
+      <div className="flex items-center justify-center gap-2 px-3 py-1.5 border-b border-border bg-card/30 shrink-0">
         <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Tools:</span>
         <Button
           variant="outline"
