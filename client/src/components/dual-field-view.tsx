@@ -105,6 +105,13 @@ export function DualFieldView({
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
   const [derivedValue, setDerivedValue] = useState<number | null>(null);
 
+  // Helper to get primary field color (grayscale based on value)
+  const getPrimaryColor = useCallback((value: number, minVal: number, range: number): [number, number, number] => {
+    const normalized = (value - minVal) / range;
+    const gray = Math.floor(normalized * 255);
+    return [gray, gray, gray];
+  }, []);
+
   const render = useCallback(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -114,6 +121,32 @@ export function DualFieldView({
     if (!ctx) return;
 
     setContainerSize({ width: container.clientWidth, height: container.clientHeight });
+
+    // Helper to blend two colors
+    const blendColors = (
+      primary: [number, number, number], 
+      overlay: [number, number, number], 
+      opacity: number
+    ): [number, number, number] => {
+      return [
+        Math.round(primary[0] * (1 - opacity) + overlay[0] * opacity),
+        Math.round(primary[1] * (1 - opacity) + overlay[1] * opacity),
+        Math.round(primary[2] * (1 - opacity) + overlay[2] * opacity),
+      ];
+    };
+
+    // Get primary field min/max for blending
+    let primaryMinVal = 0, primaryMaxVal = 1, primaryRange = 1;
+    if (blendMode && primaryField) {
+      primaryMinVal = Infinity;
+      primaryMaxVal = -Infinity;
+      for (let i = 0; i < primaryField.grid.length; i++) {
+        const v = primaryField.grid[i];
+        if (v < primaryMinVal) primaryMinVal = v;
+        if (v > primaryMaxVal) primaryMaxVal = v;
+      }
+      primaryRange = primaryMaxVal - primaryMinVal || 1;
+    }
 
     if (derivedType === "basins") {
       if (!basinMap) return;
@@ -128,18 +161,27 @@ export function DualFieldView({
         const basinId = basinMap.labels[i];
         const pixelIdx = i * 4;
         
+        let overlayColor: [number, number, number];
         if (basinId >= 0) {
           const color = BASIN_COLORS[basinId % BASIN_COLORS.length];
-          data[pixelIdx] = color[0];
-          data[pixelIdx + 1] = color[1];
-          data[pixelIdx + 2] = color[2];
-          data[pixelIdx + 3] = 255;
+          overlayColor = [color[0], color[1], color[2]];
         } else {
-          data[pixelIdx] = 30;
-          data[pixelIdx + 1] = 30;
-          data[pixelIdx + 2] = 30;
-          data[pixelIdx + 3] = 255;
+          overlayColor = [30, 30, 30];
         }
+
+        // Apply blending with primary field if enabled
+        if (blendMode && primaryField && i < primaryField.grid.length) {
+          const primaryColor = getPrimaryColor(primaryField.grid[i], primaryMinVal, primaryRange);
+          const blended = blendColors(primaryColor, overlayColor, blendOpacity);
+          data[pixelIdx] = blended[0];
+          data[pixelIdx + 1] = blended[1];
+          data[pixelIdx + 2] = blended[2];
+        } else {
+          data[pixelIdx] = overlayColor[0];
+          data[pixelIdx + 1] = overlayColor[1];
+          data[pixelIdx + 2] = overlayColor[2];
+        }
+        data[pixelIdx + 3] = 255;
       }
       
       ctx.putImageData(imageData, 0, 0);
@@ -165,16 +207,26 @@ export function DualFieldView({
     for (let i = 0; i < derivedField.grid.length; i++) {
       const value = derivedField.grid[i];
       const normalized = (value - minVal) / range;
-      const [r, g, b] = interpolateColor(normalized);
+      const overlayColor = interpolateColor(normalized);
       const pixelIdx = i * 4;
-      data[pixelIdx] = r;
-      data[pixelIdx + 1] = g;
-      data[pixelIdx + 2] = b;
+
+      // Apply blending with primary field if enabled
+      if (blendMode && primaryField && i < primaryField.grid.length) {
+        const primaryColor = getPrimaryColor(primaryField.grid[i], primaryMinVal, primaryRange);
+        const blended = blendColors(primaryColor, overlayColor, blendOpacity);
+        data[pixelIdx] = blended[0];
+        data[pixelIdx + 1] = blended[1];
+        data[pixelIdx + 2] = blended[2];
+      } else {
+        data[pixelIdx] = overlayColor[0];
+        data[pixelIdx + 1] = overlayColor[1];
+        data[pixelIdx + 2] = overlayColor[2];
+      }
       data[pixelIdx + 3] = 255;
     }
 
     ctx.putImageData(imageData, 0, 0);
-  }, [derivedField, basinMap, derivedType]);
+  }, [derivedField, basinMap, derivedType, blendMode, blendOpacity, primaryField, getPrimaryColor]);
 
   useEffect(() => {
     render();
