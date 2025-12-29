@@ -582,17 +582,7 @@ export default function SimulationPage() {
           >
             Show Intro
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setDiagnosticsVisible(!diagnosticsVisible)} 
-            data-testid="button-diagnostics"
-            className="h-7 text-xs gap-1.5"
-          >
-            <Gauge className="h-3 w-3" />
-            Diagnostics
-          </Button>
-          <Dialog>
+                    <Dialog>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" data-testid="button-help" className="h-7 w-7">
                 <HelpCircle className="h-3.5 w-3.5" />
@@ -671,6 +661,17 @@ export default function SimulationPage() {
           </Button>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant={diagnosticsVisible ? "default" : "outline"}
+            size="sm"
+            onClick={() => setDiagnosticsVisible(!diagnosticsVisible)}
+            data-testid="button-diagnostics"
+            className="h-6 text-[10px] gap-1"
+          >
+            <Gauge className="h-3 w-3" />
+            Diagnostics
+          </Button>
+          <div className="w-px h-4 bg-border" />
           <Button
             variant="outline"
             size="sm"
