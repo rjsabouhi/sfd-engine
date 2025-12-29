@@ -51,6 +51,7 @@ export default function SimulationPage() {
   });
   const [field, setField] = useState<FieldData | null>(null);
   const [colormap, setColormap] = useState<"inferno" | "viridis" | "cividis">("viridis");
+  const [hasUserSelectedColormap, setHasUserSelectedColormap] = useState(false);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("structural");
     
@@ -336,6 +337,15 @@ export default function SimulationPage() {
       setTrajectoryProbePoint({ x, y });
     }
   }, [perturbMode, trajectoryProbeActive]);
+
+  const colormapLabel = hasUserSelectedColormap 
+    ? (colormap === "viridis" ? "Viridis" : colormap === "inferno" ? "Inferno" : "Cividis") 
+    : "Color Map";
+  
+  const handleColormapChange = useCallback((value: string) => {
+    setHasUserSelectedColormap(true);
+    setColormap(value as "inferno" | "viridis" | "cividis");
+  }, []);
 
   const handleJumpToNextEvent = useCallback(() => {
     const engine = engineRef.current;
@@ -720,9 +730,9 @@ export default function SimulationPage() {
                           <h4 className="text-xs font-medium">Structural Field</h4>
                           <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation showing local state values.</p>
                         </div>
-                        <Select value={colormap} onValueChange={(v) => setColormap(v as "inferno" | "viridis" | "cividis")}>
+                        <Select value={colormap} onValueChange={handleColormapChange}>
                           <SelectTrigger className="h-7 w-28 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-header">
-                            <span>Color Map</span>
+                            <span>{colormapLabel}</span>
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="viridis">Viridis</SelectItem>
@@ -773,9 +783,9 @@ export default function SimulationPage() {
                       <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation showing local state values.</p>
                     </div>
                     <div className="absolute right-3">
-                      <Select value={colormap} onValueChange={(v) => setColormap(v as "inferno" | "viridis" | "cividis")}>
+                      <Select value={colormap} onValueChange={handleColormapChange}>
                         <SelectTrigger className="h-7 w-28 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-single">
-                          <span>Color Map</span>
+                          <span>{colormapLabel}</span>
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="viridis">Viridis</SelectItem>
