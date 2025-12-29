@@ -20,20 +20,12 @@ function getStabilityLabel(variance: number, curvature: number): { label: string
 }
 
 export function StructuralFieldFooter({ probeData, basinMap, isHovering }: StructuralFieldFooterProps) {
-  if (!probeData) {
-    return (
-      <div 
-        className="h-7 flex items-center justify-center text-[10px] text-neutral-500 border-t border-white/5"
-        style={{ backgroundColor: 'rgba(8, 10, 14, 0.9)' }}
-        data-testid="structural-field-footer"
-      >
-        Hover over field to inspect
-      </div>
-    );
-  }
-
-  const stability = getStabilityLabel(probeData.neighborhoodVariance, probeData.curvature);
-  const energyDensity = 0.5 * probeData.gradientMagnitude * probeData.gradientMagnitude + 0.5 * probeData.curvature * probeData.curvature;
+  const stability = probeData 
+    ? getStabilityLabel(probeData.neighborhoodVariance, probeData.curvature)
+    : { label: "---", color: "text-neutral-500" };
+  const energyDensity = probeData 
+    ? 0.5 * probeData.gradientMagnitude * probeData.gradientMagnitude + 0.5 * probeData.curvature * probeData.curvature
+    : null;
 
   return (
     <div 
@@ -42,19 +34,19 @@ export function StructuralFieldFooter({ probeData, basinMap, isHovering }: Struc
       data-testid="structural-field-footer"
     >
       <span className="text-neutral-400">
-        <span className="text-neutral-500">Val:</span> {formatValue(probeData.value, 3)}
+        <span className="text-neutral-500">Val:</span> {formatValue(probeData?.value, 3)}
       </span>
       <span className="text-neutral-400">
-        <span className="text-neutral-500">κ:</span> {formatValue(probeData.curvature, 3)}
+        <span className="text-neutral-500">κ:</span> {formatValue(probeData?.curvature, 3)}
       </span>
       <span className="text-neutral-400">
-        <span className="text-neutral-500">|∇Φ|:</span> {formatValue(probeData.gradientMagnitude, 3)}
+        <span className="text-neutral-500">|∇Φ|:</span> {formatValue(probeData?.gradientMagnitude, 3)}
       </span>
       <span className="text-neutral-400">
-        <span className="text-neutral-500">τ:</span> {formatValue(probeData.tension, 3)}
+        <span className="text-neutral-500">τ:</span> {formatValue(probeData?.tension, 3)}
       </span>
       <span className="text-neutral-400">
-        <span className="text-neutral-500">Basin:</span> {probeData.basinId !== null ? probeData.basinId : "---"}
+        <span className="text-neutral-500">Basin:</span> {probeData?.basinId ?? "---"}
       </span>
       <span className={stability.color}>
         {stability.label}
@@ -62,7 +54,7 @@ export function StructuralFieldFooter({ probeData, basinMap, isHovering }: Struc
       <span className="text-neutral-400">
         <span className="text-neutral-500">e:</span> {formatValue(energyDensity, 4)}
       </span>
-      {isHovering && (
+      {isHovering && probeData && (
         <span className="text-blue-400/60 ml-auto">
           ({probeData.x}, {probeData.y})
         </span>
@@ -240,18 +232,6 @@ export function ProjectionViewFooter({ layerType, probeData, derivedValue, basin
     }
   };
 
-  if (!isHovering) {
-    return (
-      <div 
-        className="h-7 flex items-center justify-center text-[10px] text-neutral-500 border-t border-white/5"
-        style={{ backgroundColor: 'rgba(8, 10, 14, 0.9)' }}
-        data-testid="projection-view-footer"
-      >
-        Hover over projection to inspect
-      </div>
-    );
-  }
-
   return (
     <div 
       className="flex items-center gap-3 px-3 py-1.5 text-[10px] font-mono border-t border-white/5 overflow-x-auto"
@@ -259,9 +239,11 @@ export function ProjectionViewFooter({ layerType, probeData, derivedValue, basin
       data-testid="projection-view-footer"
     >
       {renderMetrics()}
-      <span className="text-blue-400/60 ml-auto">
-        ({x}, {y})
-      </span>
+      {isHovering && (
+        <span className="text-blue-400/60 ml-auto">
+          ({x}, {y})
+        </span>
+      )}
     </div>
   );
 }
