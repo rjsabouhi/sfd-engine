@@ -740,7 +740,17 @@ export default function SimulationPage() {
           </div>
 
           {/* Tools Toolbar */}
-          <div className="flex items-center justify-center gap-2 px-3 py-1.5 border-b border-border bg-card/30 shrink-0">
+          <div 
+            className="flex items-center justify-center gap-2 px-3 py-1.5 border-b border-border/50 shrink-0"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(70,90,130,0.25) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(70,90,130,0.25) 1px, transparent 1px)
+              `,
+              backgroundSize: '40px 40px',
+              backgroundPosition: 'center center',
+            }}
+          >
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Tools:</span>
             <Button
               variant="outline"
