@@ -189,7 +189,7 @@ export function ControlPanel({
                   <Button 
                     onClick={onPlay} 
                     variant="outline"
-                    className="flex-1 bg-teal-400/20 hover:bg-teal-400/30 text-teal-300 border-teal-400/50" 
+                    className="flex-1 bg-teal-400/20 hover:bg-teal-400/30 text-teal-300 border border-teal-400" 
                     size="sm" 
                     data-testid="button-play"
                   >
