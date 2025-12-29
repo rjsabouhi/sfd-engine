@@ -128,6 +128,10 @@ export class SFDEngine {
   private signatureCacheInterval: number = 15; // Update every N steps
   private lastSignatureCacheStep: number = 0;
   
+  // Coherence history for sparkline
+  private coherenceHistory: number[] = [];
+  private coherenceHistorySize: number = 60;
+  
   // Cached derived fields - reuse typed arrays
   private cachedDerivedFields: Map<string, DerivedField> = new Map();
   private derivedFieldCacheInterval: number = 1;
@@ -793,17 +797,56 @@ export class SFDEngine {
       avgBasinDepth = count > 0 ? depthSum / count : 0;
     }
     
+    // Compute structural coherence (0-1 composite)
+    // Uses dynamic scaling based on observed empirical ranges
+    // Higher values = more organized/structured field
+    
+    // Depth contribution: typical depths range 0.001 to 0.1, use sigmoid scaling
+    const depthScore = avgBasinDepth > 0 
+      ? Math.min(1, avgBasinDepth / 0.05) * 0.8 + 0.2 * (1 - Math.exp(-avgBasinDepth * 20))
+      : 0;
+    
+    // Curvature stability: absolute curvature near 0 is stable
+    // Typical range: -0.001 to 0.001, scale accordingly
+    const avgCurvature = Math.abs(totalCurvature / n);
+    const curvatureScore = Math.exp(-avgCurvature * 500); // Exponential decay from 1
+    
+    // Tension stability: low tension variance indicates coherent field
+    // Typical range: 0 to 0.01, scale accordingly  
+    const tensionScore = Math.exp(-totalTensionVar * 50);
+    
+    // Basin presence bonus: having basins indicates structure
+    const basinBonus = stats.basinCount > 0 ? 0.15 : 0;
+    
+    // Geometric mean provides balanced contribution from all factors
+    const baseCoherence = Math.pow(
+      Math.max(0.01, depthScore) * Math.max(0.01, curvatureScore) * Math.max(0.01, tensionScore),
+      1/3
+    );
+    const coherence = Math.min(1, baseCoherence + basinBonus);
+    
+    // Track coherence history for sparkline
+    this.coherenceHistory.push(coherence);
+    if (this.coherenceHistory.length > this.coherenceHistorySize) {
+      this.coherenceHistory.shift();
+    }
+    
     return {
       basinCount: stats.basinCount,
       avgBasinDepth,
       globalCurvature: totalCurvature / n,
       tensionVariance: totalTensionVar,
       stabilityMetric: 1 / (1 + stats.variance),
+      coherence,
     };
   }
 
   getOperatorContributions(): OperatorContributions {
     return { ...this.operatorContributions };
+  }
+  
+  getCoherenceHistory(): number[] {
+    return [...this.coherenceHistory];
   }
 
   getCachedSignature(): StructuralSignature {

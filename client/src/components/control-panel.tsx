@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Sliders, Activity, Settings2, BookOpen, Download, Columns2 } from "lucide-react";
 import type { SimulationParameters, SimulationState, OperatorContributions, StructuralSignature, StructuralEvent } from "@shared/schema";
 import { defaultParameters } from "@shared/schema";
-import { StatisticsPanel } from "./statistics-panel";
 import { TemporalControls } from "./temporal-controls";
 import { OperatorSensitivity } from "./operator-sensitivity";
 import { StructuralSignatureBar } from "./structural-signature";
@@ -27,6 +26,7 @@ interface ControlPanelProps {
   interpretationMode: InterpretationMode;
   operatorContributions: OperatorContributions;
   structuralSignature: StructuralSignature;
+  coherenceHistory: number[];
   events: StructuralEvent[];
   historyLength: number;
   currentHistoryIndex: number;
@@ -88,6 +88,7 @@ export function ControlPanel({
   interpretationMode,
   operatorContributions,
   structuralSignature,
+  coherenceHistory,
   events,
   historyLength,
   currentHistoryIndex,
@@ -234,8 +235,12 @@ export function ControlPanel({
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent className="pt-2 space-y-2">
-                <StructuralSignatureBar signature={structuralSignature} modeLabels={modeLabels} />
-                <StatisticsPanel state={state} modeLabels={modeLabels} />
+                <StructuralSignatureBar 
+                  signature={structuralSignature} 
+                  coherenceHistory={coherenceHistory}
+                  state={state}
+                  modeLabels={modeLabels} 
+                />
               </CollapsibleContent>
             </Collapsible>
 

@@ -96,7 +96,22 @@ export interface StructuralSignature {
   globalCurvature: number;
   tensionVariance: number;
   stabilityMetric: number;
+  coherence: number; // Composite 0-1 metric combining depth, curvature, tension variance
 }
+
+// Human-readable attractor status
+export type AttractorStatus = "None" | "Emerging" | "Stable" | "Multiple";
+
+// Field mode regime labels
+export type FieldMode = 
+  | "Diffuse equilibrium"
+  | "Shear tension forming"
+  | "Radial symmetry breach"
+  | "Boundary locking"
+  | "Oscillatory collapse"
+  | "Basin crystallization"
+  | "Coherent attractor"
+  | "Multi-stable regime";
 
 export interface BasinMap {
   labels: Int32Array;

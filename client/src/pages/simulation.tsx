@@ -52,8 +52,9 @@ export default function SimulationPage() {
     curvature: 0.2, tension: 0.2, coupling: 0.2, attractor: 0.2, redistribution: 0.2,
   });
   const [structuralSignature, setStructuralSignature] = useState<StructuralSignature>({
-    basinCount: 0, avgBasinDepth: 0, globalCurvature: 0, tensionVariance: 0, stabilityMetric: 1,
+    basinCount: 0, avgBasinDepth: 0, globalCurvature: 0, tensionVariance: 0, stabilityMetric: 1, coherence: 0.5,
   });
+  const [coherenceHistory, setCoherenceHistory] = useState<number[]>([]);
   const [events, setEvents] = useState<StructuralEvent[]>([]);
   const [historyLength, setHistoryLength] = useState(0);
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
@@ -109,6 +110,7 @@ export default function SimulationPage() {
         if (inPlayback || frameCount % 3 === 0) {
           setOperatorContributions(engine.getOperatorContributions());
           setStructuralSignature(engine.getCachedSignature());
+          setCoherenceHistory(engine.getCoherenceHistory());
           setHistoryLength(engine.getHistoryLength());
           setCurrentHistoryIndex(engine.getCurrentHistoryIndex());
           setIsPlaybackMode(inPlayback);
@@ -619,6 +621,7 @@ export default function SimulationPage() {
                 interpretationMode={interpretationMode}
                 operatorContributions={operatorContributions}
                 structuralSignature={structuralSignature}
+                coherenceHistory={coherenceHistory}
                 events={events}
                 historyLength={historyLength}
                 currentHistoryIndex={currentHistoryIndex}
