@@ -16,6 +16,7 @@ interface DualFieldViewProps {
   onTypeChange: (type: OverlayType) => void;
   probeData?: ProbeData | null;
   primaryField?: { grid: Float32Array; width: number; height: number } | null;
+  primaryColormap?: "inferno" | "viridis" | "cividis";
   blendMode?: boolean;
   blendOpacity?: number;
   onBlendModeChange?: (enabled: boolean) => void;
@@ -82,6 +83,35 @@ const OVERLAY_OPTIONS: { value: OverlayType; label: string; tooltip: string }[] 
   { value: "stabilityField", label: "Stability Field", tooltip: "Local stability measure across the manifold" },
 ];
 
+// Colormaps for primary field blending
+const INFERNO_COLORS = [
+  [0, 0, 4], [40, 11, 84], [101, 21, 110], [159, 42, 99],
+  [212, 72, 66], [245, 125, 21], [250, 193, 39], [252, 255, 164]
+];
+const VIRIDIS_COLORS = [
+  [68, 1, 84], [72, 40, 120], [62, 73, 137], [49, 104, 142],
+  [38, 130, 142], [31, 158, 137], [53, 183, 121], [109, 205, 89],
+  [180, 222, 44], [253, 231, 37]
+];
+const CIVIDIS_COLORS = [
+  [0, 32, 77], [0, 65, 118], [52, 95, 127], [100, 122, 134],
+  [145, 148, 139], [188, 175, 127], [228, 203, 99], [253, 232, 69]
+];
+
+function interpolatePrimaryColor(t: number, colormap: "inferno" | "viridis" | "cividis"): [number, number, number] {
+  const colors = colormap === "inferno" ? INFERNO_COLORS : colormap === "viridis" ? VIRIDIS_COLORS : CIVIDIS_COLORS;
+  const n = colors.length - 1;
+  const idx = Math.min(Math.floor(t * n), n - 1);
+  const frac = t * n - idx;
+  const c0 = colors[idx];
+  const c1 = colors[idx + 1];
+  return [
+    Math.round(c0[0] + frac * (c1[0] - c0[0])),
+    Math.round(c0[1] + frac * (c1[1] - c0[1])),
+    Math.round(c0[2] + frac * (c1[2] - c0[2])),
+  ];
+}
+
 export function DualFieldView({ 
   derivedField, 
   basinMap, 
@@ -89,6 +119,7 @@ export function DualFieldView({
   onTypeChange, 
   probeData,
   primaryField,
+  primaryColormap = "viridis",
   blendMode = false,
   blendOpacity = 0.5,
   onBlendModeChange,
@@ -105,12 +136,11 @@ export function DualFieldView({
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
   const [derivedValue, setDerivedValue] = useState<number | null>(null);
 
-  // Helper to get primary field color (grayscale based on value)
+  // Helper to get primary field color using the selected colormap
   const getPrimaryColor = useCallback((value: number, minVal: number, range: number): [number, number, number] => {
-    const normalized = (value - minVal) / range;
-    const gray = Math.floor(normalized * 255);
-    return [gray, gray, gray];
-  }, []);
+    const normalized = Math.max(0, Math.min(1, (value - minVal) / range));
+    return interpolatePrimaryColor(normalized, primaryColormap);
+  }, [primaryColormap]);
 
   const render = useCallback(() => {
     const canvas = canvasRef.current;

@@ -757,6 +757,7 @@ export default function SimulationPage() {
                       onTypeChange={setDerivedType}
                       probeData={probeData}
                       primaryField={field}
+                      primaryColormap={colormap}
                       blendMode={blendMode}
                       blendOpacity={blendOpacity}
                       onBlendModeChange={setBlendMode}
