@@ -117,8 +117,7 @@ export function ControlPanel({
   const [metricsOpen, setMetricsOpen] = useState(false);
   const [interpretationOpen, setInterpretationOpen] = useState(false);
   const [presetsOpen, setPresetsOpen] = useState(true);
-  const [displayOpen, setDisplayOpen] = useState(false);
-  const [playbackOpen, setPlaybackOpen] = useState(true);
+    const [playbackOpen, setPlaybackOpen] = useState(true);
 
   const modeLabels = getModeLabels(interpretationMode);
   const languageMode = toLanguageMode(interpretationMode);
@@ -224,28 +223,6 @@ export function ControlPanel({
               </CollapsibleTrigger>
               <CollapsibleContent className="pt-2">
                 <PresetMenu onApply={onParamsChange} />
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Collapsible open={displayOpen} onOpenChange={setDisplayOpen} className="border-t border-border/50 pt-3">
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-display">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Display Settings</span>
-                  {displayOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2 space-y-2">
-                <Select value={colormap} onValueChange={(v) => onColormapChange(v as "inferno" | "viridis" | "grayscale")}>
-                  <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-colormap">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="inferno">Inferno</SelectItem>
-                    <SelectItem value="viridis">Viridis</SelectItem>
-                    <SelectItem value="grayscale">Grayscale</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground leading-relaxed">Choose a color palette for the field visualization.</p>
               </CollapsibleContent>
             </Collapsible>
 
