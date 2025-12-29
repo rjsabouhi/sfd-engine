@@ -260,14 +260,6 @@ export function VisualizationCanvas({
       }}
       data-testid="visualization-container"
     >
-      {/* Depth gradient - darker at edges, lighter in center for Z-axis feel */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse at center, rgba(20,25,35,0.3) 0%, rgba(8,10,14,0.95) 70%, rgb(8,10,14) 100%)',
-        }}
-      />
-
       {/* Spatial Reference Grid Background */}
       <div 
         className="absolute inset-0 pointer-events-none"
@@ -280,8 +272,6 @@ export function VisualizationCanvas({
           `,
           backgroundSize: '80px 80px, 80px 80px, 20px 20px, 20px 20px',
           backgroundPosition: 'center center',
-          maskImage: 'radial-gradient(ellipse at center, black 0%, black 40%, transparent 80%)',
-          WebkitMaskImage: 'radial-gradient(ellipse at center, black 0%, black 40%, transparent 80%)',
         }}
       />
       
