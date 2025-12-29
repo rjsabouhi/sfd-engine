@@ -323,3 +323,15 @@
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--muted)) transparent;
 }
+
+/* Subtle pulse animation for Run button */
+@keyframes subtle-pulse {
+  0%, 100% {
+    opacity: 1;
+    border-color: rgba(94, 234, 212, 0.4);
+  }
+  50% {
+    opacity: 0.85;
+    border-color: rgba(94, 234, 212, 0.7);
+  }
+}

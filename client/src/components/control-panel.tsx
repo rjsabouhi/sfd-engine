@@ -191,7 +191,8 @@ export function ControlPanel({
                     className="flex-1 h-8 flex items-center justify-center gap-1.5 rounded-sm text-xs font-medium transition-all duration-150 focus:outline-none"
                     style={{
                       backgroundColor: "rgba(20, 184, 166, 0.15)",
-                      border: "1px solid rgba(94, 234, 212, 0.4)"
+                      border: "1px solid rgba(94, 234, 212, 0.4)",
+                      animation: "subtle-pulse 2.5s ease-in-out infinite"
                     }}
                     data-testid="button-play"
                   >
