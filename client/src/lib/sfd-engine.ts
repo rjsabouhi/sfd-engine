@@ -176,7 +176,7 @@ export class SFDEngine {
     const cy = this.height / 2;
     const maxDist = Math.sqrt(cx * cx + cy * cy);
     
-    // Create structured subtle seed: radial gradient with gentle perturbations
+    // Create simple radial seed that evolves into circular patterns
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         const idx = y * this.width + x;
@@ -185,18 +185,13 @@ export class SFDEngine {
         const dist = Math.sqrt(dx * dx + dy * dy);
         const normalizedDist = dist / maxDist;
         
-        // Base: subtle radial gradient (center slightly elevated)
-        const radialBase = 0.03 * (1 - normalizedDist * 0.8);
+        // Simple radial gradient (center elevated, fading outward)
+        const radialBase = 0.05 * (1 - normalizedDist);
         
-        // Add gentle angular modulation for latent structure
-        const angle = Math.atan2(dy, dx);
-        const angularMod = 0.008 * Math.sin(angle * 3 + normalizedDist * 4);
+        // Very subtle noise for organic feel
+        const noise = (this.rng() - 0.5) * 0.01;
         
-        // Very subtle noise for organic feel (low amplitude)
-        const noise = (this.rng() - 0.5) * 0.015;
-        
-        // Combine: structured yet neutral
-        this.grid[idx] = radialBase + angularMod + noise;
+        this.grid[idx] = radialBase + noise;
       }
     }
     this.step = 0;
