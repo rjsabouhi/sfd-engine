@@ -216,7 +216,7 @@ export function ControlPanel({
                   onExitPlayback={onExitPlayback}
                 />
                 {!state.isRunning && (
-                  <p className="text-xs text-muted-foreground leading-relaxed">Run the simulation to reveal dynamic structure.</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">Run the simulation to reveal dynamic structure. A timeline will appear.</p>
                 )}
               </CollapsibleContent>
             </Collapsible>
