@@ -118,6 +118,7 @@ export function ControlPanel({
   const [interpretationOpen, setInterpretationOpen] = useState(true);
   const [presetsOpen, setPresetsOpen] = useState(true);
   const [displayOpen, setDisplayOpen] = useState(true);
+  const [playbackOpen, setPlaybackOpen] = useState(true);
 
   const modeLabels = getModeLabels(interpretationMode);
   const languageMode = toLanguageMode(interpretationMode);
@@ -157,61 +158,68 @@ export function ControlPanel({
 
         <div className="flex-1 overflow-y-auto">
           <TabsContent value="controls" className="m-0 p-3 space-y-4">
-            <div className="space-y-3">
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Simulation Playback</span>
-              <div className="flex items-center gap-2">
-                {state.isRunning ? (
-                  <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="button-pause">
-                    <Pause className="h-3.5 w-3.5 mr-1.5" />
-                    Pause
-                  </Button>
-                ) : (
-                  <button
-                    onClick={onPlay}
-                    className="flex-1 h-8 flex items-center justify-center gap-1.5 rounded-sm text-xs font-medium transition-all duration-150 focus:outline-none"
-                    style={{
-                      backgroundColor: "rgba(20, 184, 166, 0.2)",
-                      border: "1px solid rgba(94, 234, 212, 0.7)",
-                      animation: "subtle-pulse 2.5s ease-in-out infinite"
-                    }}
-                    data-testid="button-play"
+            <Collapsible open={playbackOpen} onOpenChange={setPlaybackOpen}>
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-playback">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Simulation Playback</span>
+                  {playbackOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2 space-y-3">
+                <div className="flex items-center gap-2">
+                  {state.isRunning ? (
+                    <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="button-pause">
+                      <Pause className="h-3.5 w-3.5 mr-1.5" />
+                      Pause
+                    </Button>
+                  ) : (
+                    <button
+                      onClick={onPlay}
+                      className="flex-1 h-8 flex items-center justify-center gap-1.5 rounded-sm text-xs font-medium transition-all duration-150 focus:outline-none"
+                      style={{
+                        backgroundColor: "rgba(20, 184, 166, 0.2)",
+                        border: "1px solid rgba(94, 234, 212, 0.7)",
+                        animation: "subtle-pulse 2.5s ease-in-out infinite"
+                      }}
+                      data-testid="button-play"
+                    >
+                      <Play className="h-3.5 w-3.5 text-teal-200" />
+                      <span className="text-teal-200">Run</span>
+                    </button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={onStep}
+                    disabled={state.isRunning}
+                    data-testid="button-step"
                   >
-                    <Play className="h-3.5 w-3.5 text-teal-200" />
-                    <span className="text-teal-200">Run</span>
-                  </button>
+                    <StepForward className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={onReset}
+                    data-testid="button-reset"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                <TemporalControls
+                  historyLength={historyLength}
+                  currentIndex={currentHistoryIndex}
+                  isPlaybackMode={isPlaybackMode}
+                  isRunning={state.isRunning}
+                  onStepBackward={onStepBackward}
+                  onStepForward={onStepForward}
+                  onSeek={onSeekFrame}
+                  onExitPlayback={onExitPlayback}
+                />
+                {!state.isRunning && (
+                  <p className="text-xs text-muted-foreground leading-relaxed">Run the simulation to reveal dynamic structure.</p>
                 )}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={onStep}
-                  disabled={state.isRunning}
-                  data-testid="button-step"
-                >
-                  <StepForward className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={onReset}
-                  data-testid="button-reset"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-              <TemporalControls
-                historyLength={historyLength}
-                currentIndex={currentHistoryIndex}
-                isPlaybackMode={isPlaybackMode}
-                isRunning={state.isRunning}
-                onStepBackward={onStepBackward}
-                onStepForward={onStepForward}
-                onSeek={onSeekFrame}
-                onExitPlayback={onExitPlayback}
-              />
-              {!state.isRunning && (
-                <p className="text-xs text-muted-foreground leading-relaxed">Run the simulation to reveal dynamic structure.</p>
-              )}
-            </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             <Collapsible open={displayOpen} onOpenChange={setDisplayOpen} className="border-t border-border/50 pt-3">
               <CollapsibleTrigger asChild>
