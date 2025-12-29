@@ -219,7 +219,7 @@ export function ControlPanel({
                 </Button>
               </div>
               {!state.isRunning && (
-                <p className="text-[10px] text-muted-foreground text-center">Run the simulation to reveal dynamic structure.</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">Run the simulation to reveal dynamic structure.</p>
               )}
             </div>
 
