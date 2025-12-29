@@ -289,8 +289,11 @@ export function ControlPanel({
             <Collapsible open={metricsOpen} onOpenChange={setMetricsOpen} className="border-t border-border pt-3">
               <CollapsibleTrigger asChild>
                 <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-metrics-inline">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Simulation Metrics</span>
-                  {metricsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                  <h4 className="text-xs font-medium flex items-center gap-1.5">
+                    <Activity className="h-3 w-3" />
+                    Simulation Metrics
+                  </h4>
+                  {metricsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent className="pt-2 space-y-2">
