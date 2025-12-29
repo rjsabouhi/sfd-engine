@@ -122,6 +122,9 @@ export function ControlPanel({
   const [regimeOpen, setRegimeOpen] = useState(true);
   const [operatorOpen, setOperatorOpen] = useState(true);
   const [eventLogOpen, setEventLogOpen] = useState(true);
+  const [notebookParamsOpen, setNotebookParamsOpen] = useState(true);
+  const [notebookEquationOpen, setNotebookEquationOpen] = useState(true);
+  const [notebookWeightsOpen, setNotebookWeightsOpen] = useState(true);
 
   const modeLabels = getModeLabels(interpretationMode);
   const languageMode = toLanguageMode(interpretationMode);
@@ -291,7 +294,7 @@ export function ControlPanel({
               </CollapsibleContent>
             </Collapsible>
 
-            <Collapsible open={weightsOpen} onOpenChange={setWeightsOpen}>
+            <Collapsible open={weightsOpen} onOpenChange={setWeightsOpen} className="border-t border-border/50 pt-3">
               <CollapsibleTrigger asChild>
                 <button className="flex items-center justify-between w-full py-2 text-xs font-medium text-muted-foreground hover-elevate rounded px-2" data-testid="button-toggle-operators">
                   Operator Weights
@@ -307,7 +310,7 @@ export function ControlPanel({
               </CollapsibleContent>
             </Collapsible>
 
-            <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+            <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen} className="border-t border-border/50 pt-3">
               <CollapsibleTrigger asChild>
                 <button className="flex items-center justify-between w-full py-2 text-xs font-medium text-muted-foreground hover-elevate rounded px-2" data-testid="button-toggle-advanced">
                   <span className="flex items-center gap-1.5">
@@ -369,35 +372,56 @@ export function ControlPanel({
             <p className="text-xs text-muted-foreground italic border-b border-border/50 pb-2">
               These are the active equations and operator weights governing the field.
             </p>
-            <div className="space-y-3">
-              <div className="text-xs font-medium text-muted-foreground">Current Parameters</div>
-              <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-muted/30 p-2 rounded">
-                <div>dt = {params.dt.toFixed(3)}</div>
-                <div>K = {params.curvatureGain.toFixed(2)}</div>
-                <div>C = {params.couplingWeight.toFixed(2)}</div>
-                <div>A = {params.attractorStrength.toFixed(2)}</div>
-                <div>R = {params.redistributionRate.toFixed(2)}</div>
-                <div>Grid: {params.gridSize}x{params.gridSize}</div>
-              </div>
-            </div>
+            <Collapsible open={notebookParamsOpen} onOpenChange={setNotebookParamsOpen}>
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-params">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Current Parameters</span>
+                  {notebookParamsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-muted/30 p-2 rounded">
+                  <div>dt = {params.dt.toFixed(3)}</div>
+                  <div>K = {params.curvatureGain.toFixed(2)}</div>
+                  <div>C = {params.couplingWeight.toFixed(2)}</div>
+                  <div>A = {params.attractorStrength.toFixed(2)}</div>
+                  <div>R = {params.redistributionRate.toFixed(2)}</div>
+                  <div>Grid: {params.gridSize}x{params.gridSize}</div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
             
-            <div className="space-y-2 pt-2 border-t border-border">
-              <div className="text-xs font-medium text-muted-foreground">Field Equation</div>
-              <code className="text-xs block bg-muted p-2 rounded font-mono">
-                dF/dt = wK*K(F) + wT*T(F) + wC*C(F) + wA*A(F) + wR*R(F)
-              </code>
-            </div>
+            <Collapsible open={notebookEquationOpen} onOpenChange={setNotebookEquationOpen} className="border-t border-border/50 pt-3">
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-equation">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Field Equation</span>
+                  {notebookEquationOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <code className="text-xs block bg-muted p-2 rounded font-mono">
+                  dF/dt = wK*K(F) + wT*T(F) + wC*C(F) + wA*A(F) + wR*R(F)
+                </code>
+              </CollapsibleContent>
+            </Collapsible>
 
-            <div className="space-y-2 pt-2 border-t border-border">
-              <div className="text-xs font-medium text-muted-foreground">Operator Weights</div>
-              <div className="grid grid-cols-5 gap-1 text-xs font-mono bg-muted/30 p-2 rounded text-center">
-                <div>wK={params.wK.toFixed(1)}</div>
-                <div>wT={params.wT.toFixed(1)}</div>
-                <div>wC={params.wC.toFixed(1)}</div>
-                <div>wA={params.wA.toFixed(1)}</div>
-                <div>wR={params.wR.toFixed(1)}</div>
-              </div>
-            </div>
+            <Collapsible open={notebookWeightsOpen} onOpenChange={setNotebookWeightsOpen} className="border-t border-border/50 pt-3">
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-weights">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Operator Weights</span>
+                  {notebookWeightsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2">
+                <div className="grid grid-cols-5 gap-1 text-xs font-mono bg-muted/30 p-2 rounded text-center">
+                  <div>wK={params.wK.toFixed(1)}</div>
+                  <div>wT={params.wT.toFixed(1)}</div>
+                  <div>wC={params.wC.toFixed(1)}</div>
+                  <div>wA={params.wA.toFixed(1)}</div>
+                  <div>wR={params.wR.toFixed(1)}</div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </TabsContent>
 
           <TabsContent value="export" className="m-0 p-3 space-y-3">
