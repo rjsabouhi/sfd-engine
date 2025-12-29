@@ -95,7 +95,7 @@ export async function exportAnimationGIF(
     }
   }
   
-  const gifData = await createSimpleGIF(frameDataUrls, width, height, 100, onProgress);
+  const gifData = await createSimpleGIF(frameDataUrls, width, height, 100, colormap, onProgress);
   
   const blob = new Blob([gifData], { type: "image/gif" });
   downloadBlob(blob, `sfd-animation-${getTimestamp()}.gif`);
@@ -108,12 +108,40 @@ async function createSimpleGIF(
   width: number,
   height: number,
   delay: number,
+  colormap: "inferno" | "viridis" | "cividis",
   onProgress?: (progress: number) => void
 ): Promise<Uint8Array> {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d")!;
+  
+  const colormaps: Record<string, number[][]> = {
+    inferno: [[0,0,4],[40,11,84],[101,21,110],[159,42,99],[212,72,66],[245,125,21],[252,192,39],[252,255,164]],
+    viridis: [[68,1,84],[72,36,117],[65,68,135],[53,95,141],[42,120,142],[33,144,140],[34,167,132],[68,190,112],[122,209,81],[189,222,38],[253,231,37]],
+    cividis: [[0,32,77],[42,67,108],[75,99,130],[107,130,151],[140,160,170],[175,191,186],[212,221,198],[253,252,205]]
+  };
+  
+  const colors = colormaps[colormap] || colormaps.viridis;
+  
+  function interpolateColor(t: number): [number, number, number] {
+    const idx = t * (colors.length - 1);
+    const i = Math.floor(idx);
+    const f = idx - i;
+    const c1 = colors[Math.min(i, colors.length - 1)];
+    const c2 = colors[Math.min(i + 1, colors.length - 1)];
+    return [
+      Math.round(c1[0] + f * (c2[0] - c1[0])),
+      Math.round(c1[1] + f * (c2[1] - c1[1])),
+      Math.round(c1[2] + f * (c2[2] - c1[2]))
+    ];
+  }
+  
+  const palette: number[][] = [];
+  for (let i = 0; i < 256; i++) {
+    const t = i / 255;
+    palette.push(interpolateColor(t));
+  }
   
   const gifBytes: number[] = [];
   
@@ -124,7 +152,7 @@ async function createSimpleGIF(
   gifBytes.push(0xF7, 0x00, 0x00);
   
   for (let i = 0; i < 256; i++) {
-    gifBytes.push(i, i, i);
+    gifBytes.push(palette[i][0], palette[i][1], palette[i][2]);
   }
   
   gifBytes.push(0x21, 0xFF, 0x0B);
@@ -156,13 +184,28 @@ async function createSimpleGIF(
     
     gifBytes.push(0x08);
     
-    const pixels: number[] = [];
+    const paletteIndices: number[] = [];
     for (let i = 0; i < imageData.data.length; i += 4) {
-      const gray = Math.round(0.299 * imageData.data[i] + 0.587 * imageData.data[i + 1] + 0.114 * imageData.data[i + 2]);
-      pixels.push(gray);
+      const r = imageData.data[i];
+      const g = imageData.data[i + 1];
+      const b = imageData.data[i + 2];
+      
+      let bestIdx = 0;
+      let bestDist = Infinity;
+      for (let j = 0; j < 256; j++) {
+        const dr = r - palette[j][0];
+        const dg = g - palette[j][1];
+        const db = b - palette[j][2];
+        const dist = dr * dr + dg * dg + db * db;
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestIdx = j;
+        }
+      }
+      paletteIndices.push(bestIdx);
     }
     
-    const lzwData = lzwEncode(pixels, 8);
+    const lzwData = lzwEncode(paletteIndices, 8);
     let offset = 0;
     while (offset < lzwData.length) {
       const chunkSize = Math.min(255, lzwData.length - offset);
@@ -211,10 +254,20 @@ function lzwEncode(pixels: number[], minCodeSize: number): number[] {
     }
   }
   
+  if (pixels.length === 0) {
+    writeCode(clearCode);
+    writeCode(eoiCode);
+    if (bitCount > 0) {
+      output.push(bitBuffer & 0xFF);
+    }
+    return output;
+  }
+  
   writeCode(clearCode);
   
-  let current = "";
-  for (const pixel of pixels) {
+  let current = String(pixels[0]);
+  for (let i = 1; i < pixels.length; i++) {
+    const pixel = pixels[i];
     const next = current + "," + pixel;
     if (dictionary.has(next)) {
       current = next;
@@ -230,10 +283,7 @@ function lzwEncode(pixels: number[], minCodeSize: number): number[] {
     }
   }
   
-  if (current !== "") {
-    writeCode(dictionary.get(current)!);
-  }
-  
+  writeCode(dictionary.get(current)!);
   writeCode(eoiCode);
   
   if (bitCount > 0) {
