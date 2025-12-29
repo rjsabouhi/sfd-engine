@@ -530,7 +530,7 @@ export default function SimulationPage() {
                           <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation showing local state values.</p>
                         </div>
                         <Select value={colormap} onValueChange={(v) => setColormap(v as "inferno" | "viridis" | "cividis")}>
-                          <SelectTrigger className="h-7 w-24 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-header">
+                          <SelectTrigger className="h-7 w-28 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-header">
                             <span>Color Map</span>
                           </SelectTrigger>
                           <SelectContent>
