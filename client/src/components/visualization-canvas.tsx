@@ -3,7 +3,7 @@ import type { FieldData, BasinMap } from "@shared/schema";
 
 interface VisualizationCanvasProps {
   field: FieldData | null;
-  colormap?: "inferno" | "viridis" | "grayscale";
+  colormap?: "inferno" | "viridis" | "cividis";
   basinMap?: BasinMap | null;
   showBasins?: boolean;
   onHover?: (x: number, y: number, screenX: number, screenY: number) => void;
@@ -34,16 +34,17 @@ const VIRIDIS_COLORS = [
   [253, 231, 37],
 ];
 
-const GRAYSCALE_COLORS = [
-  [0, 0, 0],
-  [32, 32, 32],
-  [64, 64, 64],
-  [96, 96, 96],
-  [128, 128, 128],
-  [160, 160, 160],
-  [192, 192, 192],
-  [224, 224, 224],
-  [255, 255, 255],
+// Cividis - colorblind-friendly palette (optimized for deuteranopia/protanopia)
+const CIVIDIS_COLORS = [
+  [0, 32, 77],
+  [0, 67, 106],
+  [54, 92, 108],
+  [94, 114, 110],
+  [131, 135, 114],
+  [168, 157, 117],
+  [207, 181, 118],
+  [244, 210, 118],
+  [253, 234, 118],
 ];
 
 const BASIN_COLORS = [
@@ -117,7 +118,7 @@ export function VisualizationCanvas({
 
     const imageData = ctx.createImageData(field.width, field.height);
     const data = imageData.data;
-    const colors = colormap === "grayscale" ? GRAYSCALE_COLORS : colormap === "inferno" ? INFERNO_COLORS : VIRIDIS_COLORS;
+    const colors = colormap === "cividis" ? CIVIDIS_COLORS : colormap === "inferno" ? INFERNO_COLORS : VIRIDIS_COLORS;
 
     let minVal = Infinity, maxVal = -Infinity;
     for (let i = 0; i < field.grid.length; i++) {

@@ -23,7 +23,7 @@ import type { RegimeKey } from "@/lib/language";
 interface ControlPanelProps {
   params: SimulationParameters;
   state: SimulationState;
-  colormap: "inferno" | "viridis" | "grayscale";
+  colormap: "inferno" | "viridis" | "cividis";
   interpretationMode: InterpretationMode;
   operatorContributions: OperatorContributions;
   structuralSignature: StructuralSignature;
@@ -42,7 +42,7 @@ interface ControlPanelProps {
   onStepForward: () => void;
   onSeekFrame: (index: number) => void;
   onExitPlayback: () => void;
-  onColormapChange: (colormap: "inferno" | "viridis" | "grayscale") => void;
+  onColormapChange: (colormap: "inferno" | "viridis" | "cividis") => void;
   onInterpretationModeChange: (mode: InterpretationMode) => void;
   onClearEvents: () => void;
   onExportEvents: () => void;

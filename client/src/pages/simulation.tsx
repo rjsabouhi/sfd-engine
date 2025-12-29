@@ -44,7 +44,7 @@ export default function SimulationPage() {
     fps: 0,
   });
   const [field, setField] = useState<FieldData | null>(null);
-  const [colormap, setColormap] = useState<"inferno" | "viridis" | "grayscale">("viridis");
+  const [colormap, setColormap] = useState<"inferno" | "viridis" | "cividis">("viridis");
   const [controlsOpen, setControlsOpen] = useState(false);
   const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("structural");
     
@@ -527,14 +527,14 @@ export default function SimulationPage() {
                           <h4 className="text-xs font-medium">Structural Field</h4>
                           <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation showing local state values.</p>
                         </div>
-                        <Select value={colormap} onValueChange={(v) => setColormap(v as "inferno" | "viridis" | "grayscale")}>
+                        <Select value={colormap} onValueChange={(v) => setColormap(v as "inferno" | "viridis" | "cividis")}>
                           <SelectTrigger className="h-7 w-24 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-header">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="viridis">Viridis</SelectItem>
                             <SelectItem value="inferno">Inferno</SelectItem>
-                            <SelectItem value="grayscale">Grayscale</SelectItem>
+                            <SelectItem value="cividis">Cividis</SelectItem>
                           </SelectContent>
                         </Select>
                     </div>
@@ -564,14 +564,14 @@ export default function SimulationPage() {
                       <h4 className="text-xs font-medium">Structural Field</h4>
                       <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation showing local state values.</p>
                     </div>
-                    <Select value={colormap} onValueChange={(v) => setColormap(v as "inferno" | "viridis" | "grayscale")}>
+                    <Select value={colormap} onValueChange={(v) => setColormap(v as "inferno" | "viridis" | "cividis")}>
                       <SelectTrigger className="h-7 w-24 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-single">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="viridis">Viridis</SelectItem>
                         <SelectItem value="inferno">Inferno</SelectItem>
-                        <SelectItem value="grayscale">Grayscale</SelectItem>
+                        <SelectItem value="cividis">Cividis</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

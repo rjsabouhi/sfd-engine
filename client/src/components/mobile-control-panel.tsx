@@ -13,10 +13,10 @@ import { getModeLabels, modeOptions } from "@/lib/interpretation-modes";
 
 interface MobileControlPanelProps {
   params: SimulationParameters;
-  colormap: "inferno" | "viridis" | "grayscale";
+  colormap: "inferno" | "viridis" | "cividis";
   interpretationMode: InterpretationMode;
   onParamsChange: (params: Partial<SimulationParameters>) => void;
-  onColormapChange: (colormap: "inferno" | "viridis" | "grayscale") => void;
+  onColormapChange: (colormap: "inferno" | "viridis" | "cividis") => void;
   onInterpretationModeChange: (mode: InterpretationMode) => void;
 }
 
