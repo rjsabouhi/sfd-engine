@@ -636,30 +636,7 @@ export default function SimulationPage() {
             <Crosshair className="h-3 w-3" />
             Probe
           </Button>
-          <div className="w-px h-4 bg-border mx-1" />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleJumpToPreviousEvent}
-            disabled={events.length === 0}
-            data-testid="button-jump-prev-event"
-            className="h-6 text-[10px] gap-1"
-          >
-            <SkipForward className="h-3 w-3 rotate-180" />
-            Prev Event
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleJumpToNextEvent}
-            disabled={events.length === 0}
-            data-testid="button-jump-next-event"
-            className="h-6 text-[10px] gap-1"
-          >
-            Next Event
-            <SkipForward className="h-3 w-3" />
-          </Button>
-        </div>
+                  </div>
         <div className="flex items-center gap-2">
           <Button
             variant={diagnosticsVisible ? "default" : "outline"}
