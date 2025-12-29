@@ -5,14 +5,14 @@ import { VisualizationCanvas } from "@/components/visualization-canvas";
 import { ControlPanel } from "@/components/control-panel";
 import { MobileControlPanel } from "@/components/mobile-control-panel";
 import { HoverProbe } from "@/components/hover-probe";
-import { DualFieldView } from "@/components/dual-field-view";
+import { DualFieldView, OVERLAY_OPTIONS, type OverlayType } from "@/components/dual-field-view";
 import { OnboardingModal, type OnboardingModalRef } from "@/components/onboarding-modal";
 import { FloatingDiagnostics } from "@/components/floating-diagnostics";
 import { StructuralFieldFooter } from "@/components/field-footer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -67,7 +67,8 @@ export default function SimulationPage() {
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
   const [isPlaybackMode, setIsPlaybackMode] = useState(false);
   const [showDualView, setShowDualView] = useState(false);
-  const [derivedType, setDerivedType] = useState<"curvature" | "tension" | "coupling" | "variance" | "basins" | "gradientFlow" | "criticality" | "hysteresis" | "constraintSkeleton" | "stabilityField" | "gradientFlowLines">("constraintSkeleton");
+  const [derivedType, setDerivedType] = useState<OverlayType>("constraintSkeleton");
+  const [hasUserSelectedOverlay, setHasUserSelectedOverlay] = useState(false);
   const [derivedField, setDerivedField] = useState<DerivedField | null>(null);
   const [basinMap, setBasinMap] = useState<BasinMap | null>(null);
   const [varianceChange, setVarianceChange] = useState(0);
@@ -616,13 +617,14 @@ export default function SimulationPage() {
 
       <div className="flex flex-1 overflow-hidden">
         <main className="relative bg-gray-950 flex-1 flex flex-col">
-          {/* Structural Field Header */}
-          <div className="relative flex items-center justify-center px-3 py-2 border-b border-border shrink-0">
-            <div className="text-center">
-              <h4 className="text-xs font-medium">Structural Field</h4>
-              <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation showing local state values.</p>
-            </div>
-            <div className="absolute right-3">
+          {/* Unified Dual-Pane Header Ribbon */}
+          <div className="flex items-stretch border-b border-border shrink-0">
+            {/* Left Pane Header: Structural Field */}
+            <div className={`flex items-center justify-between gap-2 px-3 py-2 ${showDualView ? 'flex-1 border-r border-border' : 'flex-1'}`}>
+              <div className="min-w-0">
+                <h4 className="text-xs font-medium">Structural Field</h4>
+                <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation</p>
+              </div>
               <Select value={colormap} onValueChange={handleColormapChange}>
                 <SelectTrigger className="h-7 w-28 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-header">
                   <span>{colormapLabel}</span>
@@ -634,6 +636,57 @@ export default function SimulationPage() {
                 </SelectContent>
               </Select>
             </div>
+            
+            {/* Right Pane Header: Projection View (only shown in dual view) */}
+            {showDualView && (
+              <div className="flex items-center justify-between gap-2 px-3 py-2 flex-1">
+                <div className="min-w-0">
+                  <h4 className="text-xs font-medium">Projection View</h4>
+                  <p className="text-[10px] text-muted-foreground truncate">
+                    {OVERLAY_OPTIONS.find(o => o.value === derivedType)?.tooltip || "Select a projection mode"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {/* Blend Controls */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setBlendMode(!blendMode)}
+                    data-testid="button-blend-mode"
+                    className={`h-6 text-[10px] gap-1 ${blendMode ? "bg-muted" : ""}`}
+                  >
+                    <Blend className="h-3 w-3" />
+                    Blend
+                  </Button>
+                  {blendMode && (
+                    <div className="flex items-center gap-1.5 w-20">
+                      <Slider
+                        value={[blendOpacity]}
+                        onValueChange={([v]) => setBlendOpacity(v)}
+                        min={0}
+                        max={1}
+                        step={0.05}
+                        className="w-full"
+                        data-testid="slider-blend-opacity"
+                      />
+                      <span className="text-[9px] text-muted-foreground w-6">{Math.round(blendOpacity * 100)}%</span>
+                    </div>
+                  )}
+                  <Select value={derivedType} onValueChange={(v) => { setHasUserSelectedOverlay(true); setDerivedType(v as OverlayType); }}>
+                    <SelectTrigger className="h-7 w-32 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-overlay-type">
+                      <span>{hasUserSelectedOverlay ? (OVERLAY_OPTIONS.find(o => o.value === derivedType)?.label || "Layers") : "Layers"}</span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {OVERLAY_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value} className="text-xs">
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Tools Toolbar */}
@@ -751,6 +804,7 @@ export default function SimulationPage() {
                       blendOpacity={blendOpacity}
                       onBlendModeChange={setBlendMode}
                       onBlendOpacityChange={setBlendOpacity}
+                      compact={true}
                     />
                   </div>
                 </div>

@@ -21,6 +21,7 @@ interface DualFieldViewProps {
   blendOpacity?: number;
   onBlendModeChange?: (enabled: boolean) => void;
   onBlendOpacityChange?: (opacity: number) => void;
+  compact?: boolean;
 }
 
 const PLASMA_COLORS = [
@@ -69,7 +70,7 @@ const BASIN_COLORS: [number, number, number][] = [
   [99, 102, 241],
 ];
 
-const OVERLAY_OPTIONS: { value: OverlayType; label: string; tooltip: string }[] = [
+export const OVERLAY_OPTIONS: { value: OverlayType; label: string; tooltip: string }[] = [
   { value: "curvature", label: "Curvature", tooltip: "Local bending intensity of field geometry" },
   { value: "tension", label: "Tension", tooltip: "Field gradient magnitude / stored potential energy" },
   { value: "coupling", label: "Coupling", tooltip: "Interaction strength between neighboring field cells" },
@@ -124,6 +125,7 @@ export function DualFieldView({
   blendOpacity = 0.5,
   onBlendModeChange,
   onBlendOpacityChange,
+  compact = false,
 }: DualFieldViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -363,69 +365,71 @@ export function DualFieldView({
 
   return (
     <div className="h-full flex flex-col bg-background">
-      <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border shrink-0">
-        <div className="min-w-0 flex-1">
-          <h4 className="text-xs font-medium">Projection View</h4>
-          <p className="text-[10px] text-muted-foreground truncate">{currentOption?.tooltip || "Select a projection mode"}</p>
-        </div>
-        
-        {/* Blend Controls */}
-        {onBlendModeChange && (
-          <div className="flex items-center gap-2 mr-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onBlendModeChange(!blendMode)}
-              data-testid="button-blend-mode"
-              className={`h-6 text-[10px] gap-1 ${blendMode ? "bg-muted" : ""}`}
-            >
-              <Blend className="h-3 w-3" />
-              Blend
-            </Button>
-            {blendMode && onBlendOpacityChange && (
-              <div className="flex items-center gap-1.5 w-20">
-                <Slider
-                  value={[blendOpacity]}
-                  onValueChange={([v]) => onBlendOpacityChange(v)}
-                  min={0}
-                  max={1}
-                  step={0.05}
-                  className="w-full"
-                  data-testid="slider-blend-opacity"
-                />
-                <span className="text-[9px] text-muted-foreground w-6">{Math.round(blendOpacity * 100)}%</span>
-              </div>
-            )}
+      {!compact && (
+        <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border shrink-0">
+          <div className="min-w-0 flex-1">
+            <h4 className="text-xs font-medium">Projection View</h4>
+            <p className="text-[10px] text-muted-foreground truncate">{currentOption?.tooltip || "Select a projection mode"}</p>
           </div>
-        )}
-        
-        <Select value={derivedType} onValueChange={handleOverlayChange}>
-          <SelectTrigger 
-            className="h-7 w-32 text-xs focus:ring-0 focus:ring-offset-0"
-            data-testid="select-overlay-type"
-          >
-            <span>{displayLabel}</span>
-          </SelectTrigger>
-          <SelectContent>
-            {OVERLAY_OPTIONS.map((option) => (
-              <Tooltip key={option.value}>
-                <TooltipTrigger asChild>
-                  <SelectItem 
-                    value={option.value}
-                    className="text-xs"
-                    data-testid={`select-overlay-${option.value}`}
-                  >
-                    {option.label}
-                  </SelectItem>
-                </TooltipTrigger>
-                <TooltipContent side="left" className="max-w-[200px] text-xs">
-                  {option.tooltip}
-                </TooltipContent>
-              </Tooltip>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+          
+          {/* Blend Controls */}
+          {onBlendModeChange && (
+            <div className="flex items-center gap-2 mr-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onBlendModeChange(!blendMode)}
+                data-testid="button-blend-mode"
+                className={`h-6 text-[10px] gap-1 ${blendMode ? "bg-muted" : ""}`}
+              >
+                <Blend className="h-3 w-3" />
+                Blend
+              </Button>
+              {blendMode && onBlendOpacityChange && (
+                <div className="flex items-center gap-1.5 w-20">
+                  <Slider
+                    value={[blendOpacity]}
+                    onValueChange={([v]) => onBlendOpacityChange(v)}
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    className="w-full"
+                    data-testid="slider-blend-opacity"
+                  />
+                  <span className="text-[9px] text-muted-foreground w-6">{Math.round(blendOpacity * 100)}%</span>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <Select value={derivedType} onValueChange={handleOverlayChange}>
+            <SelectTrigger 
+              className="h-7 w-32 text-xs focus:ring-0 focus:ring-offset-0"
+              data-testid="select-overlay-type"
+            >
+              <span>{displayLabel}</span>
+            </SelectTrigger>
+            <SelectContent>
+              {OVERLAY_OPTIONS.map((option) => (
+                <Tooltip key={option.value}>
+                  <TooltipTrigger asChild>
+                    <SelectItem 
+                      value={option.value}
+                      className="text-xs"
+                      data-testid={`select-overlay-${option.value}`}
+                    >
+                      {option.label}
+                    </SelectItem>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="max-w-[200px] text-xs">
+                    {option.tooltip}
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       
       <div 
         ref={containerRef}
