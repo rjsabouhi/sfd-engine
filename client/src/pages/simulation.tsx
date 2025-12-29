@@ -8,6 +8,7 @@ import { HoverProbe } from "@/components/hover-probe";
 import { DualFieldView } from "@/components/dual-field-view";
 import { OnboardingModal, type OnboardingModalRef } from "@/components/onboarding-modal";
 import { FloatingDiagnostics } from "@/components/floating-diagnostics";
+import { StructuralFieldFooter } from "@/components/field-footer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -569,6 +570,11 @@ export default function SimulationPage() {
                         onHoverEnd={handleHoverEnd}
                       />
                     </div>
+                    <StructuralFieldFooter 
+                      probeData={probeData} 
+                      basinMap={basinMap} 
+                      isHovering={probeVisible} 
+                    />
                   </div>
                   <div className="h-full min-h-0 bg-background">
                     <DualFieldView
@@ -576,6 +582,7 @@ export default function SimulationPage() {
                       basinMap={basinMap}
                       derivedType={derivedType}
                       onTypeChange={setDerivedType}
+                      probeData={probeData}
                     />
                   </div>
                 </div>
@@ -608,6 +615,11 @@ export default function SimulationPage() {
                       onHoverEnd={handleHoverEnd}
                     />
                   </div>
+                  <StructuralFieldFooter 
+                    probeData={probeData} 
+                    basinMap={basinMap} 
+                    isHovering={probeVisible} 
+                  />
                 </div>
               )}
               

@@ -1,7 +1,8 @@
 import { useRef, useEffect, useCallback, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { DerivedField, BasinMap } from "@shared/schema";
+import { ProjectionViewFooter } from "@/components/field-footer";
+import type { DerivedField, BasinMap, ProbeData } from "@shared/schema";
 
 export type OverlayType = "curvature" | "tension" | "coupling" | "variance" | "basins" | "gradientFlow" | "criticality" | "hysteresis" | "constraintSkeleton" | "stabilityField" | "gradientFlowLines";
 
@@ -10,6 +11,7 @@ interface DualFieldViewProps {
   basinMap: BasinMap | null;
   derivedType: OverlayType;
   onTypeChange: (type: OverlayType) => void;
+  probeData?: ProbeData | null;
 }
 
 const PLASMA_COLORS = [
@@ -72,7 +74,7 @@ const OVERLAY_OPTIONS: { value: OverlayType; label: string; tooltip: string }[] 
   { value: "stabilityField", label: "Stability Field", tooltip: "Local stability measure across the manifold" },
 ];
 
-export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChange }: DualFieldViewProps) {
+export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChange, probeData }: DualFieldViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -81,6 +83,8 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
+  const [derivedValue, setDerivedValue] = useState<number | null>(null);
 
   const render = useCallback(() => {
     const canvas = canvasRef.current;
@@ -204,8 +208,27 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
         x: Math.max(-maxPan, Math.min(maxPan, newPanX)),
         y: Math.max(-maxPan, Math.min(maxPan, newPanY)),
       });
+    } else {
+      const canvas = canvasRef.current;
+      const field = derivedType === "basins" ? basinMap : derivedField;
+      if (!canvas || !field) return;
+      
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = field.width / rect.width;
+      const scaleY = field.height / rect.height;
+      
+      const x = Math.floor((e.clientX - rect.left) * scaleX);
+      const y = Math.floor((e.clientY - rect.top) * scaleY);
+      
+      if (x >= 0 && x < field.width && y >= 0 && y < field.height) {
+        setHoverPos({ x, y });
+        if (derivedField) {
+          const idx = y * derivedField.width + x;
+          setDerivedValue(derivedField.grid[idx] ?? null);
+        }
+      }
     }
-  }, [isPanning, panStart, containerSize, zoom]);
+  }, [isPanning, panStart, containerSize, zoom, derivedField, basinMap, derivedType]);
 
   const handleMouseUp = useCallback(() => {
     setIsPanning(false);
@@ -213,6 +236,8 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
 
   const handleMouseLeave = useCallback(() => {
     setIsPanning(false);
+    setHoverPos(null);
+    setDerivedValue(null);
   }, []);
 
   const handleDoubleClick = useCallback(() => {
@@ -338,6 +363,16 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
           </div>
         )}
       </div>
+      
+      <ProjectionViewFooter
+        layerType={derivedType}
+        probeData={probeData || null}
+        derivedValue={derivedValue}
+        basinMap={basinMap}
+        isHovering={hoverPos !== null}
+        x={hoverPos?.x ?? 0}
+        y={hoverPos?.y ?? 0}
+      />
     </div>
   );
 }
