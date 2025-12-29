@@ -115,6 +115,8 @@ export function ControlPanel({
   const [weightsOpen, setWeightsOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [metricsOpen, setMetricsOpen] = useState(false);
+  const [interpretationOpen, setInterpretationOpen] = useState(true);
+  const [presetsOpen, setPresetsOpen] = useState(true);
 
   const modeLabels = getModeLabels(interpretationMode);
   const languageMode = toLanguageMode(interpretationMode);
@@ -128,28 +130,42 @@ export function ControlPanel({
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="px-3 py-3 border-b border-border shrink-0 space-y-3">
-        <div className="space-y-2">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Interpretation Mode</span>
-          <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
-            <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-interpretation-mode">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {modeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
-        </div>
+      <div className="px-3 py-3 border-b border-border shrink-0 space-y-1">
+        <Collapsible open={interpretationOpen} onOpenChange={setInterpretationOpen}>
+          <CollapsibleTrigger asChild>
+            <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-interpretation">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Interpretation Mode</span>
+              {interpretationOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-2 space-y-2">
+            <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
+              <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-interpretation-mode">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {modeOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
+          </CollapsibleContent>
+        </Collapsible>
         
-        <div className="space-y-2 pt-2 border-t border-border/50">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Behavior Presets</span>
-          <PresetMenu onApply={onParamsChange} />
-        </div>
+        <Collapsible open={presetsOpen} onOpenChange={setPresetsOpen} className="pt-2 border-t border-border/50">
+          <CollapsibleTrigger asChild>
+            <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-presets">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Behavior Presets</span>
+              {presetsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-2">
+            <PresetMenu onApply={onParamsChange} />
+          </CollapsibleContent>
+        </Collapsible>
       </div>
 
       <Tabs defaultValue="controls" className="flex-1 flex flex-col overflow-hidden">
