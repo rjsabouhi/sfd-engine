@@ -616,7 +616,25 @@ export default function SimulationPage() {
 
       <div className="flex flex-1 overflow-hidden">
         <main className="relative bg-gray-950 flex-1 flex flex-col">
-          {/* Tools Toolbar - only spans visualization area */}
+          {/* Structural Field Header */}
+          <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border shrink-0">
+            <div className="min-w-0">
+              <h4 className="text-xs font-medium">Structural Field</h4>
+              <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation showing local state values.</p>
+            </div>
+            <Select value={colormap} onValueChange={handleColormapChange}>
+              <SelectTrigger className="h-7 w-28 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-header">
+                <span>{colormapLabel}</span>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="viridis">Viridis</SelectItem>
+                <SelectItem value="inferno">Inferno</SelectItem>
+                <SelectItem value="cividis">Cividis</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Tools Toolbar */}
           <div className="flex items-center justify-center gap-2 px-3 py-1.5 border-b border-border bg-card/30 shrink-0">
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Tools:</span>
             <Button
@@ -700,22 +718,6 @@ export default function SimulationPage() {
               {showDualView ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-px h-full bg-border">
                   <div className="h-full min-h-0 flex flex-col bg-background">
-                    <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border shrink-0">
-                        <div className="min-w-0">
-                          <h4 className="text-xs font-medium">Structural Field</h4>
-                          <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation showing local state values.</p>
-                        </div>
-                        <Select value={colormap} onValueChange={handleColormapChange}>
-                          <SelectTrigger className="h-7 w-28 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-header">
-                            <span>{colormapLabel}</span>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="viridis">Viridis</SelectItem>
-                            <SelectItem value="inferno">Inferno</SelectItem>
-                            <SelectItem value="cividis">Cividis</SelectItem>
-                          </SelectContent>
-                        </Select>
-                    </div>
                     <div className="relative flex-1 min-h-0 flex items-center justify-center bg-gray-950">
                       <VisualizationCanvas 
                         field={field} 
@@ -752,24 +754,6 @@ export default function SimulationPage() {
                 </div>
               ) : (
                 <div className="h-full flex flex-col bg-background">
-                  <div className="relative flex items-center justify-center px-3 py-2 border-b border-border shrink-0">
-                    <div className="text-center">
-                      <h4 className="text-xs font-medium">Structural Field</h4>
-                      <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation showing local state values.</p>
-                    </div>
-                    <div className="absolute right-3">
-                      <Select value={colormap} onValueChange={handleColormapChange}>
-                        <SelectTrigger className="h-7 w-28 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-single">
-                          <span>{colormapLabel}</span>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="viridis">Viridis</SelectItem>
-                          <SelectItem value="inferno">Inferno</SelectItem>
-                          <SelectItem value="cividis">Cividis</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
                   <div className="relative flex-1 flex items-center justify-center bg-gray-950">
                     <VisualizationCanvas 
                       field={field} 
