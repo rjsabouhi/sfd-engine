@@ -215,8 +215,11 @@ export function ControlPanel({
                   onSeek={onSeekFrame}
                   onExitPlayback={onExitPlayback}
                 />
-                {!state.isRunning && (
+                {!state.isRunning && historyLength === 0 && (
                   <p className="text-xs text-muted-foreground leading-relaxed">Run the simulation to reveal dynamic structure. A timeline will appear.</p>
+                )}
+                {!state.isRunning && historyLength > 0 && (
+                  <p className="text-xs text-muted-foreground leading-relaxed">Scrub step-by-step to see shape as it changes.</p>
                 )}
               </CollapsibleContent>
             </Collapsible>
