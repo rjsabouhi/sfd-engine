@@ -748,7 +748,7 @@ export default function SimulationPage() {
                 linear-gradient(90deg, rgba(70,90,130,0.25) 1px, transparent 1px)
               `,
               backgroundSize: '40px 40px',
-              backgroundPosition: 'center center',
+              backgroundPosition: '0 0',
             }}
           >
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Tools:</span>
