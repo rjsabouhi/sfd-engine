@@ -1,0 +1,188 @@
+REPLIT IMPLEMENTATION PROMPT — FLOATING DIAGNOSTICS CONSOLE (COPY–PASTE EXACTLY)
+
+Implement a full replacement for the current Diagnostics panel.
+We are moving from the cramped sidebar version to a Floating Diagnostics Console — a draggable, resizable, semi-transparent overlay window that behaves like an instrument panel inside the app.
+
+This replaces NOTHING in the core app logic — it only moves the UX and reshapes how diagnostic data is displayed.
+
+Follow ALL specs below.
+
+⸻
+
+1. Create a Floating Diagnostics Console Window
+
+A new UI element that:
+	•	Floats above all other UI elements
+	•	Has a dark, slightly translucent background (similar to the image provided)
+	•	Has rounded corners and a faint 1px border
+	•	Is draggable
+	•	Is resizable (min width ~350px, max width ~700px)
+	•	Can be collapsed or minimized
+	•	Has a close button (X) that hides it
+	•	Has a “pin” toggle to keep on top
+
+The container should be similar in style to a scientific instrumentation panel.
+
+⸻
+
+2. Hotkey to Toggle Panel
+
+Add a global hotkey:
+
+Ctrl + Shift + D
+
+This opens/closes the diagnostics window.
+
+When closed, system continues running normally.
+
+⸻
+
+3. Structure the Console EXACTLY Like This
+
+Use tabs across the top:
+
+[ Solver ] [ Check ] [ Render ] [ Internals ] [ Events ] [ Advanced ]
+
+Each tab opens its respective section.
+
+Do NOT reuse old sidebar code.
+Reorganize into a clean, scrollable layout.
+
+⸻
+
+4. Tab Contents (FULL SPEC)
+
+▶ TAB: Solver
+	•	Step
+	•	Frame Hash
+	•	Δt Stability
+	•	Energy Functional
+	•	E(t)
+	•	ΔE
+	•	Energy History (small sparkline if easy)
+	•	Variance Monitor
+	•	σ²
+	•	Δσ²
+	•	Stability Status (green OK / red UNSTABLE)
+
+▶ TAB: Check
+	•	Run Determinism Check (100 steps) button
+	•	Dual-View Sync
+	•	History Index
+	•	History Length
+	•	Determinism Sync State
+	•	Determinism Warnings box
+
+▶ TAB: Render
+	•	Frame Time
+	•	FPS
+	•	Dropped Frames
+	•	Renderer (canvas2d or WebGL)
+	•	Resolution (e.g., 300×300)
+	•	Colormap
+	•	Color Normalization Mode
+
+▶ TAB: Internals
+	•	Grid Stats
+	•	Min
+	•	Max
+	•	Mean
+	•	Std Dev
+	•	Gradient Magnitude
+	•	Min
+	•	Max
+	•	Mean
+	•	Curvature Stats
+	•	Min
+	•	Max
+	•	Mean
+
+▶ TAB: Events
+	•	Event search bar
+	•	Auto-scroll toggle
+	•	Compact mode toggle
+	•	Full event list with timestamps
+	•	Export Events button (keep existing export logic)
+
+▶ TAB: Advanced
+	•	Energy Trend
+	•	Variance Trend (dσ²/dt)
+	•	Max Gradient
+	•	Curvature Mean
+	•	Warnings section
+	•	High Energy Drift
+	•	Instability Alerts
+	•	“Full Diagnostic Export” button
+	•	“10-Frame Export” button
+
+⸻
+
+5. Window Behavior Requirements
+	•	Draggable top bar
+	•	Resizable by dragging bottom/right edges
+	•	Smooth animations (fade in/out on open/close)
+	•	Semi-transparent background (rgba(8, 8, 12, 0.92))
+	•	Automatic scrollbars for overflow
+	•	Sticky tab header
+	•	Close button hides window, does NOT reset state
+	•	Must stay above simulation canvas
+
+⸻
+
+6. Styling Requirements
+
+Match this visual mood:
+	•	Dark neon-scientific UI
+	•	Clean spacing
+	•	Labels left-aligned
+	•	Values right-aligned monospaced font
+	•	Metric groups separated by subtle dividers
+	•	Warning states in soft red
+	•	Stability OK in green
+	•	Zero clutter
+
+⸻
+
+7. Code Integration Requirements
+
+Implement this as a fully self-contained module:
+
+/ui/diagnostics/
+    diagnosticsWindow.js
+    diagnosticsWindow.css
+    diagnosticsState.js
+
+The window should read from the same diagnostic data sources the old sidebar used.
+
+Do NOT remove or modify the underlying diagnostic computations.
+
+Just re-route outputs to the new floating panel.
+
+⸻
+
+8. Optional Enhancements (If Easy)
+
+If trivial, add:
+	•	Smooth opacity transitions
+	•	Snap-to-corner docking (top-right, bottom-left, etc.)
+	•	“Compact Mode” (reduces font size & padding by 25%)
+
+If not easy — skip.
+
+⸻
+
+9. Deliverables
+
+When done, the system should meet these conditions:
+	•	Diagnostics no longer lives inside the right sidebar
+	•	Sidebar version can be deleted
+	•	Ctrl+Shift+D toggles the floating console
+	•	Console displays ALL diagnostic data cleanly
+	•	Console looks like a professional computational physics instrument panel
+	•	Everything remains non-blocking and performant
+
+⸻
+
+END OF PROMPT
+
+(Implement exactly as written.)

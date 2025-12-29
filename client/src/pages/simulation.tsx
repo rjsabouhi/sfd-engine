@@ -7,7 +7,7 @@ import { MobileControlPanel } from "@/components/mobile-control-panel";
 import { HoverProbe } from "@/components/hover-probe";
 import { DualFieldView } from "@/components/dual-field-view";
 import { OnboardingModal, type OnboardingModalRef } from "@/components/onboarding-modal";
-import { DiagnosticPanel } from "@/components/diagnostic-panel";
+import { FloatingDiagnostics } from "@/components/floating-diagnostics";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -675,8 +675,8 @@ export default function SimulationPage() {
         </aside>
       </div>
       
-      {/* Hidden Diagnostic Panel - CTRL+SHIFT+D to toggle */}
-      <DiagnosticPanel
+      {/* Floating Diagnostics Console - CTRL+SHIFT+D to toggle */}
+      <FloatingDiagnostics
         engine={engineRef.current}
         isVisible={diagnosticsVisible}
         onClose={() => setDiagnosticsVisible(false)}
@@ -684,11 +684,7 @@ export default function SimulationPage() {
         isRunning={state.isRunning}
         currentHistoryIndex={currentHistoryIndex}
         historyLength={historyLength}
-        onStepBackward={handleStepBackward}
-        onStepForward={handleStepForward}
-        onSeekFrame={handleSeekFrame}
-        onPlay={handlePlay}
-        onPause={handlePause}
+        colormap={colormap}
       />
     </div>
   );
