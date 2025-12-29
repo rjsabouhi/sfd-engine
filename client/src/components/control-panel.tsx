@@ -188,8 +188,8 @@ export function ControlPanel({
                 ) : (
                   <Button 
                     onClick={onPlay} 
-                    variant="default" 
-                    className="flex-1 shadow-[0_0_12px_rgba(59,130,246,0.3)] border border-primary/30" 
+                    variant="ghost"
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_16px_rgba(16,185,129,0.4)] border border-emerald-400/40" 
                     size="sm" 
                     data-testid="button-play"
                   >
