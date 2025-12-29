@@ -265,12 +265,10 @@ export function VisualizationCanvas({
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(80,100,140,0.35) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(80,100,140,0.35) 1px, transparent 1px),
-            linear-gradient(rgba(80,100,140,0.15) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(80,100,140,0.15) 1px, transparent 1px)
+            linear-gradient(rgba(70,90,130,0.25) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(70,90,130,0.25) 1px, transparent 1px)
           `,
-          backgroundSize: '80px 80px, 80px 80px, 20px 20px, 20px 20px',
+          backgroundSize: '40px 40px',
           backgroundPosition: 'center center',
         }}
       />
