@@ -792,6 +792,9 @@ export default function SimulationPage() {
                       basinMap={basinMap}
                       onHover={handleHover}
                       onHoverEnd={handleHoverEnd}
+                      onClick={handleFieldClick}
+                      perturbMode={perturbMode}
+                      trajectoryProbePoint={trajectoryProbePoint}
                     />
                   </div>
                   <StructuralFieldFooter 
