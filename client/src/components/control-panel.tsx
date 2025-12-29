@@ -5,7 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Sliders, Activity, Settings2, BookOpen, Download, Columns2, Palette } from "lucide-react";
+import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Sliders, Activity, Settings2, BookOpen, Download, Columns2 } from "lucide-react";
 import type { SimulationParameters, SimulationState, OperatorContributions, StructuralSignature, StructuralEvent } from "@shared/schema";
 import { defaultParameters } from "@shared/schema";
 import { StatisticsPanel } from "./statistics-panel";
@@ -223,21 +223,21 @@ export function ControlPanel({
               )}
             </div>
 
-            <div className="border-t border-border/50 pt-3">
+            <div className="border-t border-border/50 pt-3 space-y-3">
+              <div className="space-y-2">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Color Map</span>
+                <Select value={colormap} onValueChange={(v) => onColormapChange(v as "inferno" | "viridis" | "grayscale")}>
+                  <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-colormap">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inferno">Inferno</SelectItem>
+                    <SelectItem value="viridis">Viridis</SelectItem>
+                    <SelectItem value="grayscale">Grayscale</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="flex gap-2">
-                <button
-                  onClick={() => onColormapChange(colormap === "inferno" ? "viridis" : "inferno")}
-                  className="relative h-10 w-10 rounded-sm transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                  style={{
-                    backgroundColor: colormap === "viridis" ? "rgba(12, 74, 110, 0.6)" : "rgba(127, 29, 29, 0.4)",
-                    border: colormap === "viridis" 
-                      ? "1px solid rgba(125, 211, 252, 0.5)" 
-                      : "1px solid rgba(248, 113, 113, 0.4)"
-                  }}
-                  data-testid="pad-colormap-toggle"
-                >
-                  <Palette className={`h-4 w-4 mx-auto ${colormap === "viridis" ? "text-sky-300/80" : "text-red-400/80"}`} />
-                </button>
                 <button
                   onClick={() => onShowDualViewChange(!showDualView)}
                   className="relative h-10 w-10 rounded-sm transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
