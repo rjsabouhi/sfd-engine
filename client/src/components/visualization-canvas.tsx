@@ -260,18 +260,28 @@ export function VisualizationCanvas({
       }}
       data-testid="visualization-container"
     >
+      {/* Depth gradient - darker at edges, lighter in center for Z-axis feel */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse at center, rgba(20,25,35,0.3) 0%, rgba(8,10,14,0.95) 70%, rgb(8,10,14) 100%)',
+        }}
+      />
+
       {/* Spatial Reference Grid Background */}
       <div 
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
-            linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)
+            linear-gradient(rgba(100,120,160,0.12) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(100,120,160,0.12) 1px, transparent 1px),
+            linear-gradient(rgba(100,120,160,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(100,120,160,0.05) 1px, transparent 1px)
           `,
           backgroundSize: '80px 80px, 80px 80px, 20px 20px, 20px 20px',
           backgroundPosition: 'center center',
+          maskImage: 'radial-gradient(ellipse at center, black 20%, transparent 75%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at center, black 20%, transparent 75%)',
         }}
       />
       
@@ -281,7 +291,7 @@ export function VisualizationCanvas({
         style={{
           width: '100%',
           height: '1px',
-          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.04) 60%, transparent 100%)',
+          background: 'linear-gradient(90deg, transparent 0%, rgba(100,120,160,0.15) 35%, rgba(100,120,160,0.25) 50%, rgba(100,120,160,0.15) 65%, transparent 100%)',
           top: '50%',
         }}
       />
@@ -290,7 +300,7 @@ export function VisualizationCanvas({
         style={{
           width: '1px',
           height: '100%',
-          background: 'linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.04) 60%, transparent 100%)',
+          background: 'linear-gradient(180deg, transparent 0%, rgba(100,120,160,0.15) 35%, rgba(100,120,160,0.25) 50%, rgba(100,120,160,0.15) 65%, transparent 100%)',
           left: '50%',
         }}
       />
