@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -41,7 +41,11 @@ const steps: OnboardingStep[] = [
   },
 ];
 
-export function OnboardingModal() {
+export interface OnboardingModalRef {
+  replay: () => void;
+}
+
+export const OnboardingModal = forwardRef<OnboardingModalRef>(function OnboardingModal(_, ref) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -51,6 +55,13 @@ export function OnboardingModal() {
       setIsOpen(true);
     }
   }, []);
+
+  useImperativeHandle(ref, () => ({
+    replay: () => {
+      setCurrentStep(0);
+      setIsOpen(true);
+    },
+  }));
 
   const handleClose = () => {
     localStorage.setItem(ONBOARDING_STORAGE_KEY, "true");
@@ -151,4 +162,4 @@ export function OnboardingModal() {
       </DialogContent>
     </Dialog>
   );
-}
+});

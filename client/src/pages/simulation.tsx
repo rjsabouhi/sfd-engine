@@ -6,7 +6,7 @@ import { ControlPanel } from "@/components/control-panel";
 import { MobileControlPanel } from "@/components/mobile-control-panel";
 import { HoverProbe } from "@/components/hover-probe";
 import { DualFieldView } from "@/components/dual-field-view";
-import { OnboardingModal } from "@/components/onboarding-modal";
+import { OnboardingModal, type OnboardingModalRef } from "@/components/onboarding-modal";
 import { DiagnosticPanel } from "@/components/diagnostic-panel";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -34,6 +34,7 @@ export default function SimulationPage() {
   const isMobile = useIsMobile();
   const engineRef = useRef<SFDEngine | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const onboardingRef = useRef<OnboardingModalRef>(null);
   
   const [params, setParams] = useState<SimulationParameters>(defaultParameters);
   const [state, setState] = useState<SimulationState>({
@@ -487,7 +488,7 @@ export default function SimulationPage() {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      <OnboardingModal />
+      <OnboardingModal ref={onboardingRef} />
       <header className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-card/50">
         <div className="flex items-center gap-3">
           <img src={sfdLogo} alt="SFD Engine" className="w-7 h-7 rounded-md" />
@@ -497,7 +498,16 @@ export default function SimulationPage() {
           </div>
         </div>
         
-        <div>
+        <div className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => onboardingRef.current?.replay()} 
+            data-testid="button-show-intro"
+            className="h-7 text-xs"
+          >
+            Show Intro
+          </Button>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" data-testid="button-help" className="h-7 w-7">
