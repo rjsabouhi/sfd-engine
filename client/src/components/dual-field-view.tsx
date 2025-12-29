@@ -290,7 +290,7 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
       
       <div 
         ref={containerRef}
-        className="relative flex-1 flex items-center justify-center overflow-hidden"
+        className="relative flex-1 min-h-0 flex items-center justify-center overflow-hidden bg-gray-950"
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -299,7 +299,6 @@ export function DualFieldView({ derivedField, basinMap, derivedType, onTypeChang
         onDoubleClick={handleDoubleClick}
         style={{ 
           cursor: zoom > 1 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair',
-          backgroundColor: 'rgb(8, 10, 14)',
         }}
       >
         {/* Spatial Reference Grid Background */}

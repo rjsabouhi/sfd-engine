@@ -576,7 +576,7 @@ export default function SimulationPage() {
                       isHovering={probeVisible} 
                     />
                   </div>
-                  <div className="h-full min-h-0 bg-background">
+                  <div className="h-full min-h-0 flex flex-col bg-background">
                     <DualFieldView
                       derivedField={derivedField}
                       basinMap={basinMap}

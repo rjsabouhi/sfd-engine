@@ -29,8 +29,8 @@ export function StructuralFieldFooter({ probeData, basinMap, isHovering }: Struc
 
   return (
     <div 
-      className="flex items-center gap-3 px-3 py-1.5 text-[10px] font-mono border-t border-white/5 overflow-x-auto"
-      style={{ backgroundColor: 'rgba(8, 10, 14, 0.9)' }}
+      className="flex items-center gap-4 px-4 text-[11px] font-mono border-t border-white/5 overflow-x-auto shrink-0"
+      style={{ backgroundColor: 'rgba(8, 10, 14, 0.9)', height: '36px', minHeight: '36px' }}
       data-testid="structural-field-footer"
     >
       <span className="text-neutral-400">
@@ -234,8 +234,8 @@ export function ProjectionViewFooter({ layerType, probeData, derivedValue, basin
 
   return (
     <div 
-      className="flex items-center gap-3 px-3 py-1.5 text-[10px] font-mono border-t border-white/5 overflow-x-auto"
-      style={{ backgroundColor: 'rgba(8, 10, 14, 0.9)' }}
+      className="flex items-center gap-4 px-4 text-[11px] font-mono border-t border-white/5 overflow-x-auto shrink-0"
+      style={{ backgroundColor: 'rgba(8, 10, 14, 0.9)', height: '36px', minHeight: '36px' }}
       data-testid="projection-view-footer"
     >
       {renderMetrics()}
