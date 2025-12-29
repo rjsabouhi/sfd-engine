@@ -244,7 +244,7 @@ export function ControlPanel({
                   onExitPlayback={onExitPlayback}
                 />
                 {!state.isRunning && historyLength === 0 && (
-                  <p className="text-xs text-muted-foreground leading-relaxed">Run the simulation to reveal dynamic structure. A timeline will appear.</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">Run the simulation to reveal dynamic structure in the field visualization.</p>
                 )}
                 {!state.isRunning && historyLength > 0 && (
                   <p className="text-xs text-muted-foreground leading-relaxed">Scrub step-by-step to see shape as it changes.</p>
