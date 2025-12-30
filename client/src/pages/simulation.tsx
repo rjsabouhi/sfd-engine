@@ -12,7 +12,7 @@ import { StructuralFieldFooter } from "@/components/field-footer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye, Sparkles } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -828,23 +828,6 @@ export default function SimulationPage() {
               </TooltipTrigger>
               <TooltipContent side="bottom" className="text-xs">
                 Show real-time stability and energy metrics
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setPerceptualSmoothing(!perceptualSmoothing)}
-                  data-testid="button-perceptual-smoothing"
-                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${perceptualSmoothing ? "bg-white/20 text-white" : ""}`}
-                >
-                  <Sparkles className="h-3 w-3" />
-                  Smooth
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
-                Reduce visual flicker with temporal smoothing
               </TooltipContent>
             </Tooltip>
             <div className="w-px h-4 bg-white/20" />
