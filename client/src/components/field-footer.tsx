@@ -29,8 +29,8 @@ export function StructuralFieldFooter({ probeData, basinMap, isHovering }: Struc
 
   return (
     <div 
-      className="flex items-center gap-4 px-4 text-[11px] font-mono border-t border-white/5 overflow-x-auto shrink-0"
-      style={{ backgroundColor: 'rgba(8, 10, 14, 0.9)', height: '36px', minHeight: '36px' }}
+      className="flex items-center gap-4 px-6 text-[11px] font-mono border-t border-white/5 overflow-x-auto shrink-0"
+      style={{ backgroundColor: 'rgba(8, 10, 14, 0.9)', height: '44px', minHeight: '44px' }}
       data-testid="structural-field-footer"
     >
       <span className="text-neutral-400">

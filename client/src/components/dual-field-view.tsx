@@ -381,7 +381,46 @@ export function DualFieldView({
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {!compact && (
+      {/* Header - full version for non-compact, minimal version for compact */}
+      {compact ? (
+        <div className="flex items-center justify-between gap-2 px-3 py-1.5 border-b border-border shrink-0">
+          <span className="text-[10px] text-muted-foreground truncate">{currentOption?.label || "Projection"}</span>
+          
+          <div className="flex items-center gap-1.5">
+            {onBlendModeChange && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onBlendModeChange(!blendMode)}
+                data-testid="button-blend-mode-compact"
+                className={`h-6 w-6 p-0 ${blendMode ? "bg-muted" : ""}`}
+              >
+                <Blend className="h-3 w-3" />
+              </Button>
+            )}
+            <Select value={derivedType} onValueChange={handleOverlayChange}>
+              <SelectTrigger 
+                className="h-6 w-24 text-[10px] focus:ring-0 focus:ring-offset-0"
+                data-testid="select-overlay-type-compact"
+              >
+                <span>{displayLabel}</span>
+              </SelectTrigger>
+              <SelectContent>
+                {OVERLAY_OPTIONS.map((option) => (
+                  <SelectItem 
+                    key={option.value}
+                    value={option.value}
+                    className="text-xs"
+                    data-testid={`select-overlay-compact-${option.value}`}
+                  >
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      ) : (
         <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border shrink-0">
           <div className="min-w-0 flex-1">
             <h4 className="text-xs font-medium">Projection View</h4>
