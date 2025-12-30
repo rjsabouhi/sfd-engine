@@ -722,11 +722,7 @@ export default function SimulationPage() {
             </div>
           )}
           {/* Tools Row - above canvas */}
-          <div className="relative shrink-0 border-b border-white/10">
-            {/* Fade edges */}
-            <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-gray-950 to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-gray-950 to-transparent z-10 pointer-events-none" />
-            <div className="flex items-center gap-2 px-6 py-1.5 bg-gray-950 overflow-x-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+          <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gray-950 shrink-0 border-b border-white/10">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -921,7 +917,6 @@ export default function SimulationPage() {
               onChange={handleLoadConfiguration}
               className="hidden"
             />
-            </div>
           </div>
           
           <div className="flex-1 relative">
@@ -1010,7 +1005,7 @@ export default function SimulationPage() {
                   <span className="text-xs font-mono text-black">Playback Mode</span>
                 </div>
               )}
-          </div>
+              </div>
             </main>
         
         <aside className="w-[420px] border-l border-border bg-card flex flex-col overflow-hidden">
