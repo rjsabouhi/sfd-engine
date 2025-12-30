@@ -516,16 +516,17 @@ export class SFDEngine {
 
   // Soliton Entity (SP₃): Stable localized self-stabilizing pattern with breathing and drift
   private updateSolitonStep(): void {
-    // Tuned parameters for stable soliton-like behavior
-    const alpha = 0.08;          // diffusion (reduced)
-    const beta = 0.4;            // tension (reduced)
-    const gamma = 0.25;          // curvature response (reduced)
-    const sigma = 0.3;           // soliton feedback (reduced)
-    const lambda = 0.02;         // damping
-    const breathingFreq = 0.22;  // breathing frequency
-    const breathingAmp = 0.08;   // breathing amplitude (reduced)
-    const driftBias = 0.03;      // directional drift (reduced)
-    const gradFollow = 0.15;     // gradient follow strength
+    // Soliton parameters - from spec with stability scaling
+    const stabilityScale = 0.12; // Scale factor for numerical stability
+    const alpha = 0.18 * stabilityScale;         // diffusion
+    const beta = 1.42 * stabilityScale;          // tension
+    const gamma = 0.91 * stabilityScale;         // curvature response
+    const sigma = 1.25 * stabilityScale;         // soliton feedback
+    const lambda = 0.04;                         // damping
+    const breathingFreq = 0.22;                  // breathing frequency
+    const breathingAmp = 0.17 * stabilityScale;  // breathing amplitude
+    const driftBias = 0.12 * stabilityScale;     // directional drift
+    const gradFollow = 0.33;                     // gradient follow strength
     
     // Breathing oscillation based on step
     const breathing = breathingAmp * Math.sin(this.step * breathingFreq * 0.1);
@@ -572,9 +573,9 @@ export class SFDEngine {
         // Damping stabilizer
         const damping = -lambda * value * value * value;
         
-        // Combined update with smaller dt multiplier
+        // Combined update
         const delta = alpha * laplacian + tension + curvature + solitonFeedback + drift + damping;
-        this.tempGrid[idx] = Math.tanh(value + this.params.dt * 0.5 * delta);
+        this.tempGrid[idx] = Math.tanh(value + this.params.dt * delta);
       }
     }
 
@@ -585,15 +586,16 @@ export class SFDEngine {
 
   // Cosmic Web Analog (SP₄): Filament-void structure formation
   private updateCosmicWebStep(): void {
-    // Tuned parameters for stable cosmic web behavior
-    const alpha = 0.12;        // diffusion (higher for smoothing)
-    const beta = 0.35;         // tension (reduced)
-    const gamma = 0.2;         // curvature response (reduced)
-    const chi = 0.25;          // filament reinforcement (reduced)
-    const nu = 0.15;           // void pressure (reduced)
-    const lambda = 0.02;       // damping
-    const densityThreshold = 0.15;
-    const scaleBias = 0.7;
+    // Cosmic web parameters - closer to spec but with stability scaling
+    const stabilityScale = 0.15; // Scale factor for numerical stability
+    const alpha = 0.08 * stabilityScale;        // diffusion
+    const beta = 1.93 * stabilityScale;         // tension
+    const gamma = 1.15 * stabilityScale;        // curvature response
+    const chi = 1.47 * stabilityScale;          // filament reinforcement
+    const nu = 0.62 * stabilityScale;           // void pressure
+    const lambda = 0.03;                        // damping
+    const densityThreshold = 0.27;
+    const scaleBias = 0.84;
     
     for (let y = 1; y < this.height - 1; y++) {
       for (let x = 1; x < this.width - 1; x++) {
@@ -643,9 +645,9 @@ export class SFDEngine {
         // Damping
         const damping = -lambda * value * value * value;
         
-        // Combined dynamics with reduced dt
+        // Combined dynamics
         const delta = alpha * laplacian + tension + curvature + filamentTerm - voidPressure + coherence + damping;
-        this.tempGrid[idx] = Math.tanh(value + this.params.dt * 0.5 * delta);
+        this.tempGrid[idx] = Math.tanh(value + this.params.dt * delta);
       }
     }
 
