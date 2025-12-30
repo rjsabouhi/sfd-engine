@@ -85,7 +85,7 @@ export default function SimulationPage() {
   const lastDerivedCacheStepRef = useRef(0);
   
   // New MVP feature states
-  const [fieldInspectorEnabled, setFieldInspectorEnabled] = useState(true);
+  const [fieldInspectorEnabled, setFieldInspectorEnabled] = useState(false);
   const [perturbMode, setPerturbMode] = useState(false);
   const [trajectoryProbeActive, setTrajectoryProbeActive] = useState(false);
   const [trajectoryProbePoint, setTrajectoryProbePoint] = useState<{ x: number; y: number } | null>(null);
