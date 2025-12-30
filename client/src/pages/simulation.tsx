@@ -390,6 +390,22 @@ export default function SimulationPage() {
     setProbeVisible(false);
   }, []);
 
+  // Toggle dual view with synchronous field initialization to prevent flash
+  const handleToggleDualView = useCallback((show?: boolean) => {
+    setShowDualView((prev) => {
+      const newValue = show !== undefined ? show : !prev;
+      if (newValue && engineRef.current) {
+        // Synchronously set derived field before React re-renders
+        if (derivedType === "basins") {
+          setBasinMap(engineRef.current.getBasinMap());
+        } else {
+          setDerivedField(engineRef.current.computeDerivedField(derivedType));
+        }
+      }
+      return newValue;
+    });
+  }, [derivedType]);
+
   // New MVP feature handlers
   const handleFieldClick = useCallback((x: number, y: number, shiftKey: boolean) => {
     const engine = engineRef.current;
@@ -466,7 +482,7 @@ export default function SimulationPage() {
           break;
         case "KeyD":
           if (!e.ctrlKey && !e.shiftKey && !e.metaKey) {
-            setShowDualView((prev) => !prev);
+            handleToggleDualView();
           }
           break;
         case "KeyR":
@@ -477,7 +493,7 @@ export default function SimulationPage() {
     
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [state.isRunning, handlePause, handlePlay, handleReset]);
+  }, [state.isRunning, handlePause, handlePlay, handleReset, handleToggleDualView]);
 
   const interpretationSentence = generateInterpretationSentence(
     state.basinCount,
@@ -1079,7 +1095,7 @@ export default function SimulationPage() {
                 onExportLayers={handleExportLayers}
                 onExportArchive={handleExportArchive}
                 onExportWebM={handleExportWebM}
-                onShowDualViewChange={setShowDualView}
+                onShowDualViewChange={handleToggleDualView}
                 varianceChange={varianceChange}
                 isExporting={isExporting}
               />
