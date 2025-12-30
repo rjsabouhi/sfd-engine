@@ -765,6 +765,9 @@ export class SFDEngine {
     // Update trend buffers for aggregated metrics
     this.updateTrendBuffers(stats);
     
+    // Track energy history for diagnostics sparkline
+    this.trackDiagnostics(stats.energy);
+    
     // Reset reactive events each frame
     this.resetReactiveEvents();
     
