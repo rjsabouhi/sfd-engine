@@ -193,29 +193,18 @@ export class SFDEngine {
     const cy = this.height / 2;
     
     // Check for special mode initializations
-    if (this.params.mode === "botanical") {
-      // Botanical mode: Initialize with stem source and bud seed
+    if (this.params.mode === "shapemold") {
+      // Shape Mold mode: Initialize with light noise and slight center bias
       for (let i = 0; i < this.grid.length; i++) {
-        this.grid[i] = (this.rng() - 0.5) * 0.02; // Lighter noise
+        this.grid[i] = (this.rng() - 0.5) * 0.05;
       }
-      
-      // Stem source - vertical energy concentration
-      for (let y = 0; y < this.height * 0.75; y++) {
-        const idx = y * this.width + Math.floor(cx);
-        this.grid[idx] += 0.12 * Math.exp(-((y - this.height * 0.5) ** 2) / (2 * 1200));
-      }
-      
-      // Bud seed - concentrated energy at top
-      const budY = this.height * 0.78;
-      for (let x = Math.floor(cx) - 8; x <= Math.floor(cx) + 8; x++) {
-        for (let y = Math.floor(budY) - 8; y <= Math.floor(budY) + 8; y++) {
-          if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-            const r = Math.hypot(x - cx, y - budY);
-            if (r < 8) {
-              const idx = y * this.width + x;
-              this.grid[idx] += 0.20 * Math.exp(-r / 5);
-            }
-          }
+      // Add slight radial gradient to seed the mold
+      for (let y = 0; y < this.height; y++) {
+        for (let x = 0; x < this.width; x++) {
+          const ux = x / this.width;
+          const uy = y / this.height;
+          const d = this.sdfRoseSide(ux, uy);
+          this.grid[y * this.width + x] += (d < 0 ? 0.1 : -0.02);
         }
       }
     } else {
@@ -378,83 +367,80 @@ export class SFDEngine {
     this.ringBufferIndex = (this.ringBufferIndex + 1) % this.ringBufferSize;
   }
 
-  // Botanical Growth Mode: Simulated stem emergence, bud formation, layered bloom
-  private updateBotanicalStep(): void {
-    const cx = this.width / 2;
-    const budY = this.height * 0.78;
-    const frame = this.step;
+  // Shape Mold Mode: Procedural Rose Side-Profile Growth using SDF operators
+  // SDF - Rose Side-Profile Mold
+  private sdfRoseSide(x: number, y: number): number {
+    // Normalize input to [-1,1]
+    const px = 2.0 * x - 1.0;
+    const py = 2.0 * y - 1.0;
 
-    // Phase 1: Stem Raising (frames 0-20)
-    if (frame < 20) {
-      for (let y = Math.floor(this.height * 0.55); y < budY; y++) {
-        const idx = y * this.width + Math.floor(cx);
-        this.grid[idx] += 0.003;
+    // Bud region
+    const bud = Math.sqrt(px * px + py * py * 1.4) - 0.33;
+
+    // Outer petal flare
+    const petal = Math.sqrt((px * 0.8) ** 2 + (py + 0.25) ** 2) - 0.55;
+
+    // Combine - union minimum
+    return Math.min(bud, petal);
+  }
+
+  private updateShapeMoldStep(): void {
+    const t = this.step;
+    const moldStrength = 1.0;
+    const curlIntensity = 0.6;
+    const rotationBias = 0.42;
+    const layerCount = 4;
+    const bloomSpeed = 0.015;
+
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        const idx = y * this.width + x;
+        
+        // Normalized coordinates [0,1]
+        const ux = x / this.width;
+        const uy = y / this.height;
+        
+        // Center-relative coordinates
+        const cx = x - this.width / 2;
+        const cy = y - this.height / 2;
+        const radiusNorm = Math.sqrt(cx * cx + cy * cy) / (this.width / 2);
+        const angle = Math.atan2(cy, cx);
+        
+        // Gradient components
+        const gradX = (this.getValue(x + 1, y) - this.getValue(x - 1, y)) / 2;
+        const gradY = (this.getValue(x, y + 1) - this.getValue(x, y - 1)) / 2;
+        
+        let value = this.grid[idx];
+        
+        // 1. Mold Attraction Operator - pulls field toward rose silhouette
+        const d = this.sdfRoseSide(ux, uy);
+        value += -d * moldStrength * 0.01;
+        
+        // 2. Curvature Bias Operator - creates petal curl texture
+        const curl = gradX * (-gradY) - gradY * gradX;
+        value += curl * curlIntensity * 0.1;
+        
+        // 3. Layered Unfold Operator - simulates petal blooming outward
+        const L = Math.floor(radiusNorm * layerCount);
+        value += Math.sin(t * bloomSpeed * (L + 1)) * 0.02;
+        
+        // 4. Rotational Flow Operator - adds swirling motion
+        value += Math.sin(angle * 5.0) * rotationBias * 0.01;
+        
+        // Clamp value
+        this.tempGrid[idx] = Math.max(-1, Math.min(1, value));
       }
     }
 
-    // Phase 2: Bud Pressure + Rotation (frames 20-45)
-    if (frame >= 20 && frame < 45) {
-      const angleWarp = 0.08 * Math.sin(frame * 0.15);
-      for (let x = Math.floor(cx) - 10; x <= Math.floor(cx) + 10; x++) {
-        for (let y = Math.floor(budY) - 10; y <= Math.floor(budY) + 10; y++) {
-          if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-            const dx = x - cx;
-            const dy = y - budY;
-            const r = Math.hypot(dx, dy);
-            const petalPulse = Math.sin(r * 1.3 + frame * 0.2) * 0.02;
-            const idx = y * this.width + x;
-            this.grid[idx] += petalPulse;
-          }
-        }
-      }
-    }
-
-    // Phase 3: Blooming Layer Release (frames 45+)
-    if (frame >= 45) {
-      const bloomFactor = Math.min((frame - 45) / 80, 1);
-      const petalCount = 7;
-
-      for (let y = 0; y < this.height; y++) {
-        for (let x = 0; x < this.width; x++) {
-          const dx = x - cx;
-          const dy = y - budY;
-          const r = Math.hypot(dx, dy);
-          const theta = Math.atan2(dy, dx);
-          const lobe = Math.sin(theta * petalCount + r * 0.05);
-          const intensity = lobe * bloomFactor * 0.015 * Math.exp(-r / 60);
-          const idx = y * this.width + x;
-          this.grid[idx] += intensity;
-        }
-      }
-    }
-
-    // Diffuse and relax
+    // Diffuse for smoothness
     for (let y = 1; y < this.height - 1; y++) {
       for (let x = 1; x < this.width - 1; x++) {
         const idx = y * this.width + x;
-        const laplacian = this.grid[idx - 1] + this.grid[idx + 1] + 
-                         this.grid[idx - this.width] + this.grid[idx + this.width] - 
-                         4 * this.grid[idx];
-        this.tempGrid[idx] = this.grid[idx] + 0.14 * laplacian;
+        const laplacian = this.tempGrid[idx - 1] + this.tempGrid[idx + 1] + 
+                         this.tempGrid[idx - this.width] + this.tempGrid[idx + this.width] - 
+                         4 * this.tempGrid[idx];
+        this.tempGrid[idx] += 0.05 * laplacian;
       }
-    }
-
-    // Boundary copy
-    for (let x = 0; x < this.width; x++) {
-      this.tempGrid[x] = this.grid[x];
-      this.tempGrid[(this.height - 1) * this.width + x] = this.grid[(this.height - 1) * this.width + x];
-    }
-    for (let y = 0; y < this.height; y++) {
-      this.tempGrid[y * this.width] = this.grid[y * this.width];
-      this.tempGrid[y * this.width + this.width - 1] = this.grid[y * this.width + this.width - 1];
-    }
-
-    // Relax toward mean
-    let sum = 0;
-    for (let i = 0; i < this.tempGrid.length; i++) sum += this.tempGrid[i];
-    const mean = sum / this.tempGrid.length;
-    for (let i = 0; i < this.tempGrid.length; i++) {
-      this.tempGrid[i] = this.tempGrid[i] + 0.05 * (mean - this.tempGrid[i]);
     }
 
     // Swap buffers
@@ -545,8 +531,8 @@ export class SFDEngine {
       return;
     }
     
-    if (this.params.mode === "botanical") {
-      this.updateBotanicalStep();
+    if (this.params.mode === "shapemold") {
+      this.updateShapeMoldStep();
       this.step++;
       this.detectEvents();
       if (this.step - this.lastBasinMapStep >= this.basinMapUpdateInterval) {
