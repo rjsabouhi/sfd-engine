@@ -11,6 +11,7 @@ import { FloatingDiagnostics } from "@/components/floating-diagnostics";
 import { StructuralFieldFooter } from "@/components/field-footer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -974,44 +975,49 @@ export default function SimulationPage() {
           
           <div className="flex-1 relative">
               {showDualView ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-px h-full bg-border">
-                  <div className="h-full min-h-0 flex flex-col bg-background">
-                    <div className="relative flex-1 min-h-0 flex items-center justify-center bg-gray-950">
-                      <VisualizationCanvas 
-                        field={field} 
-                        colormap={colormap}
-                        basinMap={basinMap}
-                        onHover={handleHover}
-                        onHoverEnd={handleHoverEnd}
-                        onClick={handleFieldClick}
-                        perturbMode={perturbMode}
-                        trajectoryProbePoint={trajectoryProbePoint}
-                        perceptualSmoothing={perceptualSmoothing}
+                <ResizablePanelGroup direction="horizontal" className="h-full">
+                  <ResizablePanel defaultSize={50} minSize={25}>
+                    <div className="h-full min-h-0 flex flex-col bg-background">
+                      <div className="relative flex-1 min-h-0 flex items-center justify-center bg-gray-950">
+                        <VisualizationCanvas 
+                          field={field} 
+                          colormap={colormap}
+                          basinMap={basinMap}
+                          onHover={handleHover}
+                          onHoverEnd={handleHoverEnd}
+                          onClick={handleFieldClick}
+                          perturbMode={perturbMode}
+                          trajectoryProbePoint={trajectoryProbePoint}
+                          perceptualSmoothing={perceptualSmoothing}
+                        />
+                      </div>
+                      <StructuralFieldFooter 
+                        probeData={probeData} 
+                        basinMap={basinMap} 
+                        isHovering={probeVisible} 
                       />
                     </div>
-                    <StructuralFieldFooter 
-                      probeData={probeData} 
-                      basinMap={basinMap} 
-                      isHovering={probeVisible} 
-                    />
-                  </div>
-                  <div className="h-full min-h-0 flex flex-col bg-background">
-                    <DualFieldView
-                      derivedField={derivedField}
-                      basinMap={basinMap}
-                      derivedType={derivedType}
-                      onTypeChange={setDerivedType}
-                      probeData={probeData}
-                      primaryField={field}
-                      primaryColormap={colormap}
-                      blendMode={blendMode}
-                      blendOpacity={blendOpacity}
-                      onBlendModeChange={setBlendMode}
-                      onBlendOpacityChange={setBlendOpacity}
-                      compact={true}
-                    />
-                  </div>
-                </div>
+                  </ResizablePanel>
+                  <ResizableHandle withHandle />
+                  <ResizablePanel defaultSize={50} minSize={25}>
+                    <div className="h-full min-h-0 flex flex-col bg-background">
+                      <DualFieldView
+                        derivedField={derivedField}
+                        basinMap={basinMap}
+                        derivedType={derivedType}
+                        onTypeChange={setDerivedType}
+                        probeData={probeData}
+                        primaryField={field}
+                        primaryColormap={colormap}
+                        blendMode={blendMode}
+                        blendOpacity={blendOpacity}
+                        onBlendModeChange={setBlendMode}
+                        onBlendOpacityChange={setBlendOpacity}
+                        compact={true}
+                      />
+                    </div>
+                  </ResizablePanel>
+                </ResizablePanelGroup>
               ) : (
                 <div className="h-full flex flex-col bg-background">
                   <div className="relative flex-1 flex items-center justify-center bg-gray-950">
