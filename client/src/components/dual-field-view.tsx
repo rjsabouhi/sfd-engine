@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useState } from "react";
+import { useRef, useEffect, useCallback, useState, useMemo } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ProjectionViewFooter } from "@/components/field-footer";
@@ -139,11 +139,15 @@ export function DualFieldView({
   const [derivedValue, setDerivedValue] = useState<number | null>(null);
   const [hasUserSelectedOverlay, setHasUserSelectedOverlay] = useState(false);
 
-  // Helper to get primary field color using the selected colormap
-  const getPrimaryColor = useCallback((value: number, minVal: number, range: number): [number, number, number] => {
-    const normalized = Math.max(0, Math.min(1, (value - minVal) / range));
-    return interpolatePrimaryColor(normalized, primaryColormap);
-  }, [primaryColormap]);
+  // Helper to get primary field color - only created when blendMode is active
+  // This prevents colormap changes from triggering re-renders when blend is off
+  const blendColorHelper = useMemo(() => {
+    if (!blendMode) return null;
+    return (value: number, minVal: number, range: number): [number, number, number] => {
+      const normalized = Math.max(0, Math.min(1, (value - minVal) / range));
+      return interpolatePrimaryColor(normalized, primaryColormap);
+    };
+  }, [blendMode, primaryColormap]);
 
   const render = useCallback(() => {
     const canvas = canvasRef.current;
@@ -176,7 +180,7 @@ export function DualFieldView({
 
     // Get primary field min/max for blending
     let primaryMinVal = 0, primaryMaxVal = 1, primaryRange = 1;
-    if (blendMode && primaryField) {
+    if (blendColorHelper && primaryField) {
       primaryMinVal = Infinity;
       primaryMaxVal = -Infinity;
       for (let i = 0; i < primaryField.grid.length; i++) {
@@ -212,8 +216,8 @@ export function DualFieldView({
         }
 
         // Apply blending with primary field if enabled
-        if (blendMode && primaryField && i < primaryField.grid.length) {
-          const primaryColor = getPrimaryColor(primaryField.grid[i], primaryMinVal, primaryRange);
+        if (blendColorHelper && primaryField && i < primaryField.grid.length) {
+          const primaryColor = blendColorHelper(primaryField.grid[i], primaryMinVal, primaryRange);
           const blended = blendColors(primaryColor, overlayColor, blendOpacity);
           data[pixelIdx] = blended[0];
           data[pixelIdx + 1] = blended[1];
@@ -256,8 +260,8 @@ export function DualFieldView({
       const pixelIdx = i * 4;
 
       // Apply blending with primary field if enabled
-      if (blendMode && primaryField && i < primaryField.grid.length) {
-        const primaryColor = getPrimaryColor(primaryField.grid[i], primaryMinVal, primaryRange);
+      if (blendColorHelper && primaryField && i < primaryField.grid.length) {
+        const primaryColor = blendColorHelper(primaryField.grid[i], primaryMinVal, primaryRange);
         const blended = blendColors(primaryColor, overlayColor, blendOpacity);
         data[pixelIdx] = blended[0];
         data[pixelIdx + 1] = blended[1];
@@ -271,7 +275,7 @@ export function DualFieldView({
     }
 
     ctx.putImageData(imageData, 0, 0);
-  }, [derivedField, basinMap, derivedType, blendMode, blendOpacity, primaryField, getPrimaryColor]);
+  }, [derivedField, basinMap, derivedType, blendOpacity, primaryField, blendColorHelper]);
 
   useEffect(() => {
     render();
