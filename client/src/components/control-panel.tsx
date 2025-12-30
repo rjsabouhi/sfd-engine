@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -62,6 +63,8 @@ interface ControlPanelProps {
   onExportWebM?: () => void;
   onShowDualViewChange: (show: boolean) => void;
   isExporting?: boolean;
+  perceptualSmoothing?: boolean;
+  onPerceptualSmoothingChange?: (enabled: boolean) => void;
 }
 
 interface ParameterSliderProps {
@@ -137,6 +140,8 @@ export function ControlPanel({
   onShowDualViewChange,
   varianceChange = 0,
   isExporting = false,
+  perceptualSmoothing = true,
+  onPerceptualSmoothingChange,
 }: ControlPanelProps) {
   const [coreParamsOpen, setCoreParamsOpen] = useState(true);
   const [weightsOpen, setWeightsOpen] = useState(false);

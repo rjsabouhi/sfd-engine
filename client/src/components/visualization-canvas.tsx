@@ -11,7 +11,11 @@ interface VisualizationCanvasProps {
   onClick?: (x: number, y: number, shiftKey: boolean) => void;
   perturbMode?: boolean;
   trajectoryProbePoint?: { x: number; y: number } | null;
+  perceptualSmoothing?: boolean;
 }
+
+// Temporal smoothing buffer for perceptual safety
+let lastFrameBuffer: Float32Array | null = null;
 
 const INFERNO_COLORS = [
   [0, 0, 4],
@@ -96,6 +100,7 @@ export function VisualizationCanvas({
   onClick,
   perturbMode = false,
   trajectoryProbePoint,
+  perceptualSmoothing = false,
 }: VisualizationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -126,9 +131,25 @@ export function VisualizationCanvas({
     const data = imageData.data;
     const colors = colormap === "cividis" ? CIVIDIS_COLORS : colormap === "inferno" ? INFERNO_COLORS : VIRIDIS_COLORS;
 
+    // Apply temporal smoothing if enabled (Perceptual Safety Layer)
+    let displayGrid = field.grid;
+    if (perceptualSmoothing) {
+      if (!lastFrameBuffer || lastFrameBuffer.length !== field.grid.length) {
+        lastFrameBuffer = new Float32Array(field.grid);
+      } else {
+        const alpha = 0.7; // 70% current, 30% previous
+        const smoothed = new Float32Array(field.grid.length);
+        for (let i = 0; i < field.grid.length; i++) {
+          smoothed[i] = alpha * field.grid[i] + (1 - alpha) * lastFrameBuffer[i];
+        }
+        lastFrameBuffer = smoothed;
+        displayGrid = smoothed;
+      }
+    }
+
     let minVal = Infinity, maxVal = -Infinity;
-    for (let i = 0; i < field.grid.length; i++) {
-      const v = field.grid[i];
+    for (let i = 0; i < displayGrid.length; i++) {
+      const v = displayGrid[i];
       if (isFinite(v)) {
         if (v < minVal) minVal = v;
         if (v > maxVal) maxVal = v;
@@ -140,10 +161,30 @@ export function VisualizationCanvas({
     }
     const range = maxVal - minVal || 1;
 
-    for (let i = 0; i < field.grid.length; i++) {
-      const value = field.grid[i];
-      const normalized = isFinite(value) ? (value - minVal) / range : 0.5;
-      let [r, g, b] = interpolateColor(normalized, colors);
+    // Hue shift for perceptual smoothing (slow breathing effect)
+    const hueShift = perceptualSmoothing ? Math.sin(performance.now() * 0.00015) * 0.03 : 0;
+
+    for (let i = 0; i < displayGrid.length; i++) {
+      let value = displayGrid[i];
+      let normalized = isFinite(value) ? (value - minVal) / range : 0.5;
+      
+      // Micro-texture noise to break phase-lock (Perceptual Safety)
+      if (perceptualSmoothing) {
+        const noise = (Math.random() - 0.5) * 0.005;
+        normalized = Math.max(0, Math.min(1, normalized + noise));
+      }
+      
+      // Apply hue shift
+      let adjustedNorm = Math.max(0, Math.min(1, normalized + hueShift));
+      
+      let [r, g, b] = interpolateColor(adjustedNorm, colors);
+      
+      // Gamma compression for softer contrast (Perceptual Safety)
+      if (perceptualSmoothing) {
+        r = Math.round(Math.pow(r / 255, 0.85) * 255);
+        g = Math.round(Math.pow(g / 255, 0.85) * 255);
+        b = Math.round(Math.pow(b / 255, 0.85) * 255);
+      }
       
       if (showBasins && basinMap && basinMap.labels[i] >= 0) {
         const basinId = basinMap.labels[i];
@@ -162,7 +203,7 @@ export function VisualizationCanvas({
     }
 
     ctx.putImageData(imageData, 0, 0);
-  }, [field, colormap, basinMap, showBasins]);
+  }, [field, colormap, basinMap, showBasins, perceptualSmoothing]);
 
   useEffect(() => {
     render();
