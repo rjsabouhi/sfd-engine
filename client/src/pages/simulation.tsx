@@ -12,7 +12,7 @@ import { StructuralFieldFooter } from "@/components/field-footer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye, Palette } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -689,16 +689,6 @@ export default function SimulationPage() {
                 <h4 className="text-xs font-medium">Structural Field</h4>
                 <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation</p>
               </div>
-              <Select value={colormap} onValueChange={handleColormapChange}>
-                <SelectTrigger className="h-7 w-28 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-colormap-header">
-                  <span>{colormapLabel}</span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="viridis">Viridis</SelectItem>
-                  <SelectItem value="inferno">Inferno</SelectItem>
-                  <SelectItem value="cividis">Cividis</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             
             {/* Right Pane Header: Projection View (only shown in dual view) */}
@@ -762,6 +752,29 @@ export default function SimulationPage() {
               </TooltipTrigger>
               <TooltipContent side="bottom" className="text-xs">
                 Hover over the field to see local values
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1">
+                  <Palette className="h-3 w-3 text-white/70" />
+                  <Select value={colormap} onValueChange={handleColormapChange}>
+                    <SelectTrigger 
+                      className="h-6 w-24 text-[10px] bg-transparent border-none text-white/70 hover:text-white hover:bg-white/10 focus:ring-0 focus:ring-offset-0" 
+                      data-testid="select-colormap-tools"
+                    >
+                      <span>{colormapLabel}</span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="viridis">Viridis</SelectItem>
+                      <SelectItem value="inferno">Inferno</SelectItem>
+                      <SelectItem value="cividis">Cividis</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Change field colormap
               </TooltipContent>
             </Tooltip>
             <Tooltip>
