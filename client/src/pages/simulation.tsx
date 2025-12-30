@@ -871,17 +871,21 @@ export default function SimulationPage() {
                   </TooltipContent>
                 </Tooltip>
                 {blendMode && (
-                  <div className="flex items-center gap-1.5 w-32">
-                    <Slider
-                      value={[blendOpacity]}
-                      onValueChange={([v]) => setBlendOpacity(v)}
-                      min={0}
-                      max={1}
-                      step={0.05}
-                      className="w-full"
-                      data-testid="slider-blend-opacity"
-                    />
-                    <span className="text-[9px] text-white/60 w-8">{Math.round(blendOpacity * 100)}%</span>
+                  <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-white/5 border border-white/10">
+                    <span className="text-[9px] text-white/40 font-mono">0</span>
+                    <div className="relative w-28">
+                      <Slider
+                        value={[blendOpacity]}
+                        onValueChange={([v]) => setBlendOpacity(v)}
+                        min={0}
+                        max={1}
+                        step={0.01}
+                        className="w-full [&_[role=slider]]:h-3 [&_[role=slider]]:w-3 [&_[role=slider]]:border-2 [&_[role=slider]]:border-cyan-400 [&_[role=slider]]:bg-gray-900 [&_[role=slider]]:shadow-[0_0_6px_rgba(34,211,238,0.4)] [&_.relative]:h-1.5 [&_[data-orientation=horizontal]>.bg-primary]:bg-gradient-to-r [&_[data-orientation=horizontal]>.bg-primary]:from-cyan-500 [&_[data-orientation=horizontal]>.bg-primary]:to-cyan-400"
+                        data-testid="slider-blend-opacity"
+                      />
+                    </div>
+                    <span className="text-[9px] text-white/40 font-mono">100</span>
+                    <div className="text-[10px] text-cyan-400 font-mono font-medium w-8 text-right">{Math.round(blendOpacity * 100)}%</div>
                   </div>
                 )}
               </>
