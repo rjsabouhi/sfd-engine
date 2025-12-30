@@ -215,6 +215,10 @@ export default function SimulationPage() {
   const handleReset = useCallback(() => {
     clearTemporalBuffer();
     engineRef.current?.reset();
+    // Sync UI params with engine defaults
+    if (engineRef.current) {
+      setParams(engineRef.current.getParams());
+    }
   }, []);
 
   const handleStep = useCallback(() => {

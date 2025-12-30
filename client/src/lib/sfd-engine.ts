@@ -283,6 +283,12 @@ export class SFDEngine {
   }
 
   reset(): void {
+    // Reset parameters to defaults (including mode)
+    this.params = { ...defaultParameters };
+    this.width = this.params.gridSize;
+    this.height = this.params.gridSize;
+    this.grid = new Float32Array(this.width * this.height);
+    this.tempGrid = new Float32Array(this.width * this.height);
     this.initialize();
     this.notifyUpdate();
   }
