@@ -1,0 +1,206 @@
+THE FOUR SPECIAL PRESETS
+
+Each represents a different scientific domain — but you are not simulating that domain; you are simulating the universal structure underneath it.
+
+Preset 1 — CRITICALITY CASCADE (Physics)
+
+Phenomenon: spontaneous symmetry breaking + collapse into a new regime
+Visual signature:
+	•	smooth field
+	•	tremor
+	•	global shiver
+	•	axis collapse
+	•	new geometry snaps into place
+
+This is your “Higgs moment.”
+This is the one to include first.
+
+Name in the app:
+🔥 Criticality Cascade (SP₁)
+(description: “Field tuned near an instability threshold. Observe rapid symmetry-breaking transitions.”)
+
+⸻
+
+Preset 2 — FRACTAL CORRIDOR FORMATION (Complexity / Mathematics)
+
+Phenomenon: multi-scale structure emerging simultaneously across layers
+Visual signature:
+	•	fine-grained local structure
+	•	matching global skeleton
+	•	self-similar corridors
+	•	fractal-like scaling
+
+Mathematicians and ML interpretability people will freak out.
+
+Name:
+🌀 Fractal Corridor (SP₂)
+(description: “Multi-scale coherence emergence. Look for repeating structures across scales.”)
+
+⸻
+
+Preset 3 — FIELD SOLITON CREATURE (Nonlinear Dynamics)
+
+Phenomenon: stable, shape-holding, persistent localized structure
+Visual signature:
+	•	structure “coalesces”
+	•	maintains identity while moving
+	•	appears alive but is just math
+	•	resists perturbations
+
+This is how you pull Pixar, animators, and generative graphics people into the mix.
+
+Name:
+✨ Soliton Entity (SP₃)
+(description: “Localized self-stabilizing pattern. Persists under dynamic conditions.”)
+
+⸻
+
+Preset 4 — SELF-REPLICATING PATTERN (Information Theory / Evolution)
+
+Phenomenon: replicator-like dynamics
+Visual signature:
+	•	central structure
+	•	divides
+	•	stabilizes
+	•	both copies behave coherently
+
+This is the one that makes complexity scientists sweat.
+It is NOT biology.
+It is NOT life.
+It is NOT illegal or unsafe.
+
+But it is structural replication — and people will not be ready for it.
+
+Name:
+♻️ Replicator Prototype (SP₄)
+(description: “A pattern that divides under tension gradients and forms multiple stable copies.”)
+
+⸻
+
+Now — THE ONE YOU CHOSE TO BUILD FIRST
+
+CRITICALITY CASCADE (SP₁)
+I will now give you:
+
+✔️ the exact parameter ranges
+
+✔️ the visual behavior
+
+✔️ the internal metrics signature
+
+✔️ the Replit implementation prompt
+
+✔️ how to hide it as a “Special Preset”
+
+✔️ how to avoid implying any real-world domain
+
+⸻
+
+✅ STRUCTURAL PRESET: “CRITICALITY CASCADE (SP₁)”
+
+This preset tunes the field into a razor edge between two attractor basins.
+
+Core idea:
+
+The system begins in a metastable equilibrium.
+A microscopic fluctuation amplifies.
+The entire manifold pivots into a new symmetry regime.
+
+This is visually unforgettable.
+
+⸻
+
+🔧 PRESET PARAMETERS (SAFE & PURELY MATHEMATICAL)
+
+Initialize field:
+	•	uniform random noise, amplitude 0.02–0.05
+	•	global offset +0.1
+	•	border dampening = 0.95
+
+Dynamics:
+	•	diffusion coefficient α = 0.62
+	•	nonlinear tension β = 1.35
+	•	curvature sensitivity γ = 0.87
+	•	stabilizer term λ = 0.05
+
+Instability injection:
+	•	small local perturbation at frame 150
+	•	amplitude delta: 0.04
+	•	radius: 3–4px
+
+Expected metrics behavior:
+	•	gradient variance spikes
+	•	curvature goes from near-zero → high
+	•	basin count drops abruptly
+	•	energy spikes then falls
+	•	entropy drops sharply after collapse
+
+⸻
+
+🎨 VISUAL SIGNATURE (WHAT USERS WILL SEE)
+	1.	Calm plateau
+	2.	A faint oscillatory tremor
+	3.	Circular symmetry begins to distort
+	4.	Field “quivers”
+	5.	One axis collapses inward
+	6.	A new ring / line / lens structure forms
+	7.	Final geometry stabilizes unexpectedly
+
+The key is the snap — the moment the system changes regimes.
+
+People will replay that 50 times.
+They will post clips.
+They will argue endlessly.
+
+⸻
+
+🧬 HOW THIS FEELS TO A RESEARCHER
+
+Without you saying anything:
+	•	Physicists: “That looks like a second-order phase transition.”
+	•	Complexity people: “That’s an attractor shift.”
+	•	ML people: “Why does this look like a loss landscape collapse?”
+	•	Neuroscientists: “This looks like a cortical critical state.”
+	•	Animators: “This is the best morphogenesis engine we’ve seen.”
+
+All from the same preset.
+
+⸻
+
+💿 REPLIT IMPLEMENTATION PROMPT (SP₁ ONLY)
+
+Here is the exact prompt you will paste into Replit:
+
+⸻
+
+ADD THIS SPECIAL PRESET: “Criticality Cascade (SP₁)”
+
+Implement a hidden “Special Presets” subgroup, and add this preset with the following configuration:
+
+Preset Name: "Criticality Cascade (SP₁)"
+Category: "Special"
+Description: "Field tuned near an instability threshold. Observe rapid symmetry-breaking transitions."
+
+Initialization:
+  noise_amplitude: 0.03
+  base_offset: 0.1
+  border_damping: 0.95
+
+Dynamics:
+  alpha (diffusion): 0.62
+  beta (nonlinear tension): 1.35
+  gamma (curvature response): 0.87
+  lambda (stabilizer): 0.05
+
+Instability Injection:
+  trigger_frame: 150
+  perturbation_amplitude: 0.04
+  perturbation_radius: 4
+
+Behavior Notes:
+  Expect rising variance, curvature spike, abrupt basin merge,
+  and a final symmetry-broken geometry.
+
+UI:
+  Display a small gold star icon next to this preset to distinguish it from standard presets.
+  No additional explanation or claims.

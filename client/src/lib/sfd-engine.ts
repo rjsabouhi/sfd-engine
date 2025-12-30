@@ -345,6 +345,212 @@ export class SFDEngine {
     this.ringBufferIndex = (this.ringBufferIndex + 1) % this.ringBufferSize;
   }
 
+  // Criticality Cascade (SP₁): Field tuned near instability threshold
+  private updateCriticalityStep(): void {
+    const alpha = 0.62;  // diffusion
+    const beta = 1.35;   // nonlinear tension
+    const gamma = 0.87;  // curvature response
+    const lambda = 0.05; // stabilizer
+    
+    // Inject instability at frame 150
+    if (this.step === 150) {
+      const cx = Math.floor(this.width / 2);
+      const cy = Math.floor(this.height / 2);
+      const radius = 4;
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          if (dx*dx + dy*dy <= radius*radius) {
+            const x = cx + dx;
+            const y = cy + dy;
+            if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+              this.grid[y * this.width + x] += 0.04;
+            }
+          }
+        }
+      }
+    }
+
+    for (let y = 1; y < this.height - 1; y++) {
+      for (let x = 1; x < this.width - 1; x++) {
+        const idx = y * this.width + x;
+        const value = this.grid[idx];
+        
+        // Laplacian (diffusion)
+        const laplacian = this.grid[idx - 1] + this.grid[idx + 1] + 
+                          this.grid[idx - this.width] + this.grid[idx + this.width] - 4 * value;
+        
+        // Gradient magnitude (tension)
+        const gx = (this.grid[idx + 1] - this.grid[idx - 1]) / 2;
+        const gy = (this.grid[idx + this.width] - this.grid[idx - this.width]) / 2;
+        const gradMag = Math.sqrt(gx*gx + gy*gy);
+        
+        // Nonlinear tension term
+        const tension = -beta * gradMag * Math.tanh(gradMag);
+        
+        // Curvature response
+        const curvature = gamma * laplacian;
+        
+        // Stabilizer
+        const stabilizer = -lambda * value * value * value;
+        
+        // Update
+        const delta = alpha * laplacian + tension + curvature + stabilizer;
+        this.tempGrid[idx] = value + this.params.dt * delta;
+      }
+    }
+    
+    // Border damping
+    for (let x = 0; x < this.width; x++) {
+      this.tempGrid[x] *= 0.95;
+      this.tempGrid[(this.height - 1) * this.width + x] *= 0.95;
+    }
+    for (let y = 0; y < this.height; y++) {
+      this.tempGrid[y * this.width] *= 0.95;
+      this.tempGrid[y * this.width + this.width - 1] *= 0.95;
+    }
+
+    const temp = this.grid;
+    this.grid = this.tempGrid;
+    this.tempGrid = temp;
+  }
+
+  // Fractal Corridor (SP₂): Multi-scale coherence emergence
+  private updateFractalStep(): void {
+    const scales = [1, 2, 4, 8];
+    
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        const idx = y * this.width + x;
+        let acc = 0;
+        let weight = 0;
+        
+        // Multi-scale sampling
+        for (const scale of scales) {
+          const samples = [
+            this.getValue(x + scale, y),
+            this.getValue(x - scale, y),
+            this.getValue(x, y + scale),
+            this.getValue(x, y - scale),
+            this.getValue(x + scale, y + scale),
+            this.getValue(x - scale, y - scale),
+          ];
+          
+          const scaleWeight = 1 / scale;
+          for (const s of samples) {
+            acc += s * scaleWeight;
+            weight += scaleWeight;
+          }
+        }
+        
+        const multiScaleMean = acc / weight;
+        const current = this.grid[idx];
+        
+        // Fractal coupling
+        const alpha = 0.12;
+        const fractalTerm = Math.sin(multiScaleMean * Math.PI * 2) * 0.1;
+        
+        this.tempGrid[idx] = current + alpha * (multiScaleMean - current) + fractalTerm;
+      }
+    }
+
+    const temp = this.grid;
+    this.grid = this.tempGrid;
+    this.tempGrid = temp;
+  }
+
+  // Soliton Entity (SP₃): Stable localized self-stabilizing pattern
+  private updateSolitonStep(): void {
+    const sigma = 2.0;
+    const attractorStrength = 6.0;
+    
+    for (let y = 1; y < this.height - 1; y++) {
+      for (let x = 1; x < this.width - 1; x++) {
+        const idx = y * this.width + x;
+        const value = this.grid[idx];
+        
+        // Gaussian-weighted local mean
+        let acc = 0;
+        let weight = 0;
+        for (let dy = -3; dy <= 3; dy++) {
+          for (let dx = -3; dx <= 3; dx++) {
+            const d2 = dx*dx + dy*dy;
+            const w = Math.exp(-d2 / (2 * sigma * sigma));
+            acc += this.getValue(x + dx, y + dy) * w;
+            weight += w;
+          }
+        }
+        const localMean = acc / weight;
+        
+        // Soliton stabilization: resist deviation from local structure
+        const deviation = value - localMean;
+        const stabilizer = -attractorStrength * Math.tanh(deviation * 3);
+        
+        // Weak diffusion to maintain cohesion
+        const laplacian = this.computeLaplacian(x, y);
+        const diffusion = 0.3 * laplacian;
+        
+        // Nonlinear self-focusing
+        const focusing = 0.15 * value * (1 - value * value);
+        
+        const delta = diffusion + stabilizer + focusing;
+        this.tempGrid[idx] = Math.tanh(value + this.params.dt * delta);
+      }
+    }
+
+    const temp = this.grid;
+    this.grid = this.tempGrid;
+    this.tempGrid = temp;
+  }
+
+  // Replicator Prototype (SP₄): Pattern that divides under tension gradients
+  private updateReplicatorStep(): void {
+    const tensionThreshold = 0.15;
+    const divisionStrength = 0.08;
+    
+    for (let y = 1; y < this.height - 1; y++) {
+      for (let x = 1; x < this.width - 1; x++) {
+        const idx = y * this.width + x;
+        const value = this.grid[idx];
+        
+        // Compute tension (gradient magnitude)
+        const gx = (this.grid[idx + 1] - this.grid[idx - 1]) / 2;
+        const gy = (this.grid[idx + this.width] - this.grid[idx - this.width]) / 2;
+        const tension = Math.sqrt(gx*gx + gy*gy);
+        
+        // Local mean for cohesion
+        const localMean = this.computeLocalMean(x, y);
+        
+        // Division dynamics: high tension causes structure to split
+        let delta = 0;
+        
+        if (tension > tensionThreshold) {
+          // Push away from gradient direction (causes splitting)
+          const gradAngle = Math.atan2(gy, gx);
+          const splitX = Math.cos(gradAngle + Math.PI / 2);
+          const splitY = Math.sin(gradAngle + Math.PI / 2);
+          
+          const neighbor1 = this.getValue(x + Math.round(splitX * 2), y + Math.round(splitY * 2));
+          const neighbor2 = this.getValue(x - Math.round(splitX * 2), y - Math.round(splitY * 2));
+          
+          delta = divisionStrength * (neighbor1 + neighbor2 - 2 * value);
+        }
+        
+        // Cohesion toward local mean
+        const cohesion = 0.1 * (localMean - value);
+        
+        // Weak diffusion
+        const laplacian = this.computeLaplacian(x, y);
+        const diffusion = 0.2 * laplacian;
+        
+        this.tempGrid[idx] = Math.tanh(value + this.params.dt * (delta + cohesion + diffusion));
+      }
+    }
+
+    const temp = this.grid;
+    this.grid = this.tempGrid;
+    this.tempGrid = temp;
+  }
+
   // Quasi-Crystal Mode: Symbolic aperiodic tiling with emergent radial symmetry
   private updateQuasiCrystalStep(): void {
     // Rotational basis vectors (5-fold symmetry)
@@ -411,9 +617,26 @@ export class SFDEngine {
   private updateStep(): void {
     this.saveToRingBuffer();
     
-    // Check for quasicrystal mode
-    if (this.params.mode === "quasicrystal") {
-      this.updateQuasiCrystalStep();
+    // Check for special modes
+    const specialModes = ["quasicrystal", "criticality", "fractal", "soliton", "replicator"];
+    if (specialModes.includes(this.params.mode)) {
+      switch (this.params.mode) {
+        case "quasicrystal":
+          this.updateQuasiCrystalStep();
+          break;
+        case "criticality":
+          this.updateCriticalityStep();
+          break;
+        case "fractal":
+          this.updateFractalStep();
+          break;
+        case "soliton":
+          this.updateSolitonStep();
+          break;
+        case "replicator":
+          this.updateReplicatorStep();
+          break;
+      }
       this.step++;
       this.detectEvents();
       if (this.step - this.lastBasinMapStep >= this.basinMapUpdateInterval) {
