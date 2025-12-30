@@ -199,6 +199,11 @@ export default function SimulationPage() {
   const handleParamsChange = useCallback((newParams: Partial<SimulationParameters>) => {
     setParams((prev) => {
       const updated = { ...prev, ...newParams };
+      // Clear derived field when mode changes to prevent stale rendering
+      if (newParams.mode !== undefined && newParams.mode !== prev.mode) {
+        setDerivedField(null);
+        setBasinMap(null);
+      }
       engineRef.current?.setParams(newParams);
       return updated;
     });

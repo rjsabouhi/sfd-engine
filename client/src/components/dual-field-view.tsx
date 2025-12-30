@@ -155,6 +155,12 @@ export function DualFieldView({
 
     setContainerSize({ width: container.clientWidth, height: container.clientHeight });
 
+    // Clear canvas before any early returns to prevent stale content
+    const clearCanvas = () => {
+      ctx.fillStyle = "#0a0a0a";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    };
+
     // Helper to blend two colors
     const blendColors = (
       primary: [number, number, number], 
@@ -182,7 +188,10 @@ export function DualFieldView({
     }
 
     if (derivedType === "basins") {
-      if (!basinMap) return;
+      if (!basinMap) {
+        clearCanvas();
+        return;
+      }
       
       canvas.width = basinMap.width;
       canvas.height = basinMap.height;
@@ -221,7 +230,10 @@ export function DualFieldView({
       return;
     }
 
-    if (!derivedField) return;
+    if (!derivedField) {
+      clearCanvas();
+      return;
+    }
 
     canvas.width = derivedField.width;
     canvas.height = derivedField.height;
