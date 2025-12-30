@@ -828,7 +828,6 @@ export default function SimulationPage() {
             {/* Layers and Blend - only visible in dual view mode */}
             {showDualView && (
               <>
-                <div className="w-px h-5 bg-white/30 shrink-0" />
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex items-center gap-1">
