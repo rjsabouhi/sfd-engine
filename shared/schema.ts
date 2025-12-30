@@ -13,6 +13,7 @@ export const simulationParametersSchema = z.object({
   wC: z.number().min(0).max(5).default(1.2),
   wA: z.number().min(0).max(5).default(2.0),
   wR: z.number().min(0).max(5).default(0.5),
+  mode: z.enum(["standard", "quasicrystal"]).default("standard"),
 });
 
 export type SimulationParameters = z.infer<typeof simulationParametersSchema>;
@@ -30,6 +31,7 @@ export const defaultParameters: SimulationParameters = {
   wC: 1.2,
   wA: 2.0,
   wR: 0.5,
+  mode: "standard",
 };
 
 export const mobileParameters: SimulationParameters = {
@@ -45,6 +47,7 @@ export const mobileParameters: SimulationParameters = {
   wC: 1.2,
   wA: 2.0,
   wR: 0.5,
+  mode: "standard",
 };
 
 export interface SimulationState {
@@ -221,6 +224,16 @@ export const structuralPresets: Record<string, Partial<SimulationParameters>> = 
     wC: 1.8,
     wA: 0.5,
     wR: 0.8,
+  },
+  "quasicrystal": {
+    mode: "quasicrystal",
+    dt: 0.05,
+    curvatureGain: 2.0,
+    wK: 1.0,
+    wT: 0.8,
+    wC: 1.2,
+    wA: 2.0,
+    wR: 0.5,
   },
 };
 

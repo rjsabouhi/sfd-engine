@@ -13,6 +13,7 @@ const presetLabels: Record<string, string> = {
   "transition-edge": "Transition Edge",
   "entropic-dispersion": "Entropic Dispersion Phase",
   "post-cooling": "Post-Cooling Phase",
+  "quasicrystal": "Quasi-Crystal Mode",
 };
 
 export function PresetMenu({ onApply }: PresetMenuProps) {

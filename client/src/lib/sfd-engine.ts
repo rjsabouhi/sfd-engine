@@ -345,8 +345,87 @@ export class SFDEngine {
     this.ringBufferIndex = (this.ringBufferIndex + 1) % this.ringBufferSize;
   }
 
+  // Quasi-Crystal Mode: Symbolic aperiodic tiling with emergent radial symmetry
+  private updateQuasiCrystalStep(): void {
+    // Rotational basis vectors (5-fold symmetry)
+    const angles = [0, Math.PI/5, 2*Math.PI/5, 3*Math.PI/5, 4*Math.PI/5];
+    
+    // Slow global rotation drift (symbolic)
+    const drift = 0.0008 * Math.sin(this.step * 0.0003);
+
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        const i = y * this.width + x;
+
+        let acc = 0;
+        let totalWeight = 0;
+
+        // Radial distance from center
+        const dx = x - this.width / 2;
+        const dy = y - this.height / 2;
+        const r = Math.sqrt(dx*dx + dy*dy) + 1e-6;
+
+        // Angle relative to center
+        let theta = Math.atan2(dy, dx);
+
+        // Apply global drift
+        theta += drift;
+
+        // Aperiodic rotational sampling
+        for (let k = 0; k < angles.length; k++) {
+          const a = theta + angles[k];
+
+          const sx = Math.floor(x + Math.cos(a) * 2);
+          const sy = Math.floor(y + Math.sin(a) * 2);
+
+          if (sx >= 0 && sy >= 0 && sx < this.width && sy < this.height) {
+            const j = sy * this.width + sx;
+            const w = 1 / (1 + Math.abs(a)); // Symbolic angular weight
+            acc += this.grid[j] * w;
+            totalWeight += w;
+          }
+        }
+
+        // Local relaxation toward aperiodic order
+        const local = acc / totalWeight;
+        const current = this.grid[i];
+
+        const alpha = 0.14; // Structural relaxation rate
+        let newValue = current + alpha * (local - current);
+
+        // Edge stabilization to prevent collapse
+        if (r > this.width * 0.47) {
+          newValue *= 0.95;
+        }
+
+        this.tempGrid[i] = newValue;
+      }
+    }
+
+    // Swap buffers
+    const temp = this.grid;
+    this.grid = this.tempGrid;
+    this.tempGrid = temp;
+  }
+
   private updateStep(): void {
     this.saveToRingBuffer();
+    
+    // Check for quasicrystal mode
+    if (this.params.mode === "quasicrystal") {
+      this.updateQuasiCrystalStep();
+      this.step++;
+      this.detectEvents();
+      if (this.step - this.lastBasinMapStep >= this.basinMapUpdateInterval) {
+        this.updateBasinMap();
+        this.lastBasinMapStep = this.step;
+      }
+      if (this.step - this.lastSignatureCacheStep >= this.signatureCacheInterval) {
+        this.cachedSignature = this.computeStructuralSignature();
+        this.lastSignatureCacheStep = this.step;
+      }
+      return;
+    }
     
     const { dt, curvatureGain, couplingWeight, attractorStrength, redistributionRate, wK, wT, wC, wA, wR } = this.params;
 
