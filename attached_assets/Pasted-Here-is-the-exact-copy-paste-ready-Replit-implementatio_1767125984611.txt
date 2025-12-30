@@ -1,0 +1,200 @@
+Here is the exact, copy-paste-ready Replit implementation prompt you will give to your Replit agent.
+This will add the Smart View Router (SVR) system, auto-select optimal projection layers per preset, respect user overrides, and integrate cleanly with your existing UI.
+
+Paste this exactly as written into Replit:
+
+⸻
+
+✅ REPLIT IMPLEMENTATION PROMPT — SMART VIEW ROUTER (SVR)
+
+(Copy–paste into Replit exactly as-is.)
+
+Implement the Smart View Router (SVR) system into the Structural Field Dynamics App.
+This feature automatically selects the optimal Projection View layer + blend mode for each System Behavior Preset, unless the user manually overrides it.
+
+⸻
+
+1. Create the Preset → Optimal Layer Map
+
+Add a new file:
+
+/src/config/smartViewMap.js
+
+With the following structure:
+
+export const SMART_VIEW_MAP = {
+  "baseline": {
+    defaultLayer: "curvature",
+    defaultBlend: 0.4
+  },
+  "stabilized_crystal": {
+    defaultLayer: "curvature",
+    defaultBlend: 0.35
+  },
+  "fluidic_phase": {
+    defaultLayer: "gradient",
+    defaultBlend: 0.5
+  },
+  "sp2_lattice": {
+    defaultLayer: "curvature",
+    defaultBlend: 0.5
+  },
+  "sp3_cosmic_web": {
+    defaultLayer: "criticality",
+    defaultBlend: 0.6
+  },
+  "sp4_nebula": {
+    defaultLayer: "curvature",
+    defaultBlend: 0.5
+  },
+  "sp5_growth": {
+    defaultLayer: "gradient",
+    defaultBlend: 0.45
+  }
+};
+
+Feel free to add any missing presets or adjust keys to match your codebase naming scheme.
+
+⸻
+
+2. Add Smart View Router Logic
+
+In the component that handles Preset Selection
+(usually something like PresetControls.js or SimulationControls.svelte depending on your architecture):
+
+Add:
+
+import { SMART_VIEW_MAP } from "../config/smartViewMap";
+
+// tracks whether user manually changed projection layer
+let userOverrideActive = false;
+
+export function onUserChangeProjectionLayer() {
+    userOverrideActive = true;
+}
+
+export function applySmartViewRouter(presetName, setLayer, setBlend) {
+    if (userOverrideActive) return; // user takes precedence
+
+    const cfg = SMART_VIEW_MAP[presetName];
+    if (!cfg) return; // no smart config for this preset
+
+    setLayer(cfg.defaultLayer);
+    setBlend(cfg.defaultBlend);
+
+    // Optionally show subtle UI confirmation
+    if (window?.notifyUser) {
+        window.notifyUser(`Optimal View Loaded: ${cfg.defaultLayer}`);
+    }
+}
+
+
+⸻
+
+3. Invoke the SVR When a Preset Is Selected
+
+Wherever the preset selection function fires:
+
+function onPresetSelect(presetName) {
+    loadPresetParameters(presetName);
+
+    // APPLY SMART VIEW ROUTER
+    applySmartViewRouter(
+        presetName,
+        (layer) => projectionLayer.set(layer),
+        (blend) => projectionBlend.set(blend)
+    );
+
+    userOverrideActive = false; // reset for next preset
+}
+
+
+⸻
+
+4. Add Listener for User Override
+
+Wherever projection layer controls exist:
+
+function onLayerDropdownChange(newLayer) {
+    projectionLayer.set(newLayer);
+    onUserChangeProjectionLayer();
+}
+
+function onBlendSliderChange(value) {
+    projectionBlend.set(value);
+    onUserChangeProjectionLayer();
+}
+
+This ensures manual user changes disable SVR until a new preset is selected.
+
+⸻
+
+5. Optional UI Improvement (Add notification)
+
+Add a tiny global notifier (if you don’t already have one):
+
+window.notifyUser = (msg) => {
+    const el = document.createElement("div");
+    el.className = "toast";
+    el.innerText = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2000);
+};
+
+CSS:
+
+.toast {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(40,40,40,0.9);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    opacity: 0;
+    animation: fadeInOut 2s forwards;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+
+⸻
+
+6. SVR Operating Principles (Internal Notes for Replit)
+	•	SVR runs only when presets are selected
+	•	User overrides always take priority
+	•	SVR never fires during mid-simulation adjustments
+	•	SVR must not introduce randomness
+	•	All behavior must be deterministic and controlled
+
+⸻
+
+7. Final Integration Checklist
+
+Replit should ensure:
+
+✔ SMART_VIEW_MAP loads correctly
+✔ All preset names match the internal preset registry
+✔ Layer dropdown + blend slider call onUserChangeProjectionLayer()
+✔ applySmartViewRouter() runs ONCE at preset load
+✔ Notifications only appear if enabled
+
+⸻
+
+END OF PROMPT
+
+⸻
+
+If you want, I can also generate:
+	•	A dynamic SVR version (reacts to field metrics in real time)
+	•	Preset grouping logic
+	•	A machine-learning-based SVR (overkill for MVP)
+	•	A UI panel for editing Smart View mappings
+
+Just tell me “Next version.”

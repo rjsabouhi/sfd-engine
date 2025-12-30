@@ -34,6 +34,7 @@ import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
 import { getStatusLine, computeFieldState, getFieldStateLabel, type ReactiveEvents, type SimulationState as LanguageSimState, type FieldState } from "@/lib/language";
 import { exportPNGSnapshot, exportAnimationGIF, exportSimulationData, exportMetricsLog, exportStateSnapshot, exportSettingsJSON, exportEventLog, saveConfiguration, loadConfiguration, exportNumPyArray, exportBatchSpec, exportPythonScript, exportOperatorContributions, exportLayersSeparate, exportFullArchive, exportVideoWebM } from "@/lib/export-utils";
+import type { SmartViewConfig } from "@/config/smart-view-map";
 
 export default function SimulationPage() {
   const isMobile = useIsMobile();
@@ -405,6 +406,22 @@ export default function SimulationPage() {
       return newValue;
     });
   }, [derivedType]);
+
+  // Smart View Router - automatically select optimal layer/blend for presets
+  const handleSmartViewApply = useCallback((config: SmartViewConfig) => {
+    setDerivedType(config.defaultLayer);
+    setBlendOpacity(config.defaultBlend);
+    setBlendMode(config.enableBlend);
+    setHasUserSelectedOverlay(false);
+    
+    if (engineRef.current) {
+      if (config.defaultLayer === "basins") {
+        setBasinMap(engineRef.current.getBasinMap());
+      } else {
+        setDerivedField(engineRef.current.computeDerivedField(config.defaultLayer));
+      }
+    }
+  }, []);
 
   // New MVP feature handlers
   const handleFieldClick = useCallback((x: number, y: number, shiftKey: boolean) => {
@@ -835,7 +852,7 @@ export default function SimulationPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setBlendMode(!blendMode)}
+                      onClick={() => { setHasUserSelectedOverlay(true); setBlendMode(!blendMode); }}
                       data-testid="button-blend-mode"
                       className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${blendMode ? "bg-white/20 text-white" : ""}`}
                     >
@@ -853,7 +870,7 @@ export default function SimulationPage() {
                     <div className="relative w-28">
                       <Slider
                         value={[blendOpacity]}
-                        onValueChange={([v]) => setBlendOpacity(v)}
+                        onValueChange={([v]) => { setHasUserSelectedOverlay(true); setBlendOpacity(v); }}
                         min={0}
                         max={1}
                         step={0.01}
@@ -1098,6 +1115,8 @@ export default function SimulationPage() {
                 onShowDualViewChange={handleToggleDualView}
                 varianceChange={varianceChange}
                 isExporting={isExporting}
+                onSmartViewApply={handleSmartViewApply}
+                userOverrideActive={hasUserSelectedOverlay}
               />
         </aside>
       </div>

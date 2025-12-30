@@ -14,6 +14,7 @@ import { OperatorSensitivity } from "./operator-sensitivity";
 import { StructuralSignatureBar } from "./structural-signature";
 import { EventLog } from "./event-log";
 import { PresetMenu } from "./preset-menu";
+import type { SmartViewConfig } from "@/config/smart-view-map";
 import { LegacyRegimeDisplay } from "./regime-display";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, modeOptions, detectRegime, toLanguageMode } from "@/lib/interpretation-modes";
@@ -65,6 +66,8 @@ interface ControlPanelProps {
   isExporting?: boolean;
   perceptualSmoothing?: boolean;
   onPerceptualSmoothingChange?: (enabled: boolean) => void;
+  onSmartViewApply?: (config: SmartViewConfig) => void;
+  userOverrideActive?: boolean;
 }
 
 interface ParameterSliderProps {
@@ -142,6 +145,8 @@ export function ControlPanel({
   isExporting = false,
   perceptualSmoothing = true,
   onPerceptualSmoothingChange,
+  onSmartViewApply,
+  userOverrideActive = false,
 }: ControlPanelProps) {
   const [coreParamsOpen, setCoreParamsOpen] = useState(true);
   const [weightsOpen, setWeightsOpen] = useState(false);
@@ -269,7 +274,11 @@ export function ControlPanel({
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent className="pt-2">
-                <PresetMenu onApply={onParamsChange} />
+                <PresetMenu 
+                  onApply={onParamsChange} 
+                  onSmartViewApply={onSmartViewApply}
+                  userOverrideActive={userOverrideActive}
+                />
               </CollapsibleContent>
             </Collapsible>
 
