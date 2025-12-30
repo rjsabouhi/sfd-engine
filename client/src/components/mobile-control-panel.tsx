@@ -34,8 +34,8 @@ function ParameterSlider({ label, value, min, max, step, onChange, testId }: Par
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <Label className="text-sm">{label}</Label>
-        <span className="text-sm font-mono tabular-nums text-muted-foreground">
+        <Label className="text-sm text-white/90">{label}</Label>
+        <span className="text-sm font-mono tabular-nums text-white/60">
           {value.toFixed(2)}
         </span>
       </div>
@@ -66,35 +66,35 @@ export function MobileControlPanel({
   const modeLabels = getModeLabels(interpretationMode);
 
   return (
-    <div className="space-y-4 pb-4">
-      <div className="space-y-2 pb-3 border-b border-border">
-        <h3 className="text-base font-semibold">Interpretation Mode</h3>
+    <div className="space-y-4 pb-8">
+      <div className="space-y-2 pb-3 border-b border-white/10">
+        <h3 className="text-base font-semibold text-white">Interpretation Mode</h3>
         <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
-          <SelectTrigger className="h-10" data-testid="select-interpretation-mode-mobile">
+          <SelectTrigger className="h-10 bg-white/5 border-white/10 text-white" data-testid="select-interpretation-mode-mobile">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-gray-800 border-white/10">
             {modeOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+              <SelectItem key={option.value} value={option.value} className="text-white focus:bg-white/10">
                 {option.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <p className="text-sm text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
+        <p className="text-sm text-white/60 leading-relaxed">{modeLabels.subtitle}</p>
       </div>
 
 
       <Collapsible open={coreOpen} onOpenChange={setCoreOpen}>
-        <Card>
+        <Card className="bg-white/5 border-white/10">
           <CollapsibleTrigger asChild>
             <CardHeader className="pb-3 cursor-pointer" data-testid="button-toggle-core-mobile">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Core Parameters</CardTitle>
+                <CardTitle className="text-base text-white">Core Parameters</CardTitle>
                 {coreOpen ? (
-                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                  <ChevronUp className="h-5 w-5 text-white/60" />
                 ) : (
-                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  <ChevronDown className="h-5 w-5 text-white/60" />
                 )}
               </div>
             </CardHeader>
@@ -143,15 +143,15 @@ export function MobileControlPanel({
       </Collapsible>
 
       <Collapsible open={operatorsOpen} onOpenChange={setOperatorsOpen}>
-        <Card>
+        <Card className="bg-white/5 border-white/10">
           <CollapsibleTrigger asChild>
             <CardHeader className="pb-3 cursor-pointer" data-testid="button-toggle-operators-mobile">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Operator Weights</CardTitle>
+                <CardTitle className="text-base text-white">Operator Weights</CardTitle>
                 {operatorsOpen ? (
-                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                  <ChevronUp className="h-5 w-5 text-white/60" />
                 ) : (
-                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  <ChevronDown className="h-5 w-5 text-white/60" />
                 )}
               </div>
             </CardHeader>
@@ -200,8 +200,8 @@ export function MobileControlPanel({
       </Collapsible>
 
       <Button
-        variant="secondary"
-        className="w-full h-12"
+        variant="outline"
+        className="w-full h-12 bg-white/5 border-white/10 text-white hover:bg-white/10"
         onClick={() => onParamsChange(mobileParameters)}
         data-testid="button-reset-params-mobile"
       >

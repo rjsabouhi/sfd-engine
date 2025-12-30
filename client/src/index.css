@@ -363,3 +363,17 @@
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
 }
+
+/* iOS Safe Area utilities */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0);
+}
+.pl-safe {
+  padding-left: env(safe-area-inset-left, 0);
+}
+.pr-safe {
+  padding-right: env(safe-area-inset-right, 0);
+}

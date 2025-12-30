@@ -30,12 +30,12 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { SimulationParameters, SimulationState, FieldData, ProbeData, OperatorContributions, StructuralSignature, StructuralEvent, DerivedField, BasinMap, TrendMetrics } from "@shared/schema";
-import { defaultParameters, mobileParameters } from "@shared/schema";
+import { defaultParameters, mobileParameters, structuralPresets } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
 import { getStatusLine, computeFieldState, getFieldStateLabel, type ReactiveEvents, type SimulationState as LanguageSimState, type FieldState } from "@/lib/language";
 import { exportPNGSnapshot, exportAnimationGIF, exportSimulationData, exportMetricsLog, exportStateSnapshot, exportSettingsJSON, exportEventLog, saveConfiguration, loadConfiguration, exportNumPyArray, exportBatchSpec, exportPythonScript, exportOperatorContributions, exportLayersSeparate, exportFullArchive, exportVideoWebM } from "@/lib/export-utils";
-import type { SmartViewConfig } from "@/config/smart-view-map";
+import { getSmartViewConfig, type SmartViewConfig } from "@/config/smart-view-map";
 
 export default function SimulationPage() {
   const isMobile = useIsMobile();
@@ -531,131 +531,193 @@ export default function SimulationPage() {
   );
 
   if (isMobile) {
-    return (
-      <div className="flex flex-col h-screen bg-background">
-        <header className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-card/50">
-          <div className="flex items-center gap-2">
-            <img src={sfdLogo} alt="SFD Engine" className="w-8 h-8 rounded-md" />
-            <div>
-              <h1 className="text-base font-semibold leading-tight" data-testid="text-title">
-                SFD Engine
-              </h1>
-            </div>
-          </div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" data-testid="button-help-mobile">
-                <HelpCircle className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-[90vw]">
-              <DialogHeader>
-                <DialogTitle>About SFD</DialogTitle>
-                <DialogDescription className="pt-4 space-y-2 text-sm">
-                  <p>
-                    Structural Field Dynamics simulates complex adaptive systems
-                    through operator-driven field evolution.
-                  </p>
-                  <p>
-                    <strong>Operators:</strong> Curvature, Gradient-Tension,
-                    Neighbor-Coupling, Attractor-Formation, Global Redistribution
-                  </p>
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
-        </header>
+    const mobilePresets = [
+      { key: "uniform-field", label: "Uniform" },
+      { key: "high-curvature", label: "High Curve" },
+      { key: "multi-basin", label: "Multi-Basin" },
+      { key: "near-critical", label: "Critical" },
+      { key: "criticality-cascade", label: "Cascade" },
+      { key: "fractal-corridor", label: "Fractal" },
+      { key: "cosmic-web", label: "Cosmic" },
+    ];
 
-        <main className="flex-1 relative bg-gray-950 min-h-0">
+    return (
+      <div className="relative h-screen w-screen overflow-hidden bg-gray-950">
+        {/* Full-screen canvas */}
+        <div className="absolute inset-0">
           <VisualizationCanvas 
             field={field} 
             colormap={colormap} 
             basinMap={basinMap}
             perceptualSmoothing={perceptualSmoothing}
           />
-          <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
-            <span className="text-xs font-mono text-white/70" data-testid="text-step-overlay-mobile">
-              Step: {state.step.toLocaleString()}
-            </span>
-          </div>
-          {state.isRunning && (
-            <div className="absolute top-2 right-2 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-              </span>
-              <span className="text-xs font-mono text-white/70">Running</span>
-            </div>
-          )}
-        </main>
+        </div>
 
-        <footer className="border-t border-border bg-card p-3 space-y-3">
-          <div className="flex items-center gap-2">
-            {state.isRunning ? (
-              <Button onClick={handlePause} className="flex-1 h-12" data-testid="button-pause-mobile">
-                <Pause className="h-5 w-5 mr-2" />
-                Pause
-              </Button>
-            ) : (
-              <Button onClick={handlePlay} className="flex-1 h-12" data-testid="button-play-mobile">
-                <Play className="h-5 w-5 mr-2" />
-                Run Simulation
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-12 w-12"
-              onClick={handleReset}
-              data-testid="button-reset-mobile"
-            >
-              <RotateCcw className="h-5 w-5" />
-            </Button>
-            <Sheet open={controlsOpen} onOpenChange={setControlsOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-12 w-12"
-                  data-testid="button-settings-mobile"
+        {/* Floating header - minimal */}
+        <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-3 py-2 pointer-events-none z-20">
+          <div className="flex items-center gap-2 pointer-events-auto">
+            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-lg px-2.5 py-1.5">
+              <img src={sfdLogo} alt="SFD" className="w-6 h-6 rounded" />
+              <span className="text-xs font-medium text-white/90">SFD</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2 pointer-events-auto">
+            {/* Status indicator */}
+            <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg backdrop-blur-md ${state.isRunning ? 'bg-green-500/20' : 'bg-black/60'}`}>
+              {state.isRunning ? (
+                <>
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  <span className="text-xs font-mono text-green-400">Live</span>
+                </>
+              ) : (
+                <span className="text-xs font-mono text-white/60">Paused</span>
+              )}
+            </div>
+            
+            {/* Help button */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="p-2 bg-black/60 backdrop-blur-md rounded-lg" data-testid="button-help-mobile" aria-label="Help and about">
+                  <HelpCircle className="h-4 w-4 text-white/70" />
+                </button>
+              </DialogTrigger>
+              <DialogContent className="max-w-[90vw] bg-gray-900/95 backdrop-blur-xl border-white/10">
+                <DialogHeader>
+                  <DialogTitle className="text-white">About SFD Engine</DialogTitle>
+                  <DialogDescription asChild>
+                    <div className="pt-4 space-y-3 text-sm text-white/70">
+                      <span className="block">
+                        Structural Field Dynamics simulates complex adaptive systems
+                        through operator-driven field evolution.
+                      </span>
+                      <span className="block">
+                        <strong className="text-white/90">Gestures:</strong> Pinch to zoom, drag to pan, double-tap to reset view.
+                      </span>
+                      <span className="block">
+                        <strong className="text-white/90">Operators:</strong> Curvature, Gradient-Tension,
+                        Neighbor-Coupling, Attractor-Formation, Global Redistribution
+                      </span>
+                    </div>
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        {/* Floating metrics - top left under header */}
+        <div className="absolute top-14 left-3 z-20 pointer-events-none">
+          <div className="bg-black/60 backdrop-blur-md rounded-lg px-3 py-2 space-y-1">
+            <div className="flex items-center gap-3 text-[10px] font-mono">
+              <span className="text-white/50">Step</span>
+              <span className="text-white/90" data-testid="text-step-mobile">{state.step.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-3 text-[10px] font-mono">
+              <span className="text-white/50">{modeLabels.stats.energy}</span>
+              <span className="text-white/90" data-testid="text-energy-mobile">{state.energy.toFixed(2)}</span>
+            </div>
+            <div className="flex items-center gap-3 text-[10px] font-mono">
+              <span className="text-white/50">{modeLabels.stats.basins}</span>
+              <span className="text-white/90" data-testid="text-basins-mobile">{state.basinCount}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Preset chips - horizontal scroll */}
+        <div className="absolute top-14 right-3 left-24 z-20 overflow-hidden pointer-events-none">
+          <div className="overflow-x-auto scrollbar-none pointer-events-auto">
+            <div className="flex gap-1.5 pb-2">
+              {mobilePresets.map((preset) => (
+                <button
+                  key={preset.key}
+                  onClick={() => {
+                    if (structuralPresets[preset.key]) {
+                      handleParamsChange(structuralPresets[preset.key]);
+                      const smartConfig = getSmartViewConfig(preset.key);
+                      if (smartConfig) {
+                        handleSmartViewApply(smartConfig);
+                      }
+                    }
+                  }}
+                  className="flex-shrink-0 px-3 py-2.5 min-h-[44px] bg-black/60 backdrop-blur-md rounded-full text-xs font-medium text-white/80 active:bg-white/20 transition-colors"
+                  data-testid={`button-preset-${preset.key}-mobile`}
+                  aria-label={`Apply ${preset.label} preset`}
                 >
-                  <Settings2 className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[70vh] overflow-y-auto">
-                <SheetHeader className="pb-4">
-                  <SheetTitle>Settings</SheetTitle>
-                </SheetHeader>
-                <MobileControlPanel
-                  params={params}
-                  colormap={colormap}
-                  interpretationMode={interpretationMode}
-                  onParamsChange={handleParamsChange}
-                  onColormapChange={setColormap}
-                  onInterpretationModeChange={setInterpretationMode}
-                />
-              </SheetContent>
-            </Sheet>
-          </div>
-          <div className="grid grid-cols-4 gap-2 text-center">
-            <div>
-              <div className="text-xs text-muted-foreground">Step</div>
-              <div className="text-sm font-mono" data-testid="text-step-mobile">{state.step.toLocaleString()}</div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">FPS</div>
-              <div className="text-sm font-mono" data-testid="text-fps-mobile">{state.fps}</div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">{modeLabels.stats.energy}</div>
-              <div className="text-sm font-mono" data-testid="text-energy-mobile">{state.energy.toFixed(3)}</div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">{modeLabels.stats.basins}</div>
-              <div className="text-sm font-mono" data-testid="text-basins-mobile">{state.basinCount}</div>
+                  {preset.label}
+                </button>
+              ))}
             </div>
           </div>
-        </footer>
+        </div>
+
+        {/* Bottom action bar */}
+        <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none pb-safe">
+          <div className="px-4 pb-4 pt-2 pointer-events-auto">
+            {/* Main control row */}
+            <div className="flex items-center justify-center gap-3">
+              {/* Reset button */}
+              <button
+                onClick={handleReset}
+                className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center active:bg-white/20 transition-colors"
+                data-testid="button-reset-mobile"
+                aria-label="Reset simulation"
+              >
+                <RotateCcw className="h-5 w-5 text-white/80" />
+              </button>
+
+              {/* Large play/pause button */}
+              <button
+                onClick={state.isRunning ? handlePause : handlePlay}
+                className={`w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                  state.isRunning 
+                    ? 'bg-green-500/90 shadow-lg shadow-green-500/30' 
+                    : 'bg-white/90 shadow-lg shadow-white/20'
+                }`}
+                data-testid={state.isRunning ? "button-pause-mobile" : "button-play-mobile"}
+                aria-label={state.isRunning ? "Pause simulation" : "Run simulation"}
+              >
+                {state.isRunning ? (
+                  <Pause className="h-7 w-7 text-white" />
+                ) : (
+                  <Play className="h-7 w-7 text-gray-900 ml-0.5" />
+                )}
+              </button>
+
+              {/* Settings button */}
+              <Sheet open={controlsOpen} onOpenChange={setControlsOpen}>
+                <SheetTrigger asChild>
+                  <button
+                    className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center active:bg-white/20 transition-colors"
+                    data-testid="button-settings-mobile"
+                    aria-label="Open settings"
+                  >
+                    <Settings2 className="h-5 w-5 text-white/80" />
+                  </button>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="h-[75vh] bg-gray-900/95 backdrop-blur-xl border-t border-white/10 rounded-t-2xl">
+                  <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
+                  <SheetHeader className="pb-4">
+                    <SheetTitle className="text-white">Settings</SheetTitle>
+                  </SheetHeader>
+                  <div className="overflow-y-auto h-[calc(100%-4rem)]">
+                    <MobileControlPanel
+                      params={params}
+                      colormap={colormap}
+                      interpretationMode={interpretationMode}
+                      onParamsChange={handleParamsChange}
+                      onColormapChange={setColormap}
+                      onInterpretationModeChange={setInterpretationMode}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
