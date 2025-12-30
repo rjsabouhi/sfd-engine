@@ -192,17 +192,47 @@ export class SFDEngine {
     const cx = this.width / 2;
     const cy = this.height / 2;
     
-    // Initialize with random noise
-    for (let i = 0; i < this.grid.length; i++) {
-      this.grid[i] = (this.rng() - 0.5) * 0.1;
-    }
-    // Add cosine ripple from center for circular evolution
-    for (let y = 0; y < this.height; y++) {
-      for (let x = 0; x < this.width; x++) {
-        const dx = (x - cx) / this.width;
-        const dy = (y - cy) / this.height;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        this.grid[y * this.width + x] += 0.02 * Math.cos(dist * Math.PI * 2);
+    // Mode-specific initialization
+    if (this.params.mode === 'soliton') {
+      // Soliton Entity: specialized initialization with seed cluster
+      const noiseAmp = 0.02;
+      const coherenceBias = 0.44;
+      const seedDensity = 0.05;
+      const seedIntensity = 0.09;
+      
+      // Low noise background
+      for (let i = 0; i < this.grid.length; i++) {
+        this.grid[i] = (this.rng() - 0.5) * noiseAmp;
+      }
+      
+      // Create seed cluster near center for soliton formation
+      const clusterRadius = this.width * 0.15;
+      for (let y = 0; y < this.height; y++) {
+        for (let x = 0; x < this.width; x++) {
+          const dx = x - cx;
+          const dy = y - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          if (dist < clusterRadius && this.rng() < seedDensity) {
+            // Add seed intensity with coherence bias
+            const idx = y * this.width + x;
+            this.grid[idx] += seedIntensity * (1 + coherenceBias * (1 - dist / clusterRadius));
+          }
+        }
+      }
+    } else {
+      // Standard initialization for other modes
+      for (let i = 0; i < this.grid.length; i++) {
+        this.grid[i] = (this.rng() - 0.5) * 0.1;
+      }
+      // Add cosine ripple from center for circular evolution
+      for (let y = 0; y < this.height; y++) {
+        for (let x = 0; x < this.width; x++) {
+          const dx = (x - cx) / this.width;
+          const dy = (y - cy) / this.height;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          this.grid[y * this.width + x] += 0.02 * Math.cos(dist * Math.PI * 2);
+        }
       }
     }
     this.step = 0;
