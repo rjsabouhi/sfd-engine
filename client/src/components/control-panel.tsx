@@ -193,51 +193,55 @@ export function ControlPanel({
           </TabsTrigger>
         </TabsList>
 
+        {/* Persistent playback controls - always visible */}
+        <div className="px-3 py-2 border-b border-border/50 bg-background/50 shrink-0">
+          <div className="flex items-center gap-2">
+            {state.isRunning ? (
+              <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="button-pause">
+                <Pause className="h-3.5 w-3.5 mr-1.5" />
+                Pause
+              </Button>
+            ) : (
+              <Button 
+                onClick={onPlay} 
+                variant="secondary" 
+                className="flex-1 relative ring-1 ring-cyan-500/50 shadow-[0_0_12px_rgba(34,211,238,0.25)]" 
+                size="sm" 
+                data-testid="button-play"
+              >
+                <Play className="h-3.5 w-3.5 mr-1.5" />
+                Run Simulation
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => onShowDualViewChange(!showDualView)}
+              data-testid="button-dual-view"
+            >
+              <Columns2 className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onReset}
+              data-testid="button-reset"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+
         <div className="flex-1 overflow-y-auto">
           <TabsContent value="controls" className="m-0 p-3 space-y-4">
             <Collapsible open={playbackOpen} onOpenChange={setPlaybackOpen}>
               <CollapsibleTrigger asChild>
                 <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-playback">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Simulation Playback</span>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Temporal Playback</span>
                   {playbackOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent className="pt-2 space-y-3">
-                <div className="flex items-center gap-2">
-                  {state.isRunning ? (
-                    <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="button-pause">
-                      <Pause className="h-3.5 w-3.5 mr-1.5" />
-                      Pause
-                    </Button>
-                  ) : (
-                    <Button 
-                      onClick={onPlay} 
-                      variant="secondary" 
-                      className="flex-1 relative ring-1 ring-cyan-500/50 shadow-[0_0_12px_rgba(34,211,238,0.25)]" 
-                      size="sm" 
-                      data-testid="button-play"
-                    >
-                      <Play className="h-3.5 w-3.5 mr-1.5" />
-                      Run Simulation
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => onShowDualViewChange(!showDualView)}
-                    data-testid="button-dual-view"
-                  >
-                    <Columns2 className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={onReset}
-                    data-testid="button-reset"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
                 <TemporalControls
                   historyLength={historyLength}
                   currentIndex={currentHistoryIndex}
