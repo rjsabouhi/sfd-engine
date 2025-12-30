@@ -682,47 +682,7 @@ export default function SimulationPage() {
 
       <div className="flex flex-1 overflow-hidden">
         <main className="relative bg-gray-950 flex-1 min-w-0 flex flex-col">
-          {/* Unified Dual-Pane Header Ribbon */}
-          <div className="flex items-stretch border-b border-border shrink-0">
-            {/* Left Pane Header: Structural Field */}
-            <div className={`flex items-center justify-between gap-2 px-3 py-2 flex-1 ${showDualView ? 'border-r border-border' : ''}`}>
-              <div className="min-w-0">
-                <h4 className="text-xs font-medium">Structural Field</h4>
-                <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation</p>
-              </div>
-            </div>
-            
-            {/* Right Pane Header: Projection View (only shown in dual view) */}
-            {showDualView && (
-              <div className="flex items-center justify-between gap-2 px-3 py-2 flex-1">
-                <div className="min-w-0">
-                  <h4 className="text-xs font-medium">Projection View</h4>
-                  <p className="text-[10px] text-muted-foreground truncate">
-                    {OVERLAY_OPTIONS.find(o => o.value === derivedType)?.tooltip || "Select a projection mode"}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Trajectory Probe Metrics (shown when probe is active and point is set) */}
-          {trajectoryProbeActive && trajectoryProbePoint && probeData && (
-            <div className="flex items-center justify-center gap-4 px-3 py-1.5 border-b border-cyan-500/30 bg-cyan-950/20 text-[10px] font-mono shrink-0">
-              <span className="text-cyan-400 font-medium">Probe ({trajectoryProbePoint.x}, {trajectoryProbePoint.y})</span>
-              <span className="text-neutral-400"><span className="text-neutral-500">κ:</span> {probeData.curvature.toFixed(4)}</span>
-              <span className="text-neutral-400"><span className="text-neutral-500">σ²:</span> {probeData.neighborhoodVariance.toFixed(4)}</span>
-              <span className="text-neutral-400"><span className="text-neutral-500">|∇|:</span> {probeData.gradientMagnitude.toFixed(4)}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setTrajectoryProbePoint(null)}
-                className="h-5 text-[10px] ml-auto text-cyan-400"
-              >
-                Clear Probe
-              </Button>
-            </div>
-          )}
-          {/* Tools Row - above canvas (horizontally scrollable) */}
+          {/* Tools Row - at top (horizontally scrollable) */}
           <div className="relative shrink-0 border-b border-white/10 bg-gray-950">
             {/* Left fade indicator */}
             <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-gray-950 to-transparent pointer-events-none z-10" />
@@ -937,6 +897,47 @@ export default function SimulationPage() {
             />
             </div>
           </div>
+          
+          {/* Unified Dual-Pane Header Ribbon */}
+          <div className="flex items-stretch border-b border-border shrink-0">
+            {/* Left Pane Header: Structural Field */}
+            <div className={`flex items-center justify-between gap-2 px-3 py-2 flex-1 ${showDualView ? 'border-r border-border' : ''}`}>
+              <div className="min-w-0">
+                <h4 className="text-xs font-medium">Structural Field</h4>
+                <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation</p>
+              </div>
+            </div>
+            
+            {/* Right Pane Header: Projection View (only shown in dual view) */}
+            {showDualView && (
+              <div className="flex items-center justify-between gap-2 px-3 py-2 flex-1">
+                <div className="min-w-0">
+                  <h4 className="text-xs font-medium">Projection View</h4>
+                  <p className="text-[10px] text-muted-foreground truncate">
+                    {OVERLAY_OPTIONS.find(o => o.value === derivedType)?.tooltip || "Select a projection mode"}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Trajectory Probe Metrics (shown when probe is active and point is set) */}
+          {trajectoryProbeActive && trajectoryProbePoint && probeData && (
+            <div className="flex items-center justify-center gap-4 px-3 py-1.5 border-b border-cyan-500/30 bg-cyan-950/20 text-[10px] font-mono shrink-0">
+              <span className="text-cyan-400 font-medium">Probe ({trajectoryProbePoint.x}, {trajectoryProbePoint.y})</span>
+              <span className="text-neutral-400"><span className="text-neutral-500">κ:</span> {probeData.curvature.toFixed(4)}</span>
+              <span className="text-neutral-400"><span className="text-neutral-500">σ²:</span> {probeData.neighborhoodVariance.toFixed(4)}</span>
+              <span className="text-neutral-400"><span className="text-neutral-500">|∇|:</span> {probeData.gradientMagnitude.toFixed(4)}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setTrajectoryProbePoint(null)}
+                className="h-5 text-[10px] ml-auto text-cyan-400"
+              >
+                Clear Probe
+              </Button>
+            </div>
+          )}
           
           <div className="flex-1 relative">
               {showDualView ? (
