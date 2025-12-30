@@ -192,34 +192,17 @@ export class SFDEngine {
     const cx = this.width / 2;
     const cy = this.height / 2;
     
-    // Check for special mode initializations
-    if (this.params.mode === "shapemold") {
-      // Shape Mold mode: Initialize with light noise and slight center bias
-      for (let i = 0; i < this.grid.length; i++) {
-        this.grid[i] = (this.rng() - 0.5) * 0.05;
-      }
-      // Add slight radial gradient to seed the mold
-      for (let y = 0; y < this.height; y++) {
-        for (let x = 0; x < this.width; x++) {
-          const ux = x / this.width;
-          const uy = y / this.height;
-          const d = this.sdfRoseSide(ux, uy);
-          this.grid[y * this.width + x] += (d < 0 ? 0.1 : -0.02);
-        }
-      }
-    } else {
-      // Standard/Quasicrystal mode: random noise with ripple
-      for (let i = 0; i < this.grid.length; i++) {
-        this.grid[i] = (this.rng() - 0.5) * 0.1;
-      }
-      // Add cosine ripple from center for circular evolution
-      for (let y = 0; y < this.height; y++) {
-        for (let x = 0; x < this.width; x++) {
-          const dx = (x - cx) / this.width;
-          const dy = (y - cy) / this.height;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          this.grid[y * this.width + x] += 0.02 * Math.cos(dist * Math.PI * 2);
-        }
+    // Initialize with random noise
+    for (let i = 0; i < this.grid.length; i++) {
+      this.grid[i] = (this.rng() - 0.5) * 0.1;
+    }
+    // Add cosine ripple from center for circular evolution
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        const dx = (x - cx) / this.width;
+        const dy = (y - cy) / this.height;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        this.grid[y * this.width + x] += 0.02 * Math.cos(dist * Math.PI * 2);
       }
     }
     this.step = 0;
@@ -277,7 +260,6 @@ export class SFDEngine {
 
   setParams(params: Partial<SimulationParameters>): void {
     const needsResize = params.gridSize !== undefined && params.gridSize !== this.width;
-    const needsReinitialize = params.mode !== undefined && params.mode !== this.params.mode;
     this.params = { ...this.params, ...params };
     
     if (needsResize) {
@@ -285,10 +267,6 @@ export class SFDEngine {
       this.height = this.params.gridSize;
       this.grid = new Float32Array(this.width * this.height);
       this.tempGrid = new Float32Array(this.width * this.height);
-      this.initialize();
-      this.notifyUpdate();
-    } else if (needsReinitialize) {
-      // Mode change requires reinitialization with new field pattern
       this.initialize();
       this.notifyUpdate();
     } else if (params.couplingRadius !== undefined) {
@@ -367,88 +345,6 @@ export class SFDEngine {
     this.ringBufferIndex = (this.ringBufferIndex + 1) % this.ringBufferSize;
   }
 
-  // Shape Mold Mode: Procedural Rose Side-Profile Growth using SDF operators
-  // SDF - Rose Side-Profile Mold
-  private sdfRoseSide(x: number, y: number): number {
-    // Normalize input to [-1,1]
-    const px = 2.0 * x - 1.0;
-    const py = 2.0 * y - 1.0;
-
-    // Bud region
-    const bud = Math.sqrt(px * px + py * py * 1.4) - 0.33;
-
-    // Outer petal flare
-    const petal = Math.sqrt((px * 0.8) ** 2 + (py + 0.25) ** 2) - 0.55;
-
-    // Combine - union minimum
-    return Math.min(bud, petal);
-  }
-
-  private updateShapeMoldStep(): void {
-    const t = this.step;
-    const moldStrength = 1.0;
-    const curlIntensity = 0.6;
-    const rotationBias = 0.42;
-    const layerCount = 4;
-    const bloomSpeed = 0.015;
-
-    for (let y = 0; y < this.height; y++) {
-      for (let x = 0; x < this.width; x++) {
-        const idx = y * this.width + x;
-        
-        // Normalized coordinates [0,1]
-        const ux = x / this.width;
-        const uy = y / this.height;
-        
-        // Center-relative coordinates
-        const cx = x - this.width / 2;
-        const cy = y - this.height / 2;
-        const radiusNorm = Math.sqrt(cx * cx + cy * cy) / (this.width / 2);
-        const angle = Math.atan2(cy, cx);
-        
-        // Gradient components
-        const gradX = (this.getValue(x + 1, y) - this.getValue(x - 1, y)) / 2;
-        const gradY = (this.getValue(x, y + 1) - this.getValue(x, y - 1)) / 2;
-        
-        let value = this.grid[idx];
-        
-        // 1. Mold Attraction Operator - pulls field toward rose silhouette
-        const d = this.sdfRoseSide(ux, uy);
-        value += -d * moldStrength * 0.01;
-        
-        // 2. Curvature Bias Operator - creates petal curl texture
-        const curl = gradX * (-gradY) - gradY * gradX;
-        value += curl * curlIntensity * 0.1;
-        
-        // 3. Layered Unfold Operator - simulates petal blooming outward
-        const L = Math.floor(radiusNorm * layerCount);
-        value += Math.sin(t * bloomSpeed * (L + 1)) * 0.02;
-        
-        // 4. Rotational Flow Operator - adds swirling motion
-        value += Math.sin(angle * 5.0) * rotationBias * 0.01;
-        
-        // Clamp value
-        this.tempGrid[idx] = Math.max(-1, Math.min(1, value));
-      }
-    }
-
-    // Diffuse for smoothness
-    for (let y = 1; y < this.height - 1; y++) {
-      for (let x = 1; x < this.width - 1; x++) {
-        const idx = y * this.width + x;
-        const laplacian = this.tempGrid[idx - 1] + this.tempGrid[idx + 1] + 
-                         this.tempGrid[idx - this.width] + this.tempGrid[idx + this.width] - 
-                         4 * this.tempGrid[idx];
-        this.tempGrid[idx] += 0.05 * laplacian;
-      }
-    }
-
-    // Swap buffers
-    const temp = this.grid;
-    this.grid = this.tempGrid;
-    this.tempGrid = temp;
-  }
-
   // Quasi-Crystal Mode: Symbolic aperiodic tiling with emergent radial symmetry
   private updateQuasiCrystalStep(): void {
     // Rotational basis vectors (5-fold symmetry)
@@ -515,24 +411,9 @@ export class SFDEngine {
   private updateStep(): void {
     this.saveToRingBuffer();
     
-    // Check for special modes
+    // Check for quasicrystal mode
     if (this.params.mode === "quasicrystal") {
       this.updateQuasiCrystalStep();
-      this.step++;
-      this.detectEvents();
-      if (this.step - this.lastBasinMapStep >= this.basinMapUpdateInterval) {
-        this.updateBasinMap();
-        this.lastBasinMapStep = this.step;
-      }
-      if (this.step - this.lastSignatureCacheStep >= this.signatureCacheInterval) {
-        this.cachedSignature = this.computeStructuralSignature();
-        this.lastSignatureCacheStep = this.step;
-      }
-      return;
-    }
-    
-    if (this.params.mode === "shapemold") {
-      this.updateShapeMoldStep();
       this.step++;
       this.detectEvents();
       if (this.step - this.lastBasinMapStep >= this.basinMapUpdateInterval) {
