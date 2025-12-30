@@ -1,0 +1,79 @@
+{
+  name: "Botanical Growth",
+  description: "Simulated growth sequence: stem emergence, bud formation, layered bloom. Based entirely on symbolic field operators — not biological.",
+  
+  init(field, params) {
+    const { size } = field;
+    const cx = size / 2;
+    
+    // --- STEM SOURCE ---
+    for (let y = 0; y < size * 0.75; y++) {
+      field.set(cx, y, 0.12 * Math.exp(-((y - size*0.5) ** 2) / (2 * 1200)));
+    }
+    
+    // --- BUD SEED ---
+    const budY = size * 0.78;
+    for (let x = cx - 8; x <= cx + 8; x++) {
+      for (let y = budY - 8; y <= budY + 8; y++) {
+        const r = Math.hypot(x - cx, y - budY);
+        if (r < 8) field.add(x, y, 0.20 * Math.exp(-r / 5));
+      }
+    }
+    
+    field.commit();
+  },
+
+  update(field, frame, params) {
+    const { size } = field;
+    const cx = size / 2;
+    const budY = size * 0.78;
+    
+    // ===== PHASE 1: STEM RAISING (frames 0–20) =====
+    if (frame < 20) {
+      for (let y = size * 0.55; y < budY; y++) {
+        field.add(cx, y, 0.003);
+      }
+    }
+
+    // ===== PHASE 2: BUD PRESSURE + ROTATION (frames 20–45) =====
+    if (frame >= 20 && frame < 45) {
+      const angleWarp = 0.08 * Math.sin(frame * 0.15);
+      for (let x = cx - 10; x <= cx + 10; x++) {
+        for (let y = budY - 10; y <= budY + 10; y++) {
+          const dx = x - cx;
+          const dy = y - budY;
+
+          const angle = Math.atan2(dy, dx) + angleWarp;
+          const r = Math.hypot(dx, dy);
+
+          const petalPulse = Math.sin(r * 1.3 + frame * 0.2) * 0.02;
+          field.add(x, y, petalPulse);
+        }
+      }
+    }
+
+    // ===== PHASE 3: BLOOMING LAYER RELEASE (frames 45–120) =====
+    if (frame >= 45) {
+      const bloomFactor = Math.min((frame - 45) / 80, 1);
+      
+      for (let x = 0; x < size; x++) {
+        for (let y = 0; y < size; y++) {
+          const dx = x - cx;
+          const dy = y - budY;
+          const r = Math.hypot(dx, dy);
+
+          // unrolled petal lobes — rotational bloom
+          const petalCount = 7; // feels like rose layering
+          const theta = Math.atan2(dy, dx);
+          const lobe = Math.sin(theta * petalCount + r * 0.05);
+
+          const intensity = lobe * bloomFactor * 0.015 * Math.exp(-r / 60);
+          field.add(x, y, intensity);
+        }
+      }
+    }
+
+    field.diffuse(0.14);
+    field.relax(0.05);
+  }
+}

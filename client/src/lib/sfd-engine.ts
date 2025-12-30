@@ -192,17 +192,45 @@ export class SFDEngine {
     const cx = this.width / 2;
     const cy = this.height / 2;
     
-    // Initialize with random noise
-    for (let i = 0; i < this.grid.length; i++) {
-      this.grid[i] = (this.rng() - 0.5) * 0.1;
-    }
-    // Add cosine ripple from center for circular evolution
-    for (let y = 0; y < this.height; y++) {
-      for (let x = 0; x < this.width; x++) {
-        const dx = (x - cx) / this.width;
-        const dy = (y - cy) / this.height;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        this.grid[y * this.width + x] += 0.02 * Math.cos(dist * Math.PI * 2);
+    // Check for special mode initializations
+    if (this.params.mode === "botanical") {
+      // Botanical mode: Initialize with stem source and bud seed
+      for (let i = 0; i < this.grid.length; i++) {
+        this.grid[i] = (this.rng() - 0.5) * 0.02; // Lighter noise
+      }
+      
+      // Stem source - vertical energy concentration
+      for (let y = 0; y < this.height * 0.75; y++) {
+        const idx = y * this.width + Math.floor(cx);
+        this.grid[idx] += 0.12 * Math.exp(-((y - this.height * 0.5) ** 2) / (2 * 1200));
+      }
+      
+      // Bud seed - concentrated energy at top
+      const budY = this.height * 0.78;
+      for (let x = Math.floor(cx) - 8; x <= Math.floor(cx) + 8; x++) {
+        for (let y = Math.floor(budY) - 8; y <= Math.floor(budY) + 8; y++) {
+          if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+            const r = Math.hypot(x - cx, y - budY);
+            if (r < 8) {
+              const idx = y * this.width + x;
+              this.grid[idx] += 0.20 * Math.exp(-r / 5);
+            }
+          }
+        }
+      }
+    } else {
+      // Standard/Quasicrystal mode: random noise with ripple
+      for (let i = 0; i < this.grid.length; i++) {
+        this.grid[i] = (this.rng() - 0.5) * 0.1;
+      }
+      // Add cosine ripple from center for circular evolution
+      for (let y = 0; y < this.height; y++) {
+        for (let x = 0; x < this.width; x++) {
+          const dx = (x - cx) / this.width;
+          const dy = (y - cy) / this.height;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          this.grid[y * this.width + x] += 0.02 * Math.cos(dist * Math.PI * 2);
+        }
       }
     }
     this.step = 0;
@@ -260,6 +288,7 @@ export class SFDEngine {
 
   setParams(params: Partial<SimulationParameters>): void {
     const needsResize = params.gridSize !== undefined && params.gridSize !== this.width;
+    const needsReinitialize = params.mode !== undefined && params.mode !== this.params.mode;
     this.params = { ...this.params, ...params };
     
     if (needsResize) {
@@ -267,6 +296,10 @@ export class SFDEngine {
       this.height = this.params.gridSize;
       this.grid = new Float32Array(this.width * this.height);
       this.tempGrid = new Float32Array(this.width * this.height);
+      this.initialize();
+      this.notifyUpdate();
+    } else if (needsReinitialize) {
+      // Mode change requires reinitialization with new field pattern
       this.initialize();
       this.notifyUpdate();
     } else if (params.couplingRadius !== undefined) {
@@ -345,6 +378,91 @@ export class SFDEngine {
     this.ringBufferIndex = (this.ringBufferIndex + 1) % this.ringBufferSize;
   }
 
+  // Botanical Growth Mode: Simulated stem emergence, bud formation, layered bloom
+  private updateBotanicalStep(): void {
+    const cx = this.width / 2;
+    const budY = this.height * 0.78;
+    const frame = this.step;
+
+    // Phase 1: Stem Raising (frames 0-20)
+    if (frame < 20) {
+      for (let y = Math.floor(this.height * 0.55); y < budY; y++) {
+        const idx = y * this.width + Math.floor(cx);
+        this.grid[idx] += 0.003;
+      }
+    }
+
+    // Phase 2: Bud Pressure + Rotation (frames 20-45)
+    if (frame >= 20 && frame < 45) {
+      const angleWarp = 0.08 * Math.sin(frame * 0.15);
+      for (let x = Math.floor(cx) - 10; x <= Math.floor(cx) + 10; x++) {
+        for (let y = Math.floor(budY) - 10; y <= Math.floor(budY) + 10; y++) {
+          if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+            const dx = x - cx;
+            const dy = y - budY;
+            const r = Math.hypot(dx, dy);
+            const petalPulse = Math.sin(r * 1.3 + frame * 0.2) * 0.02;
+            const idx = y * this.width + x;
+            this.grid[idx] += petalPulse;
+          }
+        }
+      }
+    }
+
+    // Phase 3: Blooming Layer Release (frames 45+)
+    if (frame >= 45) {
+      const bloomFactor = Math.min((frame - 45) / 80, 1);
+      const petalCount = 7;
+
+      for (let y = 0; y < this.height; y++) {
+        for (let x = 0; x < this.width; x++) {
+          const dx = x - cx;
+          const dy = y - budY;
+          const r = Math.hypot(dx, dy);
+          const theta = Math.atan2(dy, dx);
+          const lobe = Math.sin(theta * petalCount + r * 0.05);
+          const intensity = lobe * bloomFactor * 0.015 * Math.exp(-r / 60);
+          const idx = y * this.width + x;
+          this.grid[idx] += intensity;
+        }
+      }
+    }
+
+    // Diffuse and relax
+    for (let y = 1; y < this.height - 1; y++) {
+      for (let x = 1; x < this.width - 1; x++) {
+        const idx = y * this.width + x;
+        const laplacian = this.grid[idx - 1] + this.grid[idx + 1] + 
+                         this.grid[idx - this.width] + this.grid[idx + this.width] - 
+                         4 * this.grid[idx];
+        this.tempGrid[idx] = this.grid[idx] + 0.14 * laplacian;
+      }
+    }
+
+    // Boundary copy
+    for (let x = 0; x < this.width; x++) {
+      this.tempGrid[x] = this.grid[x];
+      this.tempGrid[(this.height - 1) * this.width + x] = this.grid[(this.height - 1) * this.width + x];
+    }
+    for (let y = 0; y < this.height; y++) {
+      this.tempGrid[y * this.width] = this.grid[y * this.width];
+      this.tempGrid[y * this.width + this.width - 1] = this.grid[y * this.width + this.width - 1];
+    }
+
+    // Relax toward mean
+    let sum = 0;
+    for (let i = 0; i < this.tempGrid.length; i++) sum += this.tempGrid[i];
+    const mean = sum / this.tempGrid.length;
+    for (let i = 0; i < this.tempGrid.length; i++) {
+      this.tempGrid[i] = this.tempGrid[i] + 0.05 * (mean - this.tempGrid[i]);
+    }
+
+    // Swap buffers
+    const temp = this.grid;
+    this.grid = this.tempGrid;
+    this.tempGrid = temp;
+  }
+
   // Quasi-Crystal Mode: Symbolic aperiodic tiling with emergent radial symmetry
   private updateQuasiCrystalStep(): void {
     // Rotational basis vectors (5-fold symmetry)
@@ -411,9 +529,24 @@ export class SFDEngine {
   private updateStep(): void {
     this.saveToRingBuffer();
     
-    // Check for quasicrystal mode
+    // Check for special modes
     if (this.params.mode === "quasicrystal") {
       this.updateQuasiCrystalStep();
+      this.step++;
+      this.detectEvents();
+      if (this.step - this.lastBasinMapStep >= this.basinMapUpdateInterval) {
+        this.updateBasinMap();
+        this.lastBasinMapStep = this.step;
+      }
+      if (this.step - this.lastSignatureCacheStep >= this.signatureCacheInterval) {
+        this.cachedSignature = this.computeStructuralSignature();
+        this.lastSignatureCacheStep = this.step;
+      }
+      return;
+    }
+    
+    if (this.params.mode === "botanical") {
+      this.updateBotanicalStep();
       this.step++;
       this.detectEvents();
       if (this.step - this.lastBasinMapStep >= this.basinMapUpdateInterval) {

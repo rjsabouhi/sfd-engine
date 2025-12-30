@@ -14,6 +14,7 @@ const presetLabels: Record<string, string> = {
   "entropic-dispersion": "Entropic Dispersion Phase",
   "post-cooling": "Post-Cooling Phase",
   "quasicrystal": "Quasi-Crystal Mode",
+  "botanical": "Botanical Growth",
 };
 
 export function PresetMenu({ onApply }: PresetMenuProps) {

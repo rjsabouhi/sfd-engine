@@ -13,7 +13,7 @@ export const simulationParametersSchema = z.object({
   wC: z.number().min(0).max(5).default(1.2),
   wA: z.number().min(0).max(5).default(2.0),
   wR: z.number().min(0).max(5).default(0.5),
-  mode: z.enum(["standard", "quasicrystal"]).default("standard"),
+  mode: z.enum(["standard", "quasicrystal", "botanical"]).default("standard"),
 });
 
 export type SimulationParameters = z.infer<typeof simulationParametersSchema>;
@@ -234,6 +234,16 @@ export const structuralPresets: Record<string, Partial<SimulationParameters>> = 
     wC: 1.2,
     wA: 2.0,
     wR: 0.5,
+  },
+  "botanical": {
+    mode: "botanical",
+    dt: 0.05,
+    curvatureGain: 1.5,
+    wK: 0.8,
+    wT: 0.6,
+    wC: 1.5,
+    wA: 1.2,
+    wR: 0.4,
   },
 };
 
