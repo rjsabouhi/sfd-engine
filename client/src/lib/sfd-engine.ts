@@ -283,7 +283,13 @@ export class SFDEngine {
   }
 
   reset(): void {
-    // Reset parameters to defaults (including mode)
+    // Reinitialize the field with current parameters (keeps current preset/mode)
+    this.initialize();
+    this.notifyUpdate();
+  }
+  
+  resetToDefaults(): void {
+    // Reset parameters to absolute defaults (including mode)
     this.params = { ...defaultParameters };
     this.width = this.params.gridSize;
     this.height = this.params.gridSize;
