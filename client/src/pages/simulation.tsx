@@ -727,7 +727,7 @@ export default function SimulationPage() {
             <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-gray-950 to-transparent pointer-events-none z-10" />
             {/* Right fade indicator */}
             <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-gray-950 to-transparent pointer-events-none z-10" />
-            <div className="flex items-center gap-1.5 px-6 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
+            <div className="flex items-center gap-1.5 px-6 py-1.5 overflow-x-auto scrollbar-thin flex-nowrap">
             {/* Inspector */}
             <Tooltip>
               <TooltipTrigger asChild>
