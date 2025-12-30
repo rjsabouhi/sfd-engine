@@ -703,7 +703,7 @@ export default function SimulationPage() {
                   Inspector
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
+              <TooltipContent side="top" className="text-xs">
                 Hover over the field to see local values
               </TooltipContent>
             </Tooltip>
@@ -721,7 +721,7 @@ export default function SimulationPage() {
                   Probe
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
+              <TooltipContent side="top" className="text-xs">
                 Pin a point to track its metrics over time
               </TooltipContent>
             </Tooltip>
@@ -739,7 +739,7 @@ export default function SimulationPage() {
                   Perturb
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
+              <TooltipContent side="top" className="text-xs">
                 Click on the field to inject energy at that point
               </TooltipContent>
             </Tooltip>
@@ -757,7 +757,7 @@ export default function SimulationPage() {
                   Diagnostics
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
+              <TooltipContent side="top" className="text-xs">
                 Show real-time stability and energy metrics
               </TooltipContent>
             </Tooltip>
@@ -782,7 +782,7 @@ export default function SimulationPage() {
                   </Select>
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
+              <TooltipContent side="top" className="text-xs">
                 Change field colormap
               </TooltipContent>
             </Tooltip>
@@ -810,7 +810,7 @@ export default function SimulationPage() {
                       </Select>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs">
+                  <TooltipContent side="top" className="text-xs">
                     Select projection layer for dual view
                   </TooltipContent>
                 </Tooltip>
@@ -827,7 +827,7 @@ export default function SimulationPage() {
                       Blend
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs">
+                  <TooltipContent side="top" className="text-xs">
                     Overlay projection layer on primary field
                   </TooltipContent>
                 </Tooltip>
@@ -866,7 +866,7 @@ export default function SimulationPage() {
                   Save
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
+              <TooltipContent side="top" className="text-xs">
                 Save current settings to a file
               </TooltipContent>
             </Tooltip>
@@ -884,7 +884,7 @@ export default function SimulationPage() {
                   Load
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
+              <TooltipContent side="top" className="text-xs">
                 Load settings from a saved file
               </TooltipContent>
             </Tooltip>
