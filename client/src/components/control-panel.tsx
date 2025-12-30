@@ -457,18 +457,9 @@ export function ControlPanel({
             </Collapsible>
           </TabsContent>
 
-          <TabsContent value="export" className="m-0 p-3 space-y-3 overflow-y-auto relative bg-transparent"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(70,90,130,0.25) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(70,90,130,0.25) 1px, transparent 1px)
-              `,
-              backgroundSize: '20px 20px',
-              backgroundPosition: 'center center',
-            }}
-          >
-            <div className="text-xs font-medium text-muted-foreground relative z-10">Visual Exports</div>
-            <div className="space-y-2 relative z-10">
+          <TabsContent value="export" className="m-0 p-3 space-y-3 overflow-y-auto">
+            <div className="text-xs font-medium text-muted-foreground">Visual Exports</div>
+            <div className="space-y-2">
               <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportPNG} data-testid="button-export-png">
                 <Download className="h-3.5 w-3.5 mr-2" />
                 PNG Snapshot
@@ -485,8 +476,8 @@ export function ControlPanel({
               )}
             </div>
             
-            <div className="text-xs font-medium text-muted-foreground relative z-10">Data Exports</div>
-            <div className="space-y-2 relative z-10">
+            <div className="text-xs font-medium text-muted-foreground">Data Exports</div>
+            <div className="space-y-2">
               <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportSimulationData} data-testid="button-export-simulation-data">
                 <Download className="h-3.5 w-3.5 mr-2" />
                 Simulation Data (.csv)
@@ -515,8 +506,8 @@ export function ControlPanel({
               </Button>
             </div>
             
-            <div className="text-xs font-medium text-muted-foreground relative z-10">Research-Grade</div>
-            <div className="space-y-2 relative z-10">
+            <div className="text-xs font-medium text-muted-foreground">Research-Grade</div>
+            <div className="space-y-2">
               {onExportNumPy && (
                 <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExportNumPy} data-testid="button-export-numpy">
                   <Download className="h-3.5 w-3.5 mr-2" />
