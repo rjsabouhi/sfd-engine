@@ -1027,21 +1027,15 @@ export default function SimulationPage() {
               </div>
             </main>
         
-        {/* Metrics Panel Toggle Button */}
-        <div className="flex-none flex items-stretch">
-          <button
-            onClick={() => setMetricsPanelCollapsed(!metricsPanelCollapsed)}
-            className="w-6 bg-card border-l border-border flex items-center justify-center hover:bg-muted transition-colors"
-            data-testid="button-toggle-metrics-panel"
-            title={metricsPanelCollapsed ? "Expand metrics panel" : "Collapse metrics panel"}
-          >
-            {metricsPanelCollapsed ? (
-              <PanelRightOpen className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <PanelRightClose className="h-4 w-4 text-muted-foreground" />
-            )}
-          </button>
-        </div>
+        {/* Metrics Panel Toggle Button - subtle edge handle */}
+        <button
+          onClick={() => setMetricsPanelCollapsed(!metricsPanelCollapsed)}
+          className="group flex-none w-3 flex items-center justify-center border-l border-border hover:bg-white/5 transition-colors cursor-pointer"
+          data-testid="button-toggle-metrics-panel"
+          title={metricsPanelCollapsed ? "Expand metrics panel" : "Collapse metrics panel"}
+        >
+          <div className="w-0.5 h-8 rounded-full bg-white/10 group-hover:bg-white/30 transition-colors" />
+        </button>
         
         <aside className={`${metricsPanelCollapsed ? 'w-0 overflow-hidden' : 'w-[420px]'} flex-none border-l border-border bg-card flex flex-col overflow-hidden transition-all duration-300`}>
           <ControlPanel
