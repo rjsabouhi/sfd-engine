@@ -17,11 +17,6 @@ interface VisualizationCanvasProps {
 // Temporal smoothing buffer for perceptual safety
 let lastFrameBuffer: Float32Array | null = null;
 
-// Export function to clear the temporal smoothing buffer (call on preset change)
-export function clearTemporalBuffer(): void {
-  lastFrameBuffer = null;
-}
-
 const INFERNO_COLORS = [
   [0, 0, 4],
   [40, 11, 84],
