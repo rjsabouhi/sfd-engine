@@ -458,41 +458,66 @@ export class SFDEngine {
     this.tempGrid = temp;
   }
 
-  // Soliton Entity (SP₃): Stable localized self-stabilizing pattern
+  // Soliton Entity (SP₃): Stable localized self-stabilizing pattern with breathing and drift
   private updateSolitonStep(): void {
-    const sigma = 2.0;
-    const attractorStrength = 6.0;
+    // Enhanced parameters for soliton-like behavior
+    const alpha = 0.18;          // diffusion
+    const beta = 1.42;           // tension
+    const gamma = 0.91;          // curvature response
+    const sigma = 1.25;          // soliton feedback
+    const lambda = 0.04;         // damping
+    const breathingFreq = 0.22;  // breathing frequency
+    const breathingAmp = 0.17;   // breathing amplitude
+    const driftBias = 0.12;      // directional drift
+    const gradFollow = 0.33;     // gradient follow strength
+    
+    // Breathing oscillation based on step
+    const breathing = breathingAmp * Math.sin(this.step * breathingFreq * 0.1);
     
     for (let y = 1; y < this.height - 1; y++) {
       for (let x = 1; x < this.width - 1; x++) {
         const idx = y * this.width + x;
         const value = this.grid[idx];
         
-        // Gaussian-weighted local mean
+        // Laplacian (diffusion)
+        const laplacian = this.grid[idx - 1] + this.grid[idx + 1] + 
+                          this.grid[idx - this.width] + this.grid[idx + this.width] - 4 * value;
+        
+        // Gradient for tension and drift
+        const gx = (this.grid[idx + 1] - this.grid[idx - 1]) / 2;
+        const gy = (this.grid[idx + this.width] - this.grid[idx - this.width]) / 2;
+        const gradMag = Math.sqrt(gx*gx + gy*gy);
+        
+        // Gaussian-weighted local coherence
         let acc = 0;
         let weight = 0;
         for (let dy = -3; dy <= 3; dy++) {
           for (let dx = -3; dx <= 3; dx++) {
             const d2 = dx*dx + dy*dy;
-            const w = Math.exp(-d2 / (2 * sigma * sigma));
+            const w = Math.exp(-d2 / 8);
             acc += this.getValue(x + dx, y + dy) * w;
             weight += w;
           }
         }
         const localMean = acc / weight;
         
-        // Soliton stabilization: resist deviation from local structure
-        const deviation = value - localMean;
-        const stabilizer = -attractorStrength * Math.tanh(deviation * 3);
+        // Soliton feedback: self-stabilizing term
+        const solitonFeedback = sigma * (localMean - value) * (1 + Math.abs(value));
         
-        // Weak diffusion to maintain cohesion
-        const laplacian = this.computeLaplacian(x, y);
-        const diffusion = 0.3 * laplacian;
+        // Tension term (nonlinear)
+        const tension = -beta * gradMag * Math.tanh(gradMag * 2);
         
-        // Nonlinear self-focusing
-        const focusing = 0.15 * value * (1 - value * value);
+        // Curvature response with breathing modulation
+        const curvature = gamma * laplacian * (1 + breathing);
         
-        const delta = diffusion + stabilizer + focusing;
+        // Directional drift (follows gradient for pseudo-motility)
+        const drift = driftBias * gradFollow * (gx * 0.5 + gy * 0.5);
+        
+        // Damping stabilizer
+        const damping = -lambda * value * value * value;
+        
+        // Combined update
+        const delta = alpha * laplacian + tension + curvature + solitonFeedback + drift + damping;
         this.tempGrid[idx] = Math.tanh(value + this.params.dt * delta);
       }
     }
