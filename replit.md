@@ -68,6 +68,18 @@ Added comprehensive development/debugging tools accessible via CTRL+SHIFT+D:
 - **Frame-by-Frame Mode**: Sandbox stepping through simulation history
 - **Zero Performance Cost**: Panel only updates when visible, intervals cleared when hidden
 
+### Mobile-First App Optimization (December 30, 2024)
+Complete mobile UI redesign for app-store quality experience:
+- **Full-Screen Canvas**: Maximized visualization with floating overlays
+- **Floating Header**: Minimal logo and status indicator
+- **Live Metrics Panel**: Top-left floating display for step/energy/basins
+- **Preset Chips**: Horizontal scrollable regime selection with Smart View Router integration
+- **Large Touch Controls**: Central 64px play/pause button, 48px satellite controls
+- **Dark Settings Sheet**: Bottom sheet with dark theme styling (bg-gray-900/95)
+- **iOS Safe Areas**: CSS utilities for notched device support (pb-safe, pt-safe, etc.)
+- **Accessibility**: All icon-only buttons have aria-labels, 44px minimum touch targets
+- **Dark Theme Consistency**: All mobile components styled with white/10 borders, white/60 text
+
 ### Research-Grade Export Suite (December 29, 2024)
 Added comprehensive export capabilities for research use:
 - **Visual Exports**: PNG snapshots, GIF animations, WebM video (MediaRecorder API)
