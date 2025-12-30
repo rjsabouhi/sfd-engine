@@ -901,8 +901,8 @@ export default function SimulationPage() {
           {/* Unified Dual-Pane Header Ribbon */}
           <div className="flex items-stretch border-b border-border shrink-0">
             {/* Left Pane Header: Structural Field */}
-            <div className={`flex items-center justify-between gap-2 px-3 py-2 flex-1 ${showDualView ? 'border-r border-border' : ''}`}>
-              <div className="min-w-0">
+            <div className={`flex items-center justify-center gap-2 px-3 py-2 flex-1 ${showDualView ? 'border-r border-border' : ''}`}>
+              <div className="text-center">
                 <h4 className="text-xs font-medium">Structural Field</h4>
                 <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation</p>
               </div>
@@ -910,8 +910,8 @@ export default function SimulationPage() {
             
             {/* Right Pane Header: Projection View (only shown in dual view) */}
             {showDualView && (
-              <div className="flex items-center justify-between gap-2 px-3 py-2 flex-1">
-                <div className="min-w-0">
+              <div className="flex items-center justify-center gap-2 px-3 py-2 flex-1">
+                <div className="text-center">
                   <h4 className="text-xs font-medium">Projection View</h4>
                   <p className="text-[10px] text-muted-foreground truncate">
                     {OVERLAY_OPTIONS.find(o => o.value === derivedType)?.tooltip || "Select a projection mode"}
