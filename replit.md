@@ -78,6 +78,25 @@ Added comprehensive export capabilities for research use:
 - **Batch Spec (.json)**: Minimal parameter specification for automated testing
 - **Full Archive (.json)**: Comprehensive bundle with field, operators, events, metrics, config
 
+### Perceptual Safety Layer (December 30, 2024)
+Added visual comfort features for extended viewing sessions:
+- **Temporal Smoothing**: 70/30 blend between current and previous frames to reduce flicker
+- **Hue Breathing**: Subtle slow hue shift (breathing effect) to prevent visual phase-lock
+- **Micro-Texture Noise**: Fine-grained noise overlay to break visual monotony
+- **Gamma Compression**: 0.85 gamma for softer, more comfortable contrast
+- **Toggle Control**: Sparkles icon in tools row to enable/disable perceptual smoothing
+
+### Morphogenesis-Class Presets (December 30, 2024)
+Added four new biologically-inspired (but fully abstract) structural presets (MG-1 through MG-4):
+- **MG-1 (Morphogenetic Ghost Pattern)**: Spontaneous domain differentiation with wave boundary formation
+- **MG-2 (Filament Network Formation)**: High-tension filaments forming branching networks
+- **MG-3 (Rotational Emergence Spiral)**: Rotational symmetry breaking with spiral emergence
+- **MG-4 (Multi-Domain Patch Formation)**: Tri-phase competitive differentiation of domains
+Each preset uses unique mode-specific update logic with custom physics:
+- Anisotropic gradients, rotational flow, phase competition
+- Phyllotaxis-like spiral patterns, filament reinforcement
+- Wave-like differentiation, domain boundary sharpening
+
 ### Engine Enhancements
 - Ring buffer for temporal history (100 frames, ~36MB for 300x300 grid)
 - Operator contribution tracking per update step

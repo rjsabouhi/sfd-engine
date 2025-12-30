@@ -656,6 +656,268 @@ export class SFDEngine {
     this.tempGrid = temp;
   }
 
+  // MG-1: Morphogenetic Ghost Pattern - Spontaneous domain differentiation and wave boundary formation
+  private updateMG1Step(): void {
+    const tensionBias = 0.42;
+    const curvSensitivity = 0.68;
+    const anisotropy = 0.17;
+    const basinDepth = 0.33;
+    const noiseFloor = 0.08;
+    const gradientSource = 0.51;
+    const stabilityDamp = 0.19;
+    const flowRot = 0.06;
+    
+    const rotAngle = this.step * flowRot * 0.01;
+    const cosR = Math.cos(rotAngle);
+    const sinR = Math.sin(rotAngle);
+    
+    for (let y = 1; y < this.height - 1; y++) {
+      for (let x = 1; x < this.width - 1; x++) {
+        const idx = y * this.width + x;
+        const value = this.grid[idx];
+        
+        // Laplacian (curvature)
+        const laplacian = this.grid[idx - 1] + this.grid[idx + 1] + 
+                          this.grid[idx - this.width] + this.grid[idx + this.width] - 4 * value;
+        
+        // Anisotropic gradient (with rotation)
+        const gx = (this.grid[idx + 1] - this.grid[idx - 1]) / 2;
+        const gy = (this.grid[idx + this.width] - this.grid[idx - this.width]) / 2;
+        const gxRot = gx * cosR - gy * sinR * anisotropy;
+        const gyRot = gx * sinR * anisotropy + gy * cosR;
+        const gradMag = Math.sqrt(gxRot * gxRot + gyRot * gyRot);
+        
+        // Wave-like differentiation (soft boundary formation)
+        const wavePhase = Math.sin((x + y) * 0.1 + this.step * 0.02);
+        const differentiation = basinDepth * wavePhase * Math.tanh(value);
+        
+        // Tension-driven smoothing
+        const tension = -tensionBias * gradMag * Math.tanh(gradMag * 2);
+        
+        // Curvature response
+        const curvature = curvSensitivity * laplacian * 0.15;
+        
+        // Gradient source (directional bias)
+        const source = gradientSource * (gxRot + gyRot) * 0.1;
+        
+        // Stability damping
+        const damping = -stabilityDamp * value * value * value;
+        
+        // Micro-noise for stochasticity
+        const noise = noiseFloor * (this.rng() - 0.5) * 0.1;
+        
+        const delta = tension + curvature + differentiation + source + damping + noise;
+        this.tempGrid[idx] = Math.tanh(value + this.params.dt * delta);
+      }
+    }
+    
+    const temp = this.grid;
+    this.grid = this.tempGrid;
+    this.tempGrid = temp;
+  }
+
+  // MG-2: Filament Network Formation - High-tension filaments forming branching networks
+  private updateMG2Step(): void {
+    const tensionBias = 0.78;
+    const curvSensitivity = 0.91;
+    const anisotropy = 0.44;
+    const basinDepth = 0.12;
+    const noiseFloor = 0.05;
+    const gradientSource = 0.22;
+    const stabilityDamp = 0.11;
+    const flowRot = 0.02;
+    
+    const rotAngle = this.step * flowRot * 0.01;
+    
+    for (let y = 1; y < this.height - 1; y++) {
+      for (let x = 1; x < this.width - 1; x++) {
+        const idx = y * this.width + x;
+        const value = this.grid[idx];
+        
+        // Laplacian
+        const laplacian = this.grid[idx - 1] + this.grid[idx + 1] + 
+                          this.grid[idx - this.width] + this.grid[idx + this.width] - 4 * value;
+        
+        // Gradient (strong tension for filament formation)
+        const gx = (this.grid[idx + 1] - this.grid[idx - 1]) / 2;
+        const gy = (this.grid[idx + this.width] - this.grid[idx - this.width]) / 2;
+        const gradMag = Math.sqrt(gx * gx + gy * gy);
+        
+        // Anisotropic second derivative (ridge detection for filaments)
+        const dxx = this.grid[idx + 1] - 2 * value + this.grid[idx - 1];
+        const dyy = this.grid[idx + this.width] - 2 * value + this.grid[idx - this.width];
+        const anisotropicCurv = Math.abs(dxx - dyy) * anisotropy;
+        
+        // Filament reinforcement: high gradient creates branching
+        const filament = gradMag > 0.1 ? tensionBias * Math.tanh(gradMag * 3) * Math.sign(value) : 0;
+        
+        // Curvature sharpening
+        const curvature = curvSensitivity * laplacian * 0.12;
+        
+        // Basin attraction (weak for networks)
+        const basinPull = basinDepth * (value > 0 ? -1 : 1) * Math.abs(value);
+        
+        // Gradient source
+        const source = gradientSource * (gx * Math.cos(rotAngle) + gy * Math.sin(rotAngle)) * 0.1;
+        
+        // Stability
+        const damping = -stabilityDamp * value * value * value;
+        
+        // Noise
+        const noise = noiseFloor * (this.rng() - 0.5) * 0.05;
+        
+        const delta = filament + curvature + anisotropicCurv * 0.1 + basinPull + source + damping + noise;
+        this.tempGrid[idx] = Math.tanh(value + this.params.dt * delta);
+      }
+    }
+    
+    const temp = this.grid;
+    this.grid = this.tempGrid;
+    this.tempGrid = temp;
+  }
+
+  // MG-3: Rotational Emergence Spiral - Rotational symmetry breaking and spiral emergence
+  private updateMG3Step(): void {
+    const tensionBias = 0.24;
+    const curvSensitivity = 0.73;
+    const anisotropy = 0.05;
+    const basinDepth = 0.41;
+    const noiseFloor = 0.12;
+    const gradientSource = 0.36;
+    const stabilityDamp = 0.07;
+    const flowRot = 0.48; // High rotational flow for spirals
+    
+    const cx = this.width / 2;
+    const cy = this.height / 2;
+    
+    for (let y = 1; y < this.height - 1; y++) {
+      for (let x = 1; x < this.width - 1; x++) {
+        const idx = y * this.width + x;
+        const value = this.grid[idx];
+        
+        // Polar coordinates from center
+        const dx = x - cx;
+        const dy = y - cy;
+        const r = Math.sqrt(dx * dx + dy * dy) + 0.01;
+        const theta = Math.atan2(dy, dx);
+        
+        // Laplacian
+        const laplacian = this.grid[idx - 1] + this.grid[idx + 1] + 
+                          this.grid[idx - this.width] + this.grid[idx + this.width] - 4 * value;
+        
+        // Gradient
+        const gx = (this.grid[idx + 1] - this.grid[idx - 1]) / 2;
+        const gy = (this.grid[idx + this.width] - this.grid[idx - this.width]) / 2;
+        const gradMag = Math.sqrt(gx * gx + gy * gy);
+        
+        // Spiral wave term (phyllotaxis-like)
+        const spiralPhase = theta + flowRot * Math.log(r + 1) + this.step * 0.015;
+        const spiral = Math.sin(spiralPhase * 3) * basinDepth * 0.3;
+        
+        // Rotational coupling (tangential flow)
+        const tangentX = -dy / r;
+        const tangentY = dx / r;
+        const rotFlow = flowRot * (gx * tangentX + gy * tangentY) * 0.2;
+        
+        // Tension (weak for spiral patterns)
+        const tension = -tensionBias * gradMag * 0.5;
+        
+        // Curvature
+        const curvature = curvSensitivity * laplacian * 0.1;
+        
+        // Gradient source (radial bias)
+        const source = gradientSource * (dx * gx + dy * gy) / (r * r + 1) * 0.1;
+        
+        // Damping
+        const damping = -stabilityDamp * value * value * value;
+        
+        // Noise
+        const noise = noiseFloor * (this.rng() - 0.5) * 0.1;
+        
+        const delta = spiral + rotFlow + tension + curvature + source + damping + noise;
+        this.tempGrid[idx] = Math.tanh(value + this.params.dt * delta);
+      }
+    }
+    
+    const temp = this.grid;
+    this.grid = this.tempGrid;
+    this.tempGrid = temp;
+  }
+
+  // MG-4: Multi-Domain Patch Formation - Tri-phase competitive differentiation
+  private updateMG4Step(): void {
+    const tensionBias = 0.58;
+    const curvSensitivity = 0.42;
+    const anisotropy = 0.33;
+    const basinDepth = 0.27;
+    const noiseFloor = 0.16;
+    const gradientSource = 0.61;
+    const stabilityDamp = 0.14;
+    const flowRot = 0.03;
+    
+    for (let y = 1; y < this.height - 1; y++) {
+      for (let x = 1; x < this.width - 1; x++) {
+        const idx = y * this.width + x;
+        const value = this.grid[idx];
+        
+        // Laplacian
+        const laplacian = this.grid[idx - 1] + this.grid[idx + 1] + 
+                          this.grid[idx - this.width] + this.grid[idx + this.width] - 4 * value;
+        
+        // Gradient
+        const gx = (this.grid[idx + 1] - this.grid[idx - 1]) / 2;
+        const gy = (this.grid[idx + this.width] - this.grid[idx - this.width]) / 2;
+        const gradMag = Math.sqrt(gx * gx + gy * gy);
+        
+        // Local neighborhood for patch detection
+        let localMean = 0;
+        let count = 0;
+        for (let dy = -2; dy <= 2; dy++) {
+          for (let dx = -2; dx <= 2; dx++) {
+            localMean += this.getValue(x + dx, y + dy);
+            count++;
+          }
+        }
+        localMean /= count;
+        
+        // Tri-phase competition (ternary stable states)
+        const phase = Math.floor((value + 1) * 1.5); // Map to 0, 1, 2
+        const targetValue = (phase / 1.5) - 1 + 0.333;
+        const competition = basinDepth * (targetValue - value) * 0.5;
+        
+        // Domain boundary sharpening
+        const boundary = gradMag > 0.15 ? tensionBias * Math.tanh(gradMag * 4) * 0.3 : 0;
+        
+        // Anisotropic patch elongation
+        const dxx = this.grid[idx + 1] - 2 * value + this.grid[idx - 1];
+        const dyy = this.grid[idx + this.width] - 2 * value + this.grid[idx - this.width];
+        const anisotropicTerm = anisotropy * (dxx - dyy) * 0.1;
+        
+        // Curvature smoothing within patches
+        const curvature = curvSensitivity * laplacian * 0.08;
+        
+        // Gradient source for patch growth
+        const source = gradientSource * (localMean - value) * 0.15;
+        
+        // Rotational drift
+        const rot = flowRot * Math.sin(this.step * 0.01) * 0.02;
+        
+        // Damping
+        const damping = -stabilityDamp * value * value * value;
+        
+        // Noise (higher for stochastic differentiation)
+        const noise = noiseFloor * (this.rng() - 0.5) * 0.15;
+        
+        const delta = competition + boundary + anisotropicTerm + curvature + source + rot + damping + noise;
+        this.tempGrid[idx] = Math.tanh(value + this.params.dt * delta);
+      }
+    }
+    
+    const temp = this.grid;
+    this.grid = this.tempGrid;
+    this.tempGrid = temp;
+  }
+
   // Quasi-Crystal Mode: Symbolic aperiodic tiling with emergent radial symmetry
   private updateQuasiCrystalStep(): void {
     // Rotational basis vectors (5-fold symmetry)
@@ -723,7 +985,7 @@ export class SFDEngine {
     this.saveToRingBuffer();
     
     // Check for special modes
-    const specialModes = ["quasicrystal", "criticality", "fractal", "soliton", "cosmicweb"];
+    const specialModes = ["quasicrystal", "criticality", "fractal", "soliton", "cosmicweb", "mg1", "mg2", "mg3", "mg4"];
     if (specialModes.includes(this.params.mode)) {
       switch (this.params.mode) {
         case "quasicrystal":
@@ -740,6 +1002,18 @@ export class SFDEngine {
           break;
         case "cosmicweb":
           this.updateCosmicWebStep();
+          break;
+        case "mg1":
+          this.updateMG1Step();
+          break;
+        case "mg2":
+          this.updateMG2Step();
+          break;
+        case "mg3":
+          this.updateMG3Step();
+          break;
+        case "mg4":
+          this.updateMG4Step();
           break;
       }
       this.step++;
