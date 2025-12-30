@@ -219,33 +219,6 @@ export class SFDEngine {
           }
         }
       }
-    } else if (this.params.mode === 'soliton') {
-      // Soliton Entity: specialized initialization with seed cluster
-      const noiseAmp = 0.02;
-      const coherenceBias = 0.44;
-      const seedDensity = 0.05;
-      const seedIntensity = 0.09;
-      
-      // Low noise background
-      for (let i = 0; i < this.grid.length; i++) {
-        this.grid[i] = (this.rng() - 0.5) * noiseAmp;
-      }
-      
-      // Create seed cluster near center for soliton formation
-      const clusterRadius = this.width * 0.15;
-      for (let y = 0; y < this.height; y++) {
-        for (let x = 0; x < this.width; x++) {
-          const dx = x - cx;
-          const dy = y - cy;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          
-          if (dist < clusterRadius && this.rng() < seedDensity) {
-            // Add seed intensity with coherence bias
-            const idx = y * this.width + x;
-            this.grid[idx] += seedIntensity * (1 + coherenceBias * (1 - dist / clusterRadius));
-          }
-        }
-      }
     } else {
       // Standard initialization for other modes
       for (let i = 0; i < this.grid.length; i++) {
@@ -514,77 +487,7 @@ export class SFDEngine {
     this.tempGrid = temp;
   }
 
-  // Soliton Entity (SP₃): Stable localized self-stabilizing pattern with breathing and drift
-  private updateSolitonStep(): void {
-    // Soliton parameters - from spec with stability scaling
-    const stabilityScale = 0.12; // Scale factor for numerical stability
-    const alpha = 0.18 * stabilityScale;         // diffusion
-    const beta = 1.42 * stabilityScale;          // tension
-    const gamma = 0.91 * stabilityScale;         // curvature response
-    const sigma = 1.25 * stabilityScale;         // soliton feedback
-    const lambda = 0.04;                         // damping
-    const breathingFreq = 0.22;                  // breathing frequency
-    const breathingAmp = 0.17 * stabilityScale;  // breathing amplitude
-    const driftBias = 0.12 * stabilityScale;     // directional drift
-    const gradFollow = 0.33;                     // gradient follow strength
-    
-    // Breathing oscillation based on step
-    const breathing = breathingAmp * Math.sin(this.step * breathingFreq * 0.1);
-    
-    for (let y = 1; y < this.height - 1; y++) {
-      for (let x = 1; x < this.width - 1; x++) {
-        const idx = y * this.width + x;
-        const value = this.grid[idx];
-        
-        // Laplacian (diffusion)
-        const laplacian = this.grid[idx - 1] + this.grid[idx + 1] + 
-                          this.grid[idx - this.width] + this.grid[idx + this.width] - 4 * value;
-        
-        // Gradient for tension and drift
-        const gx = (this.grid[idx + 1] - this.grid[idx - 1]) / 2;
-        const gy = (this.grid[idx + this.width] - this.grid[idx - this.width]) / 2;
-        const gradMag = Math.sqrt(gx*gx + gy*gy);
-        
-        // Gaussian-weighted local coherence
-        let acc = 0;
-        let weight = 0;
-        for (let dy = -2; dy <= 2; dy++) {
-          for (let dx = -2; dx <= 2; dx++) {
-            const d2 = dx*dx + dy*dy;
-            const w = Math.exp(-d2 / 4);
-            acc += this.getValue(x + dx, y + dy) * w;
-            weight += w;
-          }
-        }
-        const localMean = acc / weight;
-        
-        // Soliton feedback: self-stabilizing term (gentler)
-        const solitonFeedback = sigma * (localMean - value);
-        
-        // Tension term (nonlinear, gentler)
-        const tension = -beta * gradMag * Math.tanh(gradMag);
-        
-        // Curvature response with breathing modulation
-        const curvature = gamma * laplacian * (1 + breathing);
-        
-        // Directional drift (follows gradient for pseudo-motility)
-        const drift = driftBias * gradFollow * (gx + gy);
-        
-        // Damping stabilizer
-        const damping = -lambda * value * value * value;
-        
-        // Combined update
-        const delta = alpha * laplacian + tension + curvature + solitonFeedback + drift + damping;
-        this.tempGrid[idx] = Math.tanh(value + this.params.dt * delta);
-      }
-    }
-
-    const temp = this.grid;
-    this.grid = this.tempGrid;
-    this.tempGrid = temp;
-  }
-
-  // Cosmic Web Analog (SP₄): Filament-void structure formation
+  // Cosmic Web Analog (SP₃): Filament-void structure formation
   private updateCosmicWebStep(): void {
     // Cosmic web parameters - closer to spec but with stability scaling
     const stabilityScale = 0.15; // Scale factor for numerical stability
@@ -723,7 +626,7 @@ export class SFDEngine {
     this.saveToRingBuffer();
     
     // Check for special modes
-    const specialModes = ["quasicrystal", "criticality", "fractal", "soliton", "cosmicweb"];
+    const specialModes = ["quasicrystal", "criticality", "fractal", "cosmicweb"];
     if (specialModes.includes(this.params.mode)) {
       switch (this.params.mode) {
         case "quasicrystal":
@@ -734,9 +637,6 @@ export class SFDEngine {
           break;
         case "fractal":
           this.updateFractalStep();
-          break;
-        case "soliton":
-          this.updateSolitonStep();
           break;
         case "cosmicweb":
           this.updateCosmicWebStep();
