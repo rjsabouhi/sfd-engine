@@ -1,6 +1,7 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { structuralPresets, type SimulationParameters } from "@shared/schema";
+import { clearTemporalBuffer } from "./visualization-canvas";
 
 interface PresetMenuProps {
   onApply: (params: Partial<SimulationParameters>) => void;
@@ -55,6 +56,7 @@ const presetInfo: Record<string, PresetInfo> = {
 export function PresetMenu({ onApply }: PresetMenuProps) {
   const handleChange = (value: string) => {
     if (value && structuralPresets[value]) {
+      clearTemporalBuffer();
       onApply(structuralPresets[value]);
     }
   };

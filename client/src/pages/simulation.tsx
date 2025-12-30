@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { unstable_batchedUpdates } from "react-dom";
 import { SFDEngine } from "@/lib/sfd-engine";
-import { VisualizationCanvas } from "@/components/visualization-canvas";
+import { VisualizationCanvas, clearTemporalBuffer } from "@/components/visualization-canvas";
 import { ControlPanel } from "@/components/control-panel";
 import { MobileControlPanel } from "@/components/mobile-control-panel";
 import { HoverProbe } from "@/components/hover-probe";
@@ -212,6 +212,7 @@ export default function SimulationPage() {
   }, []);
 
   const handleReset = useCallback(() => {
+    clearTemporalBuffer();
     engineRef.current?.reset();
   }, []);
 
