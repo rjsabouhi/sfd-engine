@@ -387,13 +387,14 @@ export function FloatingDiagnostics({
 
             {activeTab === "check" && (
               <div className="space-y-4">
-                <div className="border border-cyan-500/30 rounded-md p-3 bg-cyan-950/20">
+                <div>
                   <SectionHeader>Determinism Check</SectionHeader>
                   <Button 
+                    variant="secondary"
                     size="sm" 
                     onClick={handleRunDeterminism}
                     disabled={isRunningDeterminism}
-                    className="w-full h-8 text-xs bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/40 text-cyan-100"
+                    className="w-full relative ring-1 ring-cyan-500/50 shadow-[0_0_12px_rgba(34,211,238,0.25)]"
                     data-testid="button-run-determinism"
                   >
                     {isRunningDeterminism ? "Running..." : "Run Determinism Check (100 steps)"}
