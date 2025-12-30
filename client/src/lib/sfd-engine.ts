@@ -310,6 +310,7 @@ export class SFDEngine {
   }
 
   reset(): void {
+    this.stop();
     this.initialize();
     this.notifyUpdate();
   }
