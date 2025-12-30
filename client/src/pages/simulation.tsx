@@ -12,7 +12,7 @@ import { StructuralFieldFooter } from "@/components/field-footer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye, Palette, Layers } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -92,6 +92,7 @@ export default function SimulationPage() {
   const [blendMode, setBlendMode] = useState(false);
   const [blendOpacity, setBlendOpacity] = useState(0.5);
   const [perceptualSmoothing, setPerceptualSmoothing] = useState(true); // Perceptual Safety Layer
+  const [metricsPanelCollapsed, setMetricsPanelCollapsed] = useState(false);
   const configInputRef = useRef<HTMLInputElement>(null);
   
   
@@ -1026,7 +1027,23 @@ export default function SimulationPage() {
               </div>
             </main>
         
-        <aside className="w-[420px] flex-none border-l border-border bg-card flex flex-col overflow-hidden">
+        {/* Metrics Panel Toggle Button */}
+        <div className="flex-none flex items-stretch">
+          <button
+            onClick={() => setMetricsPanelCollapsed(!metricsPanelCollapsed)}
+            className="w-6 bg-card border-l border-border flex items-center justify-center hover:bg-muted transition-colors"
+            data-testid="button-toggle-metrics-panel"
+            title={metricsPanelCollapsed ? "Expand metrics panel" : "Collapse metrics panel"}
+          >
+            {metricsPanelCollapsed ? (
+              <PanelRightOpen className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <PanelRightClose className="h-4 w-4 text-muted-foreground" />
+            )}
+          </button>
+        </div>
+        
+        <aside className={`${metricsPanelCollapsed ? 'w-0 overflow-hidden' : 'w-[420px]'} flex-none border-l border-border bg-card flex flex-col overflow-hidden transition-all duration-300`}>
           <ControlPanel
                 params={params}
                 state={state}
