@@ -295,6 +295,7 @@ export class SFDEngine {
 
   setParams(params: Partial<SimulationParameters>): void {
     const needsResize = params.gridSize !== undefined && params.gridSize !== this.width;
+    const modeChanged = params.mode !== undefined && params.mode !== this.params.mode;
     this.params = { ...this.params, ...params };
     
     if (needsResize) {
@@ -302,6 +303,11 @@ export class SFDEngine {
       this.height = this.params.gridSize;
       this.grid = new Float32Array(this.width * this.height);
       this.tempGrid = new Float32Array(this.width * this.height);
+      this.initialize();
+      this.notifyUpdate();
+    } else if (modeChanged) {
+      // Mode change requires reinitialization for proper field setup
+      // (e.g., cosmic web needs special clustering seeds)
       this.initialize();
       this.notifyUpdate();
     } else if (params.couplingRadius !== undefined) {
