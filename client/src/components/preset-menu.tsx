@@ -1,12 +1,10 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { structuralPresets, type SimulationParameters } from "@shared/schema";
 import { getSmartViewConfig, type SmartViewConfig } from "@/config/smart-view-map";
-import type { OverlayType } from "@/components/dual-field-view";
 
 interface PresetMenuProps {
   onApply: (params: Partial<SimulationParameters>) => void;
   onSmartViewApply?: (config: SmartViewConfig) => void;
-  userOverrideActive?: boolean;
 }
 
 const presetLabels: Record<string, string> = {
@@ -23,12 +21,12 @@ const presetLabels: Record<string, string> = {
   "cosmic-web": "Cosmic Web Analog (SP\u2083)",
 };
 
-export function PresetMenu({ onApply, onSmartViewApply, userOverrideActive = false }: PresetMenuProps) {
+export function PresetMenu({ onApply, onSmartViewApply }: PresetMenuProps) {
   const handleChange = (value: string) => {
     if (value && structuralPresets[value]) {
       onApply(structuralPresets[value]);
       
-      if (!userOverrideActive && onSmartViewApply) {
+      if (onSmartViewApply) {
         const smartConfig = getSmartViewConfig(value);
         if (smartConfig) {
           onSmartViewApply(smartConfig);

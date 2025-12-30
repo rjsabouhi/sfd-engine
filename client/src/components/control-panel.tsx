@@ -67,7 +67,6 @@ interface ControlPanelProps {
   perceptualSmoothing?: boolean;
   onPerceptualSmoothingChange?: (enabled: boolean) => void;
   onSmartViewApply?: (config: SmartViewConfig) => void;
-  userOverrideActive?: boolean;
 }
 
 interface ParameterSliderProps {
@@ -146,7 +145,6 @@ export function ControlPanel({
   perceptualSmoothing = true,
   onPerceptualSmoothingChange,
   onSmartViewApply,
-  userOverrideActive = false,
 }: ControlPanelProps) {
   const [coreParamsOpen, setCoreParamsOpen] = useState(true);
   const [weightsOpen, setWeightsOpen] = useState(false);
@@ -277,7 +275,6 @@ export function ControlPanel({
                 <PresetMenu 
                   onApply={onParamsChange} 
                   onSmartViewApply={onSmartViewApply}
-                  userOverrideActive={userOverrideActive}
                 />
               </CollapsibleContent>
             </Collapsible>

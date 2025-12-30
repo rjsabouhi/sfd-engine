@@ -1116,7 +1116,6 @@ export default function SimulationPage() {
                 varianceChange={varianceChange}
                 isExporting={isExporting}
                 onSmartViewApply={handleSmartViewApply}
-                userOverrideActive={hasUserSelectedOverlay}
               />
         </aside>
       </div>
