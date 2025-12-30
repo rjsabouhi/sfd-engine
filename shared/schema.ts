@@ -13,7 +13,7 @@ export const simulationParametersSchema = z.object({
   wC: z.number().min(0).max(5).default(1.2),
   wA: z.number().min(0).max(5).default(2.0),
   wR: z.number().min(0).max(5).default(0.5),
-  mode: z.enum(["standard", "quasicrystal", "criticality", "fractal", "soliton", "replicator"]).default("standard"),
+  mode: z.enum(["standard", "quasicrystal", "criticality", "fractal", "soliton", "cosmicweb"]).default("standard"),
 });
 
 export type SimulationParameters = z.infer<typeof simulationParametersSchema>;
@@ -275,18 +275,18 @@ export const structuralPresets: Record<string, Partial<SimulationParameters>> = 
     wA: 4.0,
     wR: 0.2,
   },
-  "replicator-prototype": {
-    mode: "replicator",
-    dt: 0.04,
-    curvatureGain: 2.5,
-    couplingWeight: 0.55,
-    attractorStrength: 3.5,
-    redistributionRate: 0.25,
-    wK: 1.8,
-    wT: 2.0,
-    wC: 1.5,
-    wA: 2.5,
-    wR: 0.8,
+  "cosmic-web": {
+    mode: "cosmicweb",
+    dt: 0.035,
+    curvatureGain: 3.8,
+    couplingWeight: 0.62,
+    attractorStrength: 4.5,
+    redistributionRate: 0.18,
+    wK: 2.2,
+    wT: 1.93,
+    wC: 1.47,
+    wA: 3.0,
+    wR: 0.62,
   },
 };
 

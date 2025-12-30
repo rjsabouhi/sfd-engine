@@ -193,7 +193,33 @@ export class SFDEngine {
     const cy = this.height / 2;
     
     // Mode-specific initialization
-    if (this.params.mode === 'soliton') {
+    if (this.params.mode === 'cosmicweb') {
+      // Cosmic Web: higher noise with coherence bias for filament formation
+      const noiseAmp = 0.05;
+      const coherenceBias = 0.31;
+      
+      for (let i = 0; i < this.grid.length; i++) {
+        this.grid[i] = (this.rng() - 0.5) * noiseAmp;
+      }
+      
+      // Add patchy clustering seeds
+      for (let y = 0; y < this.height; y++) {
+        for (let x = 0; x < this.width; x++) {
+          const idx = y * this.width + x;
+          // Create random density fluctuations
+          if (this.rng() < 0.1) {
+            const intensity = (this.rng() - 0.5) * coherenceBias;
+            // Spread to neighbors
+            for (let dy = -2; dy <= 2; dy++) {
+              for (let dx = -2; dx <= 2; dx++) {
+                const nIdx = this.getIndex(x + dx, y + dy);
+                this.grid[nIdx] += intensity * Math.exp(-(dx*dx + dy*dy) / 4);
+              }
+            }
+          }
+        }
+      }
+    } else if (this.params.mode === 'soliton') {
       // Soliton Entity: specialized initialization with seed cluster
       const noiseAmp = 0.02;
       const coherenceBias = 0.44;
@@ -557,47 +583,69 @@ export class SFDEngine {
     this.tempGrid = temp;
   }
 
-  // Replicator Prototype (SP₄): Pattern that divides under tension gradients
-  private updateReplicatorStep(): void {
-    const tensionThreshold = 0.15;
-    const divisionStrength = 0.08;
+  // Cosmic Web Analog (SP₄): Filament-void structure formation
+  private updateCosmicWebStep(): void {
+    // Cosmic web parameters
+    const alpha = 0.08;        // diffusion
+    const beta = 1.93;         // tension
+    const gamma = 1.15;        // curvature response
+    const chi = 1.47;          // filament reinforcement
+    const nu = 0.62;           // void pressure
+    const lambda = 0.03;       // damping
+    const densityThreshold = 0.27;
+    const scaleBias = 0.84;
     
     for (let y = 1; y < this.height - 1; y++) {
       for (let x = 1; x < this.width - 1; x++) {
         const idx = y * this.width + x;
         const value = this.grid[idx];
         
-        // Compute tension (gradient magnitude)
+        // Laplacian for diffusion
+        const laplacian = this.grid[idx - 1] + this.grid[idx + 1] + 
+                          this.grid[idx - this.width] + this.grid[idx + this.width] - 4 * value;
+        
+        // Gradient for tension
         const gx = (this.grid[idx + 1] - this.grid[idx - 1]) / 2;
         const gy = (this.grid[idx + this.width] - this.grid[idx - this.width]) / 2;
-        const tension = Math.sqrt(gx*gx + gy*gy);
+        const gradMag = Math.sqrt(gx*gx + gy*gy);
         
-        // Local mean for cohesion
-        const localMean = this.computeLocalMean(x, y);
-        
-        // Division dynamics: high tension causes structure to split
-        let delta = 0;
-        
-        if (tension > tensionThreshold) {
-          // Push away from gradient direction (causes splitting)
-          const gradAngle = Math.atan2(gy, gx);
-          const splitX = Math.cos(gradAngle + Math.PI / 2);
-          const splitY = Math.sin(gradAngle + Math.PI / 2);
-          
-          const neighbor1 = this.getValue(x + Math.round(splitX * 2), y + Math.round(splitY * 2));
-          const neighbor2 = this.getValue(x - Math.round(splitX * 2), y - Math.round(splitY * 2));
-          
-          delta = divisionStrength * (neighbor1 + neighbor2 - 2 * value);
+        // Multi-scale coherence (recursive subdivision simulation)
+        let multiScaleMean = 0;
+        const scales = [1, 2, 4];
+        for (const s of scales) {
+          let acc = 0;
+          let count = 0;
+          for (let dy = -s; dy <= s; dy += s) {
+            for (let dx = -s; dx <= s; dx += s) {
+              acc += this.getValue(x + dx, y + dy);
+              count++;
+            }
+          }
+          multiScaleMean += (acc / count) * Math.pow(scaleBias, scales.indexOf(s));
         }
+        multiScaleMean /= scales.length;
         
-        // Cohesion toward local mean
-        const cohesion = 0.1 * (localMean - value);
+        // Void pressure: negative density regions expand
+        const voidPressure = value < -densityThreshold ? nu * (1 + Math.abs(value)) : 0;
         
-        // Weak diffusion
-        const laplacian = this.computeLaplacian(x, y);
-        const diffusion = 0.2 * laplacian;
+        // Filament reinforcement: high gradient regions consolidate
+        const filamentTerm = gradMag > densityThreshold ? chi * gradMag * Math.sign(value) : 0;
         
-        this.tempGrid[idx] = Math.tanh(value + this.params.dt * (delta + cohesion + diffusion));
+        // Tension creates structure
+        const tension = -beta * gradMag * Math.tanh(gradMag);
+        
+        // Curvature response
+        const curvature = gamma * laplacian;
+        
+        // Coherence coupling (pulls toward multi-scale mean)
+        const coherence = 0.3 * (multiScaleMean - value);
+        
+        // Damping
+        const damping = -lambda * value * value * value;
+        
+        // Combined dynamics
+        const delta = alpha * laplacian + tension + curvature + filamentTerm - voidPressure + coherence + damping;
+        this.tempGrid[idx] = Math.tanh(value + this.params.dt * delta);
       }
     }
 
@@ -673,7 +721,7 @@ export class SFDEngine {
     this.saveToRingBuffer();
     
     // Check for special modes
-    const specialModes = ["quasicrystal", "criticality", "fractal", "soliton", "replicator"];
+    const specialModes = ["quasicrystal", "criticality", "fractal", "soliton", "cosmicweb"];
     if (specialModes.includes(this.params.mode)) {
       switch (this.params.mode) {
         case "quasicrystal":
@@ -688,8 +736,8 @@ export class SFDEngine {
         case "soliton":
           this.updateSolitonStep();
           break;
-        case "replicator":
-          this.updateReplicatorStep();
+        case "cosmicweb":
+          this.updateCosmicWebStep();
           break;
       }
       this.step++;
