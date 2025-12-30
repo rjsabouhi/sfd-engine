@@ -16,6 +16,13 @@ interface VisualizationCanvasProps {
 
 // Temporal smoothing buffer for perceptual safety
 let lastFrameBuffer: Float32Array | null = null;
+let lastFrameEnergy: number = 0;
+
+// Export function to clear the temporal buffer (called on reset)
+export function clearTemporalBuffer(): void {
+  lastFrameBuffer = null;
+  lastFrameEnergy = 0;
+}
 
 const INFERNO_COLORS = [
   [0, 0, 4],
@@ -134,15 +141,27 @@ export function VisualizationCanvas({
     // Apply temporal smoothing if enabled (Perceptual Safety Layer)
     let displayGrid = field.grid;
     if (perceptualSmoothing) {
-      if (!lastFrameBuffer || lastFrameBuffer.length !== field.grid.length) {
+      // Compute current frame energy to detect resets
+      let currentEnergy = 0;
+      for (let i = 0; i < field.grid.length; i++) {
+        currentEnergy += field.grid[i] * field.grid[i];
+      }
+      
+      // Detect dramatic energy change (reset) - clear buffer if energy changed by >50%
+      const energyRatio = lastFrameEnergy > 0 ? Math.abs(currentEnergy - lastFrameEnergy) / lastFrameEnergy : 0;
+      const isReset = energyRatio > 0.5 || !lastFrameBuffer || lastFrameBuffer.length !== field.grid.length;
+      
+      if (isReset) {
         lastFrameBuffer = new Float32Array(field.grid);
-      } else {
+        lastFrameEnergy = currentEnergy;
+      } else if (lastFrameBuffer) {
         const alpha = 0.7; // 70% current, 30% previous
         const smoothed = new Float32Array(field.grid.length);
         for (let i = 0; i < field.grid.length; i++) {
           smoothed[i] = alpha * field.grid[i] + (1 - alpha) * lastFrameBuffer[i];
         }
         lastFrameBuffer = smoothed;
+        lastFrameEnergy = currentEnergy;
         displayGrid = smoothed;
       }
     }
