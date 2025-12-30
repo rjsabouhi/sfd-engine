@@ -516,16 +516,16 @@ export class SFDEngine {
 
   // Soliton Entity (SP₃): Stable localized self-stabilizing pattern with breathing and drift
   private updateSolitonStep(): void {
-    // Enhanced parameters for soliton-like behavior
-    const alpha = 0.18;          // diffusion
-    const beta = 1.42;           // tension
-    const gamma = 0.91;          // curvature response
-    const sigma = 1.25;          // soliton feedback
-    const lambda = 0.04;         // damping
+    // Tuned parameters for stable soliton-like behavior
+    const alpha = 0.08;          // diffusion (reduced)
+    const beta = 0.4;            // tension (reduced)
+    const gamma = 0.25;          // curvature response (reduced)
+    const sigma = 0.3;           // soliton feedback (reduced)
+    const lambda = 0.02;         // damping
     const breathingFreq = 0.22;  // breathing frequency
-    const breathingAmp = 0.17;   // breathing amplitude
-    const driftBias = 0.12;      // directional drift
-    const gradFollow = 0.33;     // gradient follow strength
+    const breathingAmp = 0.08;   // breathing amplitude (reduced)
+    const driftBias = 0.03;      // directional drift (reduced)
+    const gradFollow = 0.15;     // gradient follow strength
     
     // Breathing oscillation based on step
     const breathing = breathingAmp * Math.sin(this.step * breathingFreq * 0.1);
@@ -547,34 +547,34 @@ export class SFDEngine {
         // Gaussian-weighted local coherence
         let acc = 0;
         let weight = 0;
-        for (let dy = -3; dy <= 3; dy++) {
-          for (let dx = -3; dx <= 3; dx++) {
+        for (let dy = -2; dy <= 2; dy++) {
+          for (let dx = -2; dx <= 2; dx++) {
             const d2 = dx*dx + dy*dy;
-            const w = Math.exp(-d2 / 8);
+            const w = Math.exp(-d2 / 4);
             acc += this.getValue(x + dx, y + dy) * w;
             weight += w;
           }
         }
         const localMean = acc / weight;
         
-        // Soliton feedback: self-stabilizing term
-        const solitonFeedback = sigma * (localMean - value) * (1 + Math.abs(value));
+        // Soliton feedback: self-stabilizing term (gentler)
+        const solitonFeedback = sigma * (localMean - value);
         
-        // Tension term (nonlinear)
-        const tension = -beta * gradMag * Math.tanh(gradMag * 2);
+        // Tension term (nonlinear, gentler)
+        const tension = -beta * gradMag * Math.tanh(gradMag);
         
         // Curvature response with breathing modulation
         const curvature = gamma * laplacian * (1 + breathing);
         
         // Directional drift (follows gradient for pseudo-motility)
-        const drift = driftBias * gradFollow * (gx * 0.5 + gy * 0.5);
+        const drift = driftBias * gradFollow * (gx + gy);
         
         // Damping stabilizer
         const damping = -lambda * value * value * value;
         
-        // Combined update
+        // Combined update with smaller dt multiplier
         const delta = alpha * laplacian + tension + curvature + solitonFeedback + drift + damping;
-        this.tempGrid[idx] = Math.tanh(value + this.params.dt * delta);
+        this.tempGrid[idx] = Math.tanh(value + this.params.dt * 0.5 * delta);
       }
     }
 
@@ -585,15 +585,15 @@ export class SFDEngine {
 
   // Cosmic Web Analog (SP₄): Filament-void structure formation
   private updateCosmicWebStep(): void {
-    // Cosmic web parameters
-    const alpha = 0.08;        // diffusion
-    const beta = 1.93;         // tension
-    const gamma = 1.15;        // curvature response
-    const chi = 1.47;          // filament reinforcement
-    const nu = 0.62;           // void pressure
-    const lambda = 0.03;       // damping
-    const densityThreshold = 0.27;
-    const scaleBias = 0.84;
+    // Tuned parameters for stable cosmic web behavior
+    const alpha = 0.12;        // diffusion (higher for smoothing)
+    const beta = 0.35;         // tension (reduced)
+    const gamma = 0.2;         // curvature response (reduced)
+    const chi = 0.25;          // filament reinforcement (reduced)
+    const nu = 0.15;           // void pressure (reduced)
+    const lambda = 0.02;       // damping
+    const densityThreshold = 0.15;
+    const scaleBias = 0.7;
     
     for (let y = 1; y < this.height - 1; y++) {
       for (let x = 1; x < this.width - 1; x++) {
@@ -625,27 +625,27 @@ export class SFDEngine {
         }
         multiScaleMean /= scales.length;
         
-        // Void pressure: negative density regions expand
-        const voidPressure = value < -densityThreshold ? nu * (1 + Math.abs(value)) : 0;
+        // Void pressure: negative density regions expand (gentler)
+        const voidPressure = value < -densityThreshold ? nu * Math.abs(value) : 0;
         
-        // Filament reinforcement: high gradient regions consolidate
-        const filamentTerm = gradMag > densityThreshold ? chi * gradMag * Math.sign(value) : 0;
+        // Filament reinforcement: high gradient regions consolidate (gentler)
+        const filamentTerm = gradMag > densityThreshold ? chi * Math.tanh(gradMag) * Math.sign(value) : 0;
         
-        // Tension creates structure
-        const tension = -beta * gradMag * Math.tanh(gradMag);
+        // Tension creates structure (gentler)
+        const tension = -beta * Math.tanh(gradMag * 2);
         
         // Curvature response
         const curvature = gamma * laplacian;
         
         // Coherence coupling (pulls toward multi-scale mean)
-        const coherence = 0.3 * (multiScaleMean - value);
+        const coherence = 0.15 * (multiScaleMean - value);
         
         // Damping
         const damping = -lambda * value * value * value;
         
-        // Combined dynamics
+        // Combined dynamics with reduced dt
         const delta = alpha * laplacian + tension + curvature + filamentTerm - voidPressure + coherence + damping;
-        this.tempGrid[idx] = Math.tanh(value + this.params.dt * delta);
+        this.tempGrid[idx] = Math.tanh(value + this.params.dt * 0.5 * delta);
       }
     }
 
