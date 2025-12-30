@@ -711,31 +711,6 @@ export default function SimulationPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {/* Blend Controls */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setBlendMode(!blendMode)}
-                    data-testid="button-blend-mode"
-                    className={`h-6 text-[10px] gap-1 ${blendMode ? "bg-muted" : ""}`}
-                  >
-                    <Blend className="h-3 w-3" />
-                    Blend
-                  </Button>
-                  {blendMode && (
-                    <div className="flex items-center gap-1.5 w-20">
-                      <Slider
-                        value={[blendOpacity]}
-                        onValueChange={([v]) => setBlendOpacity(v)}
-                        min={0}
-                        max={1}
-                        step={0.05}
-                        className="w-full"
-                        data-testid="slider-blend-opacity"
-                      />
-                      <span className="text-[9px] text-muted-foreground w-6">{Math.round(blendOpacity * 100)}%</span>
-                    </div>
-                  )}
                   <Select value={derivedType} onValueChange={(v) => { setHasUserSelectedOverlay(true); setDerivedType(v as OverlayType); }}>
                     <SelectTrigger className="h-7 w-32 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-overlay-type">
                       <span>{hasUserSelectedOverlay ? (OVERLAY_OPTIONS.find(o => o.value === derivedType)?.label || "Layers") : "Layers"}</span>
@@ -823,6 +798,42 @@ export default function SimulationPage() {
                 Pin a point to track its metrics over time
               </TooltipContent>
             </Tooltip>
+            {/* Blend button - only visible in dual view mode */}
+            {showDualView && (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setBlendMode(!blendMode)}
+                      data-testid="button-blend-mode"
+                      className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${blendMode ? "bg-white/20 text-white" : ""}`}
+                    >
+                      <Blend className="h-3 w-3" />
+                      Blend
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    Overlay projection layer on primary field
+                  </TooltipContent>
+                </Tooltip>
+                {blendMode && (
+                  <div className="flex items-center gap-1.5 w-20">
+                    <Slider
+                      value={[blendOpacity]}
+                      onValueChange={([v]) => setBlendOpacity(v)}
+                      min={0}
+                      max={1}
+                      step={0.05}
+                      className="w-full"
+                      data-testid="slider-blend-opacity"
+                    />
+                    <span className="text-[9px] text-white/60 w-6">{Math.round(blendOpacity * 100)}%</span>
+                  </div>
+                )}
+              </>
+            )}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
