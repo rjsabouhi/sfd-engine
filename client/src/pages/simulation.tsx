@@ -757,7 +757,7 @@ export default function SimulationPage() {
             </div>
           )}
           {/* Tools Row - above canvas */}
-          <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gray-950 shrink-0">
+          <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gray-950 shrink-0 border-b border-white/10">
             <Button
               variant="ghost"
               size="sm"
