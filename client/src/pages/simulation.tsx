@@ -12,7 +12,7 @@ import { StructuralFieldFooter } from "@/components/field-footer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye, Palette } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye, Palette, Layers } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -700,20 +700,6 @@ export default function SimulationPage() {
                     {OVERLAY_OPTIONS.find(o => o.value === derivedType)?.tooltip || "Select a projection mode"}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Select value={derivedType} onValueChange={(v) => { setHasUserSelectedOverlay(true); setDerivedType(v as OverlayType); }}>
-                    <SelectTrigger className="h-7 w-32 text-xs focus:ring-0 focus:ring-offset-0" data-testid="select-overlay-type">
-                      <span>{hasUserSelectedOverlay ? (OVERLAY_OPTIONS.find(o => o.value === derivedType)?.label || "Layers") : "Layers"}</span>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {OVERLAY_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value} className="text-xs">
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
             )}
           </div>
@@ -811,9 +797,34 @@ export default function SimulationPage() {
                 Pin a point to track its metrics over time
               </TooltipContent>
             </Tooltip>
-            {/* Blend button - only visible in dual view mode */}
+            {/* Layers and Blend - only visible in dual view mode */}
             {showDualView && (
               <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1">
+                      <Layers className="h-3 w-3 text-white/70" />
+                      <Select value={derivedType} onValueChange={(v) => { setHasUserSelectedOverlay(true); setDerivedType(v as OverlayType); }}>
+                        <SelectTrigger 
+                          className="h-6 w-28 text-[10px] bg-transparent border-none text-white/70 hover:text-white hover:bg-white/10 focus:ring-0 focus:ring-offset-0" 
+                          data-testid="select-overlay-type"
+                        >
+                          <span>{hasUserSelectedOverlay ? (OVERLAY_OPTIONS.find(o => o.value === derivedType)?.label || "Layers") : "Layers"}</span>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {OVERLAY_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value} className="text-xs">
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    Select projection layer for dual view
+                  </TooltipContent>
+                </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
