@@ -17,7 +17,6 @@ const presetLabels: Record<string, string> = {
   "criticality-cascade": "Criticality Cascade (SP\u2081)",
   "fractal-corridor": "Fractal Corridor (SP\u2082)",
   "soliton-entity": "Soliton Entity (SP\u2083)",
-  "cosmic-web": "Cosmic Web Analog (SP\u2084)",
 };
 
 export function PresetMenu({ onApply }: PresetMenuProps) {

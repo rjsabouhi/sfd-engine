@@ -193,33 +193,7 @@ export class SFDEngine {
     const cy = this.height / 2;
     
     // Mode-specific initialization
-    if (this.params.mode === 'cosmicweb') {
-      // Cosmic Web: higher noise with coherence bias for filament formation
-      const noiseAmp = 0.05;
-      const coherenceBias = 0.31;
-      
-      for (let i = 0; i < this.grid.length; i++) {
-        this.grid[i] = (this.rng() - 0.5) * noiseAmp;
-      }
-      
-      // Add patchy clustering seeds
-      for (let y = 0; y < this.height; y++) {
-        for (let x = 0; x < this.width; x++) {
-          const idx = y * this.width + x;
-          // Create random density fluctuations
-          if (this.rng() < 0.1) {
-            const intensity = (this.rng() - 0.5) * coherenceBias;
-            // Spread to neighbors
-            for (let dy = -2; dy <= 2; dy++) {
-              for (let dx = -2; dx <= 2; dx++) {
-                const nIdx = this.getIndex(x + dx, y + dy);
-                this.grid[nIdx] += intensity * Math.exp(-(dx*dx + dy*dy) / 4);
-              }
-            }
-          }
-        }
-      }
-    } else if (this.params.mode === 'soliton') {
+    if (this.params.mode === 'soliton') {
       // Soliton Entity: specialized initialization with seed cluster
       const noiseAmp = 0.02;
       const coherenceBias = 0.44;
@@ -584,78 +558,6 @@ export class SFDEngine {
     this.tempGrid = temp;
   }
 
-  // Cosmic Web Analog (SP₄): Filament-void structure formation
-  private updateCosmicWebStep(): void {
-    // Cosmic web parameters - closer to spec but with stability scaling
-    const stabilityScale = 0.15; // Scale factor for numerical stability
-    const alpha = 0.08 * stabilityScale;        // diffusion
-    const beta = 1.93 * stabilityScale;         // tension
-    const gamma = 1.15 * stabilityScale;        // curvature response
-    const chi = 1.47 * stabilityScale;          // filament reinforcement
-    const nu = 0.62 * stabilityScale;           // void pressure
-    const lambda = 0.03;                        // damping
-    const densityThreshold = 0.27;
-    const scaleBias = 0.84;
-    
-    for (let y = 1; y < this.height - 1; y++) {
-      for (let x = 1; x < this.width - 1; x++) {
-        const idx = y * this.width + x;
-        const value = this.grid[idx];
-        
-        // Laplacian for diffusion
-        const laplacian = this.grid[idx - 1] + this.grid[idx + 1] + 
-                          this.grid[idx - this.width] + this.grid[idx + this.width] - 4 * value;
-        
-        // Gradient for tension
-        const gx = (this.grid[idx + 1] - this.grid[idx - 1]) / 2;
-        const gy = (this.grid[idx + this.width] - this.grid[idx - this.width]) / 2;
-        const gradMag = Math.sqrt(gx*gx + gy*gy);
-        
-        // Multi-scale coherence (recursive subdivision simulation)
-        let multiScaleMean = 0;
-        const scales = [1, 2, 4];
-        for (const s of scales) {
-          let acc = 0;
-          let count = 0;
-          for (let dy = -s; dy <= s; dy += s) {
-            for (let dx = -s; dx <= s; dx += s) {
-              acc += this.getValue(x + dx, y + dy);
-              count++;
-            }
-          }
-          multiScaleMean += (acc / count) * Math.pow(scaleBias, scales.indexOf(s));
-        }
-        multiScaleMean /= scales.length;
-        
-        // Void pressure: negative density regions expand (gentler)
-        const voidPressure = value < -densityThreshold ? nu * Math.abs(value) : 0;
-        
-        // Filament reinforcement: high gradient regions consolidate (gentler)
-        const filamentTerm = gradMag > densityThreshold ? chi * Math.tanh(gradMag) * Math.sign(value) : 0;
-        
-        // Tension creates structure (gentler)
-        const tension = -beta * Math.tanh(gradMag * 2);
-        
-        // Curvature response
-        const curvature = gamma * laplacian;
-        
-        // Coherence coupling (pulls toward multi-scale mean)
-        const coherence = 0.15 * (multiScaleMean - value);
-        
-        // Damping
-        const damping = -lambda * value * value * value;
-        
-        // Combined dynamics
-        const delta = alpha * laplacian + tension + curvature + filamentTerm - voidPressure + coherence + damping;
-        this.tempGrid[idx] = Math.tanh(value + this.params.dt * delta);
-      }
-    }
-
-    const temp = this.grid;
-    this.grid = this.tempGrid;
-    this.tempGrid = temp;
-  }
-
   // Quasi-Crystal Mode: Symbolic aperiodic tiling with emergent radial symmetry
   private updateQuasiCrystalStep(): void {
     // Rotational basis vectors (5-fold symmetry)
@@ -723,7 +625,7 @@ export class SFDEngine {
     this.saveToRingBuffer();
     
     // Check for special modes
-    const specialModes = ["quasicrystal", "criticality", "fractal", "soliton", "cosmicweb"];
+    const specialModes = ["quasicrystal", "criticality", "fractal", "soliton"];
     if (specialModes.includes(this.params.mode)) {
       switch (this.params.mode) {
         case "quasicrystal":
@@ -737,9 +639,6 @@ export class SFDEngine {
           break;
         case "soliton":
           this.updateSolitonStep();
-          break;
-        case "cosmicweb":
-          this.updateCosmicWebStep();
           break;
       }
       this.step++;
