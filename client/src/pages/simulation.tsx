@@ -680,7 +680,7 @@ export default function SimulationPage() {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <main className="relative bg-gray-950 flex-1 flex flex-col">
+        <main className="relative bg-gray-950 flex-1 min-w-0 flex flex-col">
           {/* Unified Dual-Pane Header Ribbon */}
           <div className="flex items-stretch border-b border-border shrink-0">
             {/* Left Pane Header: Structural Field */}
@@ -1008,7 +1008,7 @@ export default function SimulationPage() {
               </div>
             </main>
         
-        <aside className="w-[420px] shrink-0 border-l border-border bg-card flex flex-col overflow-hidden">
+        <aside className="w-[420px] flex-none border-l border-border bg-card flex flex-col overflow-hidden">
           <ControlPanel
                 params={params}
                 state={state}
