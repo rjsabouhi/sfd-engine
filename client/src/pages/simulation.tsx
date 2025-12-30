@@ -807,7 +807,7 @@ export default function SimulationPage() {
                 <div className="flex items-center">
                   <Select value={colormap} onValueChange={handleColormapChange}>
                     <SelectTrigger 
-                      className="h-6 w-28 text-[10px] bg-transparent border-none text-white/70 hover:text-white hover:bg-white/10 focus:ring-0 focus:ring-offset-0" 
+                      className="h-6 w-28 text-[10px] bg-transparent border-none text-white/70 hover:text-white hover:bg-white/10 focus:ring-0 focus:ring-offset-0 gap-1" 
                       data-testid="select-colormap-tools"
                     >
                       <Palette className="h-3 w-3 shrink-0" />
@@ -833,7 +833,7 @@ export default function SimulationPage() {
                     <div className="flex items-center">
                       <Select value={derivedType} onValueChange={(v) => { setHasUserSelectedOverlay(true); setDerivedType(v as OverlayType); }}>
                         <SelectTrigger 
-                          className="h-6 w-32 text-[10px] bg-transparent border-none text-white/70 hover:text-white hover:bg-white/10 focus:ring-0 focus:ring-offset-0" 
+                          className="h-6 w-32 text-[10px] bg-transparent border-none text-white/70 hover:text-white hover:bg-white/10 focus:ring-0 focus:ring-offset-0 gap-1" 
                           data-testid="select-overlay-type"
                         >
                           <Layers className="h-3 w-3 shrink-0" />
