@@ -800,7 +800,7 @@ export default function SimulationPage() {
                 Show real-time stability and energy metrics
               </TooltipContent>
             </Tooltip>
-            <div className="w-px h-4 bg-white/20" />
+            <div className="w-px h-5 bg-white/30 shrink-0" />
             {/* Color Map */}
             <Tooltip>
               <TooltipTrigger asChild>
@@ -828,7 +828,7 @@ export default function SimulationPage() {
             {/* Layers and Blend - only visible in dual view mode */}
             {showDualView && (
               <>
-                <div className="w-px h-4 bg-white/20" />
+                <div className="w-px h-5 bg-white/30 shrink-0" />
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex items-center gap-1">
@@ -887,7 +887,7 @@ export default function SimulationPage() {
                 )}
               </>
             )}
-            <div className="w-px h-4 bg-white/20" />
+            <div className="w-px h-5 bg-white/30 shrink-0" />
             {/* Save */}
             <Tooltip>
               <TooltipTrigger asChild>
