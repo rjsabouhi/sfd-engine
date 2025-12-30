@@ -26,6 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { SimulationParameters, SimulationState, FieldData, ProbeData, OperatorContributions, StructuralSignature, StructuralEvent, DerivedField, BasinMap, TrendMetrics } from "@shared/schema";
 import { defaultParameters, mobileParameters } from "@shared/schema";
@@ -761,77 +762,126 @@ export default function SimulationPage() {
           )}
           {/* Tools Row - above canvas */}
           <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gray-950 shrink-0 border-b border-white/10">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setFieldInspectorEnabled(!fieldInspectorEnabled)}
-              data-testid="button-field-inspector"
-              className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${fieldInspectorEnabled ? "bg-white/20 text-white" : ""}`}
-            >
-              <Eye className="h-3 w-3" />
-              Inspector
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => { setPerturbMode(!perturbMode); if (!perturbMode) setTrajectoryProbeActive(false); }}
-              data-testid="button-perturb-mode"
-              className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${perturbMode ? "bg-white/20 text-white" : ""}`}
-            >
-              <Zap className="h-3 w-3" />
-              Perturb
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => { setTrajectoryProbeActive(!trajectoryProbeActive); if (!trajectoryProbeActive) { setPerturbMode(false); } else { setTrajectoryProbePoint(null); } }}
-              data-testid="button-trajectory-probe"
-              className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${trajectoryProbeActive ? "bg-white/20 text-white" : ""}`}
-            >
-              <Crosshair className="h-3 w-3" />
-              Probe
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setDiagnosticsVisible(!diagnosticsVisible)}
-              data-testid="button-diagnostics"
-              className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${diagnosticsVisible ? "bg-white/20 text-white" : ""}`}
-            >
-              <Gauge className="h-3 w-3" />
-              Diagnostics
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setPerceptualSmoothing(!perceptualSmoothing)}
-              data-testid="button-perceptual-smoothing"
-              className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${perceptualSmoothing ? "bg-white/20 text-white" : ""}`}
-            >
-              <Sparkles className="h-3 w-3" />
-              Smooth
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFieldInspectorEnabled(!fieldInspectorEnabled)}
+                  data-testid="button-field-inspector"
+                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${fieldInspectorEnabled ? "bg-white/20 text-white" : ""}`}
+                >
+                  <Eye className="h-3 w-3" />
+                  Inspector
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Hover over the field to see local values
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setPerturbMode(!perturbMode); if (!perturbMode) setTrajectoryProbeActive(false); }}
+                  data-testid="button-perturb-mode"
+                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${perturbMode ? "bg-white/20 text-white" : ""}`}
+                >
+                  <Zap className="h-3 w-3" />
+                  Perturb
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Click on the field to inject energy at that point
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setTrajectoryProbeActive(!trajectoryProbeActive); if (!trajectoryProbeActive) { setPerturbMode(false); } else { setTrajectoryProbePoint(null); } }}
+                  data-testid="button-trajectory-probe"
+                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${trajectoryProbeActive ? "bg-white/20 text-white" : ""}`}
+                >
+                  <Crosshair className="h-3 w-3" />
+                  Probe
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Pin a point to track its metrics over time
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDiagnosticsVisible(!diagnosticsVisible)}
+                  data-testid="button-diagnostics"
+                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${diagnosticsVisible ? "bg-white/20 text-white" : ""}`}
+                >
+                  <Gauge className="h-3 w-3" />
+                  Diagnostics
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Show real-time stability and energy metrics
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setPerceptualSmoothing(!perceptualSmoothing)}
+                  data-testid="button-perceptual-smoothing"
+                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${perceptualSmoothing ? "bg-white/20 text-white" : ""}`}
+                >
+                  <Sparkles className="h-3 w-3" />
+                  Smooth
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Reduce visual flicker with temporal smoothing
+              </TooltipContent>
+            </Tooltip>
             <div className="w-px h-4 bg-white/20" />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSaveConfiguration}
-              data-testid="button-save-config"
-              className="h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10"
-            >
-              <Save className="h-3 w-3" />
-              Save
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => configInputRef.current?.click()}
-              data-testid="button-load-config"
-              className="h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10"
-            >
-              <Upload className="h-3 w-3" />
-              Load
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSaveConfiguration}
+                  data-testid="button-save-config"
+                  className="h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <Save className="h-3 w-3" />
+                  Save
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Save current settings to a file
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => configInputRef.current?.click()}
+                  data-testid="button-load-config"
+                  className="h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <Upload className="h-3 w-3" />
+                  Load
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Load settings from a saved file
+              </TooltipContent>
+            </Tooltip>
             <input
               ref={configInputRef}
               type="file"
