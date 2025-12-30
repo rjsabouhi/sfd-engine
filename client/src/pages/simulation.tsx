@@ -800,6 +800,7 @@ export default function SimulationPage() {
                 Show real-time stability and energy metrics
               </TooltipContent>
             </Tooltip>
+            <div className="w-px h-4 bg-white/20" />
             {/* Color Map */}
             <Tooltip>
               <TooltipTrigger asChild>
