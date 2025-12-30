@@ -728,6 +728,7 @@ export default function SimulationPage() {
             {/* Right fade indicator */}
             <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-gray-950 to-transparent pointer-events-none z-10" />
             <div className="flex items-center gap-1.5 px-6 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
+            {/* Inspector */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -745,6 +746,61 @@ export default function SimulationPage() {
                 Hover over the field to see local values
               </TooltipContent>
             </Tooltip>
+            {/* Probe */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setTrajectoryProbeActive(!trajectoryProbeActive); if (!trajectoryProbeActive) { setPerturbMode(false); } else { setTrajectoryProbePoint(null); } }}
+                  data-testid="button-trajectory-probe"
+                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${trajectoryProbeActive ? "bg-white/20 text-white" : ""}`}
+                >
+                  <Crosshair className="h-3 w-3" />
+                  Probe
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Pin a point to track its metrics over time
+              </TooltipContent>
+            </Tooltip>
+            {/* Perturb */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setPerturbMode(!perturbMode); if (!perturbMode) setTrajectoryProbeActive(false); }}
+                  data-testid="button-perturb-mode"
+                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${perturbMode ? "bg-white/20 text-white" : ""}`}
+                >
+                  <Zap className="h-3 w-3" />
+                  Perturb
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Click on the field to inject energy at that point
+              </TooltipContent>
+            </Tooltip>
+            {/* Diagnostics */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDiagnosticsVisible(!diagnosticsVisible)}
+                  data-testid="button-diagnostics"
+                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${diagnosticsVisible ? "bg-white/20 text-white" : ""}`}
+                >
+                  <Gauge className="h-3 w-3" />
+                  Diagnostics
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Show real-time stability and energy metrics
+              </TooltipContent>
+            </Tooltip>
+            {/* Color Map */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-1">
@@ -766,40 +822,6 @@ export default function SimulationPage() {
               </TooltipTrigger>
               <TooltipContent side="bottom" className="text-xs">
                 Change field colormap
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => { setPerturbMode(!perturbMode); if (!perturbMode) setTrajectoryProbeActive(false); }}
-                  data-testid="button-perturb-mode"
-                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${perturbMode ? "bg-white/20 text-white" : ""}`}
-                >
-                  <Zap className="h-3 w-3" />
-                  Perturb
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
-                Click on the field to inject energy at that point
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => { setTrajectoryProbeActive(!trajectoryProbeActive); if (!trajectoryProbeActive) { setPerturbMode(false); } else { setTrajectoryProbePoint(null); } }}
-                  data-testid="button-trajectory-probe"
-                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${trajectoryProbeActive ? "bg-white/20 text-white" : ""}`}
-                >
-                  <Crosshair className="h-3 w-3" />
-                  Probe
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
-                Pin a point to track its metrics over time
               </TooltipContent>
             </Tooltip>
             {/* Layers and Blend - only visible in dual view mode */}
@@ -848,7 +870,7 @@ export default function SimulationPage() {
                   </TooltipContent>
                 </Tooltip>
                 {blendMode && (
-                  <div className="flex items-center gap-1.5 w-20">
+                  <div className="flex items-center gap-1.5 w-32">
                     <Slider
                       value={[blendOpacity]}
                       onValueChange={([v]) => setBlendOpacity(v)}
@@ -858,29 +880,13 @@ export default function SimulationPage() {
                       className="w-full"
                       data-testid="slider-blend-opacity"
                     />
-                    <span className="text-[9px] text-white/60 w-6">{Math.round(blendOpacity * 100)}%</span>
+                    <span className="text-[9px] text-white/60 w-8">{Math.round(blendOpacity * 100)}%</span>
                   </div>
                 )}
               </>
             )}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setDiagnosticsVisible(!diagnosticsVisible)}
-                  data-testid="button-diagnostics"
-                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${diagnosticsVisible ? "bg-white/20 text-white" : ""}`}
-                >
-                  <Gauge className="h-3 w-3" />
-                  Diagnostics
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
-                Show real-time stability and energy metrics
-              </TooltipContent>
-            </Tooltip>
             <div className="w-px h-4 bg-white/20" />
+            {/* Save */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -898,6 +904,7 @@ export default function SimulationPage() {
                 Save current settings to a file
               </TooltipContent>
             </Tooltip>
+            {/* Load */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
