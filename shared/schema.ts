@@ -164,6 +164,7 @@ export interface DerivedField {
 
 export const structuralPresets: Record<string, Partial<SimulationParameters>> = {
   "uniform-field": {
+    mode: "standard",
     curvatureGain: 1.0,
     wK: 0.5,
     wT: 0.5,
@@ -172,6 +173,7 @@ export const structuralPresets: Record<string, Partial<SimulationParameters>> = 
     wR: 1.0,
   },
   "high-curvature": {
+    mode: "standard",
     curvatureGain: 8.0,
     wK: 4.0,
     wT: 0.5,
@@ -180,6 +182,7 @@ export const structuralPresets: Record<string, Partial<SimulationParameters>> = 
     wR: 0.3,
   },
   "multi-basin": {
+    mode: "standard",
     couplingWeight: 0.3,
     attractorStrength: 5.0,
     wK: 1.0,
@@ -189,6 +192,7 @@ export const structuralPresets: Record<string, Partial<SimulationParameters>> = 
     wR: 0.2,
   },
   "near-critical": {
+    mode: "standard",
     dt: 0.03,
     curvatureGain: 3.0,
     wK: 2.0,
@@ -198,6 +202,7 @@ export const structuralPresets: Record<string, Partial<SimulationParameters>> = 
     wR: 0.5,
   },
   "transition-edge": {
+    mode: "standard",
     dt: 0.04,
     curvatureGain: 4.0,
     attractorStrength: 4.0,
@@ -208,6 +213,7 @@ export const structuralPresets: Record<string, Partial<SimulationParameters>> = 
     wR: 0.3,
   },
   "entropic-dispersion": {
+    mode: "standard",
     couplingWeight: 0.8,
     redistributionRate: 0.6,
     wK: 0.5,
@@ -217,6 +223,7 @@ export const structuralPresets: Record<string, Partial<SimulationParameters>> = 
     wR: 2.0,
   },
   "post-cooling": {
+    mode: "standard",
     dt: 0.02,
     curvatureGain: 0.8,
     wK: 0.3,
