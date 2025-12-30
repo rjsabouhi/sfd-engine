@@ -179,8 +179,13 @@ export default function SimulationPage() {
   }, [isMobile]);
 
   useEffect(() => {
-    if (showDualView && engineRef.current && derivedType !== "basins") {
-      setDerivedField(engineRef.current.computeDerivedField(derivedType));
+    if (showDualView && engineRef.current) {
+      if (derivedType === "basins") {
+        // Immediately fetch basin map when switching to basins view
+        setBasinMap(engineRef.current.getBasinMap());
+      } else {
+        setDerivedField(engineRef.current.computeDerivedField(derivedType));
+      }
     }
   }, [showDualView, derivedType]);
 
