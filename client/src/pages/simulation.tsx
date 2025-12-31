@@ -295,6 +295,11 @@ export default function SimulationPage() {
     setParams(initialParams);
     const engine = new SFDEngine(initialParams);
     engineRef.current = engine;
+    
+    // Set slower simulation speed on mobile for better viewing
+    if (isMobile) {
+      engine.setSimulationSpeed(8); // 8 steps per second on mobile
+    }
 
     engine.onStateUpdate((newState, newField) => {
       frameCountRef.current += 1;

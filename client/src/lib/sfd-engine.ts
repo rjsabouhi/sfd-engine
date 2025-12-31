@@ -155,6 +155,10 @@ export class SFDEngine {
   private droppedFrames: number = 0;
   private targetFrameTime: number = 16.67; // 60fps target
   
+  // Simulation speed control - steps per second (0 = max speed)
+  private targetStepsPerSecond: number = 0;
+  private lastStepTimestamp: number = 0;
+  
   // Field state hysteresis - stored on engine to survive callback rebindings
   private displayedFieldState: "calm" | "unsettled" | "reorganizing" | "transforming" = "calm";
   private fieldStateHoldUntil: number = 0; // timestamp when state can next change
@@ -1733,8 +1737,15 @@ export class SFDEngine {
       this.lastFrameTime = timestamp;
     }
 
-    this.updateStep();
-    this.notifyUpdate();
+    // Speed control: only update if enough time has passed
+    const stepElapsed = timestamp - this.lastStepTimestamp;
+    const minInterval = this.targetStepsPerSecond > 0 ? (1000 / this.targetStepsPerSecond) : 0;
+    
+    if (stepElapsed >= minInterval) {
+      this.updateStep();
+      this.notifyUpdate();
+      this.lastStepTimestamp = timestamp;
+    }
     
     this.animationId = requestAnimationFrame(this.loop);
   };
@@ -1745,8 +1756,18 @@ export class SFDEngine {
     this.playbackDisplayGrid = null; // Clear playback display to use live grid
     this.isRunning = true;
     this.lastFrameTime = performance.now();
+    this.lastStepTimestamp = performance.now();
     this.frameCount = 0;
     this.animationId = requestAnimationFrame(this.loop);
+  }
+  
+  // Set simulation speed (steps per second). 0 = max speed, 10 = slow, 30 = medium
+  setSimulationSpeed(stepsPerSecond: number): void {
+    this.targetStepsPerSecond = stepsPerSecond;
+  }
+  
+  getSimulationSpeed(): number {
+    return this.targetStepsPerSecond;
   }
 
   stop(): void {
