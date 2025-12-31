@@ -34,7 +34,7 @@ import { defaultParameters, mobileParameters, structuralPresets } from "@shared/
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
 import { getStatusLine, computeFieldState, getFieldStateLabel, type ReactiveEvents, type SimulationState as LanguageSimState, type FieldState } from "@/lib/language";
-import { exportPNGSnapshot, exportAnimationGIF, exportSimulationData, exportMetricsLog, exportStateSnapshot, exportSettingsJSON, exportEventLog, saveConfiguration, loadConfiguration, exportNumPyArray, exportBatchSpec, exportPythonScript, exportOperatorContributions, exportLayersSeparate, exportFullArchive, exportVideoWebM } from "@/lib/export-utils";
+import { exportPNGSnapshot, exportAnimationGIF, exportSimulationData, exportMetricsLog, exportStateSnapshot, exportSettingsJSON, exportEventLog, saveConfiguration, loadConfiguration, exportNumPyArray, exportBatchSpec, exportPythonScript, exportOperatorContributions, exportLayersSeparate, exportFullArchive, exportVideoWebM, exportMobileShareSnapshot } from "@/lib/export-utils";
 import { getSmartViewConfig, type SmartViewConfig } from "@/config/smart-view-map";
 
 export default function SimulationPage() {
@@ -98,6 +98,13 @@ export default function SimulationPage() {
   const [perceptualSmoothing, setPerceptualSmoothing] = useState(true); // Perceptual Safety Layer
   const [metricsPanelCollapsed, setMetricsPanelCollapsed] = useState(false);
   const configInputRef = useRef<HTMLInputElement>(null);
+  
+  // Mobile touch interaction states
+  const [regimeOverlay, setRegimeOverlay] = useState<string | null>(null);
+  const [instabilityFlash, setInstabilityFlash] = useState(false);
+  const [tiltOffset, setTiltOffset] = useState({ x: 0, y: 0 });
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  const regimeOverlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   
   const showDualViewRef = useRef(showDualView);
@@ -532,6 +539,113 @@ export default function SimulationPage() {
     reactiveEvents
   );
 
+  // Mobile: Instability detection flash effect
+  const isHighVariance = state.variance > 0.2;
+  const prevHighVarianceRef = useRef(false);
+  
+  useEffect(() => {
+    if (isMobile && isHighVariance && !prevHighVarianceRef.current && state.isRunning) {
+      setInstabilityFlash(true);
+      const timeout = setTimeout(() => setInstabilityFlash(false), 500);
+      prevHighVarianceRef.current = true;
+      return () => clearTimeout(timeout);
+    }
+    if (!isHighVariance) {
+      prevHighVarianceRef.current = false;
+    }
+  }, [isHighVariance, state.isRunning]);
+
+  // Mobile: Device orientation for tilt parallax
+  useEffect(() => {
+    if (!isMobile) return;
+    
+    const handleOrientation = (e: DeviceOrientationEvent) => {
+      const gamma = e.gamma || 0; // Left-right tilt (-90 to 90)
+      const beta = e.beta || 0;   // Front-back tilt (-180 to 180)
+      
+      // Subtle parallax offset (max 3px)
+      const x = Math.max(-3, Math.min(3, gamma * 0.1));
+      const y = Math.max(-3, Math.min(3, (beta - 45) * 0.1));
+      
+      setTiltOffset({ x, y });
+    };
+    
+    if (typeof DeviceOrientationEvent !== 'undefined') {
+      window.addEventListener('deviceorientation', handleOrientation);
+      return () => window.removeEventListener('deviceorientation', handleOrientation);
+    }
+  }, []);
+
+  // Mobile touch handlers for field perturbation and swipe regime change
+  const handleMobileTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+    }
+  }, []);
+
+  const handleMobileTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+    const deltaTime = Date.now() - touchStartRef.current.time;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+    
+    // Swipe detection: horizontal swipe for regime change
+    if (absX > 80 && absX > absY * 2 && deltaTime < 400) {
+      const mobileRegimeKeys = ["uniform-field", "high-curvature", "criticality-cascade", "fractal-corridor", "cosmic-web"];
+      const mobileRegimeLabels = ["Equilibrium", "Kappa-Shear", "Tension", "Fractal", "Collapse"];
+      const currentIdx = mobileRegimeKeys.findIndex(key => {
+        const preset = structuralPresets[key as keyof typeof structuralPresets];
+        return preset && preset.wK === params.wK && preset.wT === params.wT;
+      });
+      
+      let newIdx = currentIdx;
+      if (deltaX > 0) {
+        // Swipe right = previous regime
+        newIdx = currentIdx > 0 ? currentIdx - 1 : mobileRegimeKeys.length - 1;
+      } else {
+        // Swipe left = next regime
+        newIdx = (currentIdx + 1) % mobileRegimeKeys.length;
+      }
+      
+      const newPreset = structuralPresets[mobileRegimeKeys[newIdx] as keyof typeof structuralPresets];
+      if (newPreset) {
+        const wasRunning = state.isRunning;
+        handleParamsChange(newPreset);
+        
+        // Show regime overlay
+        if (regimeOverlayTimeoutRef.current) {
+          clearTimeout(regimeOverlayTimeoutRef.current);
+        }
+        setRegimeOverlay(mobileRegimeLabels[newIdx] + " Mode");
+        regimeOverlayTimeoutRef.current = setTimeout(() => setRegimeOverlay(null), 600);
+      }
+    }
+    // Tap detection: quick tap for field perturbation  
+    else if (absX < 20 && absY < 20 && deltaTime < 200 && mobileActiveTab === null) {
+      // Convert touch position to field coordinates
+      const rect = (e.target as HTMLElement).getBoundingClientRect();
+      const relX = (touch.clientX - rect.left) / rect.width;
+      const relY = (touch.clientY - rect.top) / rect.height;
+      
+      // Only perturb if within the field area (roughly centered)
+      if (relX > 0.05 && relX < 0.95 && relY > 0.1 && relY < 0.85) {
+        const fieldX = Math.floor(relX * (field?.width || 200));
+        const fieldY = Math.floor(relY * (field?.height || 200));
+        
+        if (engineRef.current) {
+          engineRef.current.perturbField(fieldX, fieldY, 0.2, 8);
+        }
+      }
+    }
+    
+    touchStartRef.current = null;
+  }, [params, state.isRunning, mobileActiveTab, field]);
+
   if (isMobile) {
     const mobileRegimes = [
       { key: "uniform-field", symbol: "E", label: "Equilibrium", description: "Balanced field" },
@@ -556,8 +670,16 @@ export default function SimulationPage() {
 
     return (
       <div className="relative h-screen w-screen overflow-hidden bg-gray-950">
-        {/* Full-screen canvas */}
-        <div className="absolute inset-0">
+        {/* Full-screen canvas with touch handlers and tilt parallax */}
+        <div 
+          className="absolute inset-0"
+          onTouchStart={handleMobileTouchStart}
+          onTouchEnd={handleMobileTouchEnd}
+          style={{
+            transform: `translate(${tiltOffset.x}px, ${tiltOffset.y}px)`,
+            transition: 'transform 0.1s ease-out',
+          }}
+        >
           <VisualizationCanvas 
             field={field} 
             colormap={colormap} 
@@ -565,6 +687,31 @@ export default function SimulationPage() {
             perceptualSmoothing={perceptualSmoothing}
           />
         </div>
+
+        {/* Instability flash overlay */}
+        {instabilityFlash && (
+          <div 
+            className="absolute inset-0 pointer-events-none z-50"
+            style={{
+              boxShadow: 'inset 0 0 60px 20px rgba(239, 68, 68, 0.4)',
+              animation: 'pulse 0.5s ease-out',
+            }}
+          />
+        )}
+
+        {/* Regime change overlay */}
+        {regimeOverlay && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
+            <div 
+              className="bg-black/70 backdrop-blur-md px-6 py-3 rounded-xl border border-white/20"
+              style={{
+                animation: 'fadeInOut 0.6s ease-out forwards',
+              }}
+            >
+              <span className="text-lg font-semibold text-white">{regimeOverlay}</span>
+            </div>
+          </div>
+        )}
 
         {/* Top Bar - dark, minimal */}
         <div className="absolute top-0 left-0 right-0 z-20 bg-gray-950/80 backdrop-blur-md border-b border-white/5">
@@ -845,8 +992,16 @@ export default function SimulationPage() {
             {/* Share button */}
             <button
               onClick={() => {
-                const canvas = document.querySelector("canvas");
-                if (canvas) exportPNGSnapshot(canvas);
+                const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
+                if (canvas) {
+                  const regimeLabel = mobileRegimes.find(r => r.key === currentRegimeKey)?.label || "Equilibrium";
+                  exportMobileShareSnapshot(canvas, {
+                    regime: regimeLabel,
+                    stability: stabilityState,
+                    curvature: operatorContributions.curvature,
+                    energy: state.energy,
+                  });
+                }
               }}
               className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
               data-testid="button-share-mobile"

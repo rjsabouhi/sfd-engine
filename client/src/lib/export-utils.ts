@@ -33,6 +33,86 @@ export async function exportPNGSnapshot(canvas: HTMLCanvasElement | null): Promi
   return true;
 }
 
+export interface MobileShareOptions {
+  regime: string;
+  stability: string;
+  curvature: number;
+  energy: number;
+}
+
+export async function exportMobileShareSnapshot(
+  canvas: HTMLCanvasElement | null,
+  options: MobileShareOptions
+): Promise<boolean> {
+  if (!canvas) return false;
+  
+  const size = 1080;
+  const exportCanvas = document.createElement("canvas");
+  exportCanvas.width = size;
+  exportCanvas.height = size;
+  const ctx = exportCanvas.getContext("2d");
+  if (!ctx) return false;
+  
+  ctx.fillStyle = "#0a0a0f";
+  ctx.fillRect(0, 0, size, size);
+  
+  const fieldSize = size - 120;
+  const offset = 60;
+  ctx.drawImage(canvas, offset, offset, fieldSize, fieldSize);
+  
+  ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+  ctx.fillRect(offset, offset, fieldSize, 40);
+  ctx.fillRect(offset, offset + fieldSize - 50, fieldSize, 50);
+  
+  ctx.font = "bold 18px Inter, system-ui, sans-serif";
+  ctx.fillStyle = "#ffffff";
+  ctx.textAlign = "left";
+  ctx.fillText(options.regime.toUpperCase(), offset + 12, offset + 26);
+  
+  const stabilityColor = options.stability === "Stable" ? "#4ade80" : 
+                         options.stability === "Active" ? "#facc15" : "#f87171";
+  ctx.fillStyle = stabilityColor;
+  ctx.textAlign = "right";
+  ctx.fillText(options.stability, offset + fieldSize - 12, offset + 26);
+  
+  ctx.font = "12px 'JetBrains Mono', monospace";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+  ctx.textAlign = "left";
+  ctx.fillText(`\u03BA ${options.curvature.toFixed(3)}  \u03B5 ${options.energy.toFixed(3)}`, offset + 12, offset + fieldSize - 18);
+  
+  ctx.font = "bold 14px Inter, system-ui, sans-serif";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+  ctx.textAlign = "right";
+  ctx.fillText("SFD Engine \u2014 Structural Field Explorer", offset + fieldSize - 12, offset + fieldSize - 18);
+  
+  const blob = await new Promise<Blob | null>((resolve) => {
+    exportCanvas.toBlob((b) => resolve(b), "image/png");
+  });
+  
+  if (!blob) return false;
+  
+  if (navigator.share && navigator.canShare) {
+    try {
+      const file = new File([blob], `sfd-${getTimestamp()}.png`, { type: "image/png" });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "SFD Engine Snapshot",
+          text: `${options.regime} mode \u2014 ${options.stability}`,
+        });
+        return true;
+      }
+    } catch (e) {
+      if ((e as Error).name !== "AbortError") {
+        console.error("Share failed:", e);
+      }
+    }
+  }
+  
+  downloadBlob(blob, `sfd-snapshot-${getTimestamp()}.png`);
+  return true;
+}
+
 export function saveConfiguration(
   parameters: SimulationParameters,
   regime: string,
