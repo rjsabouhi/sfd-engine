@@ -51,12 +51,14 @@ function MobileOverlayCanvas({
   derivedField, 
   basinMap, 
   opacity,
-  frameVersion
+  frameVersion,
+  transform,
 }: { 
   derivedField: DerivedField | null; 
   basinMap: BasinMap | null; 
   opacity: number;
   frameVersion: number;
+  transform?: { zoom: number; panX: number; panY: number };
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [visualSize, setVisualSize] = useState(0);
@@ -131,13 +133,19 @@ function MobileOverlayCanvas({
     }
   }, [derivedField, basinMap, frameVersion]);
 
+  // Apply same transform as base canvas for synchronized zoom/pan
+  const zoom = transform?.zoom ?? 1;
+  const panX = transform?.panX ?? 0;
+  const panY = transform?.panY ?? 0;
+
   return (
     <canvas
       ref={canvasRef}
       className="absolute top-1/2 left-1/2 pointer-events-none rounded-md"
       style={{ 
         opacity, 
-        transform: 'translate(-50%, -50%)',
+        transform: `translate(-50%, -50%) translate(${panX}px, ${panY}px) scale(${zoom})`,
+        transformOrigin: 'center center',
         width: visualSize || 'auto',
         height: visualSize || 'auto',
       }}
@@ -203,6 +211,7 @@ export default function SimulationPage() {
   const [trajectoryProbePoint, setTrajectoryProbePoint] = useState<{ x: number; y: number } | null>(null);
   const [blendMode, setBlendMode] = useState(false);
   const [blendOpacity, setBlendOpacity] = useState(0.5);
+  const [canvasTransform, setCanvasTransform] = useState<{ zoom: number; panX: number; panY: number }>({ zoom: 1, panX: 0, panY: 0 });
   const [perceptualSmoothing, setPerceptualSmoothing] = useState(true); // Perceptual Safety Layer
   const [metricsPanelCollapsed, setMetricsPanelCollapsed] = useState(false);
   const configInputRef = useRef<HTMLInputElement>(null);
@@ -832,6 +841,7 @@ export default function SimulationPage() {
             colormap={colormap} 
             basinMap={basinMap}
             perceptualSmoothing={perceptualSmoothing}
+            onTransformChange={setCanvasTransform}
           />
           
           {/* Overlay layer when a projection is selected */}
@@ -841,6 +851,7 @@ export default function SimulationPage() {
               basinMap={mobileLayers[mobileLayerIndex].key === "basins" ? basinMap : null}
               opacity={blendOpacity}
               frameVersion={state.step}
+              transform={canvasTransform}
             />
           )}
         </div>

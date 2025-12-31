@@ -1,6 +1,12 @@
 import { useRef, useEffect, useCallback, useState } from "react";
 import type { FieldData, BasinMap } from "@shared/schema";
 
+export interface CanvasTransform {
+  zoom: number;
+  panX: number;
+  panY: number;
+}
+
 interface VisualizationCanvasProps {
   field: FieldData | null;
   colormap?: "inferno" | "viridis" | "cividis";
@@ -12,6 +18,7 @@ interface VisualizationCanvasProps {
   perturbMode?: boolean;
   trajectoryProbePoint?: { x: number; y: number } | null;
   perceptualSmoothing?: boolean;
+  onTransformChange?: (transform: CanvasTransform) => void;
 }
 
 // Temporal smoothing buffer for perceptual safety
@@ -108,6 +115,7 @@ export function VisualizationCanvas({
   perturbMode = false,
   trajectoryProbePoint,
   perceptualSmoothing = false,
+  onTransformChange,
 }: VisualizationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -236,6 +244,13 @@ export function VisualizationCanvas({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [render]);
+
+  // Report transform changes to parent for overlay synchronization
+  useEffect(() => {
+    if (onTransformChange) {
+      onTransformChange({ zoom, panX: pan.x, panY: pan.y });
+    }
+  }, [zoom, pan, onTransformChange]);
 
   const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
     e.preventDefault();
