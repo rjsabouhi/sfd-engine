@@ -1457,42 +1457,6 @@ export default function SimulationPage() {
                 </button>
               </div>
 
-              {/* Record Button Row */}
-              <div className="flex items-center justify-center gap-4 mb-4 pt-2 border-t border-white/10">
-                <button
-                  onClick={isRecording ? handleStopRecording : handleStartRecording}
-                  disabled={isRecording && recordingProgress >= 1}
-                  className={`flex-1 h-12 rounded-xl flex items-center justify-center gap-3 transition-all active:scale-98 ${
-                    isRecording
-                      ? 'bg-red-500/30 border-2 border-red-400/50'
-                      : 'bg-white/10 border-2 border-white/20'
-                  }`}
-                  data-testid="button-record-mobile"
-                  aria-label={isRecording ? "Stop recording" : "Record 12s video"}
-                >
-                  {isRecording ? (
-                    <>
-                      <Square className="h-4 w-4 text-red-400 fill-red-400" />
-                      <span className="text-sm font-medium text-red-400">
-                        Recording... {Math.round(recordingProgress * 12)}s
-                      </span>
-                      {/* Progress bar */}
-                      <div className="flex-1 max-w-20 h-1.5 bg-white/20 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-red-400 transition-all duration-100"
-                          style={{ width: `${recordingProgress * 100}%` }}
-                        />
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <Circle className="h-4 w-4 text-red-400 fill-red-400" />
-                      <span className="text-sm font-medium text-white/80">Record 12s Video</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
               {/* Timeline Scrubbing Bar */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
@@ -1694,6 +1658,31 @@ export default function SimulationPage() {
             >
               <Share2 className="h-5 w-5 text-white/80" />
               <span className="text-[9px] text-white/60 mt-0.5">Share</span>
+            </button>
+
+            {/* Record button */}
+            <button
+              onClick={isRecording ? handleStopRecording : handleStartRecording}
+              disabled={isRecording && recordingProgress >= 1}
+              className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                isRecording
+                  ? 'bg-red-500/20 border-2 border-red-500/50'
+                  : 'bg-white/10 border-2 border-white/20'
+              }`}
+              data-testid="button-record-mobile"
+              aria-label={isRecording ? "Stop recording" : "Record video"}
+            >
+              {isRecording ? (
+                <>
+                  <Square className="h-4 w-4 text-red-400 fill-red-400" />
+                  <span className="text-[9px] text-red-400 mt-0.5">{Math.round(recordingProgress * 12)}s</span>
+                </>
+              ) : (
+                <>
+                  <Circle className="h-5 w-5 text-red-400 fill-red-400" />
+                  <span className="text-[9px] text-white/60 mt-0.5">Record</span>
+                </>
+              )}
             </button>
           </div>
         </div>
