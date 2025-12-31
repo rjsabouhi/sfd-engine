@@ -470,7 +470,7 @@ export default function SimulationPage() {
     }
   }, []);
 
-  const handleSaveVideo = useCallback(() => {
+  const handleSaveVideo = useCallback(async () => {
     if (!recordedVideoBlob) {
       console.log("[Save] No blob to save");
       return;
@@ -478,25 +478,41 @@ export default function SimulationPage() {
     console.log("[Save] Saving blob:", recordedVideoBlob.type, recordedVideoBlob.size);
     const isGif = recordedVideoBlob.type.includes("gif");
     const extension = isGif ? "gif" : recordedVideoBlob.type.includes("mp4") ? "mp4" : "webm";
-    const url = URL.createObjectURL(recordedVideoBlob);
+    const filename = `sfd-simulation-${Date.now()}.${extension}`;
     
-    // Use a more reliable download approach for iOS
+    // On iOS, use the share API which opens the native share sheet
+    // Users can then "Save Image" from there
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    
+    if (isIOS && navigator.share && navigator.canShare) {
+      try {
+        const file = new File([recordedVideoBlob], filename, { type: recordedVideoBlob.type });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: "SFD Animation"
+          });
+          setShowVideoDialog(false);
+          setRecordedVideoBlob(null);
+          return;
+        }
+      } catch (err) {
+        // User cancelled - that's fine, keep dialog open
+        console.log("[Save] Share cancelled:", err);
+        return;
+      }
+    }
+    
+    // Fallback for non-iOS: standard download
+    const url = URL.createObjectURL(recordedVideoBlob);
     const a = document.createElement("a");
     a.style.display = "none";
     a.href = url;
-    a.download = `sfd-simulation-${Date.now()}.${extension}`;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
+    a.download = filename;
     document.body.appendChild(a);
-    
-    // Use setTimeout to ensure the element is in the DOM
-    setTimeout(() => {
-      a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 100);
-    }, 0);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
     
     setShowVideoDialog(false);
     setRecordedVideoBlob(null);
@@ -1607,16 +1623,16 @@ export default function SimulationPage() {
                   </div>
                   
                   <div className="space-y-3">
-                    {/* Save Button - always available */}
+                    {/* Save/Share Button - on iOS this opens share sheet */}
                     <button
                       onClick={handleSaveVideo}
                       className="w-full h-12 rounded-xl bg-green-500/20 border-2 border-green-400/50 flex items-center justify-center gap-3 active:bg-green-500/30 transition-colors"
                       data-testid="button-save-video"
-                      aria-label="Save to device"
+                      aria-label="Save to photos"
                     >
                       <Download className="h-5 w-5 text-green-400" />
                       <span className="text-sm font-medium text-green-400">
-                        Save {recordedVideoBlob.type.includes("gif") ? "GIF" : "Video"}
+                        Save to Photos
                       </span>
                     </button>
                     
@@ -1628,7 +1644,7 @@ export default function SimulationPage() {
                       aria-label="Share"
                     >
                       <Share2 className="h-5 w-5 text-blue-400" />
-                      <span className="text-sm font-medium text-blue-400">Share</span>
+                      <span className="text-sm font-medium text-blue-400">Share to Apps</span>
                     </button>
                     
                     {/* Done */}
