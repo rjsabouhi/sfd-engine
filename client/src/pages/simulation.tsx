@@ -1516,28 +1516,28 @@ export default function SimulationPage() {
         {/* Video Recorded Dialog */}
         {showVideoDialog && recordedVideoBlob && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-            <div className="mx-6 w-full max-w-sm bg-gray-900 rounded-2xl border border-white/20 p-6 shadow-2xl">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 border-2 border-green-500/50 flex items-center justify-center">
-                  <Circle className="h-8 w-8 text-green-400 fill-green-400" />
-                </div>
+            <div className="mx-4 w-full max-w-sm bg-gray-900 rounded-2xl border border-white/20 p-5 shadow-2xl">
+              <div className="text-center mb-4">
                 <h3 className="text-lg font-semibold text-white mb-1">Video Ready</h3>
-                <p className="text-sm text-white/60">12 seconds of simulation captured</p>
+                <p className="text-xs text-white/60">Hold on video to save to photos</p>
+              </div>
+              
+              {/* Video Preview - users can long-press to save */}
+              <div className="relative mb-4 rounded-xl overflow-hidden bg-black">
+                <video
+                  src={URL.createObjectURL(recordedVideoBlob)}
+                  controls
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full aspect-square object-cover"
+                  data-testid="video-preview"
+                />
               </div>
               
               <div className="space-y-3">
-                {/* Save/Download Button */}
-                <button
-                  onClick={handleSaveVideo}
-                  className="w-full h-12 rounded-xl bg-white/10 border-2 border-white/20 flex items-center justify-center gap-3 active:bg-white/20 transition-colors"
-                  data-testid="button-save-video"
-                  aria-label="Save video to device"
-                >
-                  <Download className="h-5 w-5 text-white/80" />
-                  <span className="text-sm font-medium text-white/80">Save to Device</span>
-                </button>
-                
-                {/* Share Button */}
+                {/* Share Button - primary action */}
                 <button
                   onClick={handleShareVideo}
                   className="w-full h-12 rounded-xl bg-blue-500/20 border-2 border-blue-400/50 flex items-center justify-center gap-3 active:bg-blue-500/30 transition-colors"
@@ -1548,17 +1548,17 @@ export default function SimulationPage() {
                   <span className="text-sm font-medium text-blue-400">Share Video</span>
                 </button>
                 
-                {/* Cancel */}
+                {/* Done */}
                 <button
                   onClick={() => {
                     setShowVideoDialog(false);
                     setRecordedVideoBlob(null);
                   }}
                   className="w-full h-10 rounded-xl flex items-center justify-center active:bg-white/10 transition-colors"
-                  data-testid="button-cancel-video"
-                  aria-label="Cancel"
+                  data-testid="button-done-video"
+                  aria-label="Done"
                 >
-                  <span className="text-sm text-white/50">Cancel</span>
+                  <span className="text-sm text-white/50">Done</span>
                 </button>
               </div>
             </div>
