@@ -534,18 +534,22 @@ export default function SimulationPage() {
 
   if (isMobile) {
     const mobileRegimes = [
-      { key: "uniform-field", label: "Standard Equilibrium", description: "Balanced field with minimal dynamics" },
-      { key: "high-curvature", label: "Kappa-Shear Drift", description: "Curvature-driven flow patterns" },
-      { key: "criticality-cascade", label: "Boundary Tension Mode", description: "Tension-dominated evolution" },
-      { key: "fractal-corridor", label: "High-Curvature Cascade", description: "Rapid structural formation" },
-      { key: "cosmic-web", label: "Structural Collapse", description: "Warning: High instability regime" },
+      { key: "uniform-field", symbol: "E", label: "Equilibrium", description: "Balanced field" },
+      { key: "high-curvature", symbol: "κ", label: "Kappa-Shear", description: "Curvature flow" },
+      { key: "criticality-cascade", symbol: "T", label: "Tension", description: "Tension mode" },
+      { key: "fractal-corridor", symbol: "F", label: "Fractal", description: "Rapid formation" },
+      { key: "cosmic-web", symbol: "C", label: "Collapse", description: "High instability" },
     ];
 
     const colorMaps = [
-      { key: "viridis", label: "Viridis", description: "Perceptually uniform blue-green-yellow" },
-      { key: "inferno", label: "Inferno", description: "High contrast purple-red-yellow" },
-      { key: "cividis", label: "Cividis", description: "Colorblind-friendly blue-yellow" },
+      { key: "viridis" as const, symbol: "V", label: "Viridis" },
+      { key: "inferno" as const, symbol: "I", label: "Inferno" },
+      { key: "cividis" as const, symbol: "C", label: "Cividis" },
     ];
+
+    const currentRegimeKey = Object.entries(structuralPresets).find(
+      ([_, preset]) => preset.wK === params.wK && preset.wT === params.wT
+    )?.[0] || "uniform-field";
 
     const stabilityState = state.variance < 0.05 ? "Stable" : state.variance < 0.15 ? "Active" : "Unstable";
     const stabilityColor = state.variance < 0.05 ? "text-green-400" : state.variance < 0.15 ? "text-yellow-400" : "text-red-400";
@@ -601,10 +605,10 @@ export default function SimulationPage() {
           </div>
         </div>
 
-        {/* Main Field Window - no overlays when params is open */}
+        {/* Main Field Window - no overlays when any panel is open */}
         <div className="absolute inset-x-4 top-20 bottom-36 z-10 flex items-center justify-center">
-          {/* Floating metrics tag - hidden when params panel is open */}
-          {mobileActiveTab !== "params" && (
+          {/* Floating metrics tag - hidden when any panel is open */}
+          {!mobileActiveTab && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
               <div className="bg-black/70 backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-3">
                 <span className={`text-xs font-medium ${stabilityColor}`} data-testid="text-state-mobile">
@@ -623,12 +627,88 @@ export default function SimulationPage() {
           )}
         </div>
 
-        {/* Footer notice - hidden when params panel is open */}
-        {mobileActiveTab !== "params" && (
+        {/* Footer notice - hidden when any panel is open */}
+        {!mobileActiveTab && (
           <div className="absolute left-0 right-0 z-20 pointer-events-none bottom-28">
             <p className="text-center text-[10px] text-white/30 px-8">
               For full dual-field simulation and diagnostics, visit the desktop SFD Engine.
             </p>
+          </div>
+        )}
+
+        {/* Inline Regimes Panel - appears when Regimes is active */}
+        {mobileActiveTab === "regimes" && (
+          <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
+            <div className="mx-4 bg-gray-950/95 backdrop-blur-xl rounded-2xl border border-white/10 p-4">
+              <div className="flex items-center justify-center gap-3">
+                {mobileRegimes.map((regime) => (
+                  <button
+                    key={regime.key}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (structuralPresets[regime.key]) {
+                        handleParamsChange(structuralPresets[regime.key]);
+                        const smartConfig = getSmartViewConfig(regime.key);
+                        if (smartConfig) {
+                          handleSmartViewApply(smartConfig);
+                        }
+                      }
+                    }}
+                    className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                      currentRegimeKey === regime.key
+                        ? 'bg-purple-500/30 border-2 border-purple-400'
+                        : 'bg-white/10 border-2 border-white/20 active:bg-white/20'
+                    }`}
+                    data-testid={`button-regime-${regime.key}-mobile`}
+                    aria-label={regime.label}
+                  >
+                    <span className={`text-base font-semibold ${currentRegimeKey === regime.key ? 'text-purple-400' : 'text-white/80'}`}>
+                      {regime.symbol}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <p className="text-center text-[11px] text-white/50 mt-3">
+                {mobileRegimes.find(r => r.key === currentRegimeKey)?.label || "Custom"} - {mobileRegimes.find(r => r.key === currentRegimeKey)?.description || "User defined"}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Inline Colors Panel - appears when Colors is active */}
+        {mobileActiveTab === "colors" && (
+          <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
+            <div className="mx-4 bg-gray-950/95 backdrop-blur-xl rounded-2xl border border-white/10 p-4">
+              <div className="flex items-center justify-center gap-4">
+                {colorMaps.map((cm) => (
+                  <button
+                    key={cm.key}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setColormap(cm.key);
+                    }}
+                    className={`w-12 h-12 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                      colormap === cm.key
+                        ? 'bg-cyan-500/30 border-2 border-cyan-400'
+                        : 'bg-white/10 border-2 border-white/20 active:bg-white/20'
+                    }`}
+                    data-testid={`button-colormap-${cm.key}-mobile`}
+                    aria-label={cm.label}
+                  >
+                    <span className={`text-base font-semibold ${colormap === cm.key ? 'text-cyan-400' : 'text-white/80'}`}>
+                      {cm.symbol}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <p className="text-center text-[11px] text-white/50 mt-3">
+                {colorMaps.find(c => c.key === colormap)?.label || "Viridis"}
+              </p>
+            </div>
           </div>
         )}
 
@@ -730,92 +810,35 @@ export default function SimulationPage() {
               </span>
             </button>
 
-            {/* Regimes button */}
-            <Sheet open={mobileActiveTab === "regimes"} onOpenChange={(open) => setMobileActiveTab(open ? "regimes" : null)}>
-              <SheetTrigger asChild>
-                <button
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
-                  data-testid="button-regimes-mobile"
-                  aria-label="Choose dynamic regime"
-                >
-                  <Zap className="h-5 w-5 text-white/80" />
-                  <span className="text-[9px] text-white/60 mt-0.5">Regimes</span>
-                </button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-auto max-h-[60vh] bg-gray-900/95 backdrop-blur-xl border-t border-white/10 rounded-t-2xl">
-                <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-                <SheetHeader className="pb-4">
-                  <SheetTitle className="text-white text-center">Choose a Dynamic Regime</SheetTitle>
-                </SheetHeader>
-                <div className="space-y-2 px-2 pb-6">
-                  {mobileRegimes.map((regime) => (
-                    <button
-                      key={regime.key}
-                      onClick={() => {
-                        if (structuralPresets[regime.key]) {
-                          handleParamsChange(structuralPresets[regime.key]);
-                          const smartConfig = getSmartViewConfig(regime.key);
-                          if (smartConfig) {
-                            handleSmartViewApply(smartConfig);
-                          }
-                        }
-                        setMobileActiveTab(null);
-                      }}
-                      className="w-full text-left px-4 py-3.5 min-h-[52px] rounded-lg bg-white/5 active:bg-white/15 transition-colors border border-white/10"
-                      data-testid={`button-regime-${regime.key}-mobile`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-white/90">{regime.label}</span>
-                        {regime.key === "cosmic-web" && (
-                          <span className="text-[10px] text-red-400 font-medium">(Warning!)</span>
-                        )}
-                      </div>
-                      <p className="text-[11px] text-white/50 mt-0.5">{regime.description}</p>
-                    </button>
-                  ))}
-                </div>
-              </SheetContent>
-            </Sheet>
+            {/* Regimes button - toggles inline regime controls */}
+            <button
+              onClick={() => setMobileActiveTab(mobileActiveTab === "regimes" ? null : "regimes")}
+              className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                mobileActiveTab === "regimes" 
+                  ? 'bg-purple-500/20 border-2 border-purple-500/50' 
+                  : 'bg-white/10 border-2 border-white/20'
+              }`}
+              data-testid="button-regimes-mobile"
+              aria-label="Choose dynamic regime"
+            >
+              <Zap className={`h-5 w-5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/80'}`} />
+              <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/60'}`}>Regimes</span>
+            </button>
 
-            {/* Colors button */}
-            <Sheet open={mobileActiveTab === "colors"} onOpenChange={(open) => setMobileActiveTab(open ? "colors" : null)}>
-              <SheetTrigger asChild>
-                <button
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
-                  data-testid="button-colors-mobile"
-                  aria-label="Choose color map"
-                >
-                  <Palette className="h-5 w-5 text-white/80" />
-                  <span className="text-[9px] text-white/60 mt-0.5">Colors</span>
-                </button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-auto max-h-[50vh] bg-gray-900/95 backdrop-blur-xl border-t border-white/10 rounded-t-2xl">
-                <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-                <SheetHeader className="pb-4">
-                  <SheetTitle className="text-white text-center">Color Maps</SheetTitle>
-                </SheetHeader>
-                <div className="space-y-2 px-2 pb-6">
-                  {colorMaps.map((cm) => (
-                    <button
-                      key={cm.key}
-                      onClick={() => {
-                        setColormap(cm.key as "inferno" | "viridis" | "cividis");
-                        setMobileActiveTab(null);
-                      }}
-                      className={`w-full text-left px-4 py-3.5 min-h-[52px] rounded-lg transition-colors border ${
-                        colormap === cm.key 
-                          ? 'bg-white/15 border-white/30' 
-                          : 'bg-white/5 border-white/10 active:bg-white/15'
-                      }`}
-                      data-testid={`button-colormap-${cm.key}-mobile`}
-                    >
-                      <span className="text-sm font-medium text-white/90">{cm.label}</span>
-                      <p className="text-[11px] text-white/50 mt-0.5">{cm.description}</p>
-                    </button>
-                  ))}
-                </div>
-              </SheetContent>
-            </Sheet>
+            {/* Colors button - toggles inline color controls */}
+            <button
+              onClick={() => setMobileActiveTab(mobileActiveTab === "colors" ? null : "colors")}
+              className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                mobileActiveTab === "colors" 
+                  ? 'bg-cyan-500/20 border-2 border-cyan-500/50' 
+                  : 'bg-white/10 border-2 border-white/20'
+              }`}
+              data-testid="button-colors-mobile"
+              aria-label="Choose color map"
+            >
+              <Palette className={`h-5 w-5 ${mobileActiveTab === "colors" ? 'text-cyan-400' : 'text-white/80'}`} />
+              <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "colors" ? 'text-cyan-400' : 'text-white/60'}`}>Colors</span>
+            </button>
 
             {/* Params button - toggles inline operator controls */}
             <button
