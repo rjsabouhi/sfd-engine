@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal, Circle, Square } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal, Circle, Square } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -1483,25 +1483,60 @@ export default function SimulationPage() {
               </div>
 
               {/* Timeline Scrubbing Bar */}
-              <div className="space-y-2">
+              <div className="space-y-3 pt-2 border-t border-white/10">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-white/60">Frame</span>
                   <span className="font-mono text-green-400">
                     {currentHistoryIndex + 1} / {historyLength || 1}
                   </span>
                 </div>
-                <Slider
-                  value={[currentHistoryIndex]}
-                  onValueChange={([v]) => {
-                    if (state.isRunning) handlePause();
-                    handleSeekFrame(v);
-                  }}
-                  min={0}
-                  max={Math.max(0, historyLength - 1)}
-                  step={1}
-                  className="w-full"
-                  data-testid="slider-timeline-mobile"
-                />
+                
+                {/* Slider with frame nudge buttons */}
+                <div className="flex items-center gap-3">
+                  {/* Back 10 frames */}
+                  <button
+                    onClick={() => {
+                      if (state.isRunning) handlePause();
+                      handleSeekFrame(Math.max(0, currentHistoryIndex - 10));
+                    }}
+                    className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                    data-testid="button-back-10-mobile"
+                    aria-label="Back 10 frames"
+                  >
+                    <ChevronLeft className="h-5 w-5 text-white/70" />
+                  </button>
+                  
+                  {/* Slider */}
+                  <div className="flex-1">
+                    <Slider
+                      value={[currentHistoryIndex]}
+                      onValueChange={([v]) => {
+                        if (state.isRunning) handlePause();
+                        handleSeekFrame(v);
+                      }}
+                      min={0}
+                      max={Math.max(0, historyLength - 1)}
+                      step={1}
+                      size="mobile"
+                      className="w-full"
+                      data-testid="slider-timeline-mobile"
+                    />
+                  </div>
+                  
+                  {/* Forward 10 frames */}
+                  <button
+                    onClick={() => {
+                      if (state.isRunning) handlePause();
+                      handleSeekFrame(Math.min(historyLength - 1, currentHistoryIndex + 10));
+                    }}
+                    className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                    data-testid="button-forward-10-mobile"
+                    aria-label="Forward 10 frames"
+                  >
+                    <ChevronRight className="h-5 w-5 text-white/70" />
+                  </button>
+                </div>
+                
                 {/* Tick marks */}
                 <div className="flex justify-between px-0.5">
                   {Array.from({ length: 11 }).map((_, i) => (
