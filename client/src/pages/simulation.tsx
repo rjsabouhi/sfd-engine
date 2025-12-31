@@ -57,6 +57,7 @@ export default function SimulationPage() {
   const [hasUserSelectedColormap, setHasUserSelectedColormap] = useState(false);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [mobileActiveTab, setMobileActiveTab] = useState<string | null>(null);
+  const [mobileSelectedOperator, setMobileSelectedOperator] = useState<"wK" | "wT" | "wC" | "wA" | "wR">("wK");
   const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("structural");
     
   const [operatorContributions, setOperatorContributions] = useState<OperatorContributions>({
@@ -621,13 +622,82 @@ export default function SimulationPage() {
         </div>
 
         {/* Footer notice */}
-        <div className="absolute bottom-28 left-0 right-0 z-20 pointer-events-none">
+        <div className={`absolute left-0 right-0 z-20 pointer-events-none transition-all ${mobileActiveTab === "params" ? 'bottom-48' : 'bottom-28'}`}>
           <p className="text-center text-[10px] text-white/30 px-8">
             For full dual-field simulation and diagnostics, visit the desktop SFD Engine.
           </p>
         </div>
 
-        {/* Primary Control Strip - 4 circular buttons */}
+        {/* Inline Operator Controls - appears when Params is active */}
+        {mobileActiveTab === "params" && (
+          <div className="absolute bottom-20 left-0 right-0 z-25 pb-safe">
+            <div className="mx-4 bg-gray-950/95 backdrop-blur-xl rounded-2xl border border-white/10 p-4">
+              {/* 5 Operator Circles */}
+              <div className="flex items-center justify-center gap-4 mb-4">
+                {([
+                  { key: "wK" as const, symbol: "κ", label: "Curvature" },
+                  { key: "wT" as const, symbol: "τ", label: "Tension" },
+                  { key: "wC" as const, symbol: "γ", label: "Coupling" },
+                  { key: "wA" as const, symbol: "α", label: "Attractor" },
+                  { key: "wR" as const, symbol: "ρ", label: "Redistrib" },
+                ]).map((op) => (
+                  <button
+                    key={op.key}
+                    onClick={() => setMobileSelectedOperator(op.key)}
+                    className={`w-12 h-12 rounded-full flex flex-col items-center justify-center transition-all ${
+                      mobileSelectedOperator === op.key
+                        ? 'bg-amber-500/20 border-2 border-amber-400 ring-2 ring-amber-400/30'
+                        : 'bg-white/10 border-2 border-white/20'
+                    }`}
+                    data-testid={`button-operator-${op.key}-mobile`}
+                    aria-label={`Select ${op.label} operator`}
+                  >
+                    <span className={`text-lg font-medium ${mobileSelectedOperator === op.key ? 'text-amber-400' : 'text-white/80'}`}>
+                      {op.symbol}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              
+              {/* Selected operator label and value */}
+              <div className="flex items-center justify-between mb-2 px-1">
+                <span className="text-xs text-white/70">
+                  {mobileSelectedOperator === "wK" ? "Curvature" :
+                   mobileSelectedOperator === "wT" ? "Tension" :
+                   mobileSelectedOperator === "wC" ? "Coupling" :
+                   mobileSelectedOperator === "wA" ? "Attractor" : "Redistribution"}
+                </span>
+                <span className="text-xs font-mono text-amber-400">
+                  {params[mobileSelectedOperator].toFixed(2)}
+                </span>
+              </div>
+              
+              {/* Horizontal slider with tick marks */}
+              <div className="relative">
+                <Slider
+                  value={[params[mobileSelectedOperator]]}
+                  onValueChange={([v]) => handleParamsChange({ [mobileSelectedOperator]: v })}
+                  min={0}
+                  max={mobileSelectedOperator === "wA" ? 5 : mobileSelectedOperator === "wR" ? 2 : 3}
+                  step={0.1}
+                  className="w-full"
+                  data-testid={`slider-${mobileSelectedOperator}-mobile`}
+                />
+                {/* Tick marks below slider */}
+                <div className="flex justify-between mt-1 px-0.5">
+                  {Array.from({ length: 11 }).map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`w-0.5 ${i % 5 === 0 ? 'h-2 bg-white/40' : 'h-1 bg-white/20'}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Primary Control Strip - 5 circular buttons */}
         <div className="absolute bottom-0 left-0 right-0 z-30 bg-gray-950/90 backdrop-blur-xl border-t border-white/10 pb-safe">
           <div className="flex items-center justify-around h-20 px-4">
             {/* Run button */}
@@ -738,116 +808,20 @@ export default function SimulationPage() {
               </SheetContent>
             </Sheet>
 
-            {/* Params button - 5 canonical operators */}
-            <Sheet open={mobileActiveTab === "params"} onOpenChange={(open) => setMobileActiveTab(open ? "params" : null)}>
-              <SheetTrigger asChild>
-                <button
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
-                  data-testid="button-params-mobile"
-                  aria-label="Adjust operator parameters"
-                >
-                  <SlidersHorizontal className="h-5 w-5 text-white/80" />
-                  <span className="text-[9px] text-white/60 mt-0.5">Params</span>
-                </button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-auto max-h-[70vh] bg-gray-900/95 backdrop-blur-xl border-t border-white/10 rounded-t-2xl">
-                <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-                <SheetHeader className="pb-4">
-                  <SheetTitle className="text-white text-center">Operator Parameters</SheetTitle>
-                </SheetHeader>
-                <div className="space-y-5 px-4 pb-6 overflow-y-auto">
-                  {/* wK - Curvature */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-white/90">Curvature (κ)</span>
-                      <span className="text-xs font-mono text-white/60">{params.wK.toFixed(2)}</span>
-                    </div>
-                    <Slider
-                      value={[params.wK]}
-                      onValueChange={([v]) => handleParamsChange({ wK: v })}
-                      min={0}
-                      max={3}
-                      step={0.1}
-                      className="w-full"
-                      data-testid="slider-wK-mobile"
-                    />
-                    <p className="text-[10px] text-white/40">Local curvature-driven flow</p>
-                  </div>
-                  
-                  {/* wT - Tension */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-white/90">Tension (τ)</span>
-                      <span className="text-xs font-mono text-white/60">{params.wT.toFixed(2)}</span>
-                    </div>
-                    <Slider
-                      value={[params.wT]}
-                      onValueChange={([v]) => handleParamsChange({ wT: v })}
-                      min={0}
-                      max={3}
-                      step={0.1}
-                      className="w-full"
-                      data-testid="slider-wT-mobile"
-                    />
-                    <p className="text-[10px] text-white/40">Gradient tension smoothing</p>
-                  </div>
-                  
-                  {/* wC - Coupling */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-white/90">Coupling (γ)</span>
-                      <span className="text-xs font-mono text-white/60">{params.wC.toFixed(2)}</span>
-                    </div>
-                    <Slider
-                      value={[params.wC]}
-                      onValueChange={([v]) => handleParamsChange({ wC: v })}
-                      min={0}
-                      max={3}
-                      step={0.1}
-                      className="w-full"
-                      data-testid="slider-wC-mobile"
-                    />
-                    <p className="text-[10px] text-white/40">Neighbor interaction strength</p>
-                  </div>
-                  
-                  {/* wA - Attractor */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-white/90">Attractor (α)</span>
-                      <span className="text-xs font-mono text-white/60">{params.wA.toFixed(2)}</span>
-                    </div>
-                    <Slider
-                      value={[params.wA]}
-                      onValueChange={([v]) => handleParamsChange({ wA: v })}
-                      min={0}
-                      max={5}
-                      step={0.1}
-                      className="w-full"
-                      data-testid="slider-wA-mobile"
-                    />
-                    <p className="text-[10px] text-white/40">Basin formation intensity</p>
-                  </div>
-                  
-                  {/* wR - Redistribution */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-white/90">Redistribution (ρ)</span>
-                      <span className="text-xs font-mono text-white/60">{params.wR.toFixed(2)}</span>
-                    </div>
-                    <Slider
-                      value={[params.wR]}
-                      onValueChange={([v]) => handleParamsChange({ wR: v })}
-                      min={0}
-                      max={2}
-                      step={0.1}
-                      className="w-full"
-                      data-testid="slider-wR-mobile"
-                    />
-                    <p className="text-[10px] text-white/40">Global energy balancing</p>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+            {/* Params button - toggles inline operator controls */}
+            <button
+              onClick={() => setMobileActiveTab(mobileActiveTab === "params" ? null : "params")}
+              className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                mobileActiveTab === "params" 
+                  ? 'bg-amber-500/20 border-2 border-amber-500/50' 
+                  : 'bg-white/10 border-2 border-white/20'
+              }`}
+              data-testid="button-params-mobile"
+              aria-label="Adjust operator parameters"
+            >
+              <SlidersHorizontal className={`h-5 w-5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/80'}`} />
+              <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/60'}`}>Params</span>
+            </button>
 
             {/* Share button */}
             <button
