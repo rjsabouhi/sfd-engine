@@ -1440,162 +1440,82 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Playback Controls Panel - appears when Run button is pressed */}
+        {/* Playback Scrubber Overlay - slides up when Run button is pressed */}
         {mobileActiveTab === "scrub" && (
           <div className="absolute bottom-20 left-0 right-0 z-20 px-4 pb-3">
-            <div className="bg-gray-900/70 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-lg">
-              {/* 4 Uniform Playback Buttons */}
-              <div className="flex items-center justify-around mb-4">
-                {/* Step Back */}
-                <button
-                  onClick={() => {
-                    if (state.isRunning) handlePause();
-                    handleStepBackward();
-                  }}
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
-                  data-testid="button-step-back-mobile"
-                  aria-label="Step backward"
-                >
-                  <SkipBack className="h-5 w-5 text-white/80" />
-                  <span className="text-[9px] text-white/60 mt-0.5">Back</span>
-                </button>
-
-                {/* Play/Pause */}
-                <button
-                  onClick={state.isRunning ? handlePause : handlePlay}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                    state.isRunning 
-                      ? 'bg-green-500/20 border-2 border-green-500/50' 
-                      : 'bg-white/10 border-2 border-white/20'
-                  }`}
-                  data-testid={state.isRunning ? "button-pause-playback-mobile" : "button-play-playback-mobile"}
-                  aria-label={state.isRunning ? "Pause simulation" : "Play simulation"}
-                >
-                  {state.isRunning ? (
-                    <Pause className="h-5 w-5 text-green-400" />
-                  ) : (
-                    <Play className="h-5 w-5 text-white/80 ml-0.5" />
-                  )}
-                  <span className={`text-[9px] mt-0.5 ${state.isRunning ? 'text-green-400' : 'text-white/60'}`}>
-                    {state.isRunning ? 'Pause' : 'Play'}
+            <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-lg">
+              {/* Frame Counter with Close Button */}
+              <div className="flex items-center justify-between text-sm mb-3">
+                <span className="text-white/70">Frame</span>
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-green-400">
+                    {currentHistoryIndex} / {historyLength || 1}
                   </span>
-                </button>
-
-                {/* Step Forward */}
+                  <button
+                    onClick={() => setMobileActiveTab(null)}
+                    className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center active:bg-white/20"
+                    data-testid="button-close-scrub-mobile"
+                    aria-label="Close playback controls"
+                  >
+                    <ChevronDown className="h-4 w-4 text-white/60" />
+                  </button>
+                </div>
+              </div>
+              
+              {/* Slider with frame nudge buttons */}
+              <div className="flex items-center gap-3">
+                {/* Back 10 frames */}
                 <button
                   onClick={() => {
                     if (state.isRunning) handlePause();
-                    handleStep();
+                    handleAnimatedSeek(Math.max(0, currentHistoryIndex - 10));
                   }}
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
-                  data-testid="button-step-forward-mobile"
-                  aria-label="Step forward"
+                  className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-back-10-mobile"
+                  aria-label="Back 10 frames"
                 >
-                  <SkipForward className="h-5 w-5 text-white/80" />
-                  <span className="text-[9px] text-white/60 mt-0.5">Forward</span>
+                  <ChevronLeft className="h-6 w-6 text-white/80" />
                 </button>
-
-                {/* Reset */}
+                
+                {/* Slider */}
+                <div className="flex-1">
+                  <Slider
+                    value={[currentHistoryIndex]}
+                    onValueChange={([v]) => {
+                      if (state.isRunning) handlePause();
+                      handleSeekFrame(v);
+                    }}
+                    min={0}
+                    max={Math.max(0, historyLength - 1)}
+                    step={1}
+                    size="mobile"
+                    className="w-full"
+                    data-testid="slider-timeline-mobile"
+                  />
+                </div>
+                
+                {/* Forward 10 frames */}
                 <button
-                  onClick={handleReset}
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
-                  data-testid="button-reset-mobile"
-                  aria-label="Reset simulation"
+                  onClick={() => {
+                    if (state.isRunning) handlePause();
+                    handleAnimatedSeek(Math.min(historyLength - 1, currentHistoryIndex + 10));
+                  }}
+                  className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-forward-10-mobile"
+                  aria-label="Forward 10 frames"
                 >
-                  <RotateCcw className="h-5 w-5 text-white/80" />
-                  <span className="text-[9px] text-white/60 mt-0.5">Reset</span>
-                </button>
-
-                {/* Record */}
-                <button
-                  onClick={isRecording ? handleStopRecording : handleStartRecording}
-                  disabled={isRecording && recordingProgress >= 1}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                    isRecording
-                      ? 'bg-red-500/20 border-2 border-red-500/50'
-                      : 'bg-white/10 border-2 border-white/20'
-                  }`}
-                  data-testid="button-record-mobile"
-                  aria-label={isRecording ? "Stop recording" : "Record video"}
-                >
-                  {isRecording ? (
-                    <>
-                      <Square className="h-4 w-4 text-red-400 fill-red-400" />
-                      <span className="text-[9px] text-red-400 mt-0.5">{Math.round(recordingProgress * 12)}s</span>
-                    </>
-                  ) : (
-                    <>
-                      <Circle className="h-5 w-5 text-red-400 fill-red-400" />
-                      <span className="text-[9px] text-white/60 mt-0.5">Record</span>
-                    </>
-                  )}
+                  <ChevronRight className="h-6 w-6 text-white/80" />
                 </button>
               </div>
-
-              {/* Timeline Scrubbing Bar */}
-              <div className="space-y-3 pt-2 border-t border-white/10">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-white/60">Frame</span>
-                  <span className="font-mono text-green-400">
-                    {currentHistoryIndex + 1} / {historyLength || 1}
-                  </span>
-                </div>
-                
-                {/* Slider with frame nudge buttons */}
-                <div className="flex items-center gap-3">
-                  {/* Back 10 frames */}
-                  <button
-                    onClick={() => {
-                      if (state.isRunning) handlePause();
-                      handleAnimatedSeek(Math.max(0, currentHistoryIndex - 10));
-                    }}
-                    className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
-                    data-testid="button-back-10-mobile"
-                    aria-label="Back 10 frames"
-                  >
-                    <ChevronLeft className="h-5 w-5 text-white/70" />
-                  </button>
-                  
-                  {/* Slider */}
-                  <div className="flex-1">
-                    <Slider
-                      value={[currentHistoryIndex]}
-                      onValueChange={([v]) => {
-                        if (state.isRunning) handlePause();
-                        handleSeekFrame(v);
-                      }}
-                      min={0}
-                      max={Math.max(0, historyLength - 1)}
-                      step={1}
-                      size="mobile"
-                      className="w-full"
-                      data-testid="slider-timeline-mobile"
-                    />
-                  </div>
-                  
-                  {/* Forward 10 frames */}
-                  <button
-                    onClick={() => {
-                      if (state.isRunning) handlePause();
-                      handleAnimatedSeek(Math.min(historyLength - 1, currentHistoryIndex + 10));
-                    }}
-                    className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
-                    data-testid="button-forward-10-mobile"
-                    aria-label="Forward 10 frames"
-                  >
-                    <ChevronRight className="h-5 w-5 text-white/70" />
-                  </button>
-                </div>
-                
-                {/* Tick marks */}
-                <div className="flex justify-between px-0.5">
-                  {Array.from({ length: 11 }).map((_, i) => (
-                    <div 
-                      key={i} 
-                      className={`w-0.5 ${i % 5 === 0 ? 'h-2 bg-green-500/40' : 'h-1 bg-white/20'}`}
-                    />
-                  ))}
-                </div>
+              
+              {/* Tick marks */}
+              <div className="flex justify-between mt-2 px-14">
+                {Array.from({ length: 11 }).map((_, i) => (
+                  <div 
+                    key={i} 
+                    className={`w-0.5 ${i % 5 === 0 ? 'h-2 bg-green-500/40' : 'h-1 bg-white/20'}`}
+                  />
+                ))}
               </div>
             </div>
           </div>
@@ -1682,93 +1602,186 @@ export default function SimulationPage() {
         {/* Primary Control Strip - 5 circular buttons */}
         <div className="absolute bottom-0 left-0 right-0 z-30 bg-gray-950/70 backdrop-blur-md border-t border-white/10 pb-safe">
           <div className="flex items-center justify-around h-20 px-4">
-            {/* Run button - toggles scrub controls */}
-            <button
-              onClick={() => setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub")}
-              className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                mobileActiveTab === "scrub" || state.isRunning
-                  ? 'bg-green-500/20 border-2 border-green-500/50' 
-                  : 'bg-white/10 border-2 border-white/20'
-              }`}
-              data-testid="button-scrub-mobile"
-              aria-label="Open playback controls"
-            >
-              {state.isRunning ? (
-                <Pause className="h-5 w-5 text-green-400" />
-              ) : (
-                <Play className="h-5 w-5 text-green-400 ml-0.5" />
-              )}
-              <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "scrub" || state.isRunning ? 'text-green-400' : 'text-white/60'}`}>
-                {state.isRunning ? 'Pause' : 'Run'}
-              </span>
-            </button>
+            {mobileActiveTab === "scrub" ? (
+              <>
+                {/* Playback mode buttons: Back, Play, Forward, Reset, Record */}
+                {/* Step Back */}
+                <button
+                  onClick={() => {
+                    if (state.isRunning) handlePause();
+                    handleStepBackward();
+                  }}
+                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-step-back-mobile"
+                  aria-label="Step backward"
+                >
+                  <SkipBack className="h-5 w-5 text-white/80" />
+                  <span className="text-[9px] text-white/60 mt-0.5">Back</span>
+                </button>
 
-            {/* Regimes button - toggles inline regime controls */}
-            <button
-              onClick={() => setMobileActiveTab(mobileActiveTab === "regimes" ? null : "regimes")}
-              className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                mobileActiveTab === "regimes" 
-                  ? 'bg-purple-500/20 border-2 border-purple-500/50' 
-                  : 'bg-white/10 border-2 border-white/20'
-              }`}
-              data-testid="button-regimes-mobile"
-              aria-label="Choose dynamic regime"
-            >
-              <Zap className={`h-5 w-5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/80'}`} />
-              <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/60'}`}>Regimes</span>
-            </button>
+                {/* Play/Pause */}
+                <button
+                  onClick={state.isRunning ? handlePause : handlePlay}
+                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                    state.isRunning 
+                      ? 'bg-green-500/20 border-2 border-green-500/50' 
+                      : 'bg-white/10 border-2 border-white/20'
+                  }`}
+                  data-testid={state.isRunning ? "button-pause-playback-mobile" : "button-play-playback-mobile"}
+                  aria-label={state.isRunning ? "Pause simulation" : "Play simulation"}
+                >
+                  {state.isRunning ? (
+                    <Pause className="h-5 w-5 text-green-400" />
+                  ) : (
+                    <Play className="h-5 w-5 text-white/80 ml-0.5" />
+                  )}
+                  <span className={`text-[9px] mt-0.5 ${state.isRunning ? 'text-green-400' : 'text-white/60'}`}>
+                    {state.isRunning ? 'Pause' : 'Play'}
+                  </span>
+                </button>
 
-            {/* Layers button - toggles inline layer controls */}
-            <button
-              onClick={() => setMobileActiveTab(mobileActiveTab === "layers" ? null : "layers")}
-              className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                mobileActiveTab === "layers" 
-                  ? 'bg-cyan-500/20 border-2 border-cyan-500/50' 
-                  : 'bg-white/10 border-2 border-white/20'
-              }`}
-              data-testid="button-layers-mobile"
-              aria-label="Select visualization layer"
-            >
-              <Layers className={`h-5 w-5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/80'}`} />
-              <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/60'}`}>Layers</span>
-            </button>
+                {/* Step Forward */}
+                <button
+                  onClick={() => {
+                    if (state.isRunning) handlePause();
+                    handleStep();
+                  }}
+                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-step-forward-mobile"
+                  aria-label="Step forward"
+                >
+                  <SkipForward className="h-5 w-5 text-white/80" />
+                  <span className="text-[9px] text-white/60 mt-0.5">Forward</span>
+                </button>
 
-            {/* Params button - toggles inline operator controls */}
-            <button
-              onClick={() => setMobileActiveTab(mobileActiveTab === "params" ? null : "params")}
-              className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                mobileActiveTab === "params" 
-                  ? 'bg-amber-500/20 border-2 border-amber-500/50' 
-                  : 'bg-white/10 border-2 border-white/20'
-              }`}
-              data-testid="button-params-mobile"
-              aria-label="Adjust operator parameters"
-            >
-              <SlidersHorizontal className={`h-5 w-5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/80'}`} />
-              <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/60'}`}>Params</span>
-            </button>
+                {/* Reset */}
+                <button
+                  onClick={handleReset}
+                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-reset-mobile"
+                  aria-label="Reset simulation"
+                >
+                  <RotateCcw className="h-5 w-5 text-white/80" />
+                  <span className="text-[9px] text-white/60 mt-0.5">Reset</span>
+                </button>
 
-            {/* Share button */}
-            <button
-              onClick={() => {
-                const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
-                if (canvas) {
-                  const regimeLabel = mobileRegimes.find(r => r.key === currentRegimeKey)?.label || "Equilibrium";
-                  exportMobileShareSnapshot(canvas, {
-                    regime: regimeLabel,
-                    stability: stabilityState,
-                    curvature: operatorContributions.curvature,
-                    energy: state.energy,
-                  });
-                }
-              }}
-              className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
-              data-testid="button-share-mobile"
-              aria-label="Share snapshot"
-            >
-              <Share2 className="h-5 w-5 text-white/80" />
-              <span className="text-[9px] text-white/60 mt-0.5">Share</span>
-            </button>
+                {/* Record */}
+                <button
+                  onClick={isRecording ? handleStopRecording : handleStartRecording}
+                  disabled={isRecording && recordingProgress >= 1}
+                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                    isRecording
+                      ? 'bg-red-500/20 border-2 border-red-500/50'
+                      : 'bg-white/10 border-2 border-white/20'
+                  }`}
+                  data-testid="button-record-mobile"
+                  aria-label={isRecording ? "Stop recording" : "Record video"}
+                >
+                  {isRecording ? (
+                    <>
+                      <Square className="h-4 w-4 text-red-400 fill-red-400" />
+                      <span className="text-[9px] text-red-400 mt-0.5">{Math.round(recordingProgress * 12)}s</span>
+                    </>
+                  ) : (
+                    <>
+                      <Circle className="h-5 w-5 text-red-400 fill-red-400" />
+                      <span className="text-[9px] text-white/60 mt-0.5">Record</span>
+                    </>
+                  )}
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Default mode buttons: Run, Regimes, Layers, Params, Share */}
+                {/* Run button - toggles scrub controls */}
+                <button
+                  onClick={() => setMobileActiveTab("scrub")}
+                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                    state.isRunning
+                      ? 'bg-green-500/20 border-2 border-green-500/50' 
+                      : 'bg-white/10 border-2 border-white/20'
+                  }`}
+                  data-testid="button-scrub-mobile"
+                  aria-label="Open playback controls"
+                >
+                  {state.isRunning ? (
+                    <Pause className="h-5 w-5 text-green-400" />
+                  ) : (
+                    <Play className="h-5 w-5 text-green-400 ml-0.5" />
+                  )}
+                  <span className={`text-[9px] mt-0.5 ${state.isRunning ? 'text-green-400' : 'text-white/60'}`}>
+                    {state.isRunning ? 'Pause' : 'Run'}
+                  </span>
+                </button>
+
+                {/* Regimes button - toggles inline regime controls */}
+                <button
+                  onClick={() => setMobileActiveTab(mobileActiveTab === "regimes" ? null : "regimes")}
+                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                    mobileActiveTab === "regimes" 
+                      ? 'bg-purple-500/20 border-2 border-purple-500/50' 
+                      : 'bg-white/10 border-2 border-white/20'
+                  }`}
+                  data-testid="button-regimes-mobile"
+                  aria-label="Choose dynamic regime"
+                >
+                  <Zap className={`h-5 w-5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/80'}`} />
+                  <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/60'}`}>Regimes</span>
+                </button>
+
+                {/* Layers button - toggles inline layer controls */}
+                <button
+                  onClick={() => setMobileActiveTab(mobileActiveTab === "layers" ? null : "layers")}
+                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                    mobileActiveTab === "layers" 
+                      ? 'bg-cyan-500/20 border-2 border-cyan-500/50' 
+                      : 'bg-white/10 border-2 border-white/20'
+                  }`}
+                  data-testid="button-layers-mobile"
+                  aria-label="Select visualization layer"
+                >
+                  <Layers className={`h-5 w-5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/80'}`} />
+                  <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/60'}`}>Layers</span>
+                </button>
+
+                {/* Params button - toggles inline operator controls */}
+                <button
+                  onClick={() => setMobileActiveTab(mobileActiveTab === "params" ? null : "params")}
+                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                    mobileActiveTab === "params" 
+                      ? 'bg-amber-500/20 border-2 border-amber-500/50' 
+                      : 'bg-white/10 border-2 border-white/20'
+                  }`}
+                  data-testid="button-params-mobile"
+                  aria-label="Adjust operator parameters"
+                >
+                  <SlidersHorizontal className={`h-5 w-5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/80'}`} />
+                  <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/60'}`}>Params</span>
+                </button>
+
+                {/* Share button */}
+                <button
+                  onClick={() => {
+                    const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
+                    if (canvas) {
+                      const regimeLabel = mobileRegimes.find(r => r.key === currentRegimeKey)?.label || "Equilibrium";
+                      exportMobileShareSnapshot(canvas, {
+                        regime: regimeLabel,
+                        stability: stabilityState,
+                        curvature: operatorContributions.curvature,
+                        energy: state.energy,
+                      });
+                    }
+                  }}
+                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-share-mobile"
+                  aria-label="Share snapshot"
+                >
+                  <Share2 className="h-5 w-5 text-white/80" />
+                  <span className="text-[9px] text-white/60 mt-0.5">Share</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
