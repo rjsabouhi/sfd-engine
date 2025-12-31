@@ -472,7 +472,8 @@ export default function SimulationPage() {
 
   const handleSaveVideo = useCallback(() => {
     if (!recordedVideoBlob) return;
-    const extension = recordedVideoBlob.type.includes("mp4") ? "mp4" : "webm";
+    const isGif = recordedVideoBlob.type.includes("gif");
+    const extension = isGif ? "gif" : recordedVideoBlob.type.includes("mp4") ? "mp4" : "webm";
     const url = URL.createObjectURL(recordedVideoBlob);
     const a = document.createElement("a");
     a.href = url;
@@ -487,7 +488,8 @@ export default function SimulationPage() {
 
   const handleShareVideo = useCallback(async () => {
     if (!recordedVideoBlob) return;
-    const extension = recordedVideoBlob.type.includes("mp4") ? "mp4" : "webm";
+    const isGif = recordedVideoBlob.type.includes("gif");
+    const extension = isGif ? "gif" : recordedVideoBlob.type.includes("mp4") ? "mp4" : "webm";
     const filename = `sfd-simulation-${Date.now()}.${extension}`;
     
     const file = new File([recordedVideoBlob], filename, { type: recordedVideoBlob.type });
@@ -1555,34 +1557,62 @@ export default function SimulationPage() {
               ) : recordedVideoBlob ? (
                 <>
                   <div className="text-center mb-4">
-                    <h3 className="text-lg font-semibold text-white mb-1">Video Ready</h3>
-                    <p className="text-xs text-white/60">Hold on video to save to photos</p>
+                    <h3 className="text-lg font-semibold text-white mb-1">
+                      {recordedVideoBlob.type.includes("gif") ? "Animation Ready" : "Video Ready"}
+                    </h3>
+                    <p className="text-xs text-white/60">
+                      {recordedVideoBlob.type.includes("gif") 
+                        ? "Long-press to save to photos" 
+                        : "Hold on video to save to photos"}
+                    </p>
                   </div>
                   
-                  {/* Video Preview - users can long-press to save */}
+                  {/* Preview - use img for GIF, video otherwise */}
                   <div className="relative mb-4 rounded-xl overflow-hidden bg-black">
-                    <video
-                      src={URL.createObjectURL(recordedVideoBlob)}
-                      controls
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full aspect-square object-cover"
-                      data-testid="video-preview"
-                    />
+                    {recordedVideoBlob.type.includes("gif") ? (
+                      <img
+                        src={URL.createObjectURL(recordedVideoBlob)}
+                        alt="Recorded animation"
+                        className="w-full aspect-square object-cover"
+                        data-testid="gif-preview"
+                      />
+                    ) : (
+                      <video
+                        src={URL.createObjectURL(recordedVideoBlob)}
+                        controls
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full aspect-square object-cover"
+                        data-testid="video-preview"
+                      />
+                    )}
                   </div>
                   
                   <div className="space-y-3">
-                    {/* Share Button - primary action */}
+                    {/* Save Button - always available */}
+                    <button
+                      onClick={handleSaveVideo}
+                      className="w-full h-12 rounded-xl bg-green-500/20 border-2 border-green-400/50 flex items-center justify-center gap-3 active:bg-green-500/30 transition-colors"
+                      data-testid="button-save-video"
+                      aria-label="Save to device"
+                    >
+                      <Download className="h-5 w-5 text-green-400" />
+                      <span className="text-sm font-medium text-green-400">
+                        Save {recordedVideoBlob.type.includes("gif") ? "GIF" : "Video"}
+                      </span>
+                    </button>
+                    
+                    {/* Share Button */}
                     <button
                       onClick={handleShareVideo}
                       className="w-full h-12 rounded-xl bg-blue-500/20 border-2 border-blue-400/50 flex items-center justify-center gap-3 active:bg-blue-500/30 transition-colors"
                       data-testid="button-share-video"
-                      aria-label="Share video"
+                      aria-label="Share"
                     >
                       <Share2 className="h-5 w-5 text-blue-400" />
-                      <span className="text-sm font-medium text-blue-400">Share Video</span>
+                      <span className="text-sm font-medium text-blue-400">Share</span>
                     </button>
                     
                     {/* Done */}
