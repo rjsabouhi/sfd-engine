@@ -558,7 +558,7 @@ export default function SimulationPage() {
     const direction = targetIndex > currentIndex ? 1 : -1;
     let current = currentIndex;
     
-    // Step through frames at ~30fps (33ms per frame)
+    // Step through frames at ~7fps (150ms per frame) for watchable playback
     animatedSeekRef.current = setInterval(() => {
       current += direction;
       
@@ -580,7 +580,7 @@ export default function SimulationPage() {
           animatedSeekRef.current = null;
         }
       }
-    }, 33);
+    }, 150);
   }, []);
 
   const handleStepForward = useCallback(() => {
