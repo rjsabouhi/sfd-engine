@@ -1604,7 +1604,18 @@ export default function SimulationPage() {
           <div className="flex items-center justify-around h-20 px-4">
             {mobileActiveTab === "scrub" ? (
               <>
-                {/* Playback mode buttons: Back, Play, Forward, Reset, Record */}
+                {/* Playback mode buttons: Reset, Back, Forward, Play, Record */}
+                {/* Reset */}
+                <button
+                  onClick={handleReset}
+                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-reset-mobile"
+                  aria-label="Reset simulation"
+                >
+                  <RotateCcw className="h-5 w-5 text-white/80" />
+                  <span className="text-[9px] text-white/60 mt-0.5">Reset</span>
+                </button>
+
                 {/* Step Back */}
                 <button
                   onClick={() => {
@@ -1617,6 +1628,20 @@ export default function SimulationPage() {
                 >
                   <SkipBack className="h-5 w-5 text-white/80" />
                   <span className="text-[9px] text-white/60 mt-0.5">Back</span>
+                </button>
+
+                {/* Step Forward */}
+                <button
+                  onClick={() => {
+                    if (state.isRunning) handlePause();
+                    handleStep();
+                  }}
+                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-step-forward-mobile"
+                  aria-label="Step forward"
+                >
+                  <SkipForward className="h-5 w-5 text-white/80" />
+                  <span className="text-[9px] text-white/60 mt-0.5">Forward</span>
                 </button>
 
                 {/* Play/Pause */}
@@ -1638,31 +1663,6 @@ export default function SimulationPage() {
                   <span className={`text-[9px] mt-0.5 ${state.isRunning ? 'text-green-400' : 'text-white/60'}`}>
                     {state.isRunning ? 'Pause' : 'Play'}
                   </span>
-                </button>
-
-                {/* Step Forward */}
-                <button
-                  onClick={() => {
-                    if (state.isRunning) handlePause();
-                    handleStep();
-                  }}
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
-                  data-testid="button-step-forward-mobile"
-                  aria-label="Step forward"
-                >
-                  <SkipForward className="h-5 w-5 text-white/80" />
-                  <span className="text-[9px] text-white/60 mt-0.5">Forward</span>
-                </button>
-
-                {/* Reset */}
-                <button
-                  onClick={handleReset}
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
-                  data-testid="button-reset-mobile"
-                  aria-label="Reset simulation"
-                >
-                  <RotateCcw className="h-5 w-5 text-white/80" />
-                  <span className="text-[9px] text-white/60 mt-0.5">Reset</span>
                 </button>
 
                 {/* Record */}
@@ -1692,7 +1692,37 @@ export default function SimulationPage() {
               </>
             ) : (
               <>
-                {/* Default mode buttons: Run, Regimes, Layers, Params, Share */}
+                {/* Default mode buttons: Params, Regimes, Run, Layers, Share */}
+                {/* Params button - toggles inline operator controls */}
+                <button
+                  onClick={() => setMobileActiveTab(mobileActiveTab === "params" ? null : "params")}
+                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                    mobileActiveTab === "params" 
+                      ? 'bg-amber-500/20 border-2 border-amber-500/50' 
+                      : 'bg-white/10 border-2 border-white/20'
+                  }`}
+                  data-testid="button-params-mobile"
+                  aria-label="Adjust operator parameters"
+                >
+                  <SlidersHorizontal className={`h-5 w-5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/80'}`} />
+                  <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/60'}`}>Params</span>
+                </button>
+
+                {/* Regimes button - toggles inline regime controls */}
+                <button
+                  onClick={() => setMobileActiveTab(mobileActiveTab === "regimes" ? null : "regimes")}
+                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                    mobileActiveTab === "regimes" 
+                      ? 'bg-purple-500/20 border-2 border-purple-500/50' 
+                      : 'bg-white/10 border-2 border-white/20'
+                  }`}
+                  data-testid="button-regimes-mobile"
+                  aria-label="Choose dynamic regime"
+                >
+                  <Zap className={`h-5 w-5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/80'}`} />
+                  <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/60'}`}>Regimes</span>
+                </button>
+
                 {/* Run button - toggles scrub controls */}
                 <button
                   onClick={() => setMobileActiveTab("scrub")}
@@ -1714,21 +1744,6 @@ export default function SimulationPage() {
                   </span>
                 </button>
 
-                {/* Regimes button - toggles inline regime controls */}
-                <button
-                  onClick={() => setMobileActiveTab(mobileActiveTab === "regimes" ? null : "regimes")}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                    mobileActiveTab === "regimes" 
-                      ? 'bg-purple-500/20 border-2 border-purple-500/50' 
-                      : 'bg-white/10 border-2 border-white/20'
-                  }`}
-                  data-testid="button-regimes-mobile"
-                  aria-label="Choose dynamic regime"
-                >
-                  <Zap className={`h-5 w-5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/80'}`} />
-                  <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/60'}`}>Regimes</span>
-                </button>
-
                 {/* Layers button - toggles inline layer controls */}
                 <button
                   onClick={() => setMobileActiveTab(mobileActiveTab === "layers" ? null : "layers")}
@@ -1742,21 +1757,6 @@ export default function SimulationPage() {
                 >
                   <Layers className={`h-5 w-5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/80'}`} />
                   <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/60'}`}>Layers</span>
-                </button>
-
-                {/* Params button - toggles inline operator controls */}
-                <button
-                  onClick={() => setMobileActiveTab(mobileActiveTab === "params" ? null : "params")}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                    mobileActiveTab === "params" 
-                      ? 'bg-amber-500/20 border-2 border-amber-500/50' 
-                      : 'bg-white/10 border-2 border-white/20'
-                  }`}
-                  data-testid="button-params-mobile"
-                  aria-label="Adjust operator parameters"
-                >
-                  <SlidersHorizontal className={`h-5 w-5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/80'}`} />
-                  <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/60'}`}>Params</span>
                 </button>
 
                 {/* Share button */}
