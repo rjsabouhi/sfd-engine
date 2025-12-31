@@ -232,6 +232,8 @@ export default function SimulationPage() {
   // Recording state for mobile video capture
   const [isRecording, setIsRecording] = useState(false);
   const [recordingProgress, setRecordingProgress] = useState(0);
+  const [recordedVideoBlob, setRecordedVideoBlob] = useState<Blob | null>(null);
+  const [showVideoDialog, setShowVideoDialog] = useState(false);
   const recordingControllerRef = useRef<RecordingController | null>(null);
   
   // Mobile layers for layer selector
@@ -428,9 +430,9 @@ export default function SimulationPage() {
         setRecordingProgress(0);
         recordingControllerRef.current = null;
         
-        // Share or download the recorded video
-        const extension = blob.type.includes("mp4") ? "mp4" : "webm";
-        shareOrDownloadVideo(blob, `sfd-recording-${Date.now()}.${extension}`);
+        // Store the blob and show the dialog for user to choose save/share
+        setRecordedVideoBlob(blob);
+        setShowVideoDialog(true);
       },
       (error) => {
         setIsRecording(false);
@@ -448,6 +450,46 @@ export default function SimulationPage() {
       recordingControllerRef.current.stop();
     }
   }, []);
+
+  const handleSaveVideo = useCallback(() => {
+    if (!recordedVideoBlob) return;
+    const extension = recordedVideoBlob.type.includes("mp4") ? "mp4" : "webm";
+    const url = URL.createObjectURL(recordedVideoBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `sfd-simulation-${Date.now()}.${extension}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setShowVideoDialog(false);
+    setRecordedVideoBlob(null);
+  }, [recordedVideoBlob]);
+
+  const handleShareVideo = useCallback(async () => {
+    if (!recordedVideoBlob) return;
+    const extension = recordedVideoBlob.type.includes("mp4") ? "mp4" : "webm";
+    const filename = `sfd-simulation-${Date.now()}.${extension}`;
+    
+    const file = new File([recordedVideoBlob], filename, { type: recordedVideoBlob.type });
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: "SFD Simulation",
+          text: "Check out this field dynamics simulation!"
+        });
+        setShowVideoDialog(false);
+        setRecordedVideoBlob(null);
+      } catch (err) {
+        // User cancelled or share failed - keep dialog open
+        console.log("Share cancelled or failed:", err);
+      }
+    } else {
+      // Fallback to save if share not available
+      handleSaveVideo();
+    }
+  }, [recordedVideoBlob, handleSaveVideo]);
 
   const handleStep = useCallback(() => {
     engineRef.current?.stepOnce();
@@ -1466,6 +1508,58 @@ export default function SimulationPage() {
                     />
                   ))}
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Video Recorded Dialog */}
+        {showVideoDialog && recordedVideoBlob && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+            <div className="mx-6 w-full max-w-sm bg-gray-900 rounded-2xl border border-white/20 p-6 shadow-2xl">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 border-2 border-green-500/50 flex items-center justify-center">
+                  <Circle className="h-8 w-8 text-green-400 fill-green-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-1">Video Ready</h3>
+                <p className="text-sm text-white/60">12 seconds of simulation captured</p>
+              </div>
+              
+              <div className="space-y-3">
+                {/* Save/Download Button */}
+                <button
+                  onClick={handleSaveVideo}
+                  className="w-full h-12 rounded-xl bg-white/10 border-2 border-white/20 flex items-center justify-center gap-3 active:bg-white/20 transition-colors"
+                  data-testid="button-save-video"
+                  aria-label="Save video to device"
+                >
+                  <Download className="h-5 w-5 text-white/80" />
+                  <span className="text-sm font-medium text-white/80">Save to Device</span>
+                </button>
+                
+                {/* Share Button */}
+                <button
+                  onClick={handleShareVideo}
+                  className="w-full h-12 rounded-xl bg-blue-500/20 border-2 border-blue-400/50 flex items-center justify-center gap-3 active:bg-blue-500/30 transition-colors"
+                  data-testid="button-share-video"
+                  aria-label="Share video"
+                >
+                  <Share2 className="h-5 w-5 text-blue-400" />
+                  <span className="text-sm font-medium text-blue-400">Share Video</span>
+                </button>
+                
+                {/* Cancel */}
+                <button
+                  onClick={() => {
+                    setShowVideoDialog(false);
+                    setRecordedVideoBlob(null);
+                  }}
+                  className="w-full h-10 rounded-xl flex items-center justify-center active:bg-white/10 transition-colors"
+                  data-testid="button-cancel-video"
+                  aria-label="Cancel"
+                >
+                  <span className="text-sm text-white/50">Cancel</span>
+                </button>
               </div>
             </div>
           </div>

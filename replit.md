@@ -72,8 +72,9 @@ Added comprehensive development/debugging tools accessible via CTRL+SHIFT+D:
 Added real-time video recording for mobile sharing:
 - **Record Button**: Located in playback controls panel, records 12 seconds of live simulation
 - **Progress Indicator**: Visual progress bar shows recording time elapsed
-- **Auto-Share**: Uses Web Share API on mobile for easy sharing to social apps
-- **Fallback Download**: Automatically downloads video on devices without share support
+- **Post-Recording Dialog**: After recording completes, shows options to Save or Share
+- **Save to Device**: Downloads video file directly to device
+- **Share Video**: Uses Web Share API for sharing to social apps (with fallback to save)
 - **Format Support**: Tries VP9/VP8 WebM first, falls back to MP4 if needed
 - **Live Recording**: Captures actual running simulation, not history playback
 
