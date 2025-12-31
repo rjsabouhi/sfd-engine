@@ -75,10 +75,12 @@ function mulberry32(seed: number): () => number {
 export class SFDEngine {
   private grid: Float32Array;
   private tempGrid: Float32Array;
+  private playbackDisplayGrid: Float32Array | null = null; // Separate grid for playback display only
   private width: number;
   private height: number;
   private params: SimulationParameters;
   private step: number = 0;
+  private playbackDisplayStep: number = 0; // Separate step counter for playback display
   private isRunning: boolean = false;
   private animationId: number | null = null;
   private lastFrameTime: number = 0;
@@ -284,6 +286,8 @@ export class SFDEngine {
 
   reset(): void {
     // Reinitialize the field with current parameters (keeps current preset/mode)
+    this.currentPlaybackIndex = -1;
+    this.playbackDisplayGrid = null;
     this.initialize();
     this.notifyUpdate();
   }
@@ -295,6 +299,8 @@ export class SFDEngine {
     this.height = this.params.gridSize;
     this.grid = new Float32Array(this.width * this.height);
     this.tempGrid = new Float32Array(this.width * this.height);
+    this.currentPlaybackIndex = -1;
+    this.playbackDisplayGrid = null;
     this.initialize();
     this.notifyUpdate();
   }
@@ -1502,10 +1508,10 @@ export class SFDEngine {
     if (this.currentPlaybackIndex > 0) {
       this.currentPlaybackIndex--;
       const snapshot = this.ringBuffer[this.currentPlaybackIndex];
-      this.grid = new Float32Array(snapshot.grid);
-      this.step = snapshot.step;
+      // Use separate playback display grid - don't modify live simulation grid
+      this.playbackDisplayGrid = new Float32Array(snapshot.grid);
+      this.playbackDisplayStep = snapshot.step;
       this.invalidateDerivedFieldCache();
-      this.updateBasinMap();
       this.notifyUpdate();
       return true;
     }
@@ -1518,14 +1524,16 @@ export class SFDEngine {
     if (this.currentPlaybackIndex < this.ringBuffer.length - 1) {
       this.currentPlaybackIndex++;
       const snapshot = this.ringBuffer[this.currentPlaybackIndex];
-      this.grid = new Float32Array(snapshot.grid);
-      this.step = snapshot.step;
+      // Use separate playback display grid - don't modify live simulation grid
+      this.playbackDisplayGrid = new Float32Array(snapshot.grid);
+      this.playbackDisplayStep = snapshot.step;
       this.invalidateDerivedFieldCache();
-      this.updateBasinMap();
       this.notifyUpdate();
       return true;
     } else {
+      // Exiting playback mode - clear the display grid
       this.currentPlaybackIndex = -1;
+      this.playbackDisplayGrid = null;
       return false;
     }
   }
@@ -1535,10 +1543,10 @@ export class SFDEngine {
     
     this.currentPlaybackIndex = index;
     const snapshot = this.ringBuffer[index];
-    this.grid = new Float32Array(snapshot.grid);
-    this.step = snapshot.step;
+    // Use separate playback display grid - don't modify live simulation grid
+    this.playbackDisplayGrid = new Float32Array(snapshot.grid);
+    this.playbackDisplayStep = snapshot.step;
     this.invalidateDerivedFieldCache();
-    this.updateBasinMap();
     this.notifyUpdate();
   }
   
@@ -1549,6 +1557,7 @@ export class SFDEngine {
 
   exitPlaybackMode(): void {
     this.currentPlaybackIndex = -1;
+    this.playbackDisplayGrid = null;
   }
 
   isInPlaybackMode(): boolean {
@@ -1707,6 +1716,7 @@ export class SFDEngine {
   start(): void {
     if (this.isRunning) return;
     this.currentPlaybackIndex = -1;
+    this.playbackDisplayGrid = null; // Clear playback display to use live grid
     this.isRunning = true;
     this.lastFrameTime = performance.now();
     this.frameCount = 0;
@@ -1737,8 +1747,10 @@ export class SFDEngine {
   }
 
   getField(): FieldData {
+    // Return playback display grid if in playback mode, otherwise live grid
+    const displayGrid = this.playbackDisplayGrid !== null ? this.playbackDisplayGrid : this.grid;
     return {
-      grid: this.grid,
+      grid: displayGrid,
       width: this.width,
       height: this.height,
     };
