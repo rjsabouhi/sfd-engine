@@ -282,6 +282,52 @@ export const structuralPresets: Record<string, Partial<SimulationParameters>> = 
     wA: 3.0,
     wR: 0.62,
   },
+  // Mobile-Safe Presets (smooth, stable, no flicker)
+  "mobile-equilibrium": {
+    mode: "standard",
+    dt: 0.02,
+    wK: 0.2,
+    wT: 0.01,
+    wC: 0.05,
+    wA: 0.1,
+    wR: 0.4,
+  },
+  "mobile-curvature": {
+    mode: "standard",
+    dt: 0.02,
+    wK: 1.2,
+    wT: 0.05,
+    wC: 0.2,
+    wA: 0.08,
+    wR: 0.7,
+  },
+  "mobile-tension": {
+    mode: "standard",
+    dt: 0.02,
+    wK: 0.6,
+    wT: 0.12,
+    wC: 0.05,
+    wA: 0.2,
+    wR: 0.5,
+  },
+  "mobile-fractal": {
+    mode: "standard",
+    dt: 0.015,
+    wK: 2.8,
+    wT: 0.15,
+    wC: 0.1,
+    wA: 0.3,
+    wR: 0.9,
+  },
+  "mobile-collapse": {
+    mode: "standard",
+    dt: 0.015,
+    wK: 3.3,
+    wT: 0.2,
+    wC: 0.15,
+    wA: 0.4,
+    wR: 1.0,
+  },
 };
 
 export const users = undefined;
