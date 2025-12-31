@@ -1678,16 +1678,20 @@ export class SFDEngine {
   private notifyUpdate(): void {
     if (this.onUpdate) {
       const stats = this.computeStatistics();
+      // Use playback display step when in playback mode
+      const displayStep = this.playbackDisplayStep !== null ? this.playbackDisplayStep : this.step;
       const state: SimulationState = {
-        step: this.step,
+        step: displayStep,
         energy: stats.energy,
         variance: stats.variance,
         basinCount: stats.basinCount,
         isRunning: this.isRunning,
         fps: this.fps,
       };
+      // Use playback display grid when in playback mode, otherwise use live grid
+      const displayGrid = this.playbackDisplayGrid !== null ? this.playbackDisplayGrid : this.grid;
       const field: FieldData = {
-        grid: this.grid,
+        grid: displayGrid,
         width: this.width,
         height: this.height,
       };
