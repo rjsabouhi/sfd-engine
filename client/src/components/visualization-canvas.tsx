@@ -117,6 +117,9 @@ export function VisualizationCanvas({
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [canvasSize, setCanvasSize] = useState(0);
+  
+  const lastTouchDistRef = useRef<number | null>(null);
+  const lastTouchCenterRef = useRef<{ x: number; y: number } | null>(null);
 
   const render = useCallback(() => {
     const canvas = canvasRef.current;
@@ -305,6 +308,81 @@ export function VisualizationCanvas({
     setPan({ x: 0, y: 0 });
   }, []);
 
+  const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const t0 = e.touches[0];
+      const t1 = e.touches[1];
+      const dx = t0.clientX - t1.clientX;
+      const dy = t0.clientY - t1.clientY;
+      lastTouchDistRef.current = Math.sqrt(dx * dx + dy * dy);
+      lastTouchCenterRef.current = {
+        x: (t0.clientX + t1.clientX) / 2,
+        y: (t0.clientY + t1.clientY) / 2,
+      };
+    } else if (e.touches.length === 1 && zoom > 1) {
+      setIsPanning(true);
+      setPanStart({ 
+        x: e.touches[0].clientX - pan.x, 
+        y: e.touches[0].clientY - pan.y 
+      });
+    }
+  }, [zoom, pan]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    if (e.touches.length === 2 && lastTouchDistRef.current !== null) {
+      e.preventDefault();
+      const t0 = e.touches[0];
+      const t1 = e.touches[1];
+      const dx = t0.clientX - t1.clientX;
+      const dy = t0.clientY - t1.clientY;
+      const newDist = Math.sqrt(dx * dx + dy * dy);
+      const newCenter = {
+        x: (t0.clientX + t1.clientX) / 2,
+        y: (t0.clientY + t1.clientY) / 2,
+      };
+      
+      if (lastTouchCenterRef.current) {
+        const scale = newDist / lastTouchDistRef.current;
+        const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom * scale));
+        
+        if (newZoom !== zoom) {
+          const rect = container.getBoundingClientRect();
+          const centerX = newCenter.x - rect.left - rect.width / 2;
+          const centerY = newCenter.y - rect.top - rect.height / 2;
+          
+          const zoomScale = newZoom / zoom;
+          const newPanX = centerX - zoomScale * (centerX - pan.x);
+          const newPanY = centerY - zoomScale * (centerY - pan.y);
+          
+          setZoom(newZoom);
+          setPan({ x: newPanX, y: newPanY });
+        }
+        
+        lastTouchDistRef.current = newDist;
+        lastTouchCenterRef.current = newCenter;
+      }
+    } else if (e.touches.length === 1 && isPanning) {
+      const newPanX = e.touches[0].clientX - panStart.x;
+      const newPanY = e.touches[0].clientY - panStart.y;
+      
+      const maxPan = (canvasSize * (zoom - 1)) / 2;
+      setPan({
+        x: Math.max(-maxPan, Math.min(maxPan, newPanX)),
+        y: Math.max(-maxPan, Math.min(maxPan, newPanY)),
+      });
+    }
+  }, [zoom, pan, isPanning, panStart, canvasSize]);
+
+  const handleTouchEnd = useCallback(() => {
+    lastTouchDistRef.current = null;
+    lastTouchCenterRef.current = null;
+    setIsPanning(false);
+  }, []);
+
   const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!field || !onClick || isPanning) return;
     
@@ -345,6 +423,9 @@ export function VisualizationCanvas({
       onMouseLeave={handleMouseLeave}
       onDoubleClick={handleDoubleClick}
       onClick={handleClick}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       style={{ 
         cursor: getCursor(),
         backgroundColor: 'rgb(8, 10, 14)',
