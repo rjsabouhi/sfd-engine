@@ -1522,7 +1522,7 @@ export default function SimulationPage() {
                 <span className="text-white/70">Frame</span>
                 <div className="flex items-center gap-3">
                   <span className="font-mono text-green-400">
-                    {currentHistoryIndex} / {historyLength || 1}
+                    {currentHistoryIndex + 1} / {historyLength || 1}
                   </span>
                   <button
                     onClick={() => setMobileActiveTab(null)}
