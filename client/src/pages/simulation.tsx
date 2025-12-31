@@ -1019,6 +1019,7 @@ export default function SimulationPage() {
             basinMap={basinMap}
             perceptualSmoothing={perceptualSmoothing}
             onTransformChange={setCanvasTransform}
+            disableTouch={true}
           />
           
           {/* Overlay layer when a projection is selected */}

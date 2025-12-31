@@ -19,6 +19,7 @@ interface VisualizationCanvasProps {
   trajectoryProbePoint?: { x: number; y: number } | null;
   perceptualSmoothing?: boolean;
   onTransformChange?: (transform: CanvasTransform) => void;
+  disableTouch?: boolean;
 }
 
 // Temporal smoothing buffer for perceptual safety
@@ -116,6 +117,7 @@ export function VisualizationCanvas({
   trajectoryProbePoint,
   perceptualSmoothing = false,
   onTransformChange,
+  disableTouch = false,
 }: VisualizationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -438,13 +440,13 @@ export function VisualizationCanvas({
       onMouseLeave={handleMouseLeave}
       onDoubleClick={handleDoubleClick}
       onClick={handleClick}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+      onTouchStart={disableTouch ? undefined : handleTouchStart}
+      onTouchMove={disableTouch ? undefined : handleTouchMove}
+      onTouchEnd={disableTouch ? undefined : handleTouchEnd}
       style={{ 
         cursor: getCursor(),
         backgroundColor: 'rgb(8, 10, 14)',
-        touchAction: 'none',
+        touchAction: disableTouch ? 'auto' : 'none',
       }}
       data-testid="visualization-container"
     >
