@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -734,6 +734,117 @@ export default function SimulationPage() {
                       <p className="text-[11px] text-white/50 mt-0.5">{cm.description}</p>
                     </button>
                   ))}
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            {/* Params button - 5 canonical operators */}
+            <Sheet open={mobileActiveTab === "params"} onOpenChange={(open) => setMobileActiveTab(open ? "params" : null)}>
+              <SheetTrigger asChild>
+                <button
+                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-params-mobile"
+                  aria-label="Adjust operator parameters"
+                >
+                  <SlidersHorizontal className="h-5 w-5 text-white/80" />
+                  <span className="text-[9px] text-white/60 mt-0.5">Params</span>
+                </button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-auto max-h-[70vh] bg-gray-900/95 backdrop-blur-xl border-t border-white/10 rounded-t-2xl">
+                <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
+                <SheetHeader className="pb-4">
+                  <SheetTitle className="text-white text-center">Operator Parameters</SheetTitle>
+                </SheetHeader>
+                <div className="space-y-5 px-4 pb-6 overflow-y-auto">
+                  {/* wK - Curvature */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-white/90">Curvature (κ)</span>
+                      <span className="text-xs font-mono text-white/60">{params.wK.toFixed(2)}</span>
+                    </div>
+                    <Slider
+                      value={[params.wK]}
+                      onValueChange={([v]) => handleParamsChange({ wK: v })}
+                      min={0}
+                      max={3}
+                      step={0.1}
+                      className="w-full"
+                      data-testid="slider-wK-mobile"
+                    />
+                    <p className="text-[10px] text-white/40">Local curvature-driven flow</p>
+                  </div>
+                  
+                  {/* wT - Tension */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-white/90">Tension (τ)</span>
+                      <span className="text-xs font-mono text-white/60">{params.wT.toFixed(2)}</span>
+                    </div>
+                    <Slider
+                      value={[params.wT]}
+                      onValueChange={([v]) => handleParamsChange({ wT: v })}
+                      min={0}
+                      max={3}
+                      step={0.1}
+                      className="w-full"
+                      data-testid="slider-wT-mobile"
+                    />
+                    <p className="text-[10px] text-white/40">Gradient tension smoothing</p>
+                  </div>
+                  
+                  {/* wC - Coupling */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-white/90">Coupling (γ)</span>
+                      <span className="text-xs font-mono text-white/60">{params.wC.toFixed(2)}</span>
+                    </div>
+                    <Slider
+                      value={[params.wC]}
+                      onValueChange={([v]) => handleParamsChange({ wC: v })}
+                      min={0}
+                      max={3}
+                      step={0.1}
+                      className="w-full"
+                      data-testid="slider-wC-mobile"
+                    />
+                    <p className="text-[10px] text-white/40">Neighbor interaction strength</p>
+                  </div>
+                  
+                  {/* wA - Attractor */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-white/90">Attractor (α)</span>
+                      <span className="text-xs font-mono text-white/60">{params.wA.toFixed(2)}</span>
+                    </div>
+                    <Slider
+                      value={[params.wA]}
+                      onValueChange={([v]) => handleParamsChange({ wA: v })}
+                      min={0}
+                      max={5}
+                      step={0.1}
+                      className="w-full"
+                      data-testid="slider-wA-mobile"
+                    />
+                    <p className="text-[10px] text-white/40">Basin formation intensity</p>
+                  </div>
+                  
+                  {/* wR - Redistribution */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-white/90">Redistribution (ρ)</span>
+                      <span className="text-xs font-mono text-white/60">{params.wR.toFixed(2)}</span>
+                    </div>
+                    <Slider
+                      value={[params.wR]}
+                      onValueChange={([v]) => handleParamsChange({ wR: v })}
+                      min={0}
+                      max={2}
+                      step={0.1}
+                      className="w-full"
+                      data-testid="slider-wR-mobile"
+                    />
+                    <p className="text-[10px] text-white/40">Global energy balancing</p>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
