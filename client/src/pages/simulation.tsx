@@ -1163,7 +1163,7 @@ export default function SimulationPage() {
         {/* Playback Controls Panel - appears when Run button is pressed */}
         {mobileActiveTab === "scrub" && (
           <div className="absolute bottom-20 left-0 right-0 z-20 px-4 pb-3">
-            <div className="bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-green-500/30 p-4 shadow-lg">
+            <div className="bg-gray-900/70 backdrop-blur-md rounded-2xl border border-green-500/30 p-4 shadow-lg">
               {/* 4 Uniform Playback Buttons */}
               <div className="flex items-center justify-around mb-4">
                 {/* Step Back */}
