@@ -1262,7 +1262,7 @@ export default function SimulationPage() {
         )}
 
         {/* Primary Control Strip - 5 circular buttons */}
-        <div className="absolute bottom-0 left-0 right-0 z-30 bg-gray-950/90 backdrop-blur-xl border-t border-white/10 pb-safe">
+        <div className="absolute bottom-0 left-0 right-0 z-30 bg-gray-950/70 backdrop-blur-md border-t border-white/10 pb-safe">
           <div className="flex items-center justify-around h-20 px-4">
             {/* Run button - toggles scrub controls */}
             <button
