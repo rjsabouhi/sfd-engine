@@ -634,10 +634,10 @@ export default function SimulationPage() {
 
         {/* Inline Operator Controls - appears when Params is active */}
         {mobileActiveTab === "params" && (
-          <div className="absolute bottom-20 left-0 right-0 z-25 pb-safe">
+          <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
             <div className="mx-4 bg-gray-950/95 backdrop-blur-xl rounded-2xl border border-white/10 p-4">
               {/* 5 Operator Circles */}
-              <div className="flex items-center justify-center gap-4 mb-4">
+              <div className="flex items-center justify-center gap-3 mb-4">
                 {([
                   { key: "wK" as const, symbol: "κ", label: "Curvature" },
                   { key: "wT" as const, symbol: "τ", label: "Tension" },
@@ -647,16 +647,21 @@ export default function SimulationPage() {
                 ]).map((op) => (
                   <button
                     key={op.key}
-                    onClick={() => setMobileSelectedOperator(op.key)}
-                    className={`w-12 h-12 rounded-full flex flex-col items-center justify-center transition-all ${
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setMobileSelectedOperator(op.key);
+                    }}
+                    className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
                       mobileSelectedOperator === op.key
-                        ? 'bg-amber-500/20 border-2 border-amber-400 ring-2 ring-amber-400/30'
-                        : 'bg-white/10 border-2 border-white/20'
+                        ? 'bg-amber-500/30 border-2 border-amber-400'
+                        : 'bg-white/10 border-2 border-white/20 active:bg-white/20'
                     }`}
                     data-testid={`button-operator-${op.key}-mobile`}
                     aria-label={`Select ${op.label} operator`}
                   >
-                    <span className={`text-lg font-medium ${mobileSelectedOperator === op.key ? 'text-amber-400' : 'text-white/80'}`}>
+                    <span className={`text-base font-semibold ${mobileSelectedOperator === op.key ? 'text-amber-400' : 'text-white/80'}`}>
                       {op.symbol}
                     </span>
                   </button>
