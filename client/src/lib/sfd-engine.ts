@@ -156,7 +156,7 @@ export class SFDEngine {
   private targetFrameTime: number = 16.67; // 60fps target
   
   // Simulation speed control - steps per second (0 = max speed)
-  private targetStepsPerSecond: number = 0;
+  private targetStepsPerSecond: number = 8; // ~100 steps in 12 seconds for GIF alignment
   private lastStepTimestamp: number = 0;
   
   // Field state hysteresis - stored on engine to survive callback rebindings
