@@ -200,6 +200,13 @@ export default function SimulationPage() {
 
     return () => {
       engine.stop();
+      // Cleanup overlay timeout refs
+      if (regimeOverlayTimeoutRef.current) {
+        clearTimeout(regimeOverlayTimeoutRef.current);
+      }
+      if (layerOverlayTimeoutRef.current) {
+        clearTimeout(layerOverlayTimeoutRef.current);
+      }
     };
   }, [isMobile]);
 
