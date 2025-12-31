@@ -882,13 +882,27 @@ export default function SimulationPage() {
               </div>
             </div>
             
-            {/* Options menu */}
-            <Dialog>
-              <DialogTrigger asChild>
-                <button className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center" data-testid="button-menu-mobile" aria-label="Options menu">
-                  <MoreVertical className="h-5 w-5 text-white/60" />
-                </button>
-              </DialogTrigger>
+            {/* Header actions */}
+            <div className="flex items-center gap-1">
+              {/* Colors button in header */}
+              <button
+                onClick={() => setMobileActiveTab(mobileActiveTab === "colors" ? null : "colors")}
+                className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-all ${
+                  mobileActiveTab === "colors" ? 'bg-cyan-500/20' : ''
+                }`}
+                data-testid="button-colors-header-mobile"
+                aria-label="Choose color map"
+              >
+                <Palette className={`h-5 w-5 ${mobileActiveTab === "colors" ? 'text-cyan-400' : 'text-white/60'}`} />
+              </button>
+              
+              {/* Options menu */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center" data-testid="button-menu-mobile" aria-label="Options menu">
+                    <MoreVertical className="h-5 w-5 text-white/60" />
+                  </button>
+                </DialogTrigger>
               <DialogContent className="max-w-[90vw] bg-gray-900/95 backdrop-blur-xl border-white/10">
                 <DialogHeader>
                   <DialogTitle className="text-white">About SFD Engine</DialogTitle>
