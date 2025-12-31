@@ -101,10 +101,23 @@ export default function SimulationPage() {
   
   // Mobile touch interaction states
   const [regimeOverlay, setRegimeOverlay] = useState<string | null>(null);
+  const [layerOverlay, setLayerOverlay] = useState<string | null>(null);
   const [instabilityFlash, setInstabilityFlash] = useState(false);
   const [tiltOffset, setTiltOffset] = useState({ x: 0, y: 0 });
+  const [mobileLayerIndex, setMobileLayerIndex] = useState(0);
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const regimeOverlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const layerOverlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Mobile layers for vertical swipe - Instagram-style filters
+  const mobileLayers = [
+    { key: "none", label: "Base Field", icon: "◉" },
+    { key: "constraintSkeleton", label: "Structure", icon: "◈" },
+    { key: "tension", label: "Tension Flow", icon: "≋" },
+    { key: "curvature", label: "Curvature", icon: "∿" },
+    { key: "variance", label: "Variance", icon: "◐" },
+    { key: "basins", label: "Basins", icon: "⬡" },
+  ] as const;
   
   
   const showDualViewRef = useRef(showDualView);
@@ -614,7 +627,6 @@ export default function SimulationPage() {
       
       const newPreset = structuralPresets[mobileRegimeKeys[newIdx] as keyof typeof structuralPresets];
       if (newPreset) {
-        const wasRunning = state.isRunning;
         handleParamsChange(newPreset);
         
         // Show regime overlay
@@ -624,6 +636,47 @@ export default function SimulationPage() {
         setRegimeOverlay(mobileRegimeLabels[newIdx] + " Mode");
         regimeOverlayTimeoutRef.current = setTimeout(() => setRegimeOverlay(null), 600);
       }
+    }
+    // Vertical swipe for layer/filter change (Instagram-style)
+    else if (absY > 80 && absY > absX * 2 && deltaTime < 400) {
+      let newLayerIdx = mobileLayerIndex;
+      if (deltaY > 0) {
+        // Swipe down = previous layer
+        newLayerIdx = mobileLayerIndex > 0 ? mobileLayerIndex - 1 : mobileLayers.length - 1;
+      } else {
+        // Swipe up = next layer
+        newLayerIdx = (mobileLayerIndex + 1) % mobileLayers.length;
+      }
+      
+      setMobileLayerIndex(newLayerIdx);
+      const newLayer = mobileLayers[newLayerIdx];
+      
+      // Toggle dual view based on layer selection
+      if (newLayer.key === "none") {
+        setShowDualView(false);
+        setBlendMode(false);
+      } else {
+        setShowDualView(true);
+        setBlendMode(true);
+        setBlendOpacity(0.5);
+        const layerKey = newLayer.key;
+        setDerivedType(layerKey as OverlayType);
+        if (engineRef.current) {
+          if (layerKey === "basins") {
+            setBasinMap(engineRef.current.getBasinMap());
+          } else {
+            // Call computeDerivedField for valid overlay types
+            setDerivedField(engineRef.current.computeDerivedField(layerKey as "constraintSkeleton" | "tension" | "curvature" | "variance"));
+          }
+        }
+      }
+      
+      // Show layer overlay notification
+      if (layerOverlayTimeoutRef.current) {
+        clearTimeout(layerOverlayTimeoutRef.current);
+      }
+      setLayerOverlay(`${newLayer.icon} ${newLayer.label}`);
+      layerOverlayTimeoutRef.current = setTimeout(() => setLayerOverlay(null), 800);
     }
     // Tap detection: quick tap for field perturbation  
     else if (absX < 20 && absY < 20 && deltaTime < 200 && mobileActiveTab === null) {
@@ -713,6 +766,20 @@ export default function SimulationPage() {
           </div>
         )}
 
+        {/* Layer change overlay (vertical swipe) */}
+        {layerOverlay && (
+          <div className="absolute inset-0 flex items-start justify-center pt-24 pointer-events-none z-50">
+            <div 
+              className="bg-gradient-to-b from-cyan-500/30 to-cyan-500/10 backdrop-blur-md px-6 py-3 rounded-xl border border-cyan-400/30"
+              style={{
+                animation: 'fadeInOut 0.8s ease-out forwards',
+              }}
+            >
+              <span className="text-lg font-semibold text-white">{layerOverlay}</span>
+            </div>
+          </div>
+        )}
+
         {/* Top Bar - dark, minimal */}
         <div className="absolute top-0 left-0 right-0 z-20 bg-gray-950/80 backdrop-blur-md border-b border-white/5">
           <div className="flex items-center justify-between px-4 py-3">
@@ -766,6 +833,20 @@ export default function SimulationPage() {
               <span className="text-[10px] font-mono text-white/70" data-testid="text-energy-mobile">
                 e {state.energy.toFixed(3)}
               </span>
+            </div>
+          </div>
+        )}
+
+        {/* Layer indicator badge - shows current filter (right side) */}
+        {mobileLayerIndex > 0 && !mobileActiveTab && (
+          <div className="absolute right-1 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
+            <div className="bg-cyan-500/20 backdrop-blur-sm rounded-md px-2 py-2 border border-cyan-400/30">
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-sm">{mobileLayers[mobileLayerIndex].icon}</span>
+                <span className="text-[9px] text-cyan-300 font-medium">
+                  {mobileLayers[mobileLayerIndex].label}
+                </span>
+              </div>
             </div>
           </div>
         )}
