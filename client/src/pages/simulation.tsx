@@ -233,9 +233,24 @@ export default function SimulationPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingProgress, setRecordingProgress] = useState(0);
   const [recordedVideoBlob, setRecordedVideoBlob] = useState<Blob | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showVideoDialog, setShowVideoDialog] = useState(false);
   const [recordingError, setRecordingError] = useState<string | null>(null);
   const recordingControllerRef = useRef<RecordingController | null>(null);
+  
+  // Manage preview URL lifecycle to prevent caching issues
+  useEffect(() => {
+    if (recordedVideoBlob) {
+      const url = URL.createObjectURL(recordedVideoBlob);
+      setPreviewUrl(url);
+      return () => {
+        URL.revokeObjectURL(url);
+        setPreviewUrl(null);
+      };
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [recordedVideoBlob]);
   
   // Mobile layers for layer selector
   const mobileLayers = [
@@ -1601,16 +1616,18 @@ export default function SimulationPage() {
                   
                   {/* Preview - use img for GIF, video otherwise */}
                   <div className="relative mb-4 rounded-xl overflow-hidden bg-black">
-                    {recordedVideoBlob.type.includes("gif") ? (
+                    {previewUrl && recordedVideoBlob?.type.includes("gif") ? (
                       <img
-                        src={URL.createObjectURL(recordedVideoBlob)}
+                        key={previewUrl}
+                        src={previewUrl}
                         alt="Recorded animation"
                         className="w-full aspect-square object-cover"
                         data-testid="gif-preview"
                       />
-                    ) : (
+                    ) : previewUrl ? (
                       <video
-                        src={URL.createObjectURL(recordedVideoBlob)}
+                        key={previewUrl}
+                        src={previewUrl}
                         controls
                         autoPlay
                         loop
@@ -1619,7 +1636,7 @@ export default function SimulationPage() {
                         className="w-full aspect-square object-cover"
                         data-testid="video-preview"
                       />
-                    )}
+                    ) : null}
                   </div>
                   
                   <div className="space-y-3">
