@@ -144,6 +144,7 @@ function MobileOverlayCanvas({
   return (
     <canvas
       ref={canvasRef}
+      data-testid="canvas-overlay"
       className="absolute top-1/2 left-1/2 pointer-events-none rounded-md"
       style={{ 
         opacity, 
@@ -447,6 +448,9 @@ export default function SimulationPage() {
       return;
     }
     
+    // Find overlay canvas if present (for compositing layers)
+    const overlayCanvas = document.querySelector('[data-testid="canvas-overlay"]') as HTMLCanvasElement | null;
+    
     // Clear any previous recording data first
     setRecordedVideoBlob(null);
     setRecordingError(null);
@@ -487,7 +491,8 @@ export default function SimulationPage() {
         console.error("Recording error:", error);
         setRecordingError(error);
         setShowVideoDialog(true);
-      }
+      },
+      overlayCanvas // Pass overlay canvas for compositing
     );
     
     recordingControllerRef.current = controller;

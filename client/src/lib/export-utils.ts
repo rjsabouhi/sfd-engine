@@ -1152,13 +1152,15 @@ export interface RecordingController {
 /**
  * Frame-based recording for iOS compatibility
  * Captures canvas frames as images and creates an animated GIF
+ * Supports compositing an overlay canvas on top of the base canvas
  */
 export async function startLiveRecordingFrameBased(
   canvas: HTMLCanvasElement,
   durationSeconds: number = 10,
   onProgress?: (progress: number) => void,
   onComplete?: (blob: Blob) => void,
-  onError?: (error: string) => void
+  onError?: (error: string) => void,
+  overlayCanvas?: HTMLCanvasElement | null
 ): Promise<RecordingController> {
   const fps = 10; // Lower FPS for GIF to keep file size reasonable
   const totalFrames = Math.floor(durationSeconds * fps);
@@ -1169,7 +1171,13 @@ export async function startLiveRecordingFrameBased(
   let intervalId: NodeJS.Timeout | null = null;
   const startTime = Date.now();
   
-  console.log("[Recording] Starting frame-based capture, targeting", totalFrames, "frames");
+  // Create offscreen canvas for compositing if overlay exists
+  const compositeCanvas = document.createElement("canvas");
+  compositeCanvas.width = canvas.width;
+  compositeCanvas.height = canvas.height;
+  const compositeCtx = compositeCanvas.getContext("2d");
+  
+  console.log("[Recording] Starting frame-based capture, targeting", totalFrames, "frames, overlay:", !!overlayCanvas);
   
   // Capture frames at regular intervals
   intervalId = setInterval(() => {
@@ -1185,7 +1193,22 @@ export async function startLiveRecordingFrameBased(
     }
     
     try {
-      const dataUrl = canvas.toDataURL("image/png");
+      let dataUrl: string;
+      
+      if (overlayCanvas && compositeCtx) {
+        // Composite base + overlay
+        compositeCtx.clearRect(0, 0, compositeCanvas.width, compositeCanvas.height);
+        compositeCtx.drawImage(canvas, 0, 0);
+        // Draw overlay with its current opacity (from CSS)
+        const overlayOpacity = parseFloat(overlayCanvas.style.opacity || "1");
+        compositeCtx.globalAlpha = overlayOpacity;
+        compositeCtx.drawImage(overlayCanvas, 0, 0, compositeCanvas.width, compositeCanvas.height);
+        compositeCtx.globalAlpha = 1;
+        dataUrl = compositeCanvas.toDataURL("image/png");
+      } else {
+        dataUrl = canvas.toDataURL("image/png");
+      }
+      
       capturedFrames.push(dataUrl);
       frameIndex++;
       
@@ -1447,25 +1470,26 @@ export async function startLiveRecording(
   durationSeconds: number = 10,
   onProgress?: (progress: number) => void,
   onComplete?: (blob: Blob) => void,
-  onError?: (error: string) => void
+  onError?: (error: string) => void,
+  overlayCanvas?: HTMLCanvasElement | null
 ): Promise<RecordingController> {
   // Detect iOS and use frame-based recording
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   if (isIOS) {
     console.log("[Recording] Using frame-based recording for iOS");
-    return startLiveRecordingFrameBased(canvas, durationSeconds, onProgress, onComplete, onError);
+    return startLiveRecordingFrameBased(canvas, durationSeconds, onProgress, onComplete, onError, overlayCanvas);
   }
   
   // Check for MediaRecorder support
   if (typeof MediaRecorder === "undefined") {
     console.error("[Recording] MediaRecorder not supported, falling back to frame-based");
-    return startLiveRecordingFrameBased(canvas, durationSeconds, onProgress, onComplete, onError);
+    return startLiveRecordingFrameBased(canvas, durationSeconds, onProgress, onComplete, onError, overlayCanvas);
   }
 
   // Check for captureStream support
   if (!canvas.captureStream) {
     console.error("[Recording] captureStream not supported, falling back to frame-based");
-    return startLiveRecordingFrameBased(canvas, durationSeconds, onProgress, onComplete, onError);
+    return startLiveRecordingFrameBased(canvas, durationSeconds, onProgress, onComplete, onError, overlayCanvas);
   }
 
   const fps = 30;
