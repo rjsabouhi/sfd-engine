@@ -1442,10 +1442,10 @@ export default function SimulationPage() {
 
         {/* Playback Scrubber Overlay - slides up when Run button is pressed */}
         {mobileActiveTab === "scrub" && (
-          <div className="absolute bottom-20 left-0 right-0 z-20 px-4 pb-3">
-            <div className="bg-gray-900/60 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-lg">
+          <div className="absolute bottom-20 left-0 right-0 z-20 px-4 pb-2">
+            <div className="bg-gray-900/60 backdrop-blur-md rounded-xl border border-white/10 px-3 py-2 shadow-lg">
               {/* Frame Counter with Close Button */}
-              <div className="flex items-center justify-between text-sm mb-3">
+              <div className="flex items-center justify-between text-xs mb-1">
                 <span className="text-white/70">Frame</span>
                 <div className="flex items-center gap-3">
                   <span className="font-mono text-green-400">
@@ -1463,18 +1463,18 @@ export default function SimulationPage() {
               </div>
               
               {/* Slider with frame nudge buttons */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {/* Back 10 frames */}
                 <button
                   onClick={() => {
                     if (state.isRunning) handlePause();
                     handleAnimatedSeek(Math.max(0, currentHistoryIndex - 10));
                   }}
-                  className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
                   data-testid="button-back-10-mobile"
                   aria-label="Back 10 frames"
                 >
-                  <ChevronLeft className="h-6 w-6 text-white/80" />
+                  <ChevronLeft className="h-4 w-4 text-white/80" />
                 </button>
                 
                 {/* Slider */}
@@ -1500,16 +1500,16 @@ export default function SimulationPage() {
                     if (state.isRunning) handlePause();
                     handleAnimatedSeek(Math.min(historyLength - 1, currentHistoryIndex + 10));
                   }}
-                  className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
                   data-testid="button-forward-10-mobile"
                   aria-label="Forward 10 frames"
                 >
-                  <ChevronRight className="h-6 w-6 text-white/80" />
+                  <ChevronRight className="h-4 w-4 text-white/80" />
                 </button>
               </div>
               
               {/* Tick marks */}
-              <div className="flex justify-between mt-2 px-14">
+              <div className="flex justify-between mt-1 px-10">
                 {Array.from({ length: 11 }).map((_, i) => (
                   <div 
                     key={i} 
