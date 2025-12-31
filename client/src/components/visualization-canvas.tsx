@@ -144,9 +144,14 @@ export function VisualizationCanvas({
     const size = Math.min(containerWidth, containerHeight);
     setCanvasSize(size);
     
-    canvas.width = field.width;
-    canvas.height = field.height;
-
+    // High-DPI scaling: render at display resolution for crisp visuals
+    const dpr = Math.min(window.devicePixelRatio || 1, 3); // Cap at 3x for performance
+    const renderSize = Math.floor(size * dpr);
+    
+    canvas.width = renderSize;
+    canvas.height = renderSize;
+    
+    // Create imageData at grid resolution, then scale up
     const imageData = ctx.createImageData(field.width, field.height);
     const data = imageData.data;
     const colors = colormap === "cividis" ? CIVIDIS_COLORS : colormap === "inferno" ? INFERNO_COLORS : VIRIDIS_COLORS;
@@ -234,7 +239,18 @@ export function VisualizationCanvas({
       data[pixelIdx + 3] = 255;
     }
 
-    ctx.putImageData(imageData, 0, 0);
+    // Use offscreen canvas at grid resolution, then scale up for high-DPI display
+    const offscreen = document.createElement("canvas");
+    offscreen.width = field.width;
+    offscreen.height = field.height;
+    const offCtx = offscreen.getContext("2d");
+    if (offCtx) {
+      offCtx.putImageData(imageData, 0, 0);
+      // Use image smoothing for better upscaling quality
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(offscreen, 0, 0, renderSize, renderSize);
+    }
   }, [field, colormap, basinMap, showBasins, perceptualSmoothing]);
 
   useEffect(() => {
