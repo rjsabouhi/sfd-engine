@@ -101,13 +101,11 @@ export default function SimulationPage() {
   
   // Mobile touch interaction states
   const [regimeOverlay, setRegimeOverlay] = useState<string | null>(null);
-  const [layerOverlay, setLayerOverlay] = useState<string | null>(null);
   const [instabilityFlash, setInstabilityFlash] = useState(false);
   const [tiltOffset, setTiltOffset] = useState({ x: 0, y: 0 });
   const [mobileLayerIndex, setMobileLayerIndex] = useState(0);
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const regimeOverlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const layerOverlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Mobile layers for layer selector
   const mobileLayers = [
@@ -120,7 +118,7 @@ export default function SimulationPage() {
   ] as const;
 
   // Helper function to select a mobile layer
-  const selectMobileLayer = useCallback((layerIdx: number) => {
+  const selectMobileLayer = (layerIdx: number) => {
     setMobileLayerIndex(layerIdx);
     const newLayer = mobileLayers[layerIdx];
     
@@ -142,7 +140,7 @@ export default function SimulationPage() {
         }
       }
     }
-  }, []);
+  };
   
   
   const showDualViewRef = useRef(showDualView);
@@ -228,9 +226,6 @@ export default function SimulationPage() {
       // Cleanup overlay timeout refs
       if (regimeOverlayTimeoutRef.current) {
         clearTimeout(regimeOverlayTimeoutRef.current);
-      }
-      if (layerOverlayTimeoutRef.current) {
-        clearTimeout(layerOverlayTimeoutRef.current);
       }
     };
   }, [isMobile]);
