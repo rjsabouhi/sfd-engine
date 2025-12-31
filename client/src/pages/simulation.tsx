@@ -958,7 +958,7 @@ export default function SimulationPage() {
         {/* Inline Regimes Panel - appears when Regimes is active */}
         {mobileActiveTab === "regimes" && (
           <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
-            <div className="mx-4 bg-gray-950/95 backdrop-blur-xl rounded-2xl border border-white/10 p-4">
+            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-2xl border border-white/10 p-4">
               <div className="flex items-center justify-center gap-3">
                 {mobileRegimes.map((regime) => (
                   <button
@@ -999,7 +999,7 @@ export default function SimulationPage() {
         {/* Inline Colors Panel - appears when Colors is active */}
         {mobileActiveTab === "colors" && (
           <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
-            <div className="mx-4 bg-gray-950/95 backdrop-blur-xl rounded-2xl border border-white/10 p-4">
+            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-2xl border border-white/10 p-4">
               <div className="flex items-center justify-center gap-4">
                 {colorMaps.map((cm) => (
                   <button
@@ -1034,7 +1034,7 @@ export default function SimulationPage() {
         {/* Inline Layers Panel - appears when Layers is active */}
         {mobileActiveTab === "layers" && (
           <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
-            <div className="mx-4 bg-gray-950/95 backdrop-blur-xl rounded-2xl border border-white/10 p-4">
+            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-2xl border border-white/10 p-4">
               <div className="flex items-center justify-center gap-3 flex-wrap">
                 {mobileLayers.map((layer, idx) => (
                   <button
@@ -1089,7 +1089,7 @@ export default function SimulationPage() {
         {/* Inline Operator Controls - appears when Params is active */}
         {mobileActiveTab === "params" && (
           <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
-            <div className="mx-4 bg-gray-950/95 backdrop-blur-xl rounded-2xl border border-white/10 p-4">
+            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-2xl border border-white/10 p-4">
               {/* 5 Operator Circles */}
               <div className="flex items-center justify-center gap-3 mb-4">
                 {([
