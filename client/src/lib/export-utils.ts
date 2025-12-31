@@ -1158,6 +1158,7 @@ export async function startLiveRecording(
 ): Promise<RecordingController> {
   // Check for MediaRecorder support
   if (typeof MediaRecorder === "undefined") {
+    console.error("[Recording] MediaRecorder not supported");
     onError?.("Video recording is not supported on this device");
     return {
       stop: () => {},
@@ -1168,6 +1169,7 @@ export async function startLiveRecording(
 
   // Check for captureStream support
   if (!canvas.captureStream) {
+    console.error("[Recording] captureStream not supported");
     onError?.("Video capture is not supported on this device");
     return {
       stop: () => {},
@@ -1180,36 +1182,59 @@ export async function startLiveRecording(
   const stream = canvas.captureStream(fps);
   const chunks: Blob[] = [];
   
-  // Try different mime types for compatibility
-  let mimeType = "video/webm;codecs=vp9";
-  if (!MediaRecorder.isTypeSupported(mimeType)) {
-    mimeType = "video/webm;codecs=vp8";
-    if (!MediaRecorder.isTypeSupported(mimeType)) {
-      mimeType = "video/webm";
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = "video/mp4";
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          onError?.("No supported video format found on this device");
-          return {
-            stop: () => {},
-            getProgress: () => 0,
-            isRecording: () => false
-          };
-        }
-      }
+  // Log stream info
+  console.log("[Recording] Stream tracks:", stream.getTracks().length);
+  
+  // Try different mime types for compatibility - prioritize MP4 for iOS
+  const mimeTypes = [
+    "video/mp4",
+    "video/webm;codecs=h264",
+    "video/webm;codecs=vp9",
+    "video/webm;codecs=vp8",
+    "video/webm",
+  ];
+  
+  let mimeType = "";
+  for (const type of mimeTypes) {
+    if (MediaRecorder.isTypeSupported(type)) {
+      mimeType = type;
+      console.log("[Recording] Using mime type:", type);
+      break;
     }
   }
   
-  const mediaRecorder = new MediaRecorder(stream, {
-    mimeType,
-    videoBitsPerSecond: 2500000
-  });
+  if (!mimeType) {
+    console.error("[Recording] No supported video format found");
+    onError?.("No supported video format found on this device");
+    return {
+      stop: () => {},
+      getProgress: () => 0,
+      isRecording: () => false
+    };
+  }
+  
+  let mediaRecorder: MediaRecorder;
+  try {
+    mediaRecorder = new MediaRecorder(stream, {
+      mimeType,
+      videoBitsPerSecond: 2500000
+    });
+  } catch (e) {
+    console.error("[Recording] Failed to create MediaRecorder:", e);
+    onError?.("Failed to initialize video recorder");
+    return {
+      stop: () => {},
+      getProgress: () => 0,
+      isRecording: () => false
+    };
+  }
   
   let isActive = true;
   let startTime = Date.now();
   let progressInterval: NodeJS.Timeout | null = null;
   
   mediaRecorder.ondataavailable = (e) => {
+    console.log("[Recording] Data available:", e.data.size, "bytes");
     if (e.data.size > 0) {
       chunks.push(e.data);
     }
@@ -1221,8 +1246,16 @@ export async function startLiveRecording(
       clearInterval(progressInterval);
     }
     
-    const extension = mimeType.includes("mp4") ? "mp4" : "webm";
+    console.log("[Recording] Stopped. Total chunks:", chunks.length, "Total size:", chunks.reduce((a, b) => a + b.size, 0));
+    
+    if (chunks.length === 0) {
+      console.error("[Recording] No data captured!");
+      onError?.("No video data was captured");
+      return;
+    }
+    
     const blob = new Blob(chunks, { type: mimeType.split(";")[0] });
+    console.log("[Recording] Final blob size:", blob.size, "type:", blob.type);
     onComplete?.(blob);
   };
   

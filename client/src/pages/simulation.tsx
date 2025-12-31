@@ -234,6 +234,7 @@ export default function SimulationPage() {
   const [recordingProgress, setRecordingProgress] = useState(0);
   const [recordedVideoBlob, setRecordedVideoBlob] = useState<Blob | null>(null);
   const [showVideoDialog, setShowVideoDialog] = useState(false);
+  const [recordingError, setRecordingError] = useState<string | null>(null);
   const recordingControllerRef = useRef<RecordingController | null>(null);
   
   // Mobile layers for layer selector
@@ -411,7 +412,13 @@ export default function SimulationPage() {
   // Mobile video recording handler
   const handleStartRecording = useCallback(async () => {
     const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
-    if (!canvas) return;
+    if (!canvas) {
+      console.error("[Recording] Canvas not found");
+      return;
+    }
+    
+    // Clear any previous error
+    setRecordingError(null);
     
     // Ensure simulation is running for recording
     if (!state.isRunning) {
@@ -431,14 +438,21 @@ export default function SimulationPage() {
         recordingControllerRef.current = null;
         
         // Store the blob and show the dialog for user to choose save/share
-        setRecordedVideoBlob(blob);
-        setShowVideoDialog(true);
+        if (blob.size > 0) {
+          setRecordedVideoBlob(blob);
+          setShowVideoDialog(true);
+        } else {
+          setRecordingError("Recording produced no data. Your device may not support video capture.");
+          setShowVideoDialog(true);
+        }
       },
       (error) => {
         setIsRecording(false);
         setRecordingProgress(0);
         recordingControllerRef.current = null;
         console.error("Recording error:", error);
+        setRecordingError(error);
+        setShowVideoDialog(true);
       }
     );
     
@@ -1514,53 +1528,79 @@ export default function SimulationPage() {
         )}
 
         {/* Video Recorded Dialog */}
-        {showVideoDialog && recordedVideoBlob && (
+        {showVideoDialog && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
             <div className="mx-4 w-full max-w-sm bg-gray-900 rounded-2xl border border-white/20 p-5 shadow-2xl">
-              <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold text-white mb-1">Video Ready</h3>
-                <p className="text-xs text-white/60">Hold on video to save to photos</p>
-              </div>
-              
-              {/* Video Preview - users can long-press to save */}
-              <div className="relative mb-4 rounded-xl overflow-hidden bg-black">
-                <video
-                  src={URL.createObjectURL(recordedVideoBlob)}
-                  controls
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full aspect-square object-cover"
-                  data-testid="video-preview"
-                />
-              </div>
-              
-              <div className="space-y-3">
-                {/* Share Button - primary action */}
-                <button
-                  onClick={handleShareVideo}
-                  className="w-full h-12 rounded-xl bg-blue-500/20 border-2 border-blue-400/50 flex items-center justify-center gap-3 active:bg-blue-500/30 transition-colors"
-                  data-testid="button-share-video"
-                  aria-label="Share video"
-                >
-                  <Share2 className="h-5 w-5 text-blue-400" />
-                  <span className="text-sm font-medium text-blue-400">Share Video</span>
-                </button>
-                
-                {/* Done */}
-                <button
-                  onClick={() => {
-                    setShowVideoDialog(false);
-                    setRecordedVideoBlob(null);
-                  }}
-                  className="w-full h-10 rounded-xl flex items-center justify-center active:bg-white/10 transition-colors"
-                  data-testid="button-done-video"
-                  aria-label="Done"
-                >
-                  <span className="text-sm text-white/50">Done</span>
-                </button>
-              </div>
+              {recordingError ? (
+                <>
+                  <div className="text-center mb-4">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/20 border-2 border-red-500/50 flex items-center justify-center">
+                      <Square className="h-8 w-8 text-red-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white mb-1">Recording Failed</h3>
+                    <p className="text-xs text-white/60">{recordingError}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowVideoDialog(false);
+                      setRecordingError(null);
+                      setRecordedVideoBlob(null);
+                    }}
+                    className="w-full h-10 rounded-xl bg-white/10 flex items-center justify-center active:bg-white/20 transition-colors"
+                    data-testid="button-close-error"
+                    aria-label="Close"
+                  >
+                    <span className="text-sm text-white/80">Close</span>
+                  </button>
+                </>
+              ) : recordedVideoBlob ? (
+                <>
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-semibold text-white mb-1">Video Ready</h3>
+                    <p className="text-xs text-white/60">Hold on video to save to photos</p>
+                  </div>
+                  
+                  {/* Video Preview - users can long-press to save */}
+                  <div className="relative mb-4 rounded-xl overflow-hidden bg-black">
+                    <video
+                      src={URL.createObjectURL(recordedVideoBlob)}
+                      controls
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full aspect-square object-cover"
+                      data-testid="video-preview"
+                    />
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {/* Share Button - primary action */}
+                    <button
+                      onClick={handleShareVideo}
+                      className="w-full h-12 rounded-xl bg-blue-500/20 border-2 border-blue-400/50 flex items-center justify-center gap-3 active:bg-blue-500/30 transition-colors"
+                      data-testid="button-share-video"
+                      aria-label="Share video"
+                    >
+                      <Share2 className="h-5 w-5 text-blue-400" />
+                      <span className="text-sm font-medium text-blue-400">Share Video</span>
+                    </button>
+                    
+                    {/* Done */}
+                    <button
+                      onClick={() => {
+                        setShowVideoDialog(false);
+                        setRecordedVideoBlob(null);
+                      }}
+                      className="w-full h-10 rounded-xl flex items-center justify-center active:bg-white/10 transition-colors"
+                      data-testid="button-done-video"
+                      aria-label="Done"
+                    >
+                      <span className="text-sm text-white/50">Done</span>
+                    </button>
+                  </div>
+                </>
+              ) : null}
             </div>
           </div>
         )}
