@@ -59,6 +59,7 @@ function MobileOverlayCanvas({
   frameVersion: number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [canvasSize, setCanvasSize] = useState(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -67,11 +68,13 @@ function MobileOverlayCanvas({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Size canvas to container
+    // Size canvas to match VisualizationCanvas (square, min dimension)
     const container = canvas.parentElement;
     if (container) {
-      canvas.width = container.clientWidth;
-      canvas.height = container.clientHeight;
+      const size = Math.min(container.clientWidth, container.clientHeight);
+      canvas.width = size;
+      canvas.height = size;
+      setCanvasSize(size);
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -126,8 +129,14 @@ function MobileOverlayCanvas({
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ opacity, mixBlendMode: 'screen' }}
+      className="absolute top-1/2 left-1/2 pointer-events-none"
+      style={{ 
+        opacity, 
+        mixBlendMode: 'screen',
+        transform: 'translate(-50%, -50%)',
+        width: canvasSize || '100%',
+        height: canvasSize || '100%',
+      }}
     />
   );
 }
