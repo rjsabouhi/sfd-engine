@@ -1012,7 +1012,11 @@ export default function SimulationPage() {
           style={{
             transform: `translate(${tiltOffset.x}px, ${tiltOffset.y}px)`,
             transition: 'transform 0.1s ease-out',
-          }}
+            touchAction: 'none',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            WebkitTouchCallout: 'none',
+          } as React.CSSProperties}
         >
           <VisualizationCanvas 
             field={field} 

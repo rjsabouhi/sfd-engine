@@ -225,6 +225,7 @@ export function useTouchController(
   }, [engineRef]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
     if (e.touches.length !== 1) return;
     
     const touch = e.touches[0];
@@ -280,6 +281,7 @@ export function useTouchController(
   }, [getFieldCoords, getLocalFieldData, startLongPressPerturbation]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
     if (!touchStartRef.current || e.touches.length !== 1) return;
     
     if (longPressTimerRef.current) {
@@ -327,6 +329,7 @@ export function useTouchController(
   }, [getFieldCoords, touchState.isDragging, applyShearDeformation]);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
