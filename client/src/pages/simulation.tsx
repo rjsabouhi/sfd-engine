@@ -36,6 +36,9 @@ import { getModeLabels, generateInterpretationSentence, getInterpretationText } 
 import { getStatusLine, computeFieldState, getFieldStateLabel, type ReactiveEvents, type SimulationState as LanguageSimState, type FieldState } from "@/lib/language";
 import { exportPNGSnapshot, exportAnimationGIF, exportSimulationData, exportMetricsLog, exportStateSnapshot, exportSettingsJSON, exportEventLog, saveConfiguration, loadConfiguration, exportNumPyArray, exportBatchSpec, exportPythonScript, exportOperatorContributions, exportLayersSeparate, exportFullArchive, exportVideoWebM, exportMobileShareSnapshot } from "@/lib/export-utils";
 import { getSmartViewConfig, type SmartViewConfig } from "@/config/smart-view-map";
+import { useTouchController, type DoubleTapData } from "@/lib/touch-controller";
+import { visualPresets, type VisualPreset } from "@/config/visual-presets";
+import { applyPreset, cancelPresetTransition } from "@/lib/apply-preset";
 
 // Lightweight overlay canvas for mobile projection layers
 const PLASMA_COLORS = [
@@ -221,7 +224,9 @@ export default function SimulationPage() {
   const [instabilityFlash, setInstabilityFlash] = useState(false);
   const [tiltOffset, setTiltOffset] = useState({ x: 0, y: 0 });
   const [mobileLayerIndex, setMobileLayerIndex] = useState(0);
-  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  const [layersSubtab, setLayersSubtab] = useState<'structure' | 'presets'>('structure');
+  const [activePresetId, setActivePresetId] = useState<string | null>(null);
+  const touchContainerRef = useRef<HTMLDivElement>(null);
   const regimeOverlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Mobile layers for layer selector
@@ -651,6 +656,64 @@ export default function SimulationPage() {
     }
   }, []);
 
+  // Visual preset application with smooth tweening
+  const handleApplyPreset = useCallback((preset: VisualPreset) => {
+    setActivePresetId(preset.id);
+    
+    applyPreset(preset, {
+      currentBlend: blendOpacity,
+      currentSmoothing: perceptualSmoothing ? 1 : 0,
+      currentCurvature: params.wK,
+      onBlendChange: setBlendOpacity,
+      onSmoothingChange: (value) => setPerceptualSmoothing(value > 0.5),
+      onCurvatureChange: (value) => {
+        const newParams = { ...params, wK: value };
+        setParams(newParams);
+        engineRef.current?.setParams(newParams);
+      },
+      onColorMapChange: (cm) => {
+        if (cm === 'viridis' || cm === 'inferno' || cm === 'cividis') {
+          setColormap(cm);
+          setHasUserSelectedColormap(true);
+        }
+      },
+      onComplete: () => {
+        // Preset transition complete
+      },
+      transitionDuration: 400,
+    });
+  }, [blendOpacity, perceptualSmoothing, params]);
+
+  // Compute regime-sensitive amplitude for touch interactions
+  const regimeAmplitude = useMemo(() => {
+    const wK = params.wK;
+    const wT = params.wT;
+    if (wK > 1.5 || wT > 1.5) return 0.35;
+    if (wK < 0.3 && wT < 0.3) return 0.15;
+    return 0.25;
+  }, [params.wK, params.wT]);
+
+  // Touch controller for advanced mobile interactions (consolidated gesture handling)
+  const { touchState, handlers: touchHandlers, clearDoubleTapData } = useTouchController(
+    engineRef,
+    field?.width || 200,
+    field?.height || 200,
+    touchContainerRef,
+    { 
+      regimeAmplitude,
+      onSwipeLeft: () => handleSwipeRegime('left'),
+      onSwipeRight: () => handleSwipeRegime('right'),
+    }
+  );
+
+  // Cleanup touch controller on unmount
+  useEffect(() => {
+    return () => {
+      clearDoubleTapData();
+      cancelPresetTransition();
+    };
+  }, [clearDoubleTapData]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -733,74 +796,38 @@ export default function SimulationPage() {
     }
   }, []);
 
-  // Mobile touch handlers for field perturbation and swipe regime change
-  const handleMobileTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      const touch = e.touches[0];
-      touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
-    }
-  }, []);
+  // Swipe handlers for regime change (consolidated in touch controller)
+  const mobileRegimeKeys = useMemo(() => 
+    ["uniform-field", "high-curvature", "criticality-cascade", "fractal-corridor", "cosmic-web"],
+  []);
+  const mobileRegimeLabels = useMemo(() => 
+    ["Equilibrium", "Kappa-Shear", "Tension", "Fractal", "Collapse"],
+  []);
 
-  const handleMobileTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!touchStartRef.current) return;
+  const handleSwipeRegime = useCallback((direction: 'left' | 'right') => {
+    const currentIdx = mobileRegimeKeys.findIndex(key => {
+      const preset = structuralPresets[key as keyof typeof structuralPresets];
+      return preset && preset.wK === params.wK && preset.wT === params.wT;
+    });
     
-    const touch = e.changedTouches[0];
-    const deltaX = touch.clientX - touchStartRef.current.x;
-    const deltaY = touch.clientY - touchStartRef.current.y;
-    const deltaTime = Date.now() - touchStartRef.current.time;
-    const absX = Math.abs(deltaX);
-    const absY = Math.abs(deltaY);
-    
-    // Swipe detection: horizontal swipe for regime change
-    if (absX > 80 && absX > absY * 2 && deltaTime < 400) {
-      const mobileRegimeKeys = ["uniform-field", "high-curvature", "criticality-cascade", "fractal-corridor", "cosmic-web"];
-      const mobileRegimeLabels = ["Equilibrium", "Kappa-Shear", "Tension", "Fractal", "Collapse"];
-      const currentIdx = mobileRegimeKeys.findIndex(key => {
-        const preset = structuralPresets[key as keyof typeof structuralPresets];
-        return preset && preset.wK === params.wK && preset.wT === params.wT;
-      });
-      
-      let newIdx = currentIdx;
-      if (deltaX > 0) {
-        // Swipe right = previous regime
-        newIdx = currentIdx > 0 ? currentIdx - 1 : mobileRegimeKeys.length - 1;
-      } else {
-        // Swipe left = next regime
-        newIdx = (currentIdx + 1) % mobileRegimeKeys.length;
-      }
-      
-      const newPreset = structuralPresets[mobileRegimeKeys[newIdx] as keyof typeof structuralPresets];
-      if (newPreset) {
-        handleParamsChange(newPreset);
-        
-        // Show regime overlay
-        if (regimeOverlayTimeoutRef.current) {
-          clearTimeout(regimeOverlayTimeoutRef.current);
-        }
-        setRegimeOverlay(mobileRegimeLabels[newIdx] + " Mode");
-        regimeOverlayTimeoutRef.current = setTimeout(() => setRegimeOverlay(null), 600);
-      }
-    }
-    // Tap detection: quick tap for field perturbation  
-    else if (absX < 20 && absY < 20 && deltaTime < 200 && mobileActiveTab === null) {
-      // Convert touch position to field coordinates
-      const rect = (e.target as HTMLElement).getBoundingClientRect();
-      const relX = (touch.clientX - rect.left) / rect.width;
-      const relY = (touch.clientY - rect.top) / rect.height;
-      
-      // Only perturb if within the field area (roughly centered)
-      if (relX > 0.05 && relX < 0.95 && relY > 0.1 && relY < 0.85) {
-        const fieldX = Math.floor(relX * (field?.width || 200));
-        const fieldY = Math.floor(relY * (field?.height || 200));
-        
-        if (engineRef.current) {
-          engineRef.current.perturbField(fieldX, fieldY, 0.2, 8);
-        }
-      }
+    let newIdx = currentIdx;
+    if (direction === 'right') {
+      newIdx = currentIdx > 0 ? currentIdx - 1 : mobileRegimeKeys.length - 1;
+    } else {
+      newIdx = (currentIdx + 1) % mobileRegimeKeys.length;
     }
     
-    touchStartRef.current = null;
-  }, [params, state.isRunning, mobileActiveTab, field]);
+    const newPreset = structuralPresets[mobileRegimeKeys[newIdx] as keyof typeof structuralPresets];
+    if (newPreset) {
+      handleParamsChange(newPreset);
+      
+      if (regimeOverlayTimeoutRef.current) {
+        clearTimeout(regimeOverlayTimeoutRef.current);
+      }
+      setRegimeOverlay(mobileRegimeLabels[newIdx] + " Mode");
+      regimeOverlayTimeoutRef.current = setTimeout(() => setRegimeOverlay(null), 600);
+    }
+  }, [params, mobileRegimeKeys, mobileRegimeLabels, handleParamsChange]);
 
   if (isMobile) {
     const mobileRegimes = [
@@ -828,9 +855,11 @@ export default function SimulationPage() {
       <div className="relative h-screen w-screen overflow-hidden bg-gray-950">
         {/* Full-screen canvas with touch handlers and tilt parallax */}
         <div 
+          ref={touchContainerRef}
           className="absolute inset-0"
-          onTouchStart={handleMobileTouchStart}
-          onTouchEnd={handleMobileTouchEnd}
+          onTouchStart={touchHandlers.onTouchStart}
+          onTouchMove={touchHandlers.onTouchMove}
+          onTouchEnd={touchHandlers.onTouchEnd}
           style={{
             transform: `translate(${tiltOffset.x}px, ${tiltOffset.y}px)`,
             transition: 'transform 0.1s ease-out',
@@ -877,6 +906,39 @@ export default function SimulationPage() {
               }}
             >
               <span className="text-lg font-semibold text-white">{regimeOverlay}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Double-tap field sampler tooltip */}
+        {touchState.lastDoubleTapData && (
+          <div 
+            className="absolute pointer-events-none z-50"
+            style={{
+              left: touchState.lastDoubleTapData.x,
+              top: touchState.lastDoubleTapData.y - 80,
+              transform: 'translateX(-50%)',
+            }}
+          >
+            <div 
+              className="bg-gray-900/90 backdrop-blur-md px-3 py-2 rounded-lg border border-white/20 shadow-lg"
+              style={{ animation: 'fadeIn 0.2s ease-out' }}
+            >
+              <div className="text-[10px] text-white/50 mb-1">Field Sample</div>
+              <div className="flex items-center gap-3 text-xs">
+                <span className="text-cyan-400 font-mono">
+                  k {touchState.lastDoubleTapData.localKappa.toFixed(3)}
+                </span>
+                <span className="text-amber-400 font-mono">
+                  e {touchState.lastDoubleTapData.localEpsilon.toFixed(3)}
+                </span>
+                <span className={`font-medium ${
+                  touchState.lastDoubleTapData.stabilityClass === 'stable' ? 'text-green-400' :
+                  touchState.lastDoubleTapData.stabilityClass === 'borderline' ? 'text-yellow-400' : 'text-red-400'
+                }`}>
+                  {touchState.lastDoubleTapData.stabilityClass}
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -1035,51 +1097,115 @@ export default function SimulationPage() {
         {mobileActiveTab === "layers" && (
           <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
             <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-2xl border border-white/10 p-4">
-              <div className="flex items-center justify-center gap-3 flex-wrap">
-                {mobileLayers.map((layer, idx) => (
-                  <button
-                    key={layer.key}
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      selectMobileLayer(idx);
-                    }}
-                    className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                      mobileLayerIndex === idx
-                        ? 'bg-cyan-500/30 border-2 border-cyan-400'
-                        : 'bg-white/10 border-2 border-white/20 active:bg-white/20'
-                    }`}
-                    data-testid={`button-layer-${layer.key}-mobile`}
-                    aria-label={layer.label}
-                  >
-                    <span className={`text-base ${mobileLayerIndex === idx ? 'text-cyan-400' : 'text-white/80'}`}>
-                      {layer.icon}
-                    </span>
-                  </button>
-                ))}
+              {/* Subtab selector */}
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <button
+                  onClick={() => setLayersSubtab('structure')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    layersSubtab === 'structure'
+                      ? 'bg-cyan-500/30 text-cyan-400'
+                      : 'bg-white/10 text-white/60'
+                  }`}
+                  data-testid="button-layers-structure-tab"
+                >
+                  Structure
+                </button>
+                <button
+                  onClick={() => setLayersSubtab('presets')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    layersSubtab === 'presets'
+                      ? 'bg-purple-500/30 text-purple-400'
+                      : 'bg-white/10 text-white/60'
+                  }`}
+                  data-testid="button-layers-presets-tab"
+                >
+                  Presets
+                </button>
               </div>
-              <p className="text-center text-[11px] text-white/50 mt-3">
-                {mobileLayers[mobileLayerIndex]?.label || "Base"}
-              </p>
-              
-              {/* Blend slider - shown when overlay layer is selected */}
-              {mobileLayerIndex > 0 && (
-                <div className="mt-4 pt-3 border-t border-white/10">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] text-white/60">Blend</span>
-                    <span className="text-[11px] text-cyan-300 font-medium">{Math.round(blendOpacity * 100)}%</span>
+
+              {/* Structure subtab content */}
+              {layersSubtab === 'structure' && (
+                <>
+                  <div className="flex items-center justify-center gap-3 flex-wrap">
+                    {mobileLayers.map((layer, idx) => (
+                      <button
+                        key={layer.key}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          selectMobileLayer(idx);
+                        }}
+                        className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                          mobileLayerIndex === idx
+                            ? 'bg-cyan-500/30 border-2 border-cyan-400'
+                            : 'bg-white/10 border-2 border-white/20 active:bg-white/20'
+                        }`}
+                        data-testid={`button-layer-${layer.key}-mobile`}
+                        aria-label={layer.label}
+                      >
+                        <span className={`text-base ${mobileLayerIndex === idx ? 'text-cyan-400' : 'text-white/80'}`}>
+                          {layer.icon}
+                        </span>
+                      </button>
+                    ))}
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={blendOpacity * 100}
-                    onChange={(e) => setBlendOpacity(parseInt(e.target.value) / 100)}
-                    className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
-                    data-testid="slider-blend-opacity-mobile"
-                    aria-label="Blend opacity"
-                  />
+                  <p className="text-center text-[11px] text-white/50 mt-3">
+                    {mobileLayers[mobileLayerIndex]?.label || "Base"}
+                  </p>
+                  
+                  {/* Blend slider - shown when overlay layer is selected */}
+                  {mobileLayerIndex > 0 && (
+                    <div className="mt-4 pt-3 border-t border-white/10">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[11px] text-white/60">Blend</span>
+                        <span className="text-[11px] text-cyan-300 font-medium">{Math.round(blendOpacity * 100)}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={blendOpacity * 100}
+                        onChange={(e) => setBlendOpacity(parseInt(e.target.value) / 100)}
+                        className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                        data-testid="slider-blend-opacity-mobile"
+                        aria-label="Blend opacity"
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Presets subtab content */}
+              {layersSubtab === 'presets' && (
+                <div className="overflow-x-auto pb-2 -mx-2 px-2">
+                  <div className="flex gap-3" style={{ minWidth: 'max-content' }}>
+                    {visualPresets.map((preset) => (
+                      <button
+                        key={preset.id}
+                        onClick={() => handleApplyPreset(preset)}
+                        className={`flex-shrink-0 w-20 p-2 rounded-xl transition-all active:scale-95 ${
+                          activePresetId === preset.id
+                            ? 'bg-purple-500/30 border-2 border-purple-400'
+                            : 'bg-white/10 border-2 border-white/10'
+                        }`}
+                        data-testid={`button-preset-${preset.id}`}
+                      >
+                        {/* Color preview */}
+                        <div 
+                          className="w-full h-8 rounded-md mb-2"
+                          style={{
+                            background: `linear-gradient(135deg, ${preset.previewColor1}, ${preset.previewColor2})`,
+                          }}
+                        />
+                        <span className={`text-[10px] font-medium block text-center truncate ${
+                          activePresetId === preset.id ? 'text-purple-300' : 'text-white/70'
+                        }`}>
+                          {preset.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
