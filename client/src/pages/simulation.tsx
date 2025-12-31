@@ -437,8 +437,13 @@ export default function SimulationPage() {
       return;
     }
     
-    // Clear any previous error
+    // Clear any previous recording data first
+    setRecordedVideoBlob(null);
     setRecordingError(null);
+    setRecordingProgress(0);
+    
+    // Reset the controller reference for fresh recording
+    recordingControllerRef.current = null;
     
     // Ensure simulation is running for recording
     if (!state.isRunning) {
@@ -446,7 +451,6 @@ export default function SimulationPage() {
     }
     
     setIsRecording(true);
-    setRecordingProgress(0);
     
     const controller = await startLiveRecording(
       canvas,
