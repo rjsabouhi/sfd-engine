@@ -1270,12 +1270,13 @@ async function createAnimatedGifFromDataUrls(
   ctx.drawImage(firstImg, 0, 0);
   const firstImageData = ctx.getImageData(0, 0, width, height);
   
-  // Build palette from image colors (simple quantization)
+  // Build palette from image colors (improved quantization - 6-bit per channel for better quality)
   const colorCounts = new Map<string, number>();
   for (let i = 0; i < firstImageData.data.length; i += 4) {
-    const r = firstImageData.data[i] & 0xF0;
-    const g = firstImageData.data[i + 1] & 0xF0;
-    const b = firstImageData.data[i + 2] & 0xF0;
+    // Use 6-bit quantization (64 levels per channel) for better quality
+    const r = Math.round(firstImageData.data[i] / 4) * 4;
+    const g = Math.round(firstImageData.data[i + 1] / 4) * 4;
+    const b = Math.round(firstImageData.data[i + 2] / 4) * 4;
     const key = `${r},${g},${b}`;
     colorCounts.set(key, (colorCounts.get(key) || 0) + 1);
   }

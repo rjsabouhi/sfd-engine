@@ -471,17 +471,33 @@ export default function SimulationPage() {
   }, []);
 
   const handleSaveVideo = useCallback(() => {
-    if (!recordedVideoBlob) return;
+    if (!recordedVideoBlob) {
+      console.log("[Save] No blob to save");
+      return;
+    }
+    console.log("[Save] Saving blob:", recordedVideoBlob.type, recordedVideoBlob.size);
     const isGif = recordedVideoBlob.type.includes("gif");
     const extension = isGif ? "gif" : recordedVideoBlob.type.includes("mp4") ? "mp4" : "webm";
     const url = URL.createObjectURL(recordedVideoBlob);
+    
+    // Use a more reliable download approach for iOS
     const a = document.createElement("a");
+    a.style.display = "none";
     a.href = url;
     a.download = `sfd-simulation-${Date.now()}.${extension}`;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
     document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    
+    // Use setTimeout to ensure the element is in the DOM
+    setTimeout(() => {
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+    }, 0);
+    
     setShowVideoDialog(false);
     setRecordedVideoBlob(null);
   }, [recordedVideoBlob]);
