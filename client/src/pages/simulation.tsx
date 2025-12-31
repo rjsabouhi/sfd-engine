@@ -920,7 +920,8 @@ export default function SimulationPage() {
                   </DialogDescription>
                 </DialogHeader>
               </DialogContent>
-            </Dialog>
+              </Dialog>
+            </div>
           </div>
         </div>
 
@@ -942,52 +943,6 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Right-side cascading layer selector */}
-        {!mobileActiveTab && (
-          <div className="absolute right-1 top-1/2 -translate-y-1/2 z-20">
-            <div className="bg-black/60 backdrop-blur-sm rounded-lg py-1 flex flex-col gap-0.5 max-h-[320px] overflow-y-auto">
-              {mobileLayers.map((layer, idx) => (
-                <button
-                  key={layer.key}
-                  type="button"
-                  onClick={() => selectMobileLayer(idx)}
-                  className={`min-w-[44px] min-h-[44px] px-2 py-1.5 flex flex-col items-center justify-center transition-all ${
-                    mobileLayerIndex === idx
-                      ? 'bg-cyan-500/30 border-l-2 border-cyan-400'
-                      : 'hover:bg-white/10 border-l-2 border-transparent'
-                  }`}
-                  data-testid={`button-layer-${layer.key}-mobile`}
-                  aria-label={`Select ${layer.label} layer`}
-                >
-                  <span className={`text-sm ${mobileLayerIndex === idx ? 'text-cyan-300' : 'text-white/70'}`}>
-                    {layer.icon}
-                  </span>
-                  <span className={`text-[9px] font-medium ${mobileLayerIndex === idx ? 'text-cyan-300' : 'text-white/50'}`}>
-                    {layer.label}
-                  </span>
-                </button>
-              ))}
-              
-              {/* Blend opacity slider - shown when overlay is active */}
-              {mobileLayerIndex > 0 && (
-                <div className="px-2 py-2 border-t border-white/10 mt-1">
-                  <span className="text-[9px] text-white/50 block text-center mb-1">Blend</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={blendOpacity * 100}
-                    onChange={(e) => setBlendOpacity(parseInt(e.target.value) / 100)}
-                    className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
-                    data-testid="slider-blend-opacity-mobile"
-                    aria-label="Blend opacity"
-                  />
-                  <span className="text-[9px] text-cyan-300 block text-center mt-0.5">{Math.round(blendOpacity * 100)}%</span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Inline Regimes Panel - appears when Regimes is active */}
         {mobileActiveTab === "regimes" && (
@@ -1061,6 +1016,61 @@ export default function SimulationPage() {
               <p className="text-center text-[11px] text-white/50 mt-3">
                 {colorMaps.find(c => c.key === colormap)?.label || "Viridis"}
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* Inline Layers Panel - appears when Layers is active */}
+        {mobileActiveTab === "layers" && (
+          <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
+            <div className="mx-4 bg-gray-950/95 backdrop-blur-xl rounded-2xl border border-white/10 p-4">
+              <div className="flex items-center justify-center gap-3 flex-wrap">
+                {mobileLayers.map((layer, idx) => (
+                  <button
+                    key={layer.key}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      selectMobileLayer(idx);
+                    }}
+                    className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                      mobileLayerIndex === idx
+                        ? 'bg-cyan-500/30 border-2 border-cyan-400'
+                        : 'bg-white/10 border-2 border-white/20 active:bg-white/20'
+                    }`}
+                    data-testid={`button-layer-${layer.key}-mobile`}
+                    aria-label={layer.label}
+                  >
+                    <span className={`text-base ${mobileLayerIndex === idx ? 'text-cyan-400' : 'text-white/80'}`}>
+                      {layer.icon}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <p className="text-center text-[11px] text-white/50 mt-3">
+                {mobileLayers[mobileLayerIndex]?.label || "Base"}
+              </p>
+              
+              {/* Blend slider - shown when overlay layer is selected */}
+              {mobileLayerIndex > 0 && (
+                <div className="mt-4 pt-3 border-t border-white/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] text-white/60">Blend</span>
+                    <span className="text-[11px] text-cyan-300 font-medium">{Math.round(blendOpacity * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={blendOpacity * 100}
+                    onChange={(e) => setBlendOpacity(parseInt(e.target.value) / 100)}
+                    className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                    data-testid="slider-blend-opacity-mobile"
+                    aria-label="Blend opacity"
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1279,19 +1289,19 @@ export default function SimulationPage() {
               <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/60'}`}>Regimes</span>
             </button>
 
-            {/* Colors button - toggles inline color controls */}
+            {/* Layers button - toggles inline layer controls */}
             <button
-              onClick={() => setMobileActiveTab(mobileActiveTab === "colors" ? null : "colors")}
+              onClick={() => setMobileActiveTab(mobileActiveTab === "layers" ? null : "layers")}
               className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                mobileActiveTab === "colors" 
+                mobileActiveTab === "layers" 
                   ? 'bg-cyan-500/20 border-2 border-cyan-500/50' 
                   : 'bg-white/10 border-2 border-white/20'
               }`}
-              data-testid="button-colors-mobile"
-              aria-label="Choose color map"
+              data-testid="button-layers-mobile"
+              aria-label="Select visualization layer"
             >
-              <Palette className={`h-5 w-5 ${mobileActiveTab === "colors" ? 'text-cyan-400' : 'text-white/80'}`} />
-              <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "colors" ? 'text-cyan-400' : 'text-white/60'}`}>Colors</span>
+              <Layers className={`h-5 w-5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/80'}`} />
+              <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/60'}`}>Layers</span>
             </button>
 
             {/* Params button - toggles inline operator controls */}
