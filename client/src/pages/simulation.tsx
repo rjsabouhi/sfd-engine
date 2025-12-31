@@ -1443,7 +1443,7 @@ export default function SimulationPage() {
         {/* Playback Scrubber Overlay - slides up when Run button is pressed */}
         {mobileActiveTab === "scrub" && (
           <div className="absolute bottom-20 left-0 right-0 z-20 px-4 pb-3">
-            <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-lg">
+            <div className="bg-gray-900/60 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-lg">
               {/* Frame Counter with Close Button */}
               <div className="flex items-center justify-between text-sm mb-3">
                 <span className="text-white/70">Frame</span>
