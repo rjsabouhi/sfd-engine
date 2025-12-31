@@ -103,12 +103,8 @@ export default function SimulationPage() {
   const [regimeOverlay, setRegimeOverlay] = useState<string | null>(null);
   const [instabilityFlash, setInstabilityFlash] = useState(false);
   const [tiltOffset, setTiltOffset] = useState({ x: 0, y: 0 });
-  const [currentMobilePresetIndex, setCurrentMobilePresetIndex] = useState(0); // Track active preset by index
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const regimeOverlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Mobile preset keys for index tracking
-  const mobilePresetKeys = ["mobile-equilibrium", "mobile-curvature", "mobile-tension", "mobile-fractal", "mobile-collapse"];
   
   
   const showDualViewRef = useRef(showDualView);
@@ -299,64 +295,6 @@ export default function SimulationPage() {
   const handleClearEvents = useCallback(() => {
     engineRef.current?.clearEvents();
     setEvents([]);
-  }, []);
-
-  // Animated parameter transition for smooth regime switching (500ms ease-in-out)
-  const animationFrameRef = useRef<number | null>(null);
-  const animateParamsTransition = useCallback((
-    fromParams: SimulationParameters, 
-    toParams: Partial<SimulationParameters>, 
-    duration: number
-  ) => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-    
-    const startTime = performance.now();
-    // Include all numeric parameter keys for full preset transition
-    const paramKeys: (keyof SimulationParameters)[] = [
-      'wK', 'wT', 'wC', 'wA', 'wR', 'dt', 
-      'curvatureGain', 'couplingWeight', 'attractorStrength', 'redistributionRate'
-    ];
-    
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      // Ease-in-out cubic function
-      const eased = progress < 0.5 
-        ? 4 * progress * progress * progress 
-        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-      
-      const interpolatedParams: Partial<SimulationParameters> = {};
-      for (const key of paramKeys) {
-        const from = fromParams[key] as number | undefined;
-        const to = toParams[key] as number | undefined;
-        if (to !== undefined && from !== undefined) {
-          (interpolatedParams as Record<string, number>)[key] = from + (to - from) * eased;
-        }
-      }
-      
-      handleParamsChange(interpolatedParams);
-      
-      if (progress < 1) {
-        animationFrameRef.current = requestAnimationFrame(animate);
-      } else {
-        // Ensure final values are exactly what we wanted
-        handleParamsChange(toParams);
-        animationFrameRef.current = null;
-      }
-    };
-    
-    animationFrameRef.current = requestAnimationFrame(animate);
-  }, [handleParamsChange]);
-  
-  // Cleanup animation on unmount
-  useEffect(() => {
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
   }, []);
 
   const handleExportEvents = useCallback(async () => {
@@ -658,31 +596,32 @@ export default function SimulationPage() {
     
     // Swipe detection: horizontal swipe for regime change
     if (absX > 80 && absX > absY * 2 && deltaTime < 400) {
-      const mobileRegimeLabels = ["Equilibrium", "Curvature", "Tension", "Fractal", "Collapse"];
+      const mobileRegimeKeys = ["uniform-field", "high-curvature", "criticality-cascade", "fractal-corridor", "cosmic-web"];
+      const mobileRegimeLabels = ["Equilibrium", "Kappa-Shear", "Tension", "Fractal", "Collapse"];
+      const currentIdx = mobileRegimeKeys.findIndex(key => {
+        const preset = structuralPresets[key as keyof typeof structuralPresets];
+        return preset && preset.wK === params.wK && preset.wT === params.wT;
+      });
       
-      // Use tracked preset index instead of param comparison
-      let newIdx = currentMobilePresetIndex;
+      let newIdx = currentIdx;
       if (deltaX > 0) {
         // Swipe right = previous regime
-        newIdx = currentMobilePresetIndex > 0 ? currentMobilePresetIndex - 1 : mobilePresetKeys.length - 1;
+        newIdx = currentIdx > 0 ? currentIdx - 1 : mobileRegimeKeys.length - 1;
       } else {
         // Swipe left = next regime
-        newIdx = (currentMobilePresetIndex + 1) % mobilePresetKeys.length;
+        newIdx = (currentIdx + 1) % mobileRegimeKeys.length;
       }
       
-      const newPreset = structuralPresets[mobilePresetKeys[newIdx] as keyof typeof structuralPresets];
+      const newPreset = structuralPresets[mobileRegimeKeys[newIdx] as keyof typeof structuralPresets];
       if (newPreset) {
-        // Update tracked index
-        setCurrentMobilePresetIndex(newIdx);
-        
-        // Animated parameter transition over 500ms for smooth regime switching
-        animateParamsTransition(params, newPreset, 500);
+        const wasRunning = state.isRunning;
+        handleParamsChange(newPreset);
         
         // Show regime overlay
         if (regimeOverlayTimeoutRef.current) {
           clearTimeout(regimeOverlayTimeoutRef.current);
         }
-        setRegimeOverlay(mobileRegimeLabels[newIdx]);
+        setRegimeOverlay(mobileRegimeLabels[newIdx] + " Mode");
         regimeOverlayTimeoutRef.current = setTimeout(() => setRegimeOverlay(null), 600);
       }
     }
@@ -705,15 +644,15 @@ export default function SimulationPage() {
     }
     
     touchStartRef.current = null;
-  }, [params, state.isRunning, mobileActiveTab, field, currentMobilePresetIndex, mobilePresetKeys, animateParamsTransition]);
+  }, [params, state.isRunning, mobileActiveTab, field]);
 
   if (isMobile) {
     const mobileRegimes = [
-      { key: "mobile-equilibrium", symbol: "E", label: "Equilibrium", description: "Calm softflow" },
-      { key: "mobile-curvature", symbol: "K", label: "Curvature", description: "Slow drift" },
-      { key: "mobile-tension", symbol: "T", label: "Tension", description: "Bloom forming" },
-      { key: "mobile-fractal", symbol: "F", label: "Fractal", description: "Slow pulse" },
-      { key: "mobile-collapse", symbol: "C", label: "Collapse", description: "Gentle mist" },
+      { key: "uniform-field", symbol: "E", label: "Equilibrium", description: "Balanced field" },
+      { key: "high-curvature", symbol: "κ", label: "Kappa-Shear", description: "Curvature flow" },
+      { key: "criticality-cascade", symbol: "T", label: "Tension", description: "Tension mode" },
+      { key: "fractal-corridor", symbol: "F", label: "Fractal", description: "Rapid formation" },
+      { key: "cosmic-web", symbol: "C", label: "Collapse", description: "High instability" },
     ];
 
     const colorMaps = [
@@ -836,7 +775,7 @@ export default function SimulationPage() {
           <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
             <div className="mx-4 bg-gray-950/95 backdrop-blur-xl rounded-2xl border border-white/10 p-4">
               <div className="flex items-center justify-center gap-3">
-                {mobileRegimes.map((regime, index) => (
+                {mobileRegimes.map((regime) => (
                   <button
                     key={regime.key}
                     type="button"
@@ -844,10 +783,7 @@ export default function SimulationPage() {
                       e.preventDefault();
                       e.stopPropagation();
                       if (structuralPresets[regime.key]) {
-                        // Update tracked index when selecting regime via button
-                        setCurrentMobilePresetIndex(index);
-                        // Animated transition
-                        animateParamsTransition(params, structuralPresets[regime.key], 500);
+                        handleParamsChange(structuralPresets[regime.key]);
                         const smartConfig = getSmartViewConfig(regime.key);
                         if (smartConfig) {
                           handleSmartViewApply(smartConfig);
@@ -855,7 +791,7 @@ export default function SimulationPage() {
                       }
                     }}
                     className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                      currentMobilePresetIndex === index
+                      currentRegimeKey === regime.key
                         ? 'bg-purple-500/30 border-2 border-purple-400'
                         : 'bg-white/10 border-2 border-white/20 active:bg-white/20'
                     }`}

@@ -162,7 +162,6 @@ export class SFDEngine {
   // Memory buffer for hysteresis/memory visualization
   private memoryBuffer: Float32Array | null = null;
   private prevGrid: Float32Array | null = null;
-  
 
   // Trend tracking for aggregated metrics
   private trendWindowSize: number = 30;
@@ -1738,7 +1737,6 @@ export class SFDEngine {
   }
 
   getField(): FieldData {
-    // Return raw simulation grid - temporal smoothing is applied in visualization component
     return {
       grid: this.grid,
       width: this.width,
