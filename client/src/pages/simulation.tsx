@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -920,26 +920,123 @@ export default function SimulationPage() {
           </div>
         )}
 
+        {/* Scrub Controls Panel - appears when Run button is pressed */}
+        {mobileActiveTab === "scrub" && (
+          <div className="absolute bottom-20 left-0 right-0 z-20 px-4 pb-3">
+            <div className="bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-green-500/30 p-4 shadow-lg">
+              {/* Play/Pause and Step Controls Row */}
+              <div className="flex items-center justify-center gap-4 mb-4">
+                {/* Step Back */}
+                <button
+                  onClick={() => {
+                    if (state.isRunning) handlePause();
+                    handleStepBackward();
+                  }}
+                  className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-step-back-mobile"
+                  aria-label="Step backward"
+                >
+                  <SkipBack className="h-5 w-5 text-white/80" />
+                </button>
+
+                {/* Play/Pause - larger central button */}
+                <button
+                  onClick={state.isRunning ? handlePause : handlePlay}
+                  className={`w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                    state.isRunning 
+                      ? 'bg-green-500/30 border-2 border-green-500' 
+                      : 'bg-green-500/20 border-2 border-green-500/50'
+                  }`}
+                  data-testid={state.isRunning ? "button-pause-scrub-mobile" : "button-play-scrub-mobile"}
+                  aria-label={state.isRunning ? "Pause simulation" : "Play simulation"}
+                >
+                  {state.isRunning ? (
+                    <Pause className="h-7 w-7 text-green-400" />
+                  ) : (
+                    <Play className="h-7 w-7 text-green-400 ml-1" />
+                  )}
+                </button>
+
+                {/* Step Forward */}
+                <button
+                  onClick={() => {
+                    if (state.isRunning) handlePause();
+                    handleStep();
+                  }}
+                  className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-step-forward-mobile"
+                  aria-label="Step forward"
+                >
+                  <SkipForward className="h-5 w-5 text-white/80" />
+                </button>
+              </div>
+
+              {/* Timeline Scrubbing Bar */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-white/60">Frame</span>
+                  <span className="font-mono text-green-400">
+                    {currentHistoryIndex + 1} / {historyLength || 1}
+                  </span>
+                </div>
+                <Slider
+                  value={[currentHistoryIndex]}
+                  onValueChange={([v]) => {
+                    if (state.isRunning) handlePause();
+                    handleSeekFrame(v);
+                  }}
+                  min={0}
+                  max={Math.max(0, historyLength - 1)}
+                  step={1}
+                  className="w-full"
+                  data-testid="slider-timeline-mobile"
+                />
+                {/* Tick marks */}
+                <div className="flex justify-between px-0.5">
+                  {Array.from({ length: 11 }).map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`w-0.5 ${i % 5 === 0 ? 'h-2 bg-green-500/40' : 'h-1 bg-white/20'}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Reset button */}
+              <div className="flex justify-center mt-3">
+                <button
+                  onClick={handleReset}
+                  className="px-4 py-2 rounded-full bg-white/10 border border-white/20 text-xs text-white/70 active:bg-white/20 transition-colors"
+                  data-testid="button-reset-mobile"
+                  aria-label="Reset simulation"
+                >
+                  Reset Field
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Primary Control Strip - 5 circular buttons */}
         <div className="absolute bottom-0 left-0 right-0 z-30 bg-gray-950/90 backdrop-blur-xl border-t border-white/10 pb-safe">
           <div className="flex items-center justify-around h-20 px-4">
-            {/* Run button */}
+            {/* Run button - toggles scrub controls */}
             <button
-              onClick={state.isRunning ? handlePause : handlePlay}
+              onClick={() => setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub")}
               className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                state.isRunning 
+                mobileActiveTab === "scrub" || state.isRunning
                   ? 'bg-green-500/20 border-2 border-green-500/50' 
                   : 'bg-white/10 border-2 border-white/20'
               }`}
-              data-testid={state.isRunning ? "button-pause-mobile" : "button-play-mobile"}
-              aria-label={state.isRunning ? "Pause simulation" : "Run simulation"}
+              data-testid="button-scrub-mobile"
+              aria-label="Open playback controls"
             >
               {state.isRunning ? (
                 <Pause className="h-5 w-5 text-green-400" />
               ) : (
-                <Play className="h-5 w-5 text-white/80 ml-0.5" />
+                <Play className="h-5 w-5 text-green-400 ml-0.5" />
               )}
-              <span className={`text-[9px] mt-0.5 ${state.isRunning ? 'text-green-400' : 'text-white/60'}`}>
+              <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "scrub" || state.isRunning ? 'text-green-400' : 'text-white/60'}`}>
                 {state.isRunning ? 'Pause' : 'Run'}
               </span>
             </button>
