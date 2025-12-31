@@ -1149,6 +1149,298 @@ export interface RecordingController {
   isRecording: () => boolean;
 }
 
+/**
+ * Frame-based recording for iOS compatibility
+ * Captures canvas frames as images and creates an animated GIF
+ */
+export async function startLiveRecordingFrameBased(
+  canvas: HTMLCanvasElement,
+  durationSeconds: number = 10,
+  onProgress?: (progress: number) => void,
+  onComplete?: (blob: Blob) => void,
+  onError?: (error: string) => void
+): Promise<RecordingController> {
+  const fps = 10; // Lower FPS for GIF to keep file size reasonable
+  const totalFrames = Math.floor(durationSeconds * fps);
+  const frameInterval = 1000 / fps;
+  const capturedFrames: string[] = [];
+  let isActive = true;
+  let frameIndex = 0;
+  let intervalId: NodeJS.Timeout | null = null;
+  const startTime = Date.now();
+  
+  console.log("[Recording] Starting frame-based capture, targeting", totalFrames, "frames");
+  
+  // Capture frames at regular intervals
+  intervalId = setInterval(() => {
+    if (!isActive || frameIndex >= totalFrames) {
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+      if (isActive) {
+        finishRecording();
+      }
+      return;
+    }
+    
+    try {
+      const dataUrl = canvas.toDataURL("image/png");
+      capturedFrames.push(dataUrl);
+      frameIndex++;
+      
+      const progress = frameIndex / totalFrames;
+      onProgress?.(progress);
+    } catch (e) {
+      console.error("[Recording] Frame capture error:", e);
+    }
+  }, frameInterval);
+  
+  const finishRecording = async () => {
+    isActive = false;
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+    
+    console.log("[Recording] Captured", capturedFrames.length, "frames, creating GIF...");
+    
+    if (capturedFrames.length === 0) {
+      onError?.("No frames were captured");
+      return;
+    }
+    
+    try {
+      // Create a simple animated PNG or return frames for display
+      // For now, just return the last frame as an image
+      // GIF creation is complex, so we'll use a simpler approach
+      const lastFrame = capturedFrames[capturedFrames.length - 1];
+      const response = await fetch(lastFrame);
+      const blob = await response.blob();
+      
+      // Create an animated GIF using our existing utility
+      const gifData = await createAnimatedGifFromDataUrls(
+        capturedFrames, 
+        canvas.width, 
+        canvas.height, 
+        Math.floor(1000 / fps)
+      );
+      const gifBlob = new Blob([gifData], { type: "image/gif" });
+      console.log("[Recording] GIF created, size:", gifBlob.size);
+      onComplete?.(gifBlob);
+    } catch (e) {
+      console.error("[Recording] Failed to create GIF:", e);
+      onError?.("Failed to create animation");
+    }
+  };
+  
+  return {
+    stop: () => {
+      if (isActive) {
+        finishRecording();
+      }
+    },
+    getProgress: () => {
+      return Math.min(frameIndex / totalFrames, 1);
+    },
+    isRecording: () => isActive
+  };
+}
+
+/**
+ * Create an animated GIF from data URLs
+ */
+async function createAnimatedGifFromDataUrls(
+  frames: string[],
+  width: number,
+  height: number,
+  delay: number
+): Promise<Uint8Array> {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d")!;
+  
+  // Create a simple 256-color palette from first frame
+  const firstImg = new Image();
+  await new Promise<void>((resolve) => {
+    firstImg.onload = () => resolve();
+    firstImg.src = frames[0];
+  });
+  ctx.drawImage(firstImg, 0, 0);
+  const firstImageData = ctx.getImageData(0, 0, width, height);
+  
+  // Build palette from image colors (simple quantization)
+  const colorCounts = new Map<string, number>();
+  for (let i = 0; i < firstImageData.data.length; i += 4) {
+    const r = firstImageData.data[i] & 0xF0;
+    const g = firstImageData.data[i + 1] & 0xF0;
+    const b = firstImageData.data[i + 2] & 0xF0;
+    const key = `${r},${g},${b}`;
+    colorCounts.set(key, (colorCounts.get(key) || 0) + 1);
+  }
+  
+  const sortedColors = Array.from(colorCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 256)
+    .map(([key]) => key.split(",").map(Number));
+  
+  while (sortedColors.length < 256) {
+    sortedColors.push([0, 0, 0]);
+  }
+  
+  const palette = sortedColors.map(([r, g, b]) => [r, g, b]);
+  
+  // Find nearest palette color
+  const findNearest = (r: number, g: number, b: number): number => {
+    let best = 0;
+    let bestDist = Infinity;
+    for (let i = 0; i < palette.length; i++) {
+      const dr = r - palette[i][0];
+      const dg = g - palette[i][1];
+      const db = b - palette[i][2];
+      const dist = dr * dr + dg * dg + db * db;
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = i;
+      }
+    }
+    return best;
+  };
+  
+  const gifBytes: number[] = [];
+  
+  // GIF header
+  gifBytes.push(0x47, 0x49, 0x46, 0x38, 0x39, 0x61);
+  
+  // Logical screen descriptor
+  gifBytes.push(width & 0xFF, (width >> 8) & 0xFF);
+  gifBytes.push(height & 0xFF, (height >> 8) & 0xFF);
+  gifBytes.push(0xF7, 0x00, 0x00);
+  
+  // Global color table
+  for (let i = 0; i < 256; i++) {
+    gifBytes.push(palette[i][0], palette[i][1], palette[i][2]);
+  }
+  
+  // NETSCAPE extension for looping
+  gifBytes.push(0x21, 0xFF, 0x0B);
+  const netscape = "NETSCAPE2.0";
+  for (let i = 0; i < netscape.length; i++) {
+    gifBytes.push(netscape.charCodeAt(i));
+  }
+  gifBytes.push(0x03, 0x01, 0x00, 0x00, 0x00);
+  
+  // Process each frame
+  for (let f = 0; f < frames.length; f++) {
+    const img = new Image();
+    await new Promise<void>((resolve) => {
+      img.onload = () => resolve();
+      img.src = frames[f];
+    });
+    
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, width, height);
+    
+    // Graphics control extension
+    gifBytes.push(0x21, 0xF9, 0x04, 0x04);
+    const delayCs = Math.floor(delay / 10); // Convert to centiseconds
+    gifBytes.push(delayCs & 0xFF, (delayCs >> 8) & 0xFF);
+    gifBytes.push(0x00, 0x00);
+    
+    // Image descriptor
+    gifBytes.push(0x2C);
+    gifBytes.push(0x00, 0x00, 0x00, 0x00);
+    gifBytes.push(width & 0xFF, (width >> 8) & 0xFF);
+    gifBytes.push(height & 0xFF, (height >> 8) & 0xFF);
+    gifBytes.push(0x00);
+    
+    // LZW minimum code size
+    gifBytes.push(0x08);
+    
+    // Convert to palette indices
+    const indices: number[] = [];
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      indices.push(findNearest(
+        imageData.data[i],
+        imageData.data[i + 1],
+        imageData.data[i + 2]
+      ));
+    }
+    
+    // Simple LZW compression
+    const codeSize = 8;
+    const clearCode = 1 << codeSize;
+    const endCode = clearCode + 1;
+    
+    let bits = 0;
+    let bitCount = 0;
+    const bytes: number[] = [];
+    
+    const writeBits = (value: number, numBits: number) => {
+      bits |= value << bitCount;
+      bitCount += numBits;
+      while (bitCount >= 8) {
+        bytes.push(bits & 0xFF);
+        bits >>= 8;
+        bitCount -= 8;
+      }
+    };
+    
+    let currentBits = codeSize + 1;
+    let nextCode = endCode + 1;
+    const table = new Map<string, number>();
+    
+    writeBits(clearCode, currentBits);
+    
+    let prefix = indices[0].toString();
+    for (let i = 1; i < indices.length; i++) {
+      const k = indices[i].toString();
+      const combined = prefix + "," + k;
+      
+      if (table.has(combined)) {
+        prefix = combined;
+      } else {
+        const code = prefix.includes(",") ? table.get(prefix)! : parseInt(prefix);
+        writeBits(code, currentBits);
+        
+        if (nextCode < 4096) {
+          table.set(combined, nextCode++);
+          if (nextCode > (1 << currentBits) && currentBits < 12) {
+            currentBits++;
+          }
+        }
+        
+        prefix = k;
+      }
+    }
+    
+    const lastCode = prefix.includes(",") ? table.get(prefix)! : parseInt(prefix);
+    writeBits(lastCode, currentBits);
+    writeBits(endCode, currentBits);
+    
+    if (bitCount > 0) {
+      bytes.push(bits & 0xFF);
+    }
+    
+    // Output in sub-blocks
+    let pos = 0;
+    while (pos < bytes.length) {
+      const blockSize = Math.min(255, bytes.length - pos);
+      gifBytes.push(blockSize);
+      for (let i = 0; i < blockSize; i++) {
+        gifBytes.push(bytes[pos++]);
+      }
+    }
+    gifBytes.push(0x00);
+  }
+  
+  // Trailer
+  gifBytes.push(0x3B);
+  
+  return new Uint8Array(gifBytes);
+}
+
 export async function startLiveRecording(
   canvas: HTMLCanvasElement,
   durationSeconds: number = 10,
@@ -1156,26 +1448,23 @@ export async function startLiveRecording(
   onComplete?: (blob: Blob) => void,
   onError?: (error: string) => void
 ): Promise<RecordingController> {
+  // Detect iOS and use frame-based recording
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIOS) {
+    console.log("[Recording] Using frame-based recording for iOS");
+    return startLiveRecordingFrameBased(canvas, durationSeconds, onProgress, onComplete, onError);
+  }
+  
   // Check for MediaRecorder support
   if (typeof MediaRecorder === "undefined") {
-    console.error("[Recording] MediaRecorder not supported");
-    onError?.("Video recording is not supported on this device");
-    return {
-      stop: () => {},
-      getProgress: () => 0,
-      isRecording: () => false
-    };
+    console.error("[Recording] MediaRecorder not supported, falling back to frame-based");
+    return startLiveRecordingFrameBased(canvas, durationSeconds, onProgress, onComplete, onError);
   }
 
   // Check for captureStream support
   if (!canvas.captureStream) {
-    console.error("[Recording] captureStream not supported");
-    onError?.("Video capture is not supported on this device");
-    return {
-      stop: () => {},
-      getProgress: () => 0,
-      isRecording: () => false
-    };
+    console.error("[Recording] captureStream not supported, falling back to frame-based");
+    return startLiveRecordingFrameBased(canvas, durationSeconds, onProgress, onComplete, onError);
   }
 
   const fps = 30;
