@@ -433,38 +433,6 @@ export function VisualizationCanvas({
       }}
       data-testid="visualization-container"
     >
-      {/* Spatial Reference Grid Background */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(70,90,130,0.25) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(70,90,130,0.25) 1px, transparent 1px)
-          `,
-          backgroundSize: '40px 40px',
-          backgroundPosition: 'center center',
-        }}
-      />
-      
-      {/* Grid Origin Crosshair */}
-      <div 
-        className="absolute pointer-events-none"
-        style={{
-          width: '100%',
-          height: '1px',
-          background: 'linear-gradient(90deg, transparent 0%, rgba(80,100,140,0.4) 30%, rgba(80,100,140,0.6) 50%, rgba(80,100,140,0.4) 70%, transparent 100%)',
-          top: '50%',
-        }}
-      />
-      <div 
-        className="absolute pointer-events-none"
-        style={{
-          width: '1px',
-          height: '100%',
-          background: 'linear-gradient(180deg, transparent 0%, rgba(80,100,140,0.4) 30%, rgba(80,100,140,0.6) 50%, rgba(80,100,140,0.4) 70%, transparent 100%)',
-          left: '50%',
-        }}
-      />
 
       {field ? (
         <>
