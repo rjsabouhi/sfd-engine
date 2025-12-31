@@ -539,6 +539,49 @@ export default function SimulationPage() {
     }
   }, []);
 
+  // Animated seek - steps through frames one at a time with visual feedback
+  const animatedSeekRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const handleAnimatedSeek = useCallback((targetIndex: number) => {
+    const engine = engineRef.current;
+    if (!engine) return;
+    
+    // Cancel any existing animation
+    if (animatedSeekRef.current) {
+      clearInterval(animatedSeekRef.current);
+      animatedSeekRef.current = null;
+    }
+    
+    const currentIndex = engine.getCurrentHistoryIndex();
+    if (currentIndex === targetIndex) return;
+    
+    const direction = targetIndex > currentIndex ? 1 : -1;
+    let current = currentIndex;
+    
+    // Step through frames at ~30fps (33ms per frame)
+    animatedSeekRef.current = setInterval(() => {
+      current += direction;
+      
+      engine.seekToFrame(current);
+      setFieldState(engine.getPlaybackFieldState());
+      if (showDualViewRef.current) {
+        if (derivedTypeRef.current === "basins") {
+          setBasinMap(engine.getBasinMap());
+        } else {
+          setDerivedField(engine.getCachedDerivedField(derivedTypeRef.current));
+        }
+      }
+      
+      // Stop when we reach target
+      if (current === targetIndex || (direction > 0 && current >= targetIndex) || (direction < 0 && current <= targetIndex)) {
+        if (animatedSeekRef.current) {
+          clearInterval(animatedSeekRef.current);
+          animatedSeekRef.current = null;
+        }
+      }
+    }, 33);
+  }, []);
+
   const handleStepForward = useCallback(() => {
     const engine = engineRef.current;
     if (engine) {
@@ -1497,7 +1540,7 @@ export default function SimulationPage() {
                   <button
                     onClick={() => {
                       if (state.isRunning) handlePause();
-                      handleSeekFrame(Math.max(0, currentHistoryIndex - 10));
+                      handleAnimatedSeek(Math.max(0, currentHistoryIndex - 10));
                     }}
                     className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
                     data-testid="button-back-10-mobile"
@@ -1527,7 +1570,7 @@ export default function SimulationPage() {
                   <button
                     onClick={() => {
                       if (state.isRunning) handlePause();
-                      handleSeekFrame(Math.min(historyLength - 1, currentHistoryIndex + 10));
+                      handleAnimatedSeek(Math.min(historyLength - 1, currentHistoryIndex + 10));
                     }}
                     className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
                     data-testid="button-forward-10-mobile"
