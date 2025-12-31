@@ -920,41 +920,45 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Scrub Controls Panel - appears when Run button is pressed */}
+        {/* Playback Controls Panel - appears when Run button is pressed */}
         {mobileActiveTab === "scrub" && (
           <div className="absolute bottom-20 left-0 right-0 z-20 px-4 pb-3">
             <div className="bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-green-500/30 p-4 shadow-lg">
-              {/* Play/Pause and Step Controls Row */}
-              <div className="flex items-center justify-center gap-4 mb-4">
+              {/* 4 Uniform Playback Buttons */}
+              <div className="flex items-center justify-around mb-4">
                 {/* Step Back */}
                 <button
                   onClick={() => {
                     if (state.isRunning) handlePause();
                     handleStepBackward();
                   }}
-                  className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
                   data-testid="button-step-back-mobile"
                   aria-label="Step backward"
                 >
                   <SkipBack className="h-5 w-5 text-white/80" />
+                  <span className="text-[9px] text-white/60 mt-0.5">Back</span>
                 </button>
 
-                {/* Play/Pause - larger central button */}
+                {/* Play/Pause */}
                 <button
                   onClick={state.isRunning ? handlePause : handlePlay}
-                  className={`w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                     state.isRunning 
-                      ? 'bg-green-500/30 border-2 border-green-500' 
-                      : 'bg-green-500/20 border-2 border-green-500/50'
+                      ? 'bg-green-500/20 border-2 border-green-500/50' 
+                      : 'bg-white/10 border-2 border-white/20'
                   }`}
-                  data-testid={state.isRunning ? "button-pause-scrub-mobile" : "button-play-scrub-mobile"}
+                  data-testid={state.isRunning ? "button-pause-playback-mobile" : "button-play-playback-mobile"}
                   aria-label={state.isRunning ? "Pause simulation" : "Play simulation"}
                 >
                   {state.isRunning ? (
-                    <Pause className="h-7 w-7 text-green-400" />
+                    <Pause className="h-5 w-5 text-green-400" />
                   ) : (
-                    <Play className="h-7 w-7 text-green-400 ml-1" />
+                    <Play className="h-5 w-5 text-white/80 ml-0.5" />
                   )}
+                  <span className={`text-[9px] mt-0.5 ${state.isRunning ? 'text-green-400' : 'text-white/60'}`}>
+                    {state.isRunning ? 'Pause' : 'Play'}
+                  </span>
                 </button>
 
                 {/* Step Forward */}
@@ -963,11 +967,23 @@ export default function SimulationPage() {
                     if (state.isRunning) handlePause();
                     handleStep();
                   }}
-                  className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
                   data-testid="button-step-forward-mobile"
                   aria-label="Step forward"
                 >
                   <SkipForward className="h-5 w-5 text-white/80" />
+                  <span className="text-[9px] text-white/60 mt-0.5">Forward</span>
+                </button>
+
+                {/* Reset */}
+                <button
+                  onClick={handleReset}
+                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-reset-mobile"
+                  aria-label="Reset simulation"
+                >
+                  <RotateCcw className="h-5 w-5 text-white/80" />
+                  <span className="text-[9px] text-white/60 mt-0.5">Reset</span>
                 </button>
               </div>
 
@@ -1000,18 +1016,6 @@ export default function SimulationPage() {
                     />
                   ))}
                 </div>
-              </div>
-
-              {/* Reset button */}
-              <div className="flex justify-center mt-3">
-                <button
-                  onClick={handleReset}
-                  className="px-4 py-2 rounded-full bg-white/10 border border-white/20 text-xs text-white/70 active:bg-white/20 transition-colors"
-                  data-testid="button-reset-mobile"
-                  aria-label="Reset simulation"
-                >
-                  Reset Field
-                </button>
               </div>
             </div>
           </div>
