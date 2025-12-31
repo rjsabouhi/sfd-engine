@@ -37,6 +37,101 @@ import { getStatusLine, computeFieldState, getFieldStateLabel, type ReactiveEven
 import { exportPNGSnapshot, exportAnimationGIF, exportSimulationData, exportMetricsLog, exportStateSnapshot, exportSettingsJSON, exportEventLog, saveConfiguration, loadConfiguration, exportNumPyArray, exportBatchSpec, exportPythonScript, exportOperatorContributions, exportLayersSeparate, exportFullArchive, exportVideoWebM, exportMobileShareSnapshot } from "@/lib/export-utils";
 import { getSmartViewConfig, type SmartViewConfig } from "@/config/smart-view-map";
 
+// Lightweight overlay canvas for mobile projection layers
+const PLASMA_COLORS = [
+  [13, 8, 135], [75, 3, 161], [126, 3, 168], [168, 34, 150],
+  [203, 70, 121], [229, 107, 93], [248, 148, 65], [253, 195, 40], [240, 249, 33],
+];
+const BASIN_COLORS = [
+  [59, 130, 246], [34, 197, 94], [249, 115, 22], [168, 85, 247],
+  [236, 72, 153], [20, 184, 166], [245, 158, 11], [99, 102, 241],
+];
+
+function MobileOverlayCanvas({ 
+  derivedField, 
+  basinMap, 
+  opacity,
+  frameVersion
+}: { 
+  derivedField: DerivedField | null; 
+  basinMap: BasinMap | null; 
+  opacity: number;
+  frameVersion: number;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Size canvas to container
+    const container = canvas.parentElement;
+    if (container) {
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (basinMap && basinMap.labels.length > 0) {
+      // Render basin overlay
+      const { labels, width, height } = basinMap;
+      const cellW = canvas.width / width;
+      const cellH = canvas.height / height;
+      
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const basinId = labels[y * width + x];
+          if (basinId >= 0) {
+            const color = BASIN_COLORS[basinId % BASIN_COLORS.length];
+            ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.6)`;
+            ctx.fillRect(x * cellW, y * cellH, cellW + 0.5, cellH + 0.5);
+          }
+        }
+      }
+    } else if (derivedField) {
+      // Render derived field overlay using plasma colormap
+      const { grid, width, height } = derivedField;
+      // Compute min/max for normalization
+      let min = Infinity, max = -Infinity;
+      for (let i = 0; i < grid.length; i++) {
+        if (grid[i] < min) min = grid[i];
+        if (grid[i] > max) max = grid[i];
+      }
+      const range = max - min || 1;
+      const cellW = canvas.width / width;
+      const cellH = canvas.height / height;
+
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const val = grid[y * width + x];
+          const t = Math.max(0, Math.min(1, (val - min) / range));
+          const idx = Math.min(Math.floor(t * (PLASMA_COLORS.length - 1)), PLASMA_COLORS.length - 2);
+          const f = t * (PLASMA_COLORS.length - 1) - idx;
+          const c1 = PLASMA_COLORS[idx];
+          const c2 = PLASMA_COLORS[idx + 1];
+          const r = Math.round(c1[0] + f * (c2[0] - c1[0]));
+          const g = Math.round(c1[1] + f * (c2[1] - c1[1]));
+          const b = Math.round(c1[2] + f * (c2[2] - c1[2]));
+          ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+          ctx.fillRect(x * cellW, y * cellH, cellW + 0.5, cellH + 0.5);
+        }
+      }
+    }
+  }, [derivedField, basinMap, frameVersion]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      style={{ opacity, mixBlendMode: 'screen' }}
+    />
+  );
+}
+
 export default function SimulationPage() {
   const isMobile = useIsMobile();
   const engineRef = useRef<SFDEngine | null>(null);
@@ -725,6 +820,16 @@ export default function SimulationPage() {
             basinMap={basinMap}
             perceptualSmoothing={perceptualSmoothing}
           />
+          
+          {/* Overlay layer when a projection is selected */}
+          {mobileLayerIndex > 0 && (derivedField || (mobileLayers[mobileLayerIndex].key === "basins" && basinMap)) && (
+            <MobileOverlayCanvas
+              derivedField={mobileLayers[mobileLayerIndex].key === "basins" ? null : derivedField}
+              basinMap={mobileLayers[mobileLayerIndex].key === "basins" ? basinMap : null}
+              opacity={blendOpacity}
+              frameVersion={state.step}
+            />
+          )}
         </div>
 
         {/* Instability flash overlay */}
@@ -813,7 +918,7 @@ export default function SimulationPage() {
         {/* Right-side cascading layer selector */}
         {!mobileActiveTab && (
           <div className="absolute right-1 top-1/2 -translate-y-1/2 z-20">
-            <div className="bg-black/60 backdrop-blur-sm rounded-lg py-1 flex flex-col gap-0.5 max-h-[280px] overflow-y-auto">
+            <div className="bg-black/60 backdrop-blur-sm rounded-lg py-1 flex flex-col gap-0.5 max-h-[320px] overflow-y-auto">
               {mobileLayers.map((layer, idx) => (
                 <button
                   key={layer.key}
@@ -835,6 +940,24 @@ export default function SimulationPage() {
                   </span>
                 </button>
               ))}
+              
+              {/* Blend opacity slider - shown when overlay is active */}
+              {mobileLayerIndex > 0 && (
+                <div className="px-2 py-2 border-t border-white/10 mt-1">
+                  <span className="text-[9px] text-white/50 block text-center mb-1">Blend</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={blendOpacity * 100}
+                    onChange={(e) => setBlendOpacity(parseInt(e.target.value) / 100)}
+                    className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                    data-testid="slider-blend-opacity-mobile"
+                    aria-label="Blend opacity"
+                  />
+                  <span className="text-[9px] text-cyan-300 block text-center mt-0.5">{Math.round(blendOpacity * 100)}%</span>
+                </div>
+              )}
             </div>
           </div>
         )}
