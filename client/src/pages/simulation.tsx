@@ -601,32 +601,36 @@ export default function SimulationPage() {
           </div>
         </div>
 
-        {/* Main Field Window with floating metrics label */}
+        {/* Main Field Window - no overlays when params is open */}
         <div className="absolute inset-x-4 top-20 bottom-36 z-10 flex items-center justify-center">
-          {/* Floating metrics tag at bottom of field */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
-            <div className="bg-black/70 backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-3">
-              <span className={`text-xs font-medium ${stabilityColor}`} data-testid="text-state-mobile">
-                State: {stabilityState}
-              </span>
-              <span className="text-white/30">|</span>
-              <span className="text-xs font-mono text-white/80" data-testid="text-kappa-mobile">
-                κ: {operatorContributions.curvature.toFixed(3)}
-              </span>
-              <span className="text-white/30">|</span>
-              <span className="text-xs font-mono text-white/80" data-testid="text-energy-mobile">
-                e: {state.energy.toFixed(4)}
-              </span>
+          {/* Floating metrics tag - hidden when params panel is open */}
+          {mobileActiveTab !== "params" && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+              <div className="bg-black/70 backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-3">
+                <span className={`text-xs font-medium ${stabilityColor}`} data-testid="text-state-mobile">
+                  State: {stabilityState}
+                </span>
+                <span className="text-white/30">|</span>
+                <span className="text-xs font-mono text-white/80" data-testid="text-kappa-mobile">
+                  κ: {operatorContributions.curvature.toFixed(3)}
+                </span>
+                <span className="text-white/30">|</span>
+                <span className="text-xs font-mono text-white/80" data-testid="text-energy-mobile">
+                  e: {state.energy.toFixed(4)}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Footer notice */}
-        <div className={`absolute left-0 right-0 z-20 pointer-events-none transition-all ${mobileActiveTab === "params" ? 'bottom-48' : 'bottom-28'}`}>
-          <p className="text-center text-[10px] text-white/30 px-8">
-            For full dual-field simulation and diagnostics, visit the desktop SFD Engine.
-          </p>
-        </div>
+        {/* Footer notice - hidden when params panel is open */}
+        {mobileActiveTab !== "params" && (
+          <div className="absolute left-0 right-0 z-20 pointer-events-none bottom-28">
+            <p className="text-center text-[10px] text-white/30 px-8">
+              For full dual-field simulation and diagnostics, visit the desktop SFD Engine.
+            </p>
+          </div>
+        )}
 
         {/* Inline Operator Controls - appears when Params is active */}
         {mobileActiveTab === "params" && (
