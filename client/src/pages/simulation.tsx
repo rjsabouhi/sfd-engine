@@ -468,7 +468,7 @@ export default function SimulationPage() {
     
     const controller = await startLiveRecording(
       canvas,
-      12, // 12 seconds
+      10, // 10 seconds = 100 frames at 10fps (matches playback buffer)
       (progress) => setRecordingProgress(progress),
       (blob) => {
         setIsRecording(false);
