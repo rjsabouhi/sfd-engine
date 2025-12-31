@@ -239,15 +239,25 @@ export default function SimulationPage() {
   const recordingControllerRef = useRef<RecordingController | null>(null);
   
   // Manage preview URL lifecycle to prevent caching issues
+  // Also trigger dialog display when new URL is ready
   useEffect(() => {
     if (recordedVideoBlob) {
+      // Revoke any existing URL first
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+      // Create new URL and show dialog
       const url = URL.createObjectURL(recordedVideoBlob);
+      console.log("[Preview] Created new URL:", url, "for blob size:", recordedVideoBlob.size);
       setPreviewUrl(url);
+      setShowVideoDialog(true);
       return () => {
         URL.revokeObjectURL(url);
-        setPreviewUrl(null);
       };
     } else {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
       setPreviewUrl(null);
     }
   }, [recordedVideoBlob]);
@@ -461,10 +471,10 @@ export default function SimulationPage() {
         setRecordingProgress(0);
         recordingControllerRef.current = null;
         
-        // Store the blob and show the dialog for user to choose save/share
+        // Store the blob - dialog will be shown by useEffect when previewUrl is ready
         if (blob.size > 0) {
           setRecordedVideoBlob(blob);
-          setShowVideoDialog(true);
+          // Dialog shown in useEffect after previewUrl is created
         } else {
           setRecordingError("Recording produced no data. Your device may not support video capture.");
           setShowVideoDialog(true);
