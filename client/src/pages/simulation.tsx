@@ -627,15 +627,6 @@ export default function SimulationPage() {
           )}
         </div>
 
-        {/* Footer notice - hidden when any panel is open */}
-        {!mobileActiveTab && (
-          <div className="absolute left-0 right-0 z-20 pointer-events-none bottom-28">
-            <p className="text-center text-[10px] text-white/30 px-8">
-              For full dual-field simulation and diagnostics, visit the desktop SFD Engine.
-            </p>
-          </div>
-        )}
-
         {/* Inline Regimes Panel - appears when Regimes is active */}
         {mobileActiveTab === "regimes" && (
           <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
