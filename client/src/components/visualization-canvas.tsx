@@ -429,6 +429,7 @@ export function VisualizationCanvas({
       style={{ 
         cursor: getCursor(),
         backgroundColor: 'rgb(8, 10, 14)',
+        touchAction: 'none',
       }}
       data-testid="visualization-container"
     >
