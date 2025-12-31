@@ -605,27 +605,26 @@ export default function SimulationPage() {
           </div>
         </div>
 
-        {/* Main Field Window - no overlays when any panel is open */}
+        {/* Main Field Window */}
         <div className="absolute inset-x-4 top-20 bottom-36 z-10 flex items-center justify-center">
-          {/* Floating metrics tag - hidden when any panel is open */}
-          {!mobileActiveTab && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
-              <div className="bg-black/70 backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-3">
-                <span className={`text-xs font-medium ${stabilityColor}`} data-testid="text-state-mobile">
-                  State: {stabilityState}
-                </span>
-                <span className="text-white/30">|</span>
-                <span className="text-xs font-mono text-white/80" data-testid="text-kappa-mobile">
-                  κ: {operatorContributions.curvature.toFixed(3)}
-                </span>
-                <span className="text-white/30">|</span>
-                <span className="text-xs font-mono text-white/80" data-testid="text-energy-mobile">
-                  e: {state.energy.toFixed(4)}
-                </span>
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Floating metrics - positioned on left side, outside visualization */}
+        {!mobileActiveTab && (
+          <div className="absolute left-1 top-1/2 -translate-y-1/2 z-20">
+            <div className="bg-black/60 backdrop-blur-sm rounded-md px-2 py-3 flex flex-col items-start gap-2">
+              <span className={`text-[10px] font-medium ${stabilityColor}`} data-testid="text-state-mobile">
+                {stabilityState}
+              </span>
+              <span className="text-[10px] font-mono text-white/70" data-testid="text-kappa-mobile">
+                κ {operatorContributions.curvature.toFixed(2)}
+              </span>
+              <span className="text-[10px] font-mono text-white/70" data-testid="text-energy-mobile">
+                e {state.energy.toFixed(3)}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Inline Regimes Panel - appears when Regimes is active */}
         {mobileActiveTab === "regimes" && (
