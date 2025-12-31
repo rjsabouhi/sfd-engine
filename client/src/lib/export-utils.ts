@@ -1267,32 +1267,50 @@ export async function startLiveRecording(
     onError?.("Recording failed");
   };
   
+  // Helper to safely stop recording
+  const safeStop = () => {
+    if (progressInterval) {
+      clearInterval(progressInterval);
+      progressInterval = null;
+    }
+    try {
+      if (isActive && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+      }
+    } catch (e) {
+      console.warn("[Recording] Error stopping recorder:", e);
+    }
+  };
+  
   // Start recording
-  mediaRecorder.start(100); // Collect data every 100ms
+  mediaRecorder.start(1000); // Collect data every 1 second for better compatibility
   
   // Progress updates
   progressInterval = setInterval(() => {
+    if (!isActive) {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+      return;
+    }
     const elapsed = (Date.now() - startTime) / 1000;
     const progress = Math.min(elapsed / durationSeconds, 1);
     onProgress?.(progress);
     
     if (elapsed >= durationSeconds) {
-      mediaRecorder.stop();
+      safeStop();
     }
   }, 100);
   
-  // Auto-stop after duration
+  // Auto-stop after duration (backup)
   setTimeout(() => {
-    if (isActive && mediaRecorder.state === "recording") {
-      mediaRecorder.stop();
-    }
-  }, durationSeconds * 1000);
+    safeStop();
+  }, durationSeconds * 1000 + 500); // Add small buffer
   
   return {
     stop: () => {
-      if (isActive && mediaRecorder.state === "recording") {
-        mediaRecorder.stop();
-      }
+      safeStop();
     },
     getProgress: () => {
       const elapsed = (Date.now() - startTime) / 1000;
