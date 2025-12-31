@@ -53,6 +53,7 @@ export interface TouchControllerOptions {
   regimeAmplitude?: number;
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
+  visualScale?: number;
 }
 
 export function useTouchController(
@@ -63,6 +64,7 @@ export function useTouchController(
   options: TouchControllerOptions = {}
 ) {
   const regimeAmplitude = options.regimeAmplitude ?? 0.25;
+  const visualScale = options.visualScale ?? 0.88;
   const { onSwipeLeft, onSwipeRight } = options;
   const [touchState, setTouchState] = useState<TouchState>({
     isLongPressing: false,
@@ -81,18 +83,30 @@ export function useTouchController(
   const getFieldCoords = useCallback((clientX: number, clientY: number) => {
     if (!containerRef.current) return null;
     const rect = containerRef.current.getBoundingClientRect();
-    const relX = (clientX - rect.left) / rect.width;
-    const relY = (clientY - rect.top) / rect.height;
     
-    if (relX < 0 || relX > 1 || relY < 0 || relY > 1) return null;
+    // Calculate the actual canvas size (scaled and centered)
+    const containerSize = Math.min(rect.width, rect.height);
+    const canvasSize = containerSize * visualScale;
+    
+    // Canvas is centered in the container
+    const canvasLeft = rect.left + (rect.width - canvasSize) / 2;
+    const canvasTop = rect.top + (rect.height - canvasSize) / 2;
+    
+    // Map touch to canvas-relative coordinates
+    const relX = (clientX - canvasLeft) / canvasSize;
+    const relY = (clientY - canvasTop) / canvasSize;
+    
+    // Allow touches slightly outside the canvas bounds (for edge interactions)
+    const clampedRelX = Math.max(0, Math.min(1, relX));
+    const clampedRelY = Math.max(0, Math.min(1, relY));
     
     return {
-      fieldX: Math.floor(relX * fieldWidth),
-      fieldY: Math.floor(relY * fieldHeight),
-      relX,
-      relY,
+      fieldX: Math.floor(clampedRelX * fieldWidth),
+      fieldY: Math.floor(clampedRelY * fieldHeight),
+      relX: clampedRelX,
+      relY: clampedRelY,
     };
-  }, [fieldWidth, fieldHeight, containerRef]);
+  }, [fieldWidth, fieldHeight, containerRef, visualScale]);
 
   const applyGaussianPerturbation = useCallback((
     fieldX: number,

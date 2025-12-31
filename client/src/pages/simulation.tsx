@@ -851,6 +851,7 @@ export default function SimulationPage() {
       regimeAmplitude,
       onSwipeLeft: () => handleSwipeRegime('left'),
       onSwipeRight: () => handleSwipeRegime('right'),
+      visualScale: 0.88,
     }
   );
 
