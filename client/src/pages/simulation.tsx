@@ -564,6 +564,7 @@ export default function SimulationPage() {
       
       engine.seekToFrame(current);
       setFieldState(engine.getPlaybackFieldState());
+      setCurrentHistoryIndex(current); // Update slider position
       if (showDualViewRef.current) {
         if (derivedTypeRef.current === "basins") {
           setBasinMap(engine.getBasinMap());
