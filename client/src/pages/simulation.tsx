@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal, Circle, Square } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -34,7 +34,7 @@ import { defaultParameters, mobileParameters, structuralPresets } from "@shared/
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
 import { getStatusLine, computeFieldState, getFieldStateLabel, type ReactiveEvents, type SimulationState as LanguageSimState, type FieldState } from "@/lib/language";
-import { exportPNGSnapshot, exportAnimationGIF, exportSimulationData, exportMetricsLog, exportStateSnapshot, exportSettingsJSON, exportEventLog, saveConfiguration, loadConfiguration, exportNumPyArray, exportBatchSpec, exportPythonScript, exportOperatorContributions, exportLayersSeparate, exportFullArchive, exportVideoWebM, exportMobileShareSnapshot } from "@/lib/export-utils";
+import { exportPNGSnapshot, exportAnimationGIF, exportSimulationData, exportMetricsLog, exportStateSnapshot, exportSettingsJSON, exportEventLog, saveConfiguration, loadConfiguration, exportNumPyArray, exportBatchSpec, exportPythonScript, exportOperatorContributions, exportLayersSeparate, exportFullArchive, exportVideoWebM, exportMobileShareSnapshot, startLiveRecording, shareOrDownloadVideo, type RecordingController } from "@/lib/export-utils";
 import { getSmartViewConfig, type SmartViewConfig } from "@/config/smart-view-map";
 import { useTouchController, type DoubleTapData } from "@/lib/touch-controller";
 import { visualPresets, type VisualPreset } from "@/config/visual-presets";
@@ -229,6 +229,11 @@ export default function SimulationPage() {
   const touchContainerRef = useRef<HTMLDivElement>(null);
   const regimeOverlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
+  // Recording state for mobile video capture
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingProgress, setRecordingProgress] = useState(0);
+  const recordingControllerRef = useRef<RecordingController | null>(null);
+  
   // Mobile layers for layer selector
   const mobileLayers = [
     { key: "none", label: "Base", icon: "◉" },
@@ -399,6 +404,49 @@ export default function SimulationPage() {
   const handleReset = useCallback(() => {
     clearTemporalBuffer();
     engineRef.current?.reset();
+  }, []);
+
+  // Mobile video recording handler
+  const handleStartRecording = useCallback(async () => {
+    const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
+    if (!canvas) return;
+    
+    // Ensure simulation is running for recording
+    if (!state.isRunning) {
+      handlePlay();
+    }
+    
+    setIsRecording(true);
+    setRecordingProgress(0);
+    
+    const controller = await startLiveRecording(
+      canvas,
+      12, // 12 seconds
+      (progress) => setRecordingProgress(progress),
+      (blob) => {
+        setIsRecording(false);
+        setRecordingProgress(0);
+        recordingControllerRef.current = null;
+        
+        // Share or download the recorded video
+        const extension = blob.type.includes("mp4") ? "mp4" : "webm";
+        shareOrDownloadVideo(blob, `sfd-recording-${Date.now()}.${extension}`);
+      },
+      (error) => {
+        setIsRecording(false);
+        setRecordingProgress(0);
+        recordingControllerRef.current = null;
+        console.error("Recording error:", error);
+      }
+    );
+    
+    recordingControllerRef.current = controller;
+  }, [state.isRunning, handlePlay]);
+
+  const handleStopRecording = useCallback(() => {
+    if (recordingControllerRef.current) {
+      recordingControllerRef.current.stop();
+    }
   }, []);
 
   const handleStep = useCallback(() => {
@@ -1350,6 +1398,42 @@ export default function SimulationPage() {
                 >
                   <RotateCcw className="h-5 w-5 text-white/80" />
                   <span className="text-[9px] text-white/60 mt-0.5">Reset</span>
+                </button>
+              </div>
+
+              {/* Record Button Row */}
+              <div className="flex items-center justify-center gap-4 mb-4 pt-2 border-t border-white/10">
+                <button
+                  onClick={isRecording ? handleStopRecording : handleStartRecording}
+                  disabled={isRecording && recordingProgress >= 1}
+                  className={`flex-1 h-12 rounded-xl flex items-center justify-center gap-3 transition-all active:scale-98 ${
+                    isRecording
+                      ? 'bg-red-500/30 border-2 border-red-400/50'
+                      : 'bg-white/10 border-2 border-white/20'
+                  }`}
+                  data-testid="button-record-mobile"
+                  aria-label={isRecording ? "Stop recording" : "Record 12s video"}
+                >
+                  {isRecording ? (
+                    <>
+                      <Square className="h-4 w-4 text-red-400 fill-red-400" />
+                      <span className="text-sm font-medium text-red-400">
+                        Recording... {Math.round(recordingProgress * 12)}s
+                      </span>
+                      {/* Progress bar */}
+                      <div className="flex-1 max-w-20 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-red-400 transition-all duration-100"
+                          style={{ width: `${recordingProgress * 100}%` }}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <Circle className="h-4 w-4 text-red-400 fill-red-400" />
+                      <span className="text-sm font-medium text-white/80">Record 12s Video</span>
+                    </>
+                  )}
                 </button>
               </div>
 

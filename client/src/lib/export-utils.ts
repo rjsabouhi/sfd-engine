@@ -1138,3 +1138,165 @@ export async function exportVideoWebM(
     renderNextFrame();
   });
 }
+
+/**
+ * Record live canvas in real-time for a specified duration
+ * Returns a controller object to manage the recording
+ */
+export interface RecordingController {
+  stop: () => void;
+  getProgress: () => number;
+  isRecording: () => boolean;
+}
+
+export async function startLiveRecording(
+  canvas: HTMLCanvasElement,
+  durationSeconds: number = 10,
+  onProgress?: (progress: number) => void,
+  onComplete?: (blob: Blob) => void,
+  onError?: (error: string) => void
+): Promise<RecordingController> {
+  // Check for MediaRecorder support
+  if (typeof MediaRecorder === "undefined") {
+    onError?.("Video recording is not supported on this device");
+    return {
+      stop: () => {},
+      getProgress: () => 0,
+      isRecording: () => false
+    };
+  }
+
+  // Check for captureStream support
+  if (!canvas.captureStream) {
+    onError?.("Video capture is not supported on this device");
+    return {
+      stop: () => {},
+      getProgress: () => 0,
+      isRecording: () => false
+    };
+  }
+
+  const fps = 30;
+  const stream = canvas.captureStream(fps);
+  const chunks: Blob[] = [];
+  
+  // Try different mime types for compatibility
+  let mimeType = "video/webm;codecs=vp9";
+  if (!MediaRecorder.isTypeSupported(mimeType)) {
+    mimeType = "video/webm;codecs=vp8";
+    if (!MediaRecorder.isTypeSupported(mimeType)) {
+      mimeType = "video/webm";
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = "video/mp4";
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          onError?.("No supported video format found on this device");
+          return {
+            stop: () => {},
+            getProgress: () => 0,
+            isRecording: () => false
+          };
+        }
+      }
+    }
+  }
+  
+  const mediaRecorder = new MediaRecorder(stream, {
+    mimeType,
+    videoBitsPerSecond: 2500000
+  });
+  
+  let isActive = true;
+  let startTime = Date.now();
+  let progressInterval: NodeJS.Timeout | null = null;
+  
+  mediaRecorder.ondataavailable = (e) => {
+    if (e.data.size > 0) {
+      chunks.push(e.data);
+    }
+  };
+  
+  mediaRecorder.onstop = () => {
+    isActive = false;
+    if (progressInterval) {
+      clearInterval(progressInterval);
+    }
+    
+    const extension = mimeType.includes("mp4") ? "mp4" : "webm";
+    const blob = new Blob(chunks, { type: mimeType.split(";")[0] });
+    onComplete?.(blob);
+  };
+  
+  mediaRecorder.onerror = () => {
+    isActive = false;
+    if (progressInterval) {
+      clearInterval(progressInterval);
+    }
+    onError?.("Recording failed");
+  };
+  
+  // Start recording
+  mediaRecorder.start(100); // Collect data every 100ms
+  
+  // Progress updates
+  progressInterval = setInterval(() => {
+    const elapsed = (Date.now() - startTime) / 1000;
+    const progress = Math.min(elapsed / durationSeconds, 1);
+    onProgress?.(progress);
+    
+    if (elapsed >= durationSeconds) {
+      mediaRecorder.stop();
+    }
+  }, 100);
+  
+  // Auto-stop after duration
+  setTimeout(() => {
+    if (isActive && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+    }
+  }, durationSeconds * 1000);
+  
+  return {
+    stop: () => {
+      if (isActive && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+      }
+    },
+    getProgress: () => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      return Math.min(elapsed / durationSeconds, 1);
+    },
+    isRecording: () => isActive && mediaRecorder.state === "recording"
+  };
+}
+
+/**
+ * Share or download a recorded video blob
+ */
+export async function shareOrDownloadVideo(
+  blob: Blob,
+  filename: string
+): Promise<boolean> {
+  // Try Web Share API first (mobile-friendly)
+  if (navigator.share && navigator.canShare) {
+    try {
+      const file = new File([blob], filename, { type: blob.type });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "SFD Engine Recording",
+          text: "Check out this field dynamics simulation!"
+        });
+        return true;
+      }
+    } catch (e) {
+      if ((e as Error).name === "AbortError") {
+        return false; // User cancelled
+      }
+      // Fall through to download
+    }
+  }
+  
+  // Fallback to download
+  downloadBlob(blob, filename);
+  return true;
+}
