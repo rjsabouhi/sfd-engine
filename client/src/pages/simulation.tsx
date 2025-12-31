@@ -1455,6 +1455,31 @@ export default function SimulationPage() {
                   <RotateCcw className="h-5 w-5 text-white/80" />
                   <span className="text-[9px] text-white/60 mt-0.5">Reset</span>
                 </button>
+
+                {/* Record */}
+                <button
+                  onClick={isRecording ? handleStopRecording : handleStartRecording}
+                  disabled={isRecording && recordingProgress >= 1}
+                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                    isRecording
+                      ? 'bg-red-500/20 border-2 border-red-500/50'
+                      : 'bg-white/10 border-2 border-white/20'
+                  }`}
+                  data-testid="button-record-mobile"
+                  aria-label={isRecording ? "Stop recording" : "Record video"}
+                >
+                  {isRecording ? (
+                    <>
+                      <Square className="h-4 w-4 text-red-400 fill-red-400" />
+                      <span className="text-[9px] text-red-400 mt-0.5">{Math.round(recordingProgress * 12)}s</span>
+                    </>
+                  ) : (
+                    <>
+                      <Circle className="h-5 w-5 text-red-400 fill-red-400" />
+                      <span className="text-[9px] text-white/60 mt-0.5">Record</span>
+                    </>
+                  )}
+                </button>
               </div>
 
               {/* Timeline Scrubbing Bar */}
@@ -1658,31 +1683,6 @@ export default function SimulationPage() {
             >
               <Share2 className="h-5 w-5 text-white/80" />
               <span className="text-[9px] text-white/60 mt-0.5">Share</span>
-            </button>
-
-            {/* Record button */}
-            <button
-              onClick={isRecording ? handleStopRecording : handleStartRecording}
-              disabled={isRecording && recordingProgress >= 1}
-              className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                isRecording
-                  ? 'bg-red-500/20 border-2 border-red-500/50'
-                  : 'bg-white/10 border-2 border-white/20'
-              }`}
-              data-testid="button-record-mobile"
-              aria-label={isRecording ? "Stop recording" : "Record video"}
-            >
-              {isRecording ? (
-                <>
-                  <Square className="h-4 w-4 text-red-400 fill-red-400" />
-                  <span className="text-[9px] text-red-400 mt-0.5">{Math.round(recordingProgress * 12)}s</span>
-                </>
-              ) : (
-                <>
-                  <Circle className="h-5 w-5 text-red-400 fill-red-400" />
-                  <span className="text-[9px] text-white/60 mt-0.5">Record</span>
-                </>
-              )}
             </button>
           </div>
         </div>
