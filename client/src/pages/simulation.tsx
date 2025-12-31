@@ -81,7 +81,7 @@ function MobileOverlayCanvas({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (basinMap && basinMap.labels.length > 0) {
-      // Render basin overlay
+      // Render basin overlay with fully opaque colors (crossfade via canvas opacity)
       const { labels, width, height } = basinMap;
       const cellW = canvas.width / width;
       const cellH = canvas.height / height;
@@ -91,7 +91,11 @@ function MobileOverlayCanvas({
           const basinId = labels[y * width + x];
           if (basinId >= 0) {
             const color = BASIN_COLORS[basinId % BASIN_COLORS.length];
-            ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.6)`;
+            ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+            ctx.fillRect(x * cellW, y * cellH, cellW + 0.5, cellH + 0.5);
+          } else {
+            // Fill unassigned pixels with dark background
+            ctx.fillStyle = 'rgb(20, 20, 30)';
             ctx.fillRect(x * cellW, y * cellH, cellW + 0.5, cellH + 0.5);
           }
         }
@@ -133,7 +137,6 @@ function MobileOverlayCanvas({
       className="absolute top-1/2 left-1/2 pointer-events-none rounded-md"
       style={{ 
         opacity, 
-        mixBlendMode: 'screen',
         transform: 'translate(-50%, -50%)',
         width: visualSize || 'auto',
         height: visualSize || 'auto',
