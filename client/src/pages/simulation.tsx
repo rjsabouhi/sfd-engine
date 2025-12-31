@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2 } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -532,15 +532,22 @@ export default function SimulationPage() {
   );
 
   if (isMobile) {
-    const mobilePresets = [
-      { key: "uniform-field", label: "Uniform" },
-      { key: "high-curvature", label: "High Curve" },
-      { key: "multi-basin", label: "Multi-Basin" },
-      { key: "near-critical", label: "Critical" },
-      { key: "criticality-cascade", label: "Cascade" },
-      { key: "fractal-corridor", label: "Fractal" },
-      { key: "cosmic-web", label: "Cosmic" },
+    const mobileRegimes = [
+      { key: "uniform-field", label: "Standard Equilibrium", description: "Balanced field with minimal dynamics" },
+      { key: "high-curvature", label: "Kappa-Shear Drift", description: "Curvature-driven flow patterns" },
+      { key: "criticality-cascade", label: "Boundary Tension Mode", description: "Tension-dominated evolution" },
+      { key: "fractal-corridor", label: "High-Curvature Cascade", description: "Rapid structural formation" },
+      { key: "cosmic-web", label: "Structural Collapse", description: "Warning: High instability regime" },
     ];
+
+    const colorMaps = [
+      { key: "viridis", label: "Viridis", description: "Perceptually uniform blue-green-yellow" },
+      { key: "inferno", label: "Inferno", description: "High contrast purple-red-yellow" },
+      { key: "cividis", label: "Cividis", description: "Colorblind-friendly blue-yellow" },
+    ];
+
+    const stabilityState = state.variance < 0.05 ? "Stable" : state.variance < 0.15 ? "Active" : "Unstable";
+    const stabilityColor = state.variance < 0.05 ? "text-green-400" : state.variance < 0.15 ? "text-yellow-400" : "text-red-400";
 
     return (
       <div className="relative h-screen w-screen overflow-hidden bg-gray-950">
@@ -554,36 +561,22 @@ export default function SimulationPage() {
           />
         </div>
 
-        {/* Floating header - minimal */}
-        <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-3 py-2 pointer-events-none z-20">
-          <div className="flex items-center gap-2 pointer-events-auto">
-            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md rounded-lg px-2.5 py-1.5">
-              <img src={sfdLogo} alt="SFD" className="w-6 h-6 rounded" />
-              <span className="text-xs font-medium text-white/90">SFD</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2 pointer-events-auto">
-            {/* Status indicator */}
-            <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg backdrop-blur-md ${state.isRunning ? 'bg-green-500/20' : 'bg-black/60'}`}>
-              {state.isRunning ? (
-                <>
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                  </span>
-                  <span className="text-xs font-mono text-green-400">Live</span>
-                </>
-              ) : (
-                <span className="text-xs font-mono text-white/60">Paused</span>
-              )}
+        {/* Top Bar - dark, minimal */}
+        <div className="absolute top-0 left-0 right-0 z-20 bg-gray-950/80 backdrop-blur-md border-b border-white/5">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-3">
+              <img src={sfdLogo} alt="SFD" className="w-7 h-7 rounded-md" />
+              <div>
+                <h1 className="text-sm font-semibold text-white">SFD Engine</h1>
+                <p className="text-[10px] text-white/50">Structural Field Explorer</p>
+              </div>
             </div>
             
-            {/* Help button */}
+            {/* Options menu */}
             <Dialog>
               <DialogTrigger asChild>
-                <button className="p-2 bg-black/60 backdrop-blur-md rounded-lg" data-testid="button-help-mobile" aria-label="Help and about">
-                  <HelpCircle className="h-4 w-4 text-white/70" />
+                <button className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center" data-testid="button-menu-mobile" aria-label="Options menu">
+                  <MoreVertical className="h-5 w-5 text-white/60" />
                 </button>
               </DialogTrigger>
               <DialogContent className="max-w-[90vw] bg-gray-900/95 backdrop-blur-xl border-white/10">
@@ -594,9 +587,6 @@ export default function SimulationPage() {
                       <span className="block">
                         Structural Field Dynamics simulates complex adaptive systems
                         through operator-driven field evolution.
-                      </span>
-                      <span className="block">
-                        <strong className="text-white/90">Gestures:</strong> Pinch to zoom, drag to pan, double-tap to reset view.
                       </span>
                       <span className="block">
                         <strong className="text-white/90">Operators:</strong> Curvature, Gradient-Tension,
@@ -610,435 +600,157 @@ export default function SimulationPage() {
           </div>
         </div>
 
-        {/* Floating metrics - top left under header */}
-        <div className="absolute top-14 left-3 z-20 pointer-events-none">
-          <div className="bg-black/60 backdrop-blur-md rounded-lg px-3 py-2 space-y-1">
-            <div className="flex items-center gap-3 text-[10px] font-mono">
-              <span className="text-white/50">Step</span>
-              <span className="text-white/90" data-testid="text-step-mobile">{state.step.toLocaleString()}</span>
-            </div>
-            <div className="flex items-center gap-3 text-[10px] font-mono">
-              <span className="text-white/50">{modeLabels.stats.energy}</span>
-              <span className="text-white/90" data-testid="text-energy-mobile">{state.energy.toFixed(2)}</span>
-            </div>
-            <div className="flex items-center gap-3 text-[10px] font-mono">
-              <span className="text-white/50">{modeLabels.stats.basins}</span>
-              <span className="text-white/90" data-testid="text-basins-mobile">{state.basinCount}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Preset chips - horizontal scroll */}
-        <div className="absolute top-14 right-3 left-24 z-20 overflow-hidden pointer-events-none">
-          <div className="overflow-x-auto scrollbar-none pointer-events-auto">
-            <div className="flex gap-1.5 pb-2">
-              {mobilePresets.map((preset) => (
-                <button
-                  key={preset.key}
-                  onClick={() => {
-                    if (structuralPresets[preset.key]) {
-                      handleParamsChange(structuralPresets[preset.key]);
-                      const smartConfig = getSmartViewConfig(preset.key);
-                      if (smartConfig) {
-                        handleSmartViewApply(smartConfig);
-                      }
-                    }
-                  }}
-                  className="flex-shrink-0 px-3 py-2.5 min-h-[44px] bg-black/60 backdrop-blur-md rounded-full text-xs font-medium text-white/80 active:bg-white/20 transition-colors"
-                  data-testid={`button-preset-${preset.key}-mobile`}
-                  aria-label={`Apply ${preset.label} preset`}
-                >
-                  {preset.label}
-                </button>
-              ))}
+        {/* Main Field Window with floating metrics label */}
+        <div className="absolute inset-x-4 top-20 bottom-36 z-10 flex items-center justify-center">
+          {/* Floating metrics tag at bottom of field */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+            <div className="bg-black/70 backdrop-blur-md rounded-full px-4 py-2 flex items-center gap-3">
+              <span className={`text-xs font-medium ${stabilityColor}`} data-testid="text-state-mobile">
+                State: {stabilityState}
+              </span>
+              <span className="text-white/30">|</span>
+              <span className="text-xs font-mono text-white/80" data-testid="text-kappa-mobile">
+                κ: {operatorContributions.curvature.toFixed(3)}
+              </span>
+              <span className="text-white/30">|</span>
+              <span className="text-xs font-mono text-white/80" data-testid="text-energy-mobile">
+                e: {state.energy.toFixed(4)}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Floating controls - center bottom */}
-        <div className="absolute bottom-24 left-0 right-0 z-20 pointer-events-none">
-          <div className="flex items-center justify-center gap-3 pointer-events-auto">
-            {/* Reset button */}
-            <button
-              onClick={handleReset}
-              className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center active:bg-white/20 transition-colors"
-              data-testid="button-reset-mobile"
-              aria-label="Reset simulation"
-            >
-              <RotateCcw className="h-5 w-5 text-white/80" />
-            </button>
+        {/* Footer notice */}
+        <div className="absolute bottom-28 left-0 right-0 z-20 pointer-events-none">
+          <p className="text-center text-[10px] text-white/30 px-8">
+            For full dual-field simulation and diagnostics, visit the desktop SFD Engine.
+          </p>
+        </div>
 
-            {/* Large play/pause button */}
+        {/* Primary Control Strip - 4 circular buttons */}
+        <div className="absolute bottom-0 left-0 right-0 z-30 bg-gray-950/90 backdrop-blur-xl border-t border-white/10 pb-safe">
+          <div className="flex items-center justify-around h-20 px-4">
+            {/* Run button */}
             <button
               onClick={state.isRunning ? handlePause : handlePlay}
-              className={`w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-95 ${
+              className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                 state.isRunning 
-                  ? 'bg-green-500/90 shadow-lg shadow-green-500/30' 
-                  : 'bg-white/90 shadow-lg shadow-white/20'
+                  ? 'bg-green-500/20 border-2 border-green-500/50' 
+                  : 'bg-white/10 border-2 border-white/20'
               }`}
               data-testid={state.isRunning ? "button-pause-mobile" : "button-play-mobile"}
               aria-label={state.isRunning ? "Pause simulation" : "Run simulation"}
             >
               {state.isRunning ? (
-                <Pause className="h-7 w-7 text-white" />
+                <Pause className="h-5 w-5 text-green-400" />
               ) : (
-                <Play className="h-7 w-7 text-gray-900 ml-0.5" />
+                <Play className="h-5 w-5 text-white/80 ml-0.5" />
               )}
+              <span className={`text-[9px] mt-0.5 ${state.isRunning ? 'text-green-400' : 'text-white/60'}`}>
+                {state.isRunning ? 'Pause' : 'Run'}
+              </span>
             </button>
 
-            {/* Settings button */}
-            <Sheet open={controlsOpen} onOpenChange={setControlsOpen}>
+            {/* Regimes button */}
+            <Sheet open={mobileActiveTab === "regimes"} onOpenChange={(open) => setMobileActiveTab(open ? "regimes" : null)}>
               <SheetTrigger asChild>
                 <button
-                  className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center active:bg-white/20 transition-colors"
-                  data-testid="button-settings-mobile"
-                  aria-label="Open settings"
+                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-regimes-mobile"
+                  aria-label="Choose dynamic regime"
                 >
-                  <Settings2 className="h-5 w-5 text-white/80" />
+                  <Zap className="h-5 w-5 text-white/80" />
+                  <span className="text-[9px] text-white/60 mt-0.5">Regimes</span>
                 </button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="h-[75vh] bg-gray-900/95 backdrop-blur-xl border-t border-white/10 rounded-t-2xl">
+              <SheetContent side="bottom" className="h-auto max-h-[60vh] bg-gray-900/95 backdrop-blur-xl border-t border-white/10 rounded-t-2xl">
                 <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
                 <SheetHeader className="pb-4">
-                  <SheetTitle className="text-white">Settings</SheetTitle>
+                  <SheetTitle className="text-white text-center">Choose a Dynamic Regime</SheetTitle>
                 </SheetHeader>
-                <div className="overflow-y-auto h-[calc(100%-4rem)]">
-                  <MobileControlPanel
-                    params={params}
-                    colormap={colormap}
-                    interpretationMode={interpretationMode}
-                    onParamsChange={handleParamsChange}
-                    onColormapChange={setColormap}
-                    onInterpretationModeChange={setInterpretationMode}
-                  />
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-
-        {/* Bottom Tab Bar */}
-        <div className="absolute bottom-0 left-0 right-0 z-30 bg-gray-900/95 backdrop-blur-xl border-t border-white/10 pb-safe">
-          <div className="flex items-center justify-around h-14">
-            {/* Layers Tab */}
-            <Sheet open={mobileActiveTab === "layers"} onOpenChange={(open) => setMobileActiveTab(open ? "layers" : null)}>
-              <SheetTrigger asChild>
-                <button
-                  className={`flex flex-col items-center justify-center gap-0.5 w-14 h-full transition-colors ${mobileActiveTab === "layers" ? "text-white" : "text-white/50"}`}
-                  data-testid="button-tab-layers-mobile"
-                  aria-label="View layers"
-                >
-                  <Layers className="h-5 w-5" />
-                  <span className="text-[9px] font-medium">Layers</span>
-                </button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[50vh] bg-gray-900/95 backdrop-blur-xl border-t border-white/10 rounded-t-2xl">
-                <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-                <SheetHeader className="pb-4">
-                  <SheetTitle className="text-white">View Layers</SheetTitle>
-                </SheetHeader>
-                <div className="space-y-4 px-1">
-                  <div className="space-y-3">
-                    <Label className="text-sm text-white/90">Overlay Type</Label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {["none", "basins", "curvature", "tension", "coupling", "variance"].map((type) => (
-                        <button
-                          key={type}
-                          onClick={() => {
-                            if (type === "none") {
-                              setBlendMode(false);
-                            } else {
-                              setDerivedType(type as any);
-                              setBlendMode(true);
-                              if (type === "basins" && engineRef.current) {
-                                setBasinMap(engineRef.current.getBasinMap());
-                              } else if (engineRef.current) {
-                                setDerivedField(engineRef.current.computeDerivedField(type as any));
-                              }
-                            }
-                          }}
-                          className={`px-3 py-2.5 min-h-[44px] rounded-lg text-xs font-medium transition-colors ${
-                            (type === "none" && !blendMode) || (blendMode && derivedType === type)
-                              ? "bg-white/20 text-white"
-                              : "bg-white/5 text-white/60"
-                          }`}
-                          data-testid={`button-layer-${type}-mobile`}
-                        >
-                          {type.charAt(0).toUpperCase() + type.slice(1)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  {blendMode && (
-                    <div className="space-y-3">
+                <div className="space-y-2 px-2 pb-6">
+                  {mobileRegimes.map((regime) => (
+                    <button
+                      key={regime.key}
+                      onClick={() => {
+                        if (structuralPresets[regime.key]) {
+                          handleParamsChange(structuralPresets[regime.key]);
+                          const smartConfig = getSmartViewConfig(regime.key);
+                          if (smartConfig) {
+                            handleSmartViewApply(smartConfig);
+                          }
+                        }
+                        setMobileActiveTab(null);
+                      }}
+                      className="w-full text-left px-4 py-3.5 min-h-[52px] rounded-lg bg-white/5 active:bg-white/15 transition-colors border border-white/10"
+                      data-testid={`button-regime-${regime.key}-mobile`}
+                    >
                       <div className="flex items-center justify-between">
-                        <Label className="text-sm text-white/90">Blend Opacity</Label>
-                        <span className="text-sm font-mono text-white/60">{Math.round(blendOpacity * 100)}%</span>
+                        <span className="text-sm font-medium text-white/90">{regime.label}</span>
+                        {regime.key === "cosmic-web" && (
+                          <span className="text-[10px] text-red-400 font-medium">(Warning!)</span>
+                        )}
                       </div>
-                      <Slider
-                        value={[blendOpacity]}
-                        min={0}
-                        max={1}
-                        step={0.05}
-                        onValueChange={([v]) => setBlendOpacity(v)}
-                        className="touch-none"
-                        data-testid="slider-blend-opacity-mobile"
-                      />
-                    </div>
-                  )}
-                  <div className="space-y-3">
-                    <Label className="text-sm text-white/90">Colormap</Label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {["viridis", "inferno", "cividis"].map((cm) => (
-                        <button
-                          key={cm}
-                          onClick={() => setColormap(cm as any)}
-                          className={`px-3 py-2.5 min-h-[44px] rounded-lg text-xs font-medium transition-colors ${
-                            colormap === cm ? "bg-white/20 text-white" : "bg-white/5 text-white/60"
-                          }`}
-                          data-testid={`button-colormap-${cm}-mobile`}
-                        >
-                          {cm.charAt(0).toUpperCase() + cm.slice(1)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            {/* Timeline Tab */}
-            <Sheet open={mobileActiveTab === "timeline"} onOpenChange={(open) => setMobileActiveTab(open ? "timeline" : null)}>
-              <SheetTrigger asChild>
-                <button
-                  className={`flex flex-col items-center justify-center gap-0.5 w-14 h-full transition-colors ${mobileActiveTab === "timeline" ? "text-white" : "text-white/50"}`}
-                  data-testid="button-tab-timeline-mobile"
-                  aria-label="Timeline controls"
-                >
-                  <Clock className="h-5 w-5" />
-                  <span className="text-[9px] font-medium">Timeline</span>
-                </button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[40vh] bg-gray-900/95 backdrop-blur-xl border-t border-white/10 rounded-t-2xl">
-                <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-                <SheetHeader className="pb-4">
-                  <SheetTitle className="text-white">Timeline</SheetTitle>
-                </SheetHeader>
-                <div className="space-y-4 px-1">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm text-white/90">Frame</Label>
-                      <span className="text-sm font-mono text-white/60">{currentHistoryIndex} / {historyLength}</span>
-                    </div>
-                    <Slider
-                      value={[currentHistoryIndex]}
-                      min={0}
-                      max={Math.max(historyLength - 1, 0)}
-                      step={1}
-                      onValueChange={([v]) => handleSeekFrame(v)}
-                      disabled={historyLength === 0}
-                      className="touch-none"
-                      data-testid="slider-timeline-mobile"
-                    />
-                  </div>
-                  <div className="flex items-center justify-center gap-3">
-                    <button
-                      onClick={handleStepBackward}
-                      disabled={currentHistoryIndex === 0}
-                      className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center disabled:opacity-30 active:bg-white/20 transition-colors"
-                      aria-label="Previous frame"
-                    >
-                      <StepBack className="h-5 w-5 text-white/80" />
+                      <p className="text-[11px] text-white/50 mt-0.5">{regime.description}</p>
                     </button>
+                  ))}
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            {/* Colors button */}
+            <Sheet open={mobileActiveTab === "colors"} onOpenChange={(open) => setMobileActiveTab(open ? "colors" : null)}>
+              <SheetTrigger asChild>
+                <button
+                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-colors-mobile"
+                  aria-label="Choose color map"
+                >
+                  <Palette className="h-5 w-5 text-white/80" />
+                  <span className="text-[9px] text-white/60 mt-0.5">Colors</span>
+                </button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-auto max-h-[50vh] bg-gray-900/95 backdrop-blur-xl border-t border-white/10 rounded-t-2xl">
+                <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
+                <SheetHeader className="pb-4">
+                  <SheetTitle className="text-white text-center">Color Maps</SheetTitle>
+                </SheetHeader>
+                <div className="space-y-2 px-2 pb-6">
+                  {colorMaps.map((cm) => (
                     <button
-                      onClick={handleStepForward}
-                      disabled={currentHistoryIndex >= historyLength - 1}
-                      className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center disabled:opacity-30 active:bg-white/20 transition-colors"
-                      aria-label="Next frame"
+                      key={cm.key}
+                      onClick={() => {
+                        setColormap(cm.key as "inferno" | "viridis" | "cividis");
+                        setMobileActiveTab(null);
+                      }}
+                      className={`w-full text-left px-4 py-3.5 min-h-[52px] rounded-lg transition-colors border ${
+                        colormap === cm.key 
+                          ? 'bg-white/15 border-white/30' 
+                          : 'bg-white/5 border-white/10 active:bg-white/15'
+                      }`}
+                      data-testid={`button-colormap-${cm.key}-mobile`}
                     >
-                      <StepForward className="h-5 w-5 text-white/80" />
+                      <span className="text-sm font-medium text-white/90">{cm.label}</span>
+                      <p className="text-[11px] text-white/50 mt-0.5">{cm.description}</p>
                     </button>
-                    <button
-                      onClick={() => handleSeekFrame(historyLength - 1)}
-                      disabled={currentHistoryIndex >= historyLength - 1}
-                      className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center disabled:opacity-30 active:bg-white/20 transition-colors"
-                      aria-label="Jump to latest"
-                    >
-                      <SkipForward className="h-5 w-5 text-white/80" />
-                    </button>
-                  </div>
+                  ))}
                 </div>
               </SheetContent>
             </Sheet>
 
-            {/* Events Tab */}
-            <Sheet open={mobileActiveTab === "events"} onOpenChange={(open) => setMobileActiveTab(open ? "events" : null)}>
-              <SheetTrigger asChild>
-                <button
-                  className={`flex flex-col items-center justify-center gap-0.5 w-14 h-full transition-colors relative ${mobileActiveTab === "events" ? "text-white" : "text-white/50"}`}
-                  data-testid="button-tab-events-mobile"
-                  aria-label="Event log"
-                >
-                  <Activity className="h-5 w-5" />
-                  <span className="text-[9px] font-medium">Events</span>
-                  {events.length > 0 && (
-                    <span className="absolute top-1.5 right-2.5 w-2 h-2 bg-green-500 rounded-full" />
-                  )}
-                </button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[60vh] bg-gray-900/95 backdrop-blur-xl border-t border-white/10 rounded-t-2xl">
-                <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-                <SheetHeader className="pb-4">
-                  <SheetTitle className="text-white">Event Log ({events.length})</SheetTitle>
-                </SheetHeader>
-                <div className="overflow-y-auto h-[calc(100%-5rem)] space-y-2 px-1">
-                  {events.length === 0 ? (
-                    <p className="text-sm text-white/50 text-center py-8">No events detected yet. Run the simulation to detect structural changes.</p>
-                  ) : (
-                    events.slice().reverse().slice(0, 50).map((event, i) => (
-                      <div key={i} className="bg-white/5 rounded-lg p-3 space-y-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-xs font-medium text-white/90">{event.type.replace(/_/g, ' ')}</span>
-                          <span className="text-[10px] font-mono text-white/50">Step {event.step}</span>
-                        </div>
-                        <p className="text-[11px] text-white/60">{event.description}</p>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            {/* Export Tab */}
-            <Sheet open={mobileActiveTab === "export"} onOpenChange={(open) => setMobileActiveTab(open ? "export" : null)}>
-              <SheetTrigger asChild>
-                <button
-                  className={`flex flex-col items-center justify-center gap-0.5 w-14 h-full transition-colors ${mobileActiveTab === "export" ? "text-white" : "text-white/50"}`}
-                  data-testid="button-tab-export-mobile"
-                  aria-label="Export options"
-                >
-                  <Share2 className="h-5 w-5" />
-                  <span className="text-[9px] font-medium">Export</span>
-                </button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[50vh] bg-gray-900/95 backdrop-blur-xl border-t border-white/10 rounded-t-2xl">
-                <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-                <SheetHeader className="pb-4">
-                  <SheetTitle className="text-white">Export</SheetTitle>
-                </SheetHeader>
-                <div className="grid grid-cols-2 gap-2 px-1">
-                  <button
-                    onClick={() => {
-                      const canvas = document.querySelector("canvas");
-                      if (canvas) exportPNGSnapshot(canvas);
-                    }}
-                    className="flex flex-col items-center gap-2 p-4 bg-white/5 rounded-lg active:bg-white/10 transition-colors"
-                    data-testid="button-export-png-mobile"
-                  >
-                    <Download className="h-6 w-6 text-white/70" />
-                    <span className="text-xs text-white/80">PNG Image</span>
-                  </button>
-                  <button
-                    onClick={() => engineRef.current && exportSimulationData(engineRef.current)}
-                    className="flex flex-col items-center gap-2 p-4 bg-white/5 rounded-lg active:bg-white/10 transition-colors"
-                    data-testid="button-export-csv-mobile"
-                  >
-                    <Download className="h-6 w-6 text-white/70" />
-                    <span className="text-xs text-white/80">CSV Data</span>
-                  </button>
-                  <button
-                    onClick={() => engineRef.current && exportSettingsJSON(engineRef.current)}
-                    className="flex flex-col items-center gap-2 p-4 bg-white/5 rounded-lg active:bg-white/10 transition-colors"
-                    data-testid="button-export-settings-mobile"
-                  >
-                    <Settings2 className="h-6 w-6 text-white/70" />
-                    <span className="text-xs text-white/80">Settings</span>
-                  </button>
-                  <button
-                    onClick={() => engineRef.current && exportNumPyArray(engineRef.current)}
-                    className="flex flex-col items-center gap-2 p-4 bg-white/5 rounded-lg active:bg-white/10 transition-colors"
-                    data-testid="button-export-numpy-mobile"
-                  >
-                    <Download className="h-6 w-6 text-white/70" />
-                    <span className="text-xs text-white/80">NumPy Array</span>
-                  </button>
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            {/* Notebook Tab */}
-            <Sheet open={mobileActiveTab === "notebook"} onOpenChange={(open) => setMobileActiveTab(open ? "notebook" : null)}>
-              <SheetTrigger asChild>
-                <button
-                  className={`flex flex-col items-center justify-center gap-0.5 w-14 h-full transition-colors ${mobileActiveTab === "notebook" ? "text-white" : "text-white/50"}`}
-                  data-testid="button-tab-notebook-mobile"
-                  aria-label="Notebook mode"
-                >
-                  <BookOpen className="h-5 w-5" />
-                  <span className="text-[9px] font-medium">Notes</span>
-                </button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[70vh] bg-gray-900/95 backdrop-blur-xl border-t border-white/10 rounded-t-2xl">
-                <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-                <SheetHeader className="pb-4">
-                  <SheetTitle className="text-white">Notebook</SheetTitle>
-                </SheetHeader>
-                <div className="overflow-y-auto h-[calc(100%-5rem)] space-y-4 px-1">
-                  <div className="bg-white/5 rounded-lg p-3 space-y-2">
-                    <h4 className="text-xs font-semibold text-white/90">Current State</h4>
-                    <div className="grid grid-cols-2 gap-2 text-[11px]">
-                      <div>
-                        <span className="text-white/50">Step:</span>
-                        <span className="ml-2 font-mono text-white/80">{state.step}</span>
-                      </div>
-                      <div>
-                        <span className="text-white/50">Energy:</span>
-                        <span className="ml-2 font-mono text-white/80">{state.energy.toFixed(3)}</span>
-                      </div>
-                      <div>
-                        <span className="text-white/50">Basins:</span>
-                        <span className="ml-2 font-mono text-white/80">{state.basinCount}</span>
-                      </div>
-                      <div>
-                        <span className="text-white/50">Variance:</span>
-                        <span className="ml-2 font-mono text-white/80">{state.variance.toFixed(4)}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white/5 rounded-lg p-3 space-y-2">
-                    <h4 className="text-xs font-semibold text-white/90">Regime</h4>
-                    <p className="text-[11px] text-white/70">
-                      {getInterpretationText(
-                        generateInterpretationSentence(
-                          state.basinCount,
-                          state.variance,
-                          state.energy,
-                          operatorContributions.curvature,
-                          operatorContributions.tension,
-                          state.isRunning,
-                          varianceChange
-                        ),
-                        interpretationMode
-                      )}
-                    </p>
-                  </div>
-                  <div className="bg-white/5 rounded-lg p-3 space-y-2">
-                    <h4 className="text-xs font-semibold text-white/90">Operator Contributions</h4>
-                    <div className="space-y-1.5">
-                      {Object.entries(operatorContributions).map(([op, val]) => (
-                        <div key={op} className="flex items-center gap-2">
-                          <span className="text-[10px] text-white/50 w-20 capitalize">{op}</span>
-                          <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                            <div className="h-full bg-white/50 rounded-full" style={{ width: `${val * 100}%` }} />
-                          </div>
-                          <span className="text-[10px] font-mono text-white/60 w-10 text-right">{(val * 100).toFixed(0)}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+            {/* Share button */}
+            <button
+              onClick={() => {
+                const canvas = document.querySelector("canvas");
+                if (canvas) exportPNGSnapshot(canvas);
+              }}
+              className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+              data-testid="button-share-mobile"
+              aria-label="Share snapshot"
+            >
+              <Share2 className="h-5 w-5 text-white/80" />
+              <span className="text-[9px] text-white/60 mt-0.5">Share</span>
+            </button>
           </div>
         </div>
       </div>
