@@ -1498,6 +1498,22 @@ export class SFDEngine {
     return this.currentPlaybackIndex >= 0 ? this.currentPlaybackIndex : this.ringBuffer.length - 1;
   }
 
+  // Map user-facing index (0 = oldest) to actual buffer position
+  // When buffer isn't full, index maps directly. When full, oldest is at ringBufferIndex.
+  private getBufferSnapshot(userIndex: number): FrameSnapshot | null {
+    if (userIndex < 0 || userIndex >= this.ringBuffer.length) return null;
+    
+    // When buffer is not full, frames are in order 0..length-1
+    if (this.ringBuffer.length < this.ringBufferSize) {
+      return this.ringBuffer[userIndex];
+    }
+    
+    // When buffer is full, ringBufferIndex points to oldest (next write position)
+    // So oldest frame is at ringBufferIndex, newest at ringBufferIndex - 1
+    const actualIndex = (this.ringBufferIndex + userIndex) % this.ringBufferSize;
+    return this.ringBuffer[actualIndex];
+  }
+
   stepBackward(): boolean {
     if (this.ringBuffer.length === 0) return false;
     
@@ -1507,7 +1523,8 @@ export class SFDEngine {
     
     if (this.currentPlaybackIndex > 0) {
       this.currentPlaybackIndex--;
-      const snapshot = this.ringBuffer[this.currentPlaybackIndex];
+      const snapshot = this.getBufferSnapshot(this.currentPlaybackIndex);
+      if (!snapshot) return false;
       // Use separate playback display grid - don't modify live simulation grid
       this.playbackDisplayGrid = new Float32Array(snapshot.grid);
       this.playbackDisplayStep = snapshot.step;
@@ -1523,7 +1540,8 @@ export class SFDEngine {
     
     if (this.currentPlaybackIndex < this.ringBuffer.length - 1) {
       this.currentPlaybackIndex++;
-      const snapshot = this.ringBuffer[this.currentPlaybackIndex];
+      const snapshot = this.getBufferSnapshot(this.currentPlaybackIndex);
+      if (!snapshot) return false;
       // Use separate playback display grid - don't modify live simulation grid
       this.playbackDisplayGrid = new Float32Array(snapshot.grid);
       this.playbackDisplayStep = snapshot.step;
@@ -1542,7 +1560,8 @@ export class SFDEngine {
     if (index < 0 || index >= this.ringBuffer.length) return;
     
     this.currentPlaybackIndex = index;
-    const snapshot = this.ringBuffer[index];
+    const snapshot = this.getBufferSnapshot(index);
+    if (!snapshot) return;
     // Use separate playback display grid - don't modify live simulation grid
     this.playbackDisplayGrid = new Float32Array(snapshot.grid);
     this.playbackDisplayStep = snapshot.step;
@@ -1594,7 +1613,8 @@ export class SFDEngine {
       if (event.step > currentStep) {
         // Find the closest frame in history
         for (let i = 0; i < this.ringBuffer.length; i++) {
-          if (this.ringBuffer[i].step >= event.step) {
+          const snapshot = this.getBufferSnapshot(i);
+          if (snapshot && snapshot.step >= event.step) {
             this.seekToFrame(i);
             return event.step;
           }
@@ -1611,7 +1631,8 @@ export class SFDEngine {
       if (event.step < currentStep) {
         // Find the closest frame in history
         for (let i = this.ringBuffer.length - 1; i >= 0; i--) {
-          if (this.ringBuffer[i].step <= event.step) {
+          const snapshot = this.getBufferSnapshot(i);
+          if (snapshot && snapshot.step <= event.step) {
             this.seekToFrame(i);
             return event.step;
           }
@@ -1624,7 +1645,8 @@ export class SFDEngine {
   // Get the field state for the current playback frame (or current live state)
   getPlaybackFieldState(): "calm" | "unsettled" | "reorganizing" | "transforming" {
     if (this.currentPlaybackIndex >= 0 && this.currentPlaybackIndex < this.ringBuffer.length) {
-      return this.ringBuffer[this.currentPlaybackIndex].fieldState;
+      const snapshot = this.getBufferSnapshot(this.currentPlaybackIndex);
+      if (snapshot) return snapshot.fieldState;
     }
     return this.displayedFieldState;
   }
@@ -2006,7 +2028,8 @@ export class SFDEngine {
     
     const startIdx = Math.max(0, this.ringBuffer.length - frameCount);
     for (let i = startIdx; i < this.ringBuffer.length; i++) {
-      const snapshot = this.ringBuffer[i];
+      const snapshot = this.getBufferSnapshot(i);
+      if (!snapshot) continue;
       // Compute hash for this frame
       let hash = 0;
       for (let j = 0; j < snapshot.grid.length; j += 100) {
@@ -2044,26 +2067,40 @@ export class SFDEngine {
 
   // Export methods for new export system
   getAllFrames(): { grid: Float32Array; step: number; stats: { energy: number; variance: number; basinCount: number } }[] {
-    return this.ringBuffer.map(snapshot => ({
-      grid: new Float32Array(snapshot.grid),
-      step: snapshot.step,
-      stats: { ...snapshot.stats }
-    }));
+    const frames: { grid: Float32Array; step: number; stats: { energy: number; variance: number; basinCount: number } }[] = [];
+    for (let i = 0; i < this.ringBuffer.length; i++) {
+      const snapshot = this.getBufferSnapshot(i);
+      if (snapshot) {
+        frames.push({
+          grid: new Float32Array(snapshot.grid),
+          step: snapshot.step,
+          stats: { ...snapshot.stats }
+        });
+      }
+    }
+    return frames;
   }
 
   getMetricsHistory(): { step: number; fps: number; basinCount: number; depth: number; curvature: number; tensionVariance: number; stability: number; energy: number; variance: number; timestamp: number }[] {
-    return this.ringBuffer.map((snapshot, index) => ({
-      step: snapshot.step,
-      fps: this.fps,
-      basinCount: snapshot.stats.basinCount,
-      depth: this.cachedSignature?.avgBasinDepth ?? 0,
-      curvature: this.computeCurvatureMeanForExport(),
-      tensionVariance: snapshot.stats.variance,
-      stability: this.cachedSignature?.stabilityMetric ?? 1,
-      energy: snapshot.stats.energy,
-      variance: snapshot.stats.variance,
-      timestamp: Date.now() - (this.ringBuffer.length - index) * 16
-    }));
+    const history: { step: number; fps: number; basinCount: number; depth: number; curvature: number; tensionVariance: number; stability: number; energy: number; variance: number; timestamp: number }[] = [];
+    for (let i = 0; i < this.ringBuffer.length; i++) {
+      const snapshot = this.getBufferSnapshot(i);
+      if (snapshot) {
+        history.push({
+          step: snapshot.step,
+          fps: this.fps,
+          basinCount: snapshot.stats.basinCount,
+          depth: this.cachedSignature?.avgBasinDepth ?? 0,
+          curvature: this.computeCurvatureMeanForExport(),
+          tensionVariance: snapshot.stats.variance,
+          stability: this.cachedSignature?.stabilityMetric ?? 1,
+          energy: snapshot.stats.energy,
+          variance: snapshot.stats.variance,
+          timestamp: Date.now() - (this.ringBuffer.length - i) * 16
+        });
+      }
+    }
+    return history;
   }
 
   getCurrentFieldSnapshot(): { width: number; height: number; field: number[]; timestamp: number } {
