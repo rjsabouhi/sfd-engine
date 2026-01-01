@@ -1150,8 +1150,14 @@ export default function SimulationPage() {
         )}
 
 
-        {/* Top Bar - dark, minimal */}
-        <div className="absolute top-0 left-0 right-0 z-20 bg-gray-950/80 backdrop-blur-md border-b border-white/5">
+        {/* Top Bar - dark, minimal - collapses when panels are open */}
+        <div 
+          className="absolute left-0 right-0 z-20 bg-gray-950/80 backdrop-blur-md border-b border-white/5"
+          style={{
+            top: mobileActiveTab ? '-70px' : '0',
+            transition: 'top 0.3s ease-out',
+          }}
+        >
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-3">
               <img src={sfdLogo} alt="SFD" className="w-7 h-7 rounded-md" />
