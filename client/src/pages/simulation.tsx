@@ -64,32 +64,7 @@ function MobileOverlayCanvas({
   transform?: { zoom: number; panX: number; panY: number };
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [baseRect, setBaseRect] = useState<{ width: number; height: number; left: number; top: number }>({ width: 0, height: 0, left: 0, top: 0 });
-
-  // Sync position with base canvas
-  useEffect(() => {
-    const syncPosition = () => {
-      const baseCanvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement | null;
-      const container = canvasRef.current?.parentElement;
-      
-      if (baseCanvas && container) {
-        const baseBox = baseCanvas.getBoundingClientRect();
-        const containerBox = container.getBoundingClientRect();
-        
-        setBaseRect({
-          width: baseBox.width,
-          height: baseBox.height,
-          left: baseBox.left - containerBox.left,
-          top: baseBox.top - containerBox.top,
-        });
-      }
-    };
-    
-    // Sync on mount and after a short delay to ensure layout is complete
-    syncPosition();
-    const timeout = setTimeout(syncPosition, 100);
-    return () => clearTimeout(timeout);
-  }, [frameVersion]);
+  const [isReady, setIsReady] = useState(false);
 
   // Render the overlay content
   useEffect(() => {
@@ -99,17 +74,16 @@ function MobileOverlayCanvas({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Get the base canvas to match pixel dimensions
+    // Get the base canvas to match pixel dimensions exactly
     const baseCanvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement | null;
     
-    if (baseCanvas) {
+    if (baseCanvas && baseCanvas.width > 0 && baseCanvas.height > 0) {
       canvas.width = baseCanvas.width;
       canvas.height = baseCanvas.height;
+      setIsReady(true);
     } else {
-      // Fallback
-      const size = Math.min(baseRect.width, baseRect.height) || 300;
-      canvas.width = size;
-      canvas.height = size;
+      setIsReady(false);
+      return;
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -170,20 +144,13 @@ function MobileOverlayCanvas({
   const panX = transform?.panX ?? 0;
   const panY = transform?.panY ?? 0;
 
-  // Hide until properly positioned
-  const isReady = baseRect.width > 0 && baseRect.height > 0;
-
   return (
     <canvas
       ref={canvasRef}
       data-testid="canvas-overlay"
-      className="absolute pointer-events-none rounded-md"
+      className="absolute inset-0 w-full h-full pointer-events-none rounded-md"
       style={{ 
         opacity: isReady ? opacity : 0,
-        width: baseRect.width || 1,
-        height: baseRect.height || 1,
-        left: baseRect.left,
-        top: baseRect.top,
         transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
         transformOrigin: 'center center',
         visibility: isReady ? 'visible' : 'hidden',
