@@ -1043,7 +1043,7 @@ export default function SimulationPage() {
       switch (mobileActiveTab) {
         case "regimes": return 60; // compact row of buttons
         case "colors": return 60; // compact row of color buttons
-        case "layers": return 75; // tabs + buttons + optional slider
+        case "layers": return layersSubtab === 'presets' ? 130 : 75; // presets tab is taller with cards
         case "params": return 75; // buttons + inline slider
         case "scrub": return 95; // frame counter + slider + buttons + ticks
         default: return 0;
