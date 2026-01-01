@@ -73,19 +73,27 @@ function MobileOverlayCanvas({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Match VisualizationCanvas sizing: min(w,h) * 0.88 scale factor with DPI awareness
-    const container = canvas.parentElement;
-    if (container) {
-      const containerSize = Math.min(container.clientWidth, container.clientHeight);
-      const size = Math.floor(containerSize * 0.88);
-      const dpr = Math.min(window.devicePixelRatio || 1, 3);
-      const renderSize = Math.floor(size * dpr);
-      canvas.width = renderSize;
-      canvas.height = renderSize;
-      canvas.style.width = `${size}px`;
-      canvas.style.height = `${size}px`;
-      setVisualSize(size);
+    // Get the base canvas to match its exact size
+    const baseCanvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement | null;
+    let size: number;
+    
+    if (baseCanvas) {
+      // Match the base canvas CSS size exactly
+      size = baseCanvas.clientWidth;
+    } else {
+      // Fallback: Match VisualizationCanvas sizing formula
+      const container = canvas.parentElement;
+      if (container) {
+        const containerSize = Math.min(container.clientWidth, container.clientHeight);
+        size = Math.floor(containerSize * 0.88);
+      } else {
+        size = 300;
+      }
     }
+    
+    canvas.width = size;
+    canvas.height = size;
+    setVisualSize(size);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -154,6 +162,8 @@ function MobileOverlayCanvas({
         opacity, 
         transform: `translate(-50%, -50%) translate(${panX}px, ${panY}px) scale(${zoom})`,
         transformOrigin: 'center center',
+        width: visualSize || 'auto',
+        height: visualSize || 'auto',
       }}
     />
   );
