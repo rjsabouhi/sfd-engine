@@ -464,7 +464,7 @@ export function VisualizationCanvas({
       onTouchEnd={disableTouch ? undefined : handleTouchEnd}
       style={{ 
         cursor: getCursor(),
-        backgroundColor: 'rgb(8, 10, 14)',
+        backgroundColor: 'rgb(0, 0, 0)',
         touchAction: disableTouch ? 'auto' : 'none',
       }}
       data-testid="visualization-container"
