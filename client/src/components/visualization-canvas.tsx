@@ -466,8 +466,8 @@ export function VisualizationCanvas({
     return 'crosshair';
   };
 
-  const visualScale = 0.88;
-  const visualSize = canvasSize * visualScale;
+  // Use canvasSize directly - no visual scaling to avoid overlay misalignment
+  const visualSize = canvasSize;
 
   // Render overlay canvas when overlay data is provided
   useEffect(() => {
