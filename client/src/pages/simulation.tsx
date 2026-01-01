@@ -1116,18 +1116,10 @@ export default function SimulationPage() {
             perceptualSmoothing={perceptualSmoothing}
             onTransformChange={setCanvasTransform}
             disableTouch={true}
+            overlayDerivedField={mobileLayerIndex > 0 && mobileLayers[mobileLayerIndex].key !== "basins" ? derivedField : null}
+            overlayBasinMap={mobileLayerIndex > 0 && mobileLayers[mobileLayerIndex].key === "basins" ? basinMap : null}
+            overlayOpacity={mobileLayerIndex > 0 ? blendOpacity : 0}
           />
-          
-          {/* Overlay layer when a projection is selected */}
-          {mobileLayerIndex > 0 && (derivedField || (mobileLayers[mobileLayerIndex].key === "basins" && basinMap)) && (
-            <MobileOverlayCanvas
-              derivedField={mobileLayers[mobileLayerIndex].key === "basins" ? null : derivedField}
-              basinMap={mobileLayers[mobileLayerIndex].key === "basins" ? basinMap : null}
-              opacity={blendOpacity}
-              frameVersion={state.step}
-              transform={canvasTransform}
-            />
-          )}
         </div>
 
         {/* Instability flash overlay */}

@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback, useState } from "react";
-import type { FieldData, BasinMap } from "@shared/schema";
+import type { FieldData, BasinMap, DerivedField } from "@shared/schema";
 
 export interface CanvasTransform {
   zoom: number;
@@ -20,6 +20,10 @@ interface VisualizationCanvasProps {
   perceptualSmoothing?: boolean;
   onTransformChange?: (transform: CanvasTransform) => void;
   disableTouch?: boolean;
+  // Overlay layer props - rendered inside same container for perfect alignment
+  overlayDerivedField?: DerivedField | null;
+  overlayBasinMap?: BasinMap | null;
+  overlayOpacity?: number;
 }
 
 // Temporal smoothing buffer for perceptual safety
@@ -82,6 +86,19 @@ const BASIN_COLORS = [
   [99, 255, 132],
 ];
 
+// Plasma colormap for derived field overlays
+const PLASMA_COLORS = [
+  [13, 8, 135],
+  [75, 3, 161],
+  [126, 3, 168],
+  [168, 34, 150],
+  [204, 71, 120],
+  [232, 107, 87],
+  [250, 149, 62],
+  [253, 195, 56],
+  [240, 249, 33],
+];
+
 function interpolateColor(t: number, colormap: typeof INFERNO_COLORS): [number, number, number] {
   t = Math.max(0, Math.min(1, t));
   const idx = t * (colormap.length - 1);
@@ -118,8 +135,12 @@ export function VisualizationCanvas({
   perceptualSmoothing = false,
   onTransformChange,
   disableTouch = false,
+  overlayDerivedField,
+  overlayBasinMap,
+  overlayOpacity = 0,
 }: VisualizationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const [zoom, setZoom] = useState(1);
@@ -448,6 +469,72 @@ export function VisualizationCanvas({
   const visualScale = 0.88;
   const visualSize = canvasSize * visualScale;
 
+  // Render overlay canvas when overlay data is provided
+  useEffect(() => {
+    const canvas = overlayCanvasRef.current;
+    if (!canvas || canvasSize <= 0) return;
+    if (!overlayDerivedField && !overlayBasinMap) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    const renderSize = Math.floor(canvasSize * dpr);
+    
+    canvas.width = renderSize;
+    canvas.height = renderSize;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (overlayBasinMap && overlayBasinMap.labels.length > 0) {
+      const { labels, width, height } = overlayBasinMap;
+      const cellW = canvas.width / width;
+      const cellH = canvas.height / height;
+      
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const basinId = labels[y * width + x];
+          if (basinId >= 0) {
+            const color = BASIN_COLORS[basinId % BASIN_COLORS.length];
+            ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+            ctx.fillRect(x * cellW, y * cellH, cellW + 0.5, cellH + 0.5);
+          } else {
+            ctx.fillStyle = 'rgb(20, 20, 30)';
+            ctx.fillRect(x * cellW, y * cellH, cellW + 0.5, cellH + 0.5);
+          }
+        }
+      }
+    } else if (overlayDerivedField) {
+      const { grid, width, height } = overlayDerivedField;
+      let min = Infinity, max = -Infinity;
+      for (let i = 0; i < grid.length; i++) {
+        if (grid[i] < min) min = grid[i];
+        if (grid[i] > max) max = grid[i];
+      }
+      const range = max - min || 1;
+      const cellW = canvas.width / width;
+      const cellH = canvas.height / height;
+
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const val = grid[y * width + x];
+          const t = Math.max(0, Math.min(1, (val - min) / range));
+          const idx = Math.min(Math.floor(t * (PLASMA_COLORS.length - 1)), PLASMA_COLORS.length - 2);
+          const f = t * (PLASMA_COLORS.length - 1) - idx;
+          const c1 = PLASMA_COLORS[idx];
+          const c2 = PLASMA_COLORS[idx + 1];
+          const r = Math.round(c1[0] + f * (c2[0] - c1[0]));
+          const g = Math.round(c1[1] + f * (c2[1] - c1[1]));
+          const b = Math.round(c1[2] + f * (c2[2] - c1[2]));
+          ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+          ctx.fillRect(x * cellW, y * cellH, cellW + 0.5, cellH + 0.5);
+        }
+      }
+    }
+  }, [overlayDerivedField, overlayBasinMap, canvasSize]);
+
+  const hasOverlay = (overlayDerivedField || overlayBasinMap) && overlayOpacity > 0;
+
   return (
     <div 
       ref={containerRef}
@@ -485,6 +572,21 @@ export function VisualizationCanvas({
             }}
             data-testid="canvas-visualization"
           />
+          {/* Overlay canvas - rendered in same container for perfect alignment */}
+          {hasOverlay && (
+            <canvas
+              ref={overlayCanvasRef}
+              className="absolute rounded-md pointer-events-none"
+              style={{ 
+                width: `${visualSize}px`,
+                height: `${visualSize}px`,
+                transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                transformOrigin: 'center center',
+                opacity: overlayOpacity,
+              }}
+              data-testid="canvas-overlay"
+            />
+          )}
           {trajectoryProbePoint && field && (
             <div 
               className="absolute pointer-events-none"
