@@ -1,0 +1,91 @@
+MESSAGE TO SEND TO REPLIT SUPPORT
+
+Subject: Layout / viewport scaling issues in Mobile Preview – modal panels not respecting viewport, causing overlap and misalignment
+
+Hi! I’m building a responsive web app in Replit and running into a reproducible issue that seems to come from the mobile preview renderer rather than my code. I’ve confirmed this by testing the same app outside Replit (Safari mobile inspector + actual device), where everything displays correctly.
+
+Here is what’s happening inside Replit Mobile Preview:
+
+⸻
+
+1. Modal panels and bottom sheets are not respecting the safe area or viewport height
+
+When any of my UI panels slide up (e.g., Params, Layers, Regimes), the panel’s top boundary ends up overlapping the main canvas, sometimes cutting into the rendered content by ~20–40px depending on the view.
+
+It looks as if Replit’s preview window does not correctly calculate vh units, and therefore the panel is positioned using an incorrect viewport height.
+
+This results in:
+	•	The canvas being pushed up unpredictably
+	•	The panel overlapping or sitting too close to the canvas
+	•	Extra padding appearing on some screens
+	•	Misalignment between the visual and controls
+
+This happens consistently across all modal components, even though they position correctly on a real mobile browser.
+
+⸻
+
+2. The canvas container is being artificially expanded or compressed
+
+When switching between tabs (Params → Layers → Run), the main visualization jumps or stretches by small but noticeable amounts — again suggesting the preview adjusts the internal height dynamically in a way real browsers do not.
+
+It behaves like Replit is applying its own internal constraints or padding that conflicts with CSS rules like:
+	•	height: 100vh
+	•	bottom: 0
+	•	position: fixed
+	•	overflow: hidden
+
+My layout works everywhere else except in the Replit preview.
+
+⸻
+
+3. The bottom navigation bar appears to consume unexpected layout space
+
+Even when I account for safe-area insets (via env(safe-area-inset-bottom)), the Replit mobile preview seems to treat its own UI chrome as part of the viewport, which shifts elements upward.
+
+This only occurs in the preview — not on real devices or external browsers.
+
+⸻
+
+4. This prevents accurate mobile layout development
+
+Because the preview version:
+	•	Overlaps UI layers
+	•	Miscalculates panel heights
+	•	Introduces inconsistent padding
+	•	Moves the canvas unpredictably
+
+…it’s impossible to reliably tune spacing, padding, and alignment from within Replit.
+
+I need the preview to simulate real-world viewport behavior so I can continue developing the mobile layout accurately.
+
+⸻
+
+What would help
+
+If possible, I would love:
+
+A) Correct viewport handling in Replit’s mobile preview
+
+(accurate 100vh, correct safe-area inset calculation, consistent layout across modal transitions)
+
+B) An option to disable Replit’s top and bottom chrome
+
+So the preview reflects the true browser space.
+
+C) Confirmation on whether Replit injects any CSS or JS that affects layout
+
+Even a small modification (like a wrapper div with padding or height constraints) could explain the behavior.
+
+⸻
+
+Screenshots
+
+(I have included screenshots showing the overlap and misalignment across several interactions.)
+
+⸻
+
+Thanks so much — I’m building a fairly complex interactive visualization tool, and resolving this preview issue would make a big difference in ensuring the UI displays correctly on mobile devices.
+
+⸻
+
+✅ END OF MESSAGE

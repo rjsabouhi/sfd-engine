@@ -1076,10 +1076,10 @@ export default function SimulationPage() {
           onTouchMove={touchHandlers.onTouchMove}
           onTouchEnd={touchHandlers.onTouchEnd}
           style={{
-            top: '24px',
-            left: '7%',
-            right: '7%',
-            bottom: `${110 + panelOffset}px`, // 110px for bottom control strip + extra spacing
+            top: '20px',
+            left: '6%',
+            right: '6%',
+            bottom: `${90 + panelOffset}px`, // 90px for bottom control strip + panel offset
             transform: `translate(${tiltOffset.x}px, ${tiltOffset.y}px)`,
             transition: 'bottom 0.3s ease-out, transform 0.1s ease-out',
             touchAction: 'none',
