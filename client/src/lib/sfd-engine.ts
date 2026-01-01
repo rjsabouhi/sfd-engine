@@ -1544,18 +1544,10 @@ export class SFDEngine {
       this.currentPlaybackIndex--;
       const snapshot = this.getBufferSnapshot(this.currentPlaybackIndex);
       if (!snapshot) return false;
-      
-      // Update playback display
+      // Display-only: don't modify live simulation grid during scrubbing
       this.playbackDisplayGrid = new Float32Array(snapshot.grid);
       this.playbackDisplayStep = snapshot.step;
-      
-      // Also restore live state to prevent desync when resuming
-      this.grid.set(snapshot.grid);
-      this.step = snapshot.step;
-      this.truncateHistoryAfter(this.currentPlaybackIndex);
-      
       this.invalidateDerivedFieldCache();
-      this.updateBasinMap();
       this.notifyUpdate();
       return true;
     }
@@ -1569,54 +1561,49 @@ export class SFDEngine {
       this.currentPlaybackIndex++;
       const snapshot = this.getBufferSnapshot(this.currentPlaybackIndex);
       if (!snapshot) return false;
-      
-      // Update playback display
+      // Display-only: don't modify live simulation grid during scrubbing
       this.playbackDisplayGrid = new Float32Array(snapshot.grid);
       this.playbackDisplayStep = snapshot.step;
-      
-      // Also restore live state
-      this.grid.set(snapshot.grid);
-      this.step = snapshot.step;
-      
       this.invalidateDerivedFieldCache();
       this.notifyUpdate();
       return true;
     } else {
-      // Exiting playback mode - sync to the last frame
-      const lastSnapshot = this.getBufferSnapshot(this.ringBuffer.length - 1);
-      if (lastSnapshot) {
-        this.grid.set(lastSnapshot.grid);
-        this.step = lastSnapshot.step;
-      }
+      // Exiting playback mode - clear the display grid
       this.currentPlaybackIndex = -1;
       this.playbackDisplayGrid = null;
-      this.invalidateDerivedFieldCache();
-      this.notifyUpdate();
       return false;
     }
   }
 
-  seekToFrame(index: number, restoreLiveState: boolean = true): void {
+  seekToFrame(index: number): void {
     if (index < 0 || index >= this.ringBuffer.length) return;
     
     this.currentPlaybackIndex = index;
     const snapshot = this.getBufferSnapshot(index);
     if (!snapshot) return;
-    
-    // Create playback display grid from snapshot
+    // Display-only: don't modify live simulation grid during scrubbing
     this.playbackDisplayGrid = new Float32Array(snapshot.grid);
     this.playbackDisplayStep = snapshot.step;
+    this.invalidateDerivedFieldCache();
+    this.notifyUpdate();
+  }
+  
+  // Commit the current playback frame to live state
+  // Called when resuming simulation from a scrubbed position
+  // This syncs the live grid to the displayed frame and prunes future history
+  commitPlaybackFrame(): void {
+    if (this.currentPlaybackIndex < 0 || !this.playbackDisplayGrid) return;
     
-    // Also restore the live simulation state to prevent desync
-    // This ensures that when resuming, the simulation continues from this exact state
-    if (restoreLiveState) {
-      this.grid.set(snapshot.grid);
-      this.step = snapshot.step;
-      
-      // Truncate history after this point since it's now invalid
-      // (the future frames were based on a different state trajectory)
-      this.truncateHistoryAfter(index);
-    }
+    // Restore live state from the current playback frame
+    this.grid.set(this.playbackDisplayGrid);
+    this.step = this.playbackDisplayStep;
+    
+    // Truncate history after this point (future frames are now invalid)
+    this.truncateHistoryAfter(this.currentPlaybackIndex);
+    
+    // Exit playback mode
+    this.currentPlaybackIndex = -1;
+    this.playbackDisplayGrid = null;
     
     this.invalidateDerivedFieldCache();
     this.updateBasinMap();
@@ -1624,7 +1611,7 @@ export class SFDEngine {
   }
   
   // Truncate ring buffer history after the given index
-  // Called when scrubbing backward to invalidate future frames
+  // Called when resuming from a past frame to invalidate future history
   private truncateHistoryAfter(index: number): void {
     if (index < 0 || index >= this.ringBuffer.length - 1) return;
     
@@ -1655,16 +1642,8 @@ export class SFDEngine {
   }
 
   exitPlaybackMode(): void {
-    // When exiting playback, ensure live state matches the last viewed frame
-    // to prevent ghost artifacts from persisted perturbations
-    if (this.playbackDisplayGrid) {
-      this.grid.set(this.playbackDisplayGrid);
-      this.step = this.playbackDisplayStep;
-    }
     this.currentPlaybackIndex = -1;
     this.playbackDisplayGrid = null;
-    this.invalidateDerivedFieldCache();
-    this.notifyUpdate();
   }
 
   isInPlaybackMode(): boolean {
@@ -1674,6 +1653,12 @@ export class SFDEngine {
   // Perturbation Tool - Apply local perturbation at a point
   perturbField(x: number, y: number, magnitude: number = 0.15, radius: number = 5): void {
     if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
+    
+    // If in playback mode, commit the current frame to live state first
+    // This ensures perturbations are applied to the correct state and history is pruned
+    if (this.isInPlaybackMode()) {
+      this.commitPlaybackFrame();
+    }
     
     // Apply Gaussian-weighted perturbation
     for (let dy = -radius; dy <= radius; dy++) {

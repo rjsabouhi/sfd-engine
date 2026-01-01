@@ -461,7 +461,16 @@ export default function SimulationPage() {
   }, []);
 
   const handlePlay = useCallback(() => {
-    engineRef.current?.start();
+    const engine = engineRef.current;
+    if (!engine) return;
+    
+    // If resuming from playback mode, commit the current frame to live state
+    // This syncs the simulation state to the displayed frame and prunes future history
+    if (engine.isInPlaybackMode()) {
+      engine.commitPlaybackFrame();
+    }
+    
+    engine.start();
   }, []);
 
   const handlePause = useCallback(() => {
