@@ -1489,8 +1489,8 @@ export default function SimulationPage() {
         {mobileActiveTab === "scrub" && (
           <div className="absolute bottom-24 left-0 right-0 z-20 pb-safe">
             <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-3 py-3">
-              {/* Playback Controls Row - above scrubber */}
-              <div className="flex items-center justify-center gap-3 mb-3">
+              {/* Playback Controls Row - evenly spaced, uniform size */}
+              <div className="flex items-center justify-between mb-3 px-2">
                 {/* Reset */}
                 <button
                   onClick={handleReset}
@@ -1514,21 +1514,21 @@ export default function SimulationPage() {
                   <SkipBack className="h-4 w-4 text-white/80" />
                 </button>
 
-                {/* Play/Pause - larger central button */}
+                {/* Play/Pause - same size as others */}
                 <button
                   onClick={state.isRunning ? handlePause : handlePlay}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 ${
                     state.isRunning 
                       ? 'bg-green-500/20 border-2 border-green-500/50' 
-                      : 'bg-white/10 border-2 border-white/20'
+                      : 'bg-white/10 border border-white/20'
                   }`}
                   data-testid={state.isRunning ? "button-pause-playback-mobile" : "button-play-playback-mobile"}
                   aria-label={state.isRunning ? "Pause simulation" : "Play simulation"}
                 >
                   {state.isRunning ? (
-                    <Pause className="h-5 w-5 text-green-400" />
+                    <Pause className="h-4 w-4 text-green-400" />
                   ) : (
-                    <Play className="h-5 w-5 text-white/80 ml-0.5" />
+                    <Play className="h-4 w-4 text-white/80 ml-0.5" />
                   )}
                 </button>
 
