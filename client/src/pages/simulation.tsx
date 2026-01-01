@@ -1580,7 +1580,7 @@ export default function SimulationPage() {
                 </div>
               )}
 
-              {/* Slider with frame nudge buttons */}
+              {/* Slider with frame nudge buttons - matches blend slider style */}
               <div className="flex items-center gap-2">
                 {/* Back 10 frames */}
                 <button
@@ -1595,21 +1595,20 @@ export default function SimulationPage() {
                   <ChevronLeft className="h-4 w-4 text-white/80" />
                 </button>
                 
-                {/* Slider */}
-                <div className="flex-1">
-                  <Slider
-                    value={[currentHistoryIndex]}
-                    onValueChange={([v]) => {
-                      if (state.isRunning) handlePause();
-                      handleSeekFrame(v);
-                    }}
-                    min={0}
-                    max={Math.max(0, historyLength - 1)}
-                    step={1}
-                    className="w-full"
-                    data-testid="slider-timeline-mobile"
-                  />
-                </div>
+                {/* Slider - styled like blend slider */}
+                <input
+                  type="range"
+                  min="0"
+                  max={Math.max(0, historyLength - 1)}
+                  value={currentHistoryIndex}
+                  onChange={(e) => {
+                    if (state.isRunning) handlePause();
+                    handleSeekFrame(parseInt(e.target.value));
+                  }}
+                  className="flex-1 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                  data-testid="slider-timeline-mobile"
+                  aria-label="Timeline scrubber"
+                />
                 
                 {/* Forward 10 frames */}
                 <button
