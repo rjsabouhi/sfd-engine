@@ -1041,11 +1041,11 @@ export default function SimulationPage() {
     // Calculate dynamic bottom offset based on active panel (minimal offset to preserve visualization)
     const getPanelHeight = () => {
       switch (mobileActiveTab) {
-        case "regimes": return 80; // Regime buttons + label
-        case "colors": return 70; // Color buttons + label
-        case "layers": return 120; // Tabs + buttons + slider
-        case "params": return 140; // Sliders
-        case "scrub": return 80; // Timeline
+        case "regimes": return 60;
+        case "colors": return 50;
+        case "layers": return 70; // Compact layers panel
+        case "params": return 100;
+        case "scrub": return 60;
         default: return 0;
       }
     };
@@ -1289,15 +1289,15 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Inline Layers Panel - appears when Layers is active */}
+        {/* Inline Layers Panel - appears when Layers is active - compact design */}
         {mobileActiveTab === "layers" && (
           <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
-            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-2xl border border-white/10 p-4">
-              {/* Subtab selector */}
-              <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-3 py-2">
+              {/* Subtab selector - inline with layer buttons */}
+              <div className="flex items-center justify-center gap-1.5 mb-2">
                 <button
                   onClick={() => setLayersSubtab('structure')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-2 py-1 rounded-md text-[10px] font-medium transition-all ${
                     layersSubtab === 'structure'
                       ? 'bg-cyan-500/30 text-cyan-400'
                       : 'bg-white/10 text-white/60'
@@ -1308,7 +1308,7 @@ export default function SimulationPage() {
                 </button>
                 <button
                   onClick={() => setLayersSubtab('presets')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-2 py-1 rounded-md text-[10px] font-medium transition-all ${
                     layersSubtab === 'presets'
                       ? 'bg-purple-500/30 text-purple-400'
                       : 'bg-white/10 text-white/60'
@@ -1322,7 +1322,7 @@ export default function SimulationPage() {
               {/* Structure subtab content */}
               {layersSubtab === 'structure' && (
                 <>
-                  <div className="flex items-center justify-center gap-3 flex-wrap">
+                  <div className="flex items-center justify-center gap-2 flex-wrap">
                     {mobileLayers.map((layer, idx) => (
                       <button
                         key={layer.key}
@@ -1332,41 +1332,36 @@ export default function SimulationPage() {
                           e.stopPropagation();
                           selectMobileLayer(idx);
                         }}
-                        className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                        className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                           mobileLayerIndex === idx
                             ? 'bg-cyan-500/30 border-2 border-cyan-400'
-                            : 'bg-white/10 border-2 border-white/20 active:bg-white/20'
+                            : 'bg-white/10 border border-white/20 active:bg-white/20'
                         }`}
                         data-testid={`button-layer-${layer.key}-mobile`}
                         aria-label={layer.label}
                       >
-                        <span className={`text-base ${mobileLayerIndex === idx ? 'text-cyan-400' : 'text-white/80'}`}>
+                        <span className={`text-sm ${mobileLayerIndex === idx ? 'text-cyan-400' : 'text-white/80'}`}>
                           {layer.icon}
                         </span>
                       </button>
                     ))}
                   </div>
-                  <p className="text-center text-[11px] text-white/50 mt-3">
-                    {mobileLayers[mobileLayerIndex]?.label || "Base"}
-                  </p>
                   
-                  {/* Blend slider - shown when overlay layer is selected */}
+                  {/* Blend slider - inline, shown when overlay layer is selected */}
                   {mobileLayerIndex > 0 && (
-                    <div className="mt-4 pt-3 border-t border-white/10">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[11px] text-white/60">Blend</span>
-                        <span className="text-[11px] text-cyan-300 font-medium">{Math.round(blendOpacity * 100)}%</span>
-                      </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-[10px] text-white/50">Blend</span>
                       <input
                         type="range"
                         min="0"
                         max="100"
                         value={blendOpacity * 100}
                         onChange={(e) => setBlendOpacity(parseInt(e.target.value) / 100)}
-                        className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                        className="flex-1 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
                         data-testid="slider-blend-opacity-mobile"
                         aria-label="Blend opacity"
                       />
+                      <span className="text-[10px] text-cyan-300 w-8">{Math.round(blendOpacity * 100)}%</span>
                     </div>
                   )}
                 </>
