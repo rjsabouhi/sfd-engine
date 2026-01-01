@@ -64,12 +64,34 @@ function MobileOverlayCanvas({
   transform?: { zoom: number; panX: number; panY: number };
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isReady, setIsReady] = useState(false);
+  const [visualStyle, setVisualStyle] = useState<{ width: number; height: number; baseTransform: string } | null>(null);
+
+  // Sync size with base canvas
+  useEffect(() => {
+    const syncSize = () => {
+      const baseCanvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement | null;
+      if (baseCanvas) {
+        // Get the CSS dimensions (visual size) from the base canvas style
+        const style = baseCanvas.style;
+        const width = parseFloat(style.width) || baseCanvas.offsetWidth;
+        const height = parseFloat(style.height) || baseCanvas.offsetHeight;
+        const baseTransform = style.transform || '';
+        
+        if (width > 0 && height > 0) {
+          setVisualStyle({ width, height, baseTransform });
+        }
+      }
+    };
+    
+    syncSize();
+    const timeout = setTimeout(syncSize, 50);
+    return () => clearTimeout(timeout);
+  }, [frameVersion]);
 
   // Render the overlay content
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !visualStyle) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -80,9 +102,7 @@ function MobileOverlayCanvas({
     if (baseCanvas && baseCanvas.width > 0 && baseCanvas.height > 0) {
       canvas.width = baseCanvas.width;
       canvas.height = baseCanvas.height;
-      setIsReady(true);
     } else {
-      setIsReady(false);
       return;
     }
 
@@ -137,20 +157,28 @@ function MobileOverlayCanvas({
         }
       }
     }
-  }, [derivedField, basinMap, frameVersion]);
+  }, [derivedField, basinMap, frameVersion, visualStyle]);
 
   // Apply same transform as base canvas for synchronized zoom/pan
   const zoom = transform?.zoom ?? 1;
   const panX = transform?.panX ?? 0;
   const panY = transform?.panY ?? 0;
 
+  const isReady = visualStyle !== null;
+
   return (
     <canvas
       ref={canvasRef}
       data-testid="canvas-overlay"
-      className="absolute inset-0 w-full h-full pointer-events-none rounded-md"
+      className="absolute pointer-events-none rounded-md"
       style={{ 
         opacity: isReady ? opacity : 0,
+        width: visualStyle?.width ?? 0,
+        height: visualStyle?.height ?? 0,
+        left: '50%',
+        top: '50%',
+        marginLeft: -(visualStyle?.width ?? 0) / 2,
+        marginTop: -(visualStyle?.height ?? 0) / 2,
         transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
         transformOrigin: 'center center',
         visibility: isReady ? 'visible' : 'hidden',
