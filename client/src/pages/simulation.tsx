@@ -1433,26 +1433,26 @@ export default function SimulationPage() {
                 ))}
               </div>
               
-              {/* Inline slider with label and value */}
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-white/50 w-16 truncate">
+              {/* Inline slider with label and value - matches Layers style */}
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-[10px] text-white/50">
                   {mobileSelectedOperator === "wK" ? "Curvature" :
                    mobileSelectedOperator === "wT" ? "Tension" :
                    mobileSelectedOperator === "wC" ? "Coupling" :
                    mobileSelectedOperator === "wA" ? "Attractor" : "Redistrib"}
                 </span>
-                <Slider
-                  value={[params[mobileSelectedOperator]]}
-                  onValueChange={([v]) => handleParamsChange({ [mobileSelectedOperator]: v })}
+                <input
+                  type="range"
                   min={0}
                   max={mobileSelectedOperator === "wA" ? 5 : mobileSelectedOperator === "wR" ? 2 : 3}
                   step={0.1}
-                  className="flex-1"
+                  value={params[mobileSelectedOperator]}
+                  onChange={(e) => handleParamsChange({ [mobileSelectedOperator]: parseFloat(e.target.value) })}
+                  className="flex-1 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
                   data-testid={`slider-${mobileSelectedOperator}-mobile`}
+                  aria-label={`Adjust ${mobileSelectedOperator} parameter`}
                 />
-                <span className="text-[10px] font-mono text-amber-300 w-8 text-right">
-                  {params[mobileSelectedOperator].toFixed(2)}
-                </span>
+                <span className="text-[10px] text-amber-300 w-8">{params[mobileSelectedOperator].toFixed(1)}</span>
               </div>
             </div>
           </div>
