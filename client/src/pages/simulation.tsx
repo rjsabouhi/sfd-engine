@@ -265,12 +265,12 @@ export default function SimulationPage() {
   
   // Mobile layers for layer selector
   const mobileLayers = [
-    { key: "none", label: "Base", icon: "◉" },
-    { key: "constraintSkeleton", label: "Structure", icon: "◈" },
-    { key: "tension", label: "Tension", icon: "≋" },
-    { key: "curvature", label: "Curvature", icon: "∿" },
-    { key: "variance", label: "Variance", icon: "◐" },
-    { key: "basins", label: "Basins", icon: "⬡" },
+    { key: "none", label: "Base", icon: "B" },
+    { key: "constraintSkeleton", label: "Structure", icon: "S" },
+    { key: "tension", label: "Tension", icon: "T" },
+    { key: "curvature", label: "Curvature", icon: "K" },
+    { key: "variance", label: "Variance", icon: "V" },
+    { key: "basins", label: "Basins", icon: "A" },
   ] as const;
 
   // Helper function to select a mobile layer
