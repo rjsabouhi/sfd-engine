@@ -1808,7 +1808,7 @@ export default function SimulationPage() {
 
                 {/* Run button - toggles scrub controls */}
                 <button
-                  onClick={() => setMobileActiveTab("scrub")}
+                  onClick={() => setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub")}
                   className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                     state.isRunning
                       ? 'bg-green-500/20 border-2 border-green-500/50' 
