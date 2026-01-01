@@ -1603,6 +1603,18 @@ export default function SimulationPage() {
                 </div>
               )}
 
+              {/* Frame counter */}
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <span className="text-[10px] text-white/50">Frame</span>
+                <span className="text-sm font-mono text-cyan-400" data-testid="text-frame-counter">
+                  {currentHistoryIndex + 1} / {historyLength}
+                </span>
+                <span className="text-[10px] text-white/50">Step</span>
+                <span className="text-sm font-mono text-cyan-400" data-testid="text-step-counter">
+                  {state.step}
+                </span>
+              </div>
+
               {/* Slider with frame nudge buttons - matches blend slider style */}
               <div className="flex items-center gap-2">
                 {/* Back 10 frames */}
