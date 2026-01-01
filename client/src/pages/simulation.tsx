@@ -1044,7 +1044,7 @@ export default function SimulationPage() {
         case "regimes": return 60; // compact row of buttons
         case "colors": return 60; // compact row of color buttons
         case "layers": return layersSubtab === 'presets' ? 130 : 75; // presets tab is taller with cards
-        case "params": return 110; // buttons + inline slider - increased for better visual balance
+        case "params": return 75; // same offset as other panels
         case "scrub": return 95; // frame counter + slider + buttons + ticks
         default: return 0;
       }
@@ -1401,12 +1401,12 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Inline Operator Controls - appears when Params is active - compact design */}
+        {/* Inline Operator Controls - appears when Params is active - larger design */}
         {mobileActiveTab === "params" && (
           <div className="absolute bottom-24 left-0 right-0 z-40 pb-safe">
-            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-3 py-2">
-              {/* 5 Operator Circles - compact */}
-              <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-4 py-3">
+              {/* 5 Operator Circles - larger buttons */}
+              <div className="flex items-center justify-center gap-3 mb-3">
                 {([
                   { key: "wK" as const, symbol: "κ", label: "Curvature" },
                   { key: "wT" as const, symbol: "τ", label: "Tension" },
@@ -1422,7 +1422,7 @@ export default function SimulationPage() {
                       e.stopPropagation();
                       setMobileSelectedOperator(op.key);
                     }}
-                    className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                    className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
                       mobileSelectedOperator === op.key
                         ? 'bg-amber-500/30 border-2 border-amber-400'
                         : 'bg-white/10 border border-white/20 active:bg-white/20'
@@ -1430,16 +1430,16 @@ export default function SimulationPage() {
                     data-testid={`button-operator-${op.key}-mobile`}
                     aria-label={`Select ${op.label} operator`}
                   >
-                    <span className={`text-sm font-semibold ${mobileSelectedOperator === op.key ? 'text-amber-400' : 'text-white/80'}`}>
+                    <span className={`text-base font-semibold ${mobileSelectedOperator === op.key ? 'text-amber-400' : 'text-white/80'}`}>
                       {op.symbol}
                     </span>
                   </button>
                 ))}
               </div>
               
-              {/* Inline slider with label and value - matches Layers style */}
-              <div className="flex items-center gap-2 mt-2">
-                <span className="text-[10px] text-white/50">
+              {/* Inline slider with label and value - larger style */}
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-white/60 w-16">
                   {mobileSelectedOperator === "wK" ? "Curvature" :
                    mobileSelectedOperator === "wT" ? "Tension" :
                    mobileSelectedOperator === "wC" ? "Coupling" :
@@ -1452,11 +1452,11 @@ export default function SimulationPage() {
                   step={0.1}
                   value={params[mobileSelectedOperator]}
                   onChange={(e) => handleParamsChange({ [mobileSelectedOperator]: parseFloat(e.target.value) })}
-                  className="flex-1 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
+                  className="flex-1 h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
                   data-testid={`slider-${mobileSelectedOperator}-mobile`}
                   aria-label={`Adjust ${mobileSelectedOperator} parameter`}
                 />
-                <span className="text-[10px] text-amber-300 w-8">{params[mobileSelectedOperator].toFixed(1)}</span>
+                <span className="text-sm font-mono text-amber-300 w-10 text-right">{params[mobileSelectedOperator].toFixed(1)}</span>
               </div>
             </div>
           </div>
