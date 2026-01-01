@@ -1432,11 +1432,11 @@ export default function SimulationPage() {
               {/* 5 Operator Circles with labels */}
               <div className="flex items-center justify-center gap-2 mb-2">
                 {([
-                  { key: "wK" as const, symbol: "κ", label: "Curve" },
+                  { key: "wK" as const, symbol: "κ", label: "Curvature" },
                   { key: "wT" as const, symbol: "τ", label: "Tension" },
-                  { key: "wC" as const, symbol: "γ", label: "Couple" },
-                  { key: "wA" as const, symbol: "α", label: "Attract" },
-                  { key: "wR" as const, symbol: "ρ", label: "Redist" },
+                  { key: "wC" as const, symbol: "γ", label: "Coupling" },
+                  { key: "wA" as const, symbol: "α", label: "Attractor" },
+                  { key: "wR" as const, symbol: "ρ", label: "Redistribution" },
                 ]).map((op) => (
                   <button
                     key={op.key}
