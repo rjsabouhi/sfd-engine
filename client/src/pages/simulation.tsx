@@ -64,8 +64,34 @@ function MobileOverlayCanvas({
   transform?: { zoom: number; panX: number; panY: number };
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [baseRect, setBaseRect] = useState<{ width: number; height: number; left: number; top: number } | null>(null);
+  const [baseRect, setBaseRect] = useState<{ width: number; height: number; left: number; top: number }>({ width: 0, height: 0, left: 0, top: 0 });
 
+  // Sync position with base canvas
+  useEffect(() => {
+    const syncPosition = () => {
+      const baseCanvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement | null;
+      const container = canvasRef.current?.parentElement;
+      
+      if (baseCanvas && container) {
+        const baseBox = baseCanvas.getBoundingClientRect();
+        const containerBox = container.getBoundingClientRect();
+        
+        setBaseRect({
+          width: baseBox.width,
+          height: baseBox.height,
+          left: baseBox.left - containerBox.left,
+          top: baseBox.top - containerBox.top,
+        });
+      }
+    };
+    
+    // Sync on mount and after a short delay to ensure layout is complete
+    syncPosition();
+    const timeout = setTimeout(syncPosition, 100);
+    return () => clearTimeout(timeout);
+  }, [frameVersion]);
+
+  // Render the overlay content
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -73,32 +99,17 @@ function MobileOverlayCanvas({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Get the base canvas to match its exact position and size
+    // Get the base canvas to match pixel dimensions
     const baseCanvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement | null;
-    const container = canvas.parentElement;
     
-    if (baseCanvas && container) {
-      // Get exact position of base canvas relative to container
-      const baseBox = baseCanvas.getBoundingClientRect();
-      const containerBox = container.getBoundingClientRect();
-      
-      // Match the base canvas pixel dimensions exactly
+    if (baseCanvas) {
       canvas.width = baseCanvas.width;
       canvas.height = baseCanvas.height;
-      
-      // Store position relative to container
-      setBaseRect({
-        width: baseBox.width,
-        height: baseBox.height,
-        left: baseBox.left - containerBox.left,
-        top: baseBox.top - containerBox.top,
-      });
-    } else if (container) {
+    } else {
       // Fallback
-      const size = Math.min(container.clientWidth, container.clientHeight);
+      const size = Math.min(baseRect.width, baseRect.height) || 300;
       canvas.width = size;
       canvas.height = size;
-      setBaseRect({ width: size, height: size, left: 0, top: 0 });
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -159,8 +170,6 @@ function MobileOverlayCanvas({
   const panX = transform?.panX ?? 0;
   const panY = transform?.panY ?? 0;
 
-  if (!baseRect) return null;
-
   return (
     <canvas
       ref={canvasRef}
@@ -168,8 +177,8 @@ function MobileOverlayCanvas({
       className="absolute pointer-events-none rounded-md"
       style={{ 
         opacity,
-        width: baseRect.width,
-        height: baseRect.height,
+        width: baseRect.width || '100%',
+        height: baseRect.height || '100%',
         left: baseRect.left,
         top: baseRect.top,
         transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
@@ -1349,7 +1358,7 @@ export default function SimulationPage() {
               {/* Structure subtab content */}
               {layersSubtab === 'structure' && (
                 <>
-                  <div className="flex items-center justify-center gap-2 flex-wrap">
+                  <div className="flex items-center justify-between px-4">
                     {mobileLayers.map((layer, idx) => (
                       <button
                         key={layer.key}
