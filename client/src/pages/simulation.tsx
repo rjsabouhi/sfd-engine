@@ -64,7 +64,7 @@ function MobileOverlayCanvas({
   transform?: { zoom: number; panX: number; panY: number };
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+  const [baseRect, setBaseRect] = useState<{ width: number; height: number; left: number; top: number } | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -75,21 +75,30 @@ function MobileOverlayCanvas({
 
     // Get the base canvas to match its exact position and size
     const baseCanvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement | null;
+    const container = canvas.parentElement;
     
-    if (baseCanvas) {
+    if (baseCanvas && container) {
+      // Get exact position of base canvas relative to container
+      const baseBox = baseCanvas.getBoundingClientRect();
+      const containerBox = container.getBoundingClientRect();
+      
       // Match the base canvas pixel dimensions exactly
       canvas.width = baseCanvas.width;
       canvas.height = baseCanvas.height;
-      setCanvasSize({ width: baseCanvas.clientWidth, height: baseCanvas.clientHeight });
-    } else {
+      
+      // Store position relative to container
+      setBaseRect({
+        width: baseBox.width,
+        height: baseBox.height,
+        left: baseBox.left - containerBox.left,
+        top: baseBox.top - containerBox.top,
+      });
+    } else if (container) {
       // Fallback
-      const container = canvas.parentElement;
-      if (container) {
-        const size = Math.min(container.clientWidth, container.clientHeight);
-        canvas.width = size;
-        canvas.height = size;
-        setCanvasSize({ width: size, height: size });
-      }
+      const size = Math.min(container.clientWidth, container.clientHeight);
+      canvas.width = size;
+      canvas.height = size;
+      setBaseRect({ width: size, height: size, left: 0, top: 0 });
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -150,16 +159,19 @@ function MobileOverlayCanvas({
   const panX = transform?.panX ?? 0;
   const panY = transform?.panY ?? 0;
 
+  if (!baseRect) return null;
+
   return (
     <canvas
       ref={canvasRef}
       data-testid="canvas-overlay"
-      className="absolute inset-0 w-full h-full pointer-events-none rounded-md m-auto"
+      className="absolute pointer-events-none rounded-md"
       style={{ 
         opacity,
-        maxWidth: canvasSize.width || '100%',
-        maxHeight: canvasSize.height || '100%',
-        objectFit: 'contain',
+        width: baseRect.width,
+        height: baseRect.height,
+        left: baseRect.left,
+        top: baseRect.top,
         transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
         transformOrigin: 'center center',
       }}
