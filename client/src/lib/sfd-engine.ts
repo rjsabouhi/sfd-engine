@@ -312,7 +312,22 @@ export class SFDEngine {
   setParams(params: Partial<SimulationParameters>): void {
     const needsResize = params.gridSize !== undefined && params.gridSize !== this.width;
     const modeChanged = params.mode !== undefined && params.mode !== this.params.mode;
+    
+    // Detect significant parameter changes that should clear history
+    const significantChange = modeChanged || 
+      (params.wK !== undefined && Math.abs(params.wK - this.params.wK) > 0.5) ||
+      (params.wT !== undefined && Math.abs(params.wT - this.params.wT) > 0.5) ||
+      (params.wC !== undefined && Math.abs(params.wC - this.params.wC) > 0.5);
+    
     this.params = { ...this.params, ...params };
+    
+    // Clear ring buffer on significant changes to prevent mixing old/new frames
+    if (significantChange) {
+      this.ringBuffer = [];
+      this.ringBufferIndex = 0;
+      this.currentPlaybackIndex = -1;
+      this.playbackDisplayGrid = null;
+    }
     
     if (needsResize) {
       this.width = this.params.gridSize;
