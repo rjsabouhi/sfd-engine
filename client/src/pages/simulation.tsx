@@ -1220,7 +1220,7 @@ export default function SimulationPage() {
         {/* Inline Regimes Panel - appears when Regimes is active - expanded design */}
         {mobileActiveTab === "regimes" && (
           <div className="absolute bottom-24 left-0 right-0 z-40 pb-safe">
-            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-4 py-4">
+            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-4 py-3">
               <div className="flex items-center justify-center gap-4">
                 {mobileRegimes.map((regime) => (
                   <button
@@ -1250,6 +1250,10 @@ export default function SimulationPage() {
                     </span>
                   </button>
                 ))}
+              </div>
+              {/* Current regime label */}
+              <div className="text-center mt-2 text-sm text-white/60">
+                {mobileRegimes.find(r => r.key === currentRegimeKey)?.label || 'Select Regime'}
               </div>
             </div>
           </div>
