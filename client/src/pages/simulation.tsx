@@ -1097,12 +1097,12 @@ export default function SimulationPage() {
           onTouchMove={touchHandlers.onTouchMove}
           onTouchEnd={touchHandlers.onTouchEnd}
           style={{
-            top: '20px',
+            top: mobileActiveTab ? '12px' : '76px', // 76px clears header (8px + ~60px header + 8px gap), 12px when header slides away
             left: '6%',
             right: '6%',
-            bottom: `${90 + panelOffset}px`, // 90px for bottom control strip + panel offset
+            bottom: `${100 + panelOffset}px`, // 100px for bottom control strip (8px margin + 80px height + 12px gap) + panel offset
             transform: `translate(${tiltOffset.x}px, ${tiltOffset.y}px)`,
-            transition: 'bottom 0.3s ease-out, transform 0.1s ease-out',
+            transition: 'top 0.3s ease-out, bottom 0.3s ease-out, transform 0.1s ease-out',
             touchAction: 'none',
             userSelect: 'none',
             WebkitUserSelect: 'none',
