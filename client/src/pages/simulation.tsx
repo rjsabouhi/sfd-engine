@@ -1057,7 +1057,7 @@ export default function SimulationPage() {
         case "colors": return 60; // compact row of color buttons
         case "layers": return layersSubtab === 'presets' ? 130 : 75; // presets tab is taller with cards
         case "params": return 75; // same offset as other panels
-        case "scrub": return 130; // playback buttons + recording progress + slider + buttons + ticks
+        case "scrub": return 95; // playback buttons + recording progress + slider
         default: return 0;
       }
     };
@@ -1599,7 +1599,6 @@ export default function SimulationPage() {
                     min={0}
                     max={Math.max(0, historyLength - 1)}
                     step={1}
-                    size="mobile"
                     className="w-full"
                     data-testid="slider-timeline-mobile"
                   />
@@ -1617,16 +1616,6 @@ export default function SimulationPage() {
                 >
                   <ChevronRight className="h-4 w-4 text-white/80" />
                 </button>
-              </div>
-              
-              {/* Tick marks */}
-              <div className="flex justify-between mt-1 px-10">
-                {Array.from({ length: 11 }).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`w-0.5 ${i % 5 === 0 ? 'h-2 bg-green-500/40' : 'h-1 bg-white/20'}`}
-                  />
-                ))}
               </div>
             </div>
           </div>
