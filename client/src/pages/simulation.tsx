@@ -1320,7 +1320,7 @@ export default function SimulationPage() {
               {/* Structure subtab content */}
               {layersSubtab === 'structure' && (
                 <>
-                  <div className="flex items-center justify-center gap-2 flex-wrap">
+                  <div className="flex items-center justify-center gap-3 flex-wrap">
                     {mobileLayers.map((layer, idx) => (
                       <button
                         key={layer.key}
@@ -1330,7 +1330,7 @@ export default function SimulationPage() {
                           e.stopPropagation();
                           selectMobileLayer(idx);
                         }}
-                        className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                        className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                           mobileLayerIndex === idx
                             ? 'bg-cyan-500/30 border-2 border-cyan-400'
                             : 'bg-white/10 border border-white/20 active:bg-white/20'
@@ -1338,7 +1338,7 @@ export default function SimulationPage() {
                         data-testid={`button-layer-${layer.key}-mobile`}
                         aria-label={layer.label}
                       >
-                        <span className={`text-sm ${mobileLayerIndex === idx ? 'text-cyan-400' : 'text-white/80'}`}>
+                        <span className={`text-base ${mobileLayerIndex === idx ? 'text-cyan-400' : 'text-white/80'}`}>
                           {layer.icon}
                         </span>
                       </button>
