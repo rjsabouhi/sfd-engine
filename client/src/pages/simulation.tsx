@@ -73,13 +73,17 @@ function MobileOverlayCanvas({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Match VisualizationCanvas sizing: min(w,h) * 0.88 scale factor
+    // Match VisualizationCanvas sizing: min(w,h) * 0.88 scale factor with DPI awareness
     const container = canvas.parentElement;
     if (container) {
       const containerSize = Math.min(container.clientWidth, container.clientHeight);
       const size = Math.floor(containerSize * 0.88);
-      canvas.width = size;
-      canvas.height = size;
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      const renderSize = Math.floor(size * dpr);
+      canvas.width = renderSize;
+      canvas.height = renderSize;
+      canvas.style.width = `${size}px`;
+      canvas.style.height = `${size}px`;
       setVisualSize(size);
     }
 
@@ -150,8 +154,6 @@ function MobileOverlayCanvas({
         opacity, 
         transform: `translate(-50%, -50%) translate(${panX}px, ${panY}px) scale(${zoom})`,
         transformOrigin: 'center center',
-        width: visualSize || 'auto',
-        height: visualSize || 'auto',
       }}
     />
   );

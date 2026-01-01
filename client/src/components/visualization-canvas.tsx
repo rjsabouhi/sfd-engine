@@ -150,6 +150,9 @@ export function VisualizationCanvas({
     
     canvas.width = renderSize;
     canvas.height = renderSize;
+    // Explicitly set CSS size to match logical size for proper DPI scaling
+    canvas.style.width = `${size}px`;
+    canvas.style.height = `${size}px`;
     
     // Create imageData at grid resolution, then scale up
     const imageData = ctx.createImageData(field.width, field.height);
