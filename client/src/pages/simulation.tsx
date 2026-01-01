@@ -1044,7 +1044,7 @@ export default function SimulationPage() {
         case "regimes": return 60; // compact row of buttons
         case "colors": return 60; // compact row of color buttons
         case "layers": return layersSubtab === 'presets' ? 130 : 75; // presets tab is taller with cards
-        case "params": return 75; // buttons + inline slider
+        case "params": return 110; // buttons + inline slider - increased for better visual balance
         case "scrub": return 95; // frame counter + slider + buttons + ticks
         default: return 0;
       }
