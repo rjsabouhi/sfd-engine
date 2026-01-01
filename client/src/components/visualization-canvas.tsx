@@ -533,7 +533,9 @@ export function VisualizationCanvas({
     }
   }, [overlayDerivedField, overlayBasinMap, canvasSize]);
 
-  const hasOverlay = (overlayDerivedField || overlayBasinMap) && overlayOpacity > 0;
+  // Always render overlay canvas when there's data - opacity controls visibility
+  // This prevents remounting issues when opacity goes to 0 and back
+  const hasOverlayData = overlayDerivedField || overlayBasinMap;
 
   return (
     <div 
@@ -573,7 +575,7 @@ export function VisualizationCanvas({
             data-testid="canvas-visualization"
           />
           {/* Overlay canvas - positioned absolutely over the base canvas */}
-          {hasOverlay && (
+          {hasOverlayData && (
             <canvas
               ref={overlayCanvasRef}
               className="absolute rounded-md pointer-events-none"
