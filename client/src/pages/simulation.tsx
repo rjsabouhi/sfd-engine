@@ -1231,11 +1231,11 @@ export default function SimulationPage() {
 
 
 
-        {/* Inline Regimes Panel - appears when Regimes is active - expanded design */}
+        {/* Inline Regimes Panel - appears when Regimes is active - compact with labels */}
         {mobileActiveTab === "regimes" && (
           <div className="absolute bottom-24 left-0 right-0 z-40 pb-safe">
-            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-4 py-3">
-              <div className="flex items-center justify-center gap-4">
+            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-4 py-2">
+              <div className="flex items-center justify-center gap-3">
                 {mobileRegimes.map((regime) => (
                   <button
                     key={regime.key}
@@ -1251,23 +1251,24 @@ export default function SimulationPage() {
                         }
                       }
                     }}
-                    className={`w-12 h-12 min-w-[48px] min-h-[48px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                      currentRegimeKey === regime.key
-                        ? 'bg-purple-500/30 border-2 border-purple-400'
-                        : 'bg-white/10 border border-white/20 active:bg-white/20'
-                    }`}
+                    className="flex flex-col items-center gap-1"
                     data-testid={`button-regime-${regime.key}-mobile`}
                     aria-label={regime.label}
                   >
-                    <span className={`text-lg font-semibold ${currentRegimeKey === regime.key ? 'text-purple-400' : 'text-white/80'}`}>
-                      {regime.symbol}
+                    <div className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                      currentRegimeKey === regime.key
+                        ? 'bg-purple-500/30 border-2 border-purple-400'
+                        : 'bg-white/10 border border-white/20 active:bg-white/20'
+                    }`}>
+                      <span className={`text-base font-semibold ${currentRegimeKey === regime.key ? 'text-purple-400' : 'text-white/80'}`}>
+                        {regime.symbol}
+                      </span>
+                    </div>
+                    <span className={`text-[10px] ${currentRegimeKey === regime.key ? 'text-purple-400' : 'text-white/50'}`}>
+                      {regime.label.split('-')[0]}
                     </span>
                   </button>
                 ))}
-              </div>
-              {/* Current regime label */}
-              <div className="text-center mt-2 text-sm text-white/60">
-                {mobileRegimes.find(r => r.key === currentRegimeKey)?.label || 'Select Regime'}
               </div>
             </div>
           </div>
