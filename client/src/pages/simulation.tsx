@@ -1057,7 +1057,7 @@ export default function SimulationPage() {
         case "colors": return 60; // compact row of color buttons
         case "layers": return layersSubtab === 'presets' ? 130 : 75; // presets tab is taller with cards
         case "params": return 75; // same offset as other panels
-        case "scrub": return 95; // frame counter + slider + buttons + ticks
+        case "scrub": return 150; // playback buttons + recording progress + frame counter + slider + buttons + ticks
         default: return 0;
       }
     };
@@ -1481,7 +1481,98 @@ export default function SimulationPage() {
         {/* Playback Scrubber Overlay - slides up when Run button is pressed - compact design */}
         {mobileActiveTab === "scrub" && (
           <div className="absolute bottom-24 left-0 right-0 z-20 pb-safe">
-            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-3 py-2">
+            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-3 py-3">
+              {/* Playback Controls Row - above scrubber */}
+              <div className="flex items-center justify-center gap-3 mb-3">
+                {/* Reset */}
+                <button
+                  onClick={handleReset}
+                  className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-reset-mobile"
+                  aria-label="Reset simulation"
+                >
+                  <RotateCcw className="h-4 w-4 text-white/80" />
+                </button>
+
+                {/* Step Back */}
+                <button
+                  onClick={() => {
+                    if (state.isRunning) handlePause();
+                    handleStepBackward();
+                  }}
+                  className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-step-back-mobile"
+                  aria-label="Step backward"
+                >
+                  <SkipBack className="h-4 w-4 text-white/80" />
+                </button>
+
+                {/* Play/Pause - larger central button */}
+                <button
+                  onClick={state.isRunning ? handlePause : handlePlay}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                    state.isRunning 
+                      ? 'bg-green-500/20 border-2 border-green-500/50' 
+                      : 'bg-white/10 border-2 border-white/20'
+                  }`}
+                  data-testid={state.isRunning ? "button-pause-playback-mobile" : "button-play-playback-mobile"}
+                  aria-label={state.isRunning ? "Pause simulation" : "Play simulation"}
+                >
+                  {state.isRunning ? (
+                    <Pause className="h-5 w-5 text-green-400" />
+                  ) : (
+                    <Play className="h-5 w-5 text-white/80 ml-0.5" />
+                  )}
+                </button>
+
+                {/* Step Forward */}
+                <button
+                  onClick={() => {
+                    if (state.isRunning) handlePause();
+                    handleStep();
+                  }}
+                  className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-step-forward-mobile"
+                  aria-label="Step forward"
+                >
+                  <SkipForward className="h-4 w-4 text-white/80" />
+                </button>
+
+                {/* Record */}
+                <button
+                  onClick={isRecording ? handleStopRecording : handleStartRecording}
+                  disabled={isRecording && recordingProgress >= 1}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                    isRecording
+                      ? 'bg-red-500/20 border-2 border-red-500/50'
+                      : 'bg-white/10 border border-white/20'
+                  }`}
+                  data-testid="button-record-mobile"
+                  aria-label={isRecording ? "Stop recording" : "Record video"}
+                >
+                  {isRecording ? (
+                    <Square className="h-3 w-3 text-red-400 fill-red-400" />
+                  ) : (
+                    <Circle className="h-4 w-4 text-red-400 fill-red-400" />
+                  )}
+                </button>
+              </div>
+
+              {/* Recording progress bar */}
+              {isRecording && (
+                <div className="mb-2 px-1">
+                  <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-red-400 transition-all duration-200"
+                      style={{ width: `${recordingProgress * 100}%` }}
+                    />
+                  </div>
+                  <div className="text-center text-[10px] text-red-400 mt-0.5">
+                    Recording {Math.round(recordingProgress * 12)}s / 12s
+                  </div>
+                </div>
+              )}
+
               {/* Frame Counter with Close Button */}
               <div className="flex items-center justify-between text-xs mb-1">
                 <span className="text-white/70">Frame</span>
@@ -1670,97 +1761,6 @@ export default function SimulationPage() {
         {/* Primary Control Strip - 5 circular buttons */}
         <div className="absolute bottom-0 left-0 right-0 z-30 bg-gray-950/70 backdrop-blur-md border-t border-white/10 pb-safe">
           <div className="flex items-center justify-around h-20 px-4">
-            {mobileActiveTab === "scrub" ? (
-              <>
-                {/* Playback mode buttons: Reset, Back, Play/Pause, Forward, Record */}
-                {/* Reset */}
-                <button
-                  onClick={handleReset}
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
-                  data-testid="button-reset-mobile"
-                  aria-label="Reset simulation"
-                >
-                  <RotateCcw className="h-5 w-5 text-white/80" />
-                  <span className="text-[9px] text-white/60 mt-0.5">Reset</span>
-                </button>
-
-                {/* Step Back */}
-                <button
-                  onClick={() => {
-                    if (state.isRunning) handlePause();
-                    handleStepBackward();
-                  }}
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
-                  data-testid="button-step-back-mobile"
-                  aria-label="Step backward"
-                >
-                  <SkipBack className="h-5 w-5 text-white/80" />
-                  <span className="text-[9px] text-white/60 mt-0.5">Back</span>
-                </button>
-
-                {/* Step Forward */}
-                <button
-                  onClick={() => {
-                    if (state.isRunning) handlePause();
-                    handleStep();
-                  }}
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
-                  data-testid="button-step-forward-mobile"
-                  aria-label="Step forward"
-                >
-                  <SkipForward className="h-5 w-5 text-white/80" />
-                  <span className="text-[9px] text-white/60 mt-0.5">Forward</span>
-                </button>
-
-                {/* Play/Pause */}
-                <button
-                  onClick={state.isRunning ? handlePause : handlePlay}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                    state.isRunning 
-                      ? 'bg-green-500/20 border-2 border-green-500/50' 
-                      : 'bg-white/10 border-2 border-white/20'
-                  }`}
-                  data-testid={state.isRunning ? "button-pause-playback-mobile" : "button-play-playback-mobile"}
-                  aria-label={state.isRunning ? "Pause simulation" : "Play simulation"}
-                >
-                  {state.isRunning ? (
-                    <Pause className="h-5 w-5 text-green-400" />
-                  ) : (
-                    <Play className="h-5 w-5 text-white/80 ml-0.5" />
-                  )}
-                  <span className={`text-[9px] mt-0.5 ${state.isRunning ? 'text-green-400' : 'text-white/60'}`}>
-                    {state.isRunning ? 'Pause' : 'Play'}
-                  </span>
-                </button>
-
-                {/* Record */}
-                <button
-                  onClick={isRecording ? handleStopRecording : handleStartRecording}
-                  disabled={isRecording && recordingProgress >= 1}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                    isRecording
-                      ? 'bg-red-500/20 border-2 border-red-500/50'
-                      : 'bg-white/10 border-2 border-white/20'
-                  }`}
-                  data-testid="button-record-mobile"
-                  aria-label={isRecording ? "Stop recording" : "Record video"}
-                >
-                  {isRecording ? (
-                    <>
-                      <Square className="h-4 w-4 text-red-400 fill-red-400" />
-                      <span className="text-[9px] text-red-400 mt-0.5">{Math.round(recordingProgress * 12)}s</span>
-                    </>
-                  ) : (
-                    <>
-                      <Circle className="h-5 w-5 text-red-400 fill-red-400" />
-                      <span className="text-[9px] text-white/60 mt-0.5">Record</span>
-                    </>
-                  )}
-                </button>
-              </>
-            ) : (
-              <>
-                {/* Default mode buttons: Params, Regimes, Run, Layers, Share */}
                 {/* Params button - toggles inline operator controls */}
                 <button
                   onClick={() => setMobileActiveTab(mobileActiveTab === "params" ? null : "params")}
@@ -1848,8 +1848,6 @@ export default function SimulationPage() {
                   <Share2 className="h-5 w-5 text-white/80" />
                   <span className="text-[9px] text-white/60 mt-0.5">Share</span>
                 </button>
-              </>
-            )}
           </div>
         </div>
       </div>
