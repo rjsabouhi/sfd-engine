@@ -1051,14 +1051,14 @@ export default function SimulationPage() {
     const stabilityColor = state.variance < 0.05 ? "text-green-400" : state.variance < 0.15 ? "text-yellow-400" : "text-red-400";
 
     // Calculate dynamic bottom offset based on active panel - compact uniform sizing
-    // Add 12px padding between panels and canvas
+    // Add 20px padding between panels and canvas for better spacing
     const getPanelHeight = () => {
-      const padding = 12;
+      const padding = 20;
       switch (mobileActiveTab) {
         case "regimes": return 60 + padding; // compact row of buttons
         case "colors": return 60 + padding; // compact row of color buttons
-        case "layers": return (layersSubtab === 'presets' ? 140 : 95) + padding; // structure tab taller with labels
-        case "params": return 75 + padding; // same offset as other panels
+        case "layers": return (layersSubtab === 'presets' ? 150 : 115) + padding; // structure tab with labels + blend slider
+        case "params": return 85 + padding; // operator circles + slider
         case "scrub": return 95 + padding; // playback buttons + recording progress + slider
         default: return 0;
       }
