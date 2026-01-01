@@ -572,7 +572,7 @@ export function VisualizationCanvas({
             }}
             data-testid="canvas-visualization"
           />
-          {/* Overlay canvas - rendered in same container for perfect alignment */}
+          {/* Overlay canvas - positioned absolutely over the base canvas */}
           {hasOverlay && (
             <canvas
               ref={overlayCanvasRef}
@@ -580,6 +580,10 @@ export function VisualizationCanvas({
               style={{ 
                 width: `${visualSize}px`,
                 height: `${visualSize}px`,
+                left: '50%',
+                top: '50%',
+                marginLeft: `-${visualSize / 2}px`,
+                marginTop: `-${visualSize / 2}px`,
                 transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
                 transformOrigin: 'center center',
                 opacity: overlayOpacity,
