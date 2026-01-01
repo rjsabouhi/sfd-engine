@@ -1544,10 +1544,18 @@ export class SFDEngine {
       this.currentPlaybackIndex--;
       const snapshot = this.getBufferSnapshot(this.currentPlaybackIndex);
       if (!snapshot) return false;
-      // Use separate playback display grid - don't modify live simulation grid
+      
+      // Update playback display
       this.playbackDisplayGrid = new Float32Array(snapshot.grid);
       this.playbackDisplayStep = snapshot.step;
+      
+      // Also restore live state to prevent desync when resuming
+      this.grid.set(snapshot.grid);
+      this.step = snapshot.step;
+      this.truncateHistoryAfter(this.currentPlaybackIndex);
+      
       this.invalidateDerivedFieldCache();
+      this.updateBasinMap();
       this.notifyUpdate();
       return true;
     }
@@ -1561,31 +1569,84 @@ export class SFDEngine {
       this.currentPlaybackIndex++;
       const snapshot = this.getBufferSnapshot(this.currentPlaybackIndex);
       if (!snapshot) return false;
-      // Use separate playback display grid - don't modify live simulation grid
+      
+      // Update playback display
       this.playbackDisplayGrid = new Float32Array(snapshot.grid);
       this.playbackDisplayStep = snapshot.step;
+      
+      // Also restore live state
+      this.grid.set(snapshot.grid);
+      this.step = snapshot.step;
+      
       this.invalidateDerivedFieldCache();
       this.notifyUpdate();
       return true;
     } else {
-      // Exiting playback mode - clear the display grid
+      // Exiting playback mode - sync to the last frame
+      const lastSnapshot = this.getBufferSnapshot(this.ringBuffer.length - 1);
+      if (lastSnapshot) {
+        this.grid.set(lastSnapshot.grid);
+        this.step = lastSnapshot.step;
+      }
       this.currentPlaybackIndex = -1;
       this.playbackDisplayGrid = null;
+      this.invalidateDerivedFieldCache();
+      this.notifyUpdate();
       return false;
     }
   }
 
-  seekToFrame(index: number): void {
+  seekToFrame(index: number, restoreLiveState: boolean = true): void {
     if (index < 0 || index >= this.ringBuffer.length) return;
     
     this.currentPlaybackIndex = index;
     const snapshot = this.getBufferSnapshot(index);
     if (!snapshot) return;
-    // Use separate playback display grid - don't modify live simulation grid
+    
+    // Create playback display grid from snapshot
     this.playbackDisplayGrid = new Float32Array(snapshot.grid);
     this.playbackDisplayStep = snapshot.step;
+    
+    // Also restore the live simulation state to prevent desync
+    // This ensures that when resuming, the simulation continues from this exact state
+    if (restoreLiveState) {
+      this.grid.set(snapshot.grid);
+      this.step = snapshot.step;
+      
+      // Truncate history after this point since it's now invalid
+      // (the future frames were based on a different state trajectory)
+      this.truncateHistoryAfter(index);
+    }
+    
     this.invalidateDerivedFieldCache();
+    this.updateBasinMap();
     this.notifyUpdate();
+  }
+  
+  // Truncate ring buffer history after the given index
+  // Called when scrubbing backward to invalidate future frames
+  private truncateHistoryAfter(index: number): void {
+    if (index < 0 || index >= this.ringBuffer.length - 1) return;
+    
+    // Keep only frames 0..index (inclusive)
+    const framesToKeep = index + 1;
+    
+    if (this.ringBuffer.length < this.ringBufferSize) {
+      // Buffer not full - simple splice
+      this.ringBuffer.splice(framesToKeep);
+      this.ringBufferIndex = this.ringBuffer.length % this.ringBufferSize;
+    } else {
+      // Buffer is full - rebuild with only the frames we want to keep
+      const keptFrames: FrameSnapshot[] = [];
+      for (let i = 0; i <= index; i++) {
+        const snapshot = this.getBufferSnapshot(i);
+        if (snapshot) {
+          keptFrames.push(snapshot);
+        }
+      }
+      this.ringBuffer = keptFrames;
+      this.ringBufferIndex = keptFrames.length % this.ringBufferSize;
+    }
   }
   
   private invalidateDerivedFieldCache(): void {
@@ -1594,8 +1655,16 @@ export class SFDEngine {
   }
 
   exitPlaybackMode(): void {
+    // When exiting playback, ensure live state matches the last viewed frame
+    // to prevent ghost artifacts from persisted perturbations
+    if (this.playbackDisplayGrid) {
+      this.grid.set(this.playbackDisplayGrid);
+      this.step = this.playbackDisplayStep;
+    }
     this.currentPlaybackIndex = -1;
     this.playbackDisplayGrid = null;
+    this.invalidateDerivedFieldCache();
+    this.notifyUpdate();
   }
 
   isInPlaybackMode(): boolean {

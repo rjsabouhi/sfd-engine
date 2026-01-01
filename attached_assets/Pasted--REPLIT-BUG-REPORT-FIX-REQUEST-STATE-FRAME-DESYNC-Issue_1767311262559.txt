@@ -1,0 +1,35 @@
+✅ REPLIT BUG REPORT / FIX REQUEST — STATE–FRAME DESYNC
+
+Issue Summary:
+My simulation has a desynchronization between the underlying simulation state matrix and the visual frame history used by the scrubber. When I interact with the field via touch while the simulation is running, the touch-based perturbation is written into the active state array immediately, but the scrubber still plays back previously cached frames.
+
+Because these two buffers diverge, when I scrub backward I can see future perturbations in earlier frames (ghost artifacts / premature shapes that weren’t present yet).
+
+Expected Behavior:
+Rewinding the scrubber should either:
+	1.	fully rewind the underlying state to match the displayed frame, or
+	2.	force the playback frames to be rebuilt from state history rather than cached images.
+
+Actual Behavior:
+The visual frames rewind, but the state matrix remains in its post-interaction modified state. This creates temporal artifacts such as circles or deformations appearing before they were created.
+
+What I think needs to be fixed (one of these):
+	•	Add a true deep-reset of the full simulation state when scrubbing to a previous frame.
+	•	Or, bind the scrubber to a timeline of saved state tensors, not cached textures.
+	•	Or, when the user scrubs, trigger a full re-simulation up to that timestep to ensure determinism.
+	•	Or, allow manual clearing of both GPU buffer + CPU state buffer when scrubbing or pausing.
+
+Key technical detail:
+Touch events write into the simulation immediately but the scrubber does not reset the simulation buffers — only the frame texture. So the PDE solver continues from a future state while the UI shows a past frame.
+
+Steps to reproduce:
+	1.	Run the simulation.
+	2.	While it is running, interact with the field using touch.
+	3.	Stop the simulation.
+	4.	Scrub backward to an earlier frame.
+	5.	Artifact appears (e.g., a deformation or ring rendered in a frame that should not contain it).
+
+Request:
+Please fix the desync so that scrubbing backward fully resets the simulation state OR replaces cached frames with deterministic recomputed ones.
+
+I’m happy to provide logs, code snippets, or run test builds if needed
