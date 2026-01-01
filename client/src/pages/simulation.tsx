@@ -922,8 +922,6 @@ export default function SimulationPage() {
     touchContainerRef,
     { 
       regimeAmplitude,
-      onSwipeLeft: () => handleSwipeRegime('left'),
-      onSwipeRight: () => handleSwipeRegime('right'),
       visualScale: 0.88,
     }
   );
@@ -1017,39 +1015,6 @@ export default function SimulationPage() {
       return () => window.removeEventListener('deviceorientation', handleOrientation);
     }
   }, []);
-
-  // Swipe handlers for regime change (consolidated in touch controller)
-  const mobileRegimeKeys = useMemo(() => 
-    ["uniform-field", "high-curvature", "criticality-cascade", "fractal-corridor", "cosmic-web"],
-  []);
-  const mobileRegimeLabels = useMemo(() => 
-    ["Equilibrium", "Kappa-Shear", "Tension", "Fractal", "Collapse"],
-  []);
-
-  const handleSwipeRegime = useCallback((direction: 'left' | 'right') => {
-    const currentIdx = mobileRegimeKeys.findIndex(key => {
-      const preset = structuralPresets[key as keyof typeof structuralPresets];
-      return preset && preset.wK === params.wK && preset.wT === params.wT;
-    });
-    
-    let newIdx = currentIdx;
-    if (direction === 'right') {
-      newIdx = currentIdx > 0 ? currentIdx - 1 : mobileRegimeKeys.length - 1;
-    } else {
-      newIdx = (currentIdx + 1) % mobileRegimeKeys.length;
-    }
-    
-    const newPreset = structuralPresets[mobileRegimeKeys[newIdx] as keyof typeof structuralPresets];
-    if (newPreset) {
-      handleParamsChange(newPreset);
-      
-      if (regimeOverlayTimeoutRef.current) {
-        clearTimeout(regimeOverlayTimeoutRef.current);
-      }
-      setRegimeOverlay(mobileRegimeLabels[newIdx] + " Mode");
-      regimeOverlayTimeoutRef.current = setTimeout(() => setRegimeOverlay(null), 600);
-    }
-  }, [params, mobileRegimeKeys, mobileRegimeLabels, handleParamsChange]);
 
   if (isMobile) {
     const mobileRegimes = [
