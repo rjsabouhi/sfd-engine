@@ -1038,14 +1038,14 @@ export default function SimulationPage() {
     const stabilityState = state.variance < 0.05 ? "Stable" : state.variance < 0.15 ? "Active" : "Unstable";
     const stabilityColor = state.variance < 0.05 ? "text-green-400" : state.variance < 0.15 ? "text-yellow-400" : "text-red-400";
 
-    // Calculate dynamic bottom offset based on active panel - compact uniform sizing
+    // Calculate dynamic bottom offset based on active panel - ultra compact
     const getPanelHeight = () => {
       switch (mobileActiveTab) {
-        case "regimes": return 60; // compact row of buttons
-        case "colors": return 60; // compact row of color buttons
-        case "layers": return layersSubtab === 'presets' ? 130 : 75; // presets tab is taller with cards
-        case "params": return 75; // buttons + inline slider
-        case "scrub": return 95; // frame counter + slider + buttons + ticks
+        case "regimes": return 48; // single row of buttons
+        case "colors": return 48; // single row of color buttons
+        case "layers": return layersSubtab === 'presets' ? 115 : 60; // presets taller
+        case "params": return 65; // buttons + slider
+        case "scrub": return 80; // slider + buttons
         default: return 0;
       }
     };
@@ -1054,7 +1054,7 @@ export default function SimulationPage() {
     return (
       <div className="relative h-screen w-screen overflow-hidden bg-gray-950">
         {/* Full-screen canvas with touch handlers and tilt parallax - resizes when panels open */}
-        {/* Reduced by ~10% with padding on all sides */}
+        {/* Optimized margins for maximum visualization */}
         <div 
           ref={touchContainerRef}
           className="absolute"
@@ -1062,10 +1062,10 @@ export default function SimulationPage() {
           onTouchMove={touchHandlers.onTouchMove}
           onTouchEnd={touchHandlers.onTouchEnd}
           style={{
-            top: '16px',
-            left: '5%',
-            right: '5%',
-            bottom: `${96 + panelOffset}px`, // 96px for bottom control strip + panel height (was 80)
+            top: '8px',
+            left: '3%',
+            right: '3%',
+            bottom: `${68 + panelOffset}px`, // 68px for compact bottom controls + panel height
             transform: `translate(${tiltOffset.x}px, ${tiltOffset.y}px)`,
             transition: 'bottom 0.3s ease-out, transform 0.1s ease-out',
             touchAction: 'none',
@@ -1217,11 +1217,11 @@ export default function SimulationPage() {
 
 
 
-        {/* Inline Regimes Panel - appears when Regimes is active - compact design */}
+        {/* Inline Regimes Panel - ultra compact */}
         {mobileActiveTab === "regimes" && (
-          <div className="absolute bottom-24 left-0 right-0 z-40 pb-safe">
-            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-3 py-2">
-              <div className="flex items-center justify-center gap-2">
+          <div className="absolute bottom-16 left-0 right-0 z-40 pb-safe">
+            <div className="mx-3 bg-gray-950/80 backdrop-blur-md rounded-lg border border-white/10 px-2 py-1.5">
+              <div className="flex items-center justify-center gap-1.5">
                 {mobileRegimes.map((regime) => (
                   <button
                     key={regime.key}
@@ -1237,7 +1237,7 @@ export default function SimulationPage() {
                         }
                       }
                     }}
-                    className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                    className={`w-8 h-8 min-w-[32px] min-h-[32px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
                       currentRegimeKey === regime.key
                         ? 'bg-purple-500/30 border-2 border-purple-400'
                         : 'bg-white/10 border border-white/20 active:bg-white/20'
@@ -1245,7 +1245,7 @@ export default function SimulationPage() {
                     data-testid={`button-regime-${regime.key}-mobile`}
                     aria-label={regime.label}
                   >
-                    <span className={`text-sm font-semibold ${currentRegimeKey === regime.key ? 'text-purple-400' : 'text-white/80'}`}>
+                    <span className={`text-xs font-semibold ${currentRegimeKey === regime.key ? 'text-purple-400' : 'text-white/80'}`}>
                       {regime.symbol}
                     </span>
                   </button>
@@ -1255,11 +1255,11 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Inline Colors Panel - appears when Colors is active - compact design */}
+        {/* Inline Colors Panel - ultra compact */}
         {mobileActiveTab === "colors" && (
-          <div className="absolute bottom-24 left-0 right-0 z-40 pb-safe">
-            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-3 py-2">
-              <div className="flex items-center justify-center gap-2">
+          <div className="absolute bottom-16 left-0 right-0 z-40 pb-safe">
+            <div className="mx-3 bg-gray-950/80 backdrop-blur-md rounded-lg border border-white/10 px-2 py-1.5">
+              <div className="flex items-center justify-center gap-1.5">
                 {colorMaps.map((cm) => (
                   <button
                     key={cm.key}
@@ -1269,7 +1269,7 @@ export default function SimulationPage() {
                       e.stopPropagation();
                       setColormap(cm.key);
                     }}
-                    className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                    className={`w-8 h-8 min-w-[32px] min-h-[32px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
                       colormap === cm.key
                         ? 'bg-cyan-500/30 border-2 border-cyan-400'
                         : 'bg-white/10 border border-white/20 active:bg-white/20'
@@ -1277,7 +1277,7 @@ export default function SimulationPage() {
                     data-testid={`button-colormap-${cm.key}-mobile`}
                     aria-label={cm.label}
                   >
-                    <span className={`text-sm font-semibold ${colormap === cm.key ? 'text-cyan-400' : 'text-white/80'}`}>
+                    <span className={`text-xs font-semibold ${colormap === cm.key ? 'text-cyan-400' : 'text-white/80'}`}>
                       {cm.symbol}
                     </span>
                   </button>
@@ -1287,15 +1287,15 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Inline Layers Panel - appears when Layers is active - compact design */}
+        {/* Inline Layers Panel - ultra compact */}
         {mobileActiveTab === "layers" && (
-          <div className="absolute bottom-24 left-0 right-0 z-40 pb-safe">
-            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-3 py-2">
-              {/* Subtab selector - inline with layer buttons */}
-              <div className="flex items-center justify-center gap-1.5 mb-2">
+          <div className="absolute bottom-16 left-0 right-0 z-40 pb-safe">
+            <div className="mx-3 bg-gray-950/80 backdrop-blur-md rounded-lg border border-white/10 px-2 py-1.5">
+              {/* Subtab selector - ultra compact */}
+              <div className="flex items-center justify-center gap-1 mb-1.5">
                 <button
                   onClick={() => setLayersSubtab('structure')}
-                  className={`px-2 py-1 rounded-md text-[10px] font-medium transition-all ${
+                  className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition-all ${
                     layersSubtab === 'structure'
                       ? 'bg-cyan-500/30 text-cyan-400'
                       : 'bg-white/10 text-white/60'
@@ -1306,7 +1306,7 @@ export default function SimulationPage() {
                 </button>
                 <button
                   onClick={() => setLayersSubtab('presets')}
-                  className={`px-2 py-1 rounded-md text-[10px] font-medium transition-all ${
+                  className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition-all ${
                     layersSubtab === 'presets'
                       ? 'bg-purple-500/30 text-purple-400'
                       : 'bg-white/10 text-white/60'
@@ -1317,10 +1317,10 @@ export default function SimulationPage() {
                 </button>
               </div>
 
-              {/* Structure subtab content */}
+              {/* Structure subtab content - ultra compact */}
               {layersSubtab === 'structure' && (
                 <>
-                  <div className="flex items-center justify-center gap-2 flex-wrap">
+                  <div className="flex items-center justify-center gap-1.5 flex-wrap">
                     {mobileLayers.map((layer, idx) => (
                       <button
                         key={layer.key}
@@ -1330,7 +1330,7 @@ export default function SimulationPage() {
                           e.stopPropagation();
                           selectMobileLayer(idx);
                         }}
-                        className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                        className={`w-8 h-8 min-w-[32px] min-h-[32px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
                           mobileLayerIndex === idx
                             ? 'bg-cyan-500/30 border-2 border-cyan-400'
                             : 'bg-white/10 border border-white/20 active:bg-white/20'
@@ -1338,28 +1338,28 @@ export default function SimulationPage() {
                         data-testid={`button-layer-${layer.key}-mobile`}
                         aria-label={layer.label}
                       >
-                        <span className={`text-sm ${mobileLayerIndex === idx ? 'text-cyan-400' : 'text-white/80'}`}>
+                        <span className={`text-xs ${mobileLayerIndex === idx ? 'text-cyan-400' : 'text-white/80'}`}>
                           {layer.icon}
                         </span>
                       </button>
                     ))}
                   </div>
                   
-                  {/* Blend slider - inline, shown when overlay layer is selected */}
+                  {/* Blend slider - ultra compact */}
                   {mobileLayerIndex > 0 && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-[10px] text-white/50">Blend</span>
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <span className="text-[9px] text-white/50">Blend</span>
                       <input
                         type="range"
                         min="0"
                         max="100"
                         value={blendOpacity * 100}
                         onChange={(e) => setBlendOpacity(parseInt(e.target.value) / 100)}
-                        className="flex-1 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                        className="flex-1 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
                         data-testid="slider-blend-opacity-mobile"
                         aria-label="Blend opacity"
                       />
-                      <span className="text-[10px] text-cyan-300 w-8">{Math.round(blendOpacity * 100)}%</span>
+                      <span className="text-[9px] text-cyan-300 w-7">{Math.round(blendOpacity * 100)}%</span>
                     </div>
                   )}
                 </>
@@ -1401,12 +1401,12 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Inline Operator Controls - appears when Params is active - compact design */}
+        {/* Inline Operator Controls - ultra compact */}
         {mobileActiveTab === "params" && (
-          <div className="absolute bottom-24 left-0 right-0 z-40 pb-safe">
-            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-3 py-2">
-              {/* 5 Operator Circles - compact */}
-              <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="absolute bottom-16 left-0 right-0 z-40 pb-safe">
+            <div className="mx-3 bg-gray-950/80 backdrop-blur-md rounded-lg border border-white/10 px-2 py-1.5">
+              {/* 5 Operator Circles - ultra compact */}
+              <div className="flex items-center justify-center gap-1.5 mb-1.5">
                 {([
                   { key: "wK" as const, symbol: "κ", label: "Curvature" },
                   { key: "wT" as const, symbol: "τ", label: "Tension" },
@@ -1422,7 +1422,7 @@ export default function SimulationPage() {
                       e.stopPropagation();
                       setMobileSelectedOperator(op.key);
                     }}
-                    className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                    className={`w-8 h-8 min-w-[32px] min-h-[32px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
                       mobileSelectedOperator === op.key
                         ? 'bg-amber-500/30 border-2 border-amber-400'
                         : 'bg-white/10 border border-white/20 active:bg-white/20'
@@ -1430,20 +1430,20 @@ export default function SimulationPage() {
                     data-testid={`button-operator-${op.key}-mobile`}
                     aria-label={`Select ${op.label} operator`}
                   >
-                    <span className={`text-sm font-semibold ${mobileSelectedOperator === op.key ? 'text-amber-400' : 'text-white/80'}`}>
+                    <span className={`text-xs font-semibold ${mobileSelectedOperator === op.key ? 'text-amber-400' : 'text-white/80'}`}>
                       {op.symbol}
                     </span>
                   </button>
                 ))}
               </div>
               
-              {/* Inline slider with label and value - matches Layers style */}
-              <div className="flex items-center gap-2 mt-2">
-                <span className="text-[10px] text-white/50">
-                  {mobileSelectedOperator === "wK" ? "Curvature" :
-                   mobileSelectedOperator === "wT" ? "Tension" :
-                   mobileSelectedOperator === "wC" ? "Coupling" :
-                   mobileSelectedOperator === "wA" ? "Attractor" : "Redistrib"}
+              {/* Inline slider - ultra compact */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[9px] text-white/50">
+                  {mobileSelectedOperator === "wK" ? "Curv" :
+                   mobileSelectedOperator === "wT" ? "Tens" :
+                   mobileSelectedOperator === "wC" ? "Coup" :
+                   mobileSelectedOperator === "wA" ? "Attr" : "Rdst"}
                 </span>
                 <input
                   type="range"
@@ -1452,51 +1452,51 @@ export default function SimulationPage() {
                   step={0.1}
                   value={params[mobileSelectedOperator]}
                   onChange={(e) => handleParamsChange({ [mobileSelectedOperator]: parseFloat(e.target.value) })}
-                  className="flex-1 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
+                  className="flex-1 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-amber-400"
                   data-testid={`slider-${mobileSelectedOperator}-mobile`}
                   aria-label={`Adjust ${mobileSelectedOperator} parameter`}
                 />
-                <span className="text-[10px] text-amber-300 w-8">{params[mobileSelectedOperator].toFixed(1)}</span>
+                <span className="text-[9px] text-amber-300 w-6">{params[mobileSelectedOperator].toFixed(1)}</span>
               </div>
             </div>
           </div>
         )}
 
-        {/* Playback Scrubber Overlay - slides up when Run button is pressed - compact design */}
+        {/* Playback Scrubber Overlay - ultra compact */}
         {mobileActiveTab === "scrub" && (
-          <div className="absolute bottom-24 left-0 right-0 z-20 pb-safe">
-            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-3 py-2">
-              {/* Frame Counter with Close Button */}
-              <div className="flex items-center justify-between text-xs mb-1">
+          <div className="absolute bottom-16 left-0 right-0 z-20 pb-safe">
+            <div className="mx-3 bg-gray-950/80 backdrop-blur-md rounded-lg border border-white/10 px-2 py-1.5">
+              {/* Frame Counter with Close Button - compact */}
+              <div className="flex items-center justify-between text-[10px] mb-1">
                 <span className="text-white/70">Frame</span>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <span className="font-mono text-green-400">
-                    {currentHistoryIndex + 1} / {historyLength || 1}
+                    {currentHistoryIndex + 1}/{historyLength || 1}
                   </span>
                   <button
                     onClick={() => setMobileActiveTab(null)}
-                    className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center active:bg-white/20"
+                    className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center active:bg-white/20"
                     data-testid="button-close-scrub-mobile"
                     aria-label="Close playback controls"
                   >
-                    <ChevronDown className="h-4 w-4 text-white/60" />
+                    <ChevronDown className="h-3 w-3 text-white/60" />
                   </button>
                 </div>
               </div>
               
-              {/* Slider with frame nudge buttons */}
-              <div className="flex items-center gap-2">
+              {/* Slider with frame nudge buttons - compact */}
+              <div className="flex items-center gap-1.5">
                 {/* Back 10 frames */}
                 <button
                   onClick={() => {
                     if (state.isRunning) handlePause();
                     handleAnimatedSeek(Math.max(0, currentHistoryIndex - 10));
                   }}
-                  className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  className="w-7 h-7 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
                   data-testid="button-back-10-mobile"
                   aria-label="Back 10 frames"
                 >
-                  <ChevronLeft className="h-4 w-4 text-white/80" />
+                  <ChevronLeft className="h-3 w-3 text-white/80" />
                 </button>
                 
                 {/* Slider */}
@@ -1522,22 +1522,12 @@ export default function SimulationPage() {
                     if (state.isRunning) handlePause();
                     handleAnimatedSeek(Math.min(historyLength - 1, currentHistoryIndex + 10));
                   }}
-                  className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  className="w-7 h-7 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
                   data-testid="button-forward-10-mobile"
                   aria-label="Forward 10 frames"
                 >
-                  <ChevronRight className="h-4 w-4 text-white/80" />
+                  <ChevronRight className="h-3 w-3 text-white/80" />
                 </button>
-              </div>
-              
-              {/* Tick marks */}
-              <div className="flex justify-between mt-1 px-10">
-                {Array.from({ length: 11 }).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`w-0.5 ${i % 5 === 0 ? 'h-2 bg-green-500/40' : 'h-1 bg-white/20'}`}
-                  />
-                ))}
               </div>
             </div>
           </div>
@@ -1651,16 +1641,16 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Primary Control Strip - 5 circular buttons */}
-        <div className="absolute bottom-0 left-0 right-0 z-30 bg-gray-950/70 backdrop-blur-md border-t border-white/10 pb-safe">
-          <div className="flex items-center justify-around h-20 px-4">
+        {/* Primary Control Strip - compact circular buttons */}
+        <div className="absolute bottom-0 left-0 right-0 z-30 bg-gray-950/80 backdrop-blur-md border-t border-white/10 pb-safe">
+          <div className="flex items-center justify-around h-16 px-3">
             {mobileActiveTab === "scrub" ? (
               <>
                 {/* Playback mode buttons: Reset, Back, Play/Pause, Forward, Record */}
                 {/* Reset */}
                 <button
                   onClick={handleReset}
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                  className="w-11 h-11 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
                   data-testid="button-reset-mobile"
                   aria-label="Reset simulation"
                 >
@@ -1674,7 +1664,7 @@ export default function SimulationPage() {
                     if (state.isRunning) handlePause();
                     handleStepBackward();
                   }}
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                  className="w-11 h-11 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
                   data-testid="button-step-back-mobile"
                   aria-label="Step backward"
                 >
@@ -1688,7 +1678,7 @@ export default function SimulationPage() {
                     if (state.isRunning) handlePause();
                     handleStep();
                   }}
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                  className="w-11 h-11 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
                   data-testid="button-step-forward-mobile"
                   aria-label="Step forward"
                 >
@@ -1699,7 +1689,7 @@ export default function SimulationPage() {
                 {/* Play/Pause */}
                 <button
                   onClick={state.isRunning ? handlePause : handlePlay}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                  className={`w-11 h-11 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                     state.isRunning 
                       ? 'bg-green-500/20 border-2 border-green-500/50' 
                       : 'bg-white/10 border-2 border-white/20'
@@ -1721,7 +1711,7 @@ export default function SimulationPage() {
                 <button
                   onClick={isRecording ? handleStopRecording : handleStartRecording}
                   disabled={isRecording && recordingProgress >= 1}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                  className={`w-11 h-11 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                     isRecording
                       ? 'bg-red-500/20 border-2 border-red-500/50'
                       : 'bg-white/10 border-2 border-white/20'
@@ -1748,7 +1738,7 @@ export default function SimulationPage() {
                 {/* Params button - toggles inline operator controls */}
                 <button
                   onClick={() => setMobileActiveTab(mobileActiveTab === "params" ? null : "params")}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                  className={`w-11 h-11 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                     mobileActiveTab === "params" 
                       ? 'bg-amber-500/20 border-2 border-amber-500/50' 
                       : 'bg-white/10 border-2 border-white/20'
@@ -1763,7 +1753,7 @@ export default function SimulationPage() {
                 {/* Regimes button - toggles inline regime controls */}
                 <button
                   onClick={() => setMobileActiveTab(mobileActiveTab === "regimes" ? null : "regimes")}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                  className={`w-11 h-11 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                     mobileActiveTab === "regimes" 
                       ? 'bg-purple-500/20 border-2 border-purple-500/50' 
                       : 'bg-white/10 border-2 border-white/20'
@@ -1778,7 +1768,7 @@ export default function SimulationPage() {
                 {/* Layers button - toggles inline layer controls */}
                 <button
                   onClick={() => setMobileActiveTab(mobileActiveTab === "layers" ? null : "layers")}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                  className={`w-11 h-11 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                     mobileActiveTab === "layers" 
                       ? 'bg-cyan-500/20 border-2 border-cyan-500/50' 
                       : 'bg-white/10 border-2 border-white/20'
@@ -1793,7 +1783,7 @@ export default function SimulationPage() {
                 {/* Run button - toggles scrub controls */}
                 <button
                   onClick={() => setMobileActiveTab("scrub")}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                  className={`w-11 h-11 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                     state.isRunning
                       ? 'bg-green-500/20 border-2 border-green-500/50' 
                       : 'bg-white/10 border-2 border-white/20'
@@ -1825,7 +1815,7 @@ export default function SimulationPage() {
                       });
                     }
                   }}
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                  className="w-11 h-11 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
                   data-testid="button-share-mobile"
                   aria-label="Share snapshot"
                 >
