@@ -1186,62 +1186,64 @@ export default function SimulationPage() {
         )}
 
 
-        {/* Top Bar - dark, minimal - collapses when panels are open */}
+        {/* Top Bar - iPhone-style enclosed panel */}
         <div 
-          className="absolute left-0 right-0 z-20 bg-gray-950/80 backdrop-blur-md border-b border-white/5"
+          className="absolute left-3 right-3 z-20 pt-safe"
           style={{
-            top: mobileActiveTab ? '-70px' : '0',
+            top: mobileActiveTab ? '-80px' : '8px',
             transition: 'top 0.3s ease-out',
           }}
         >
-          <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-3">
-              <img src={sfdLogo} alt="SFD" className="w-7 h-7 rounded-md" />
-              <div>
-                <h1 className="text-sm font-semibold text-white">SFD Engine</h1>
-                <p className="text-[10px] text-white/50">Structural Field Explorer</p>
+          <div className="bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg">
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="flex items-center gap-3">
+                <img src={sfdLogo} alt="SFD" className="w-7 h-7 rounded-md" />
+                <div>
+                  <h1 className="text-sm font-semibold text-white">SFD Engine</h1>
+                  <p className="text-[10px] text-white/50">Structural Field Explorer</p>
+                </div>
               </div>
-            </div>
-            
-            {/* Header actions */}
-            <div className="flex items-center gap-1">
-              {/* Colors button in header */}
-              <button
-                onClick={() => setMobileActiveTab(mobileActiveTab === "colors" ? null : "colors")}
-                className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-all ${
-                  mobileActiveTab === "colors" ? 'bg-cyan-500/20' : ''
-                }`}
-                data-testid="button-colors-header-mobile"
-                aria-label="Choose color map"
-              >
-                <Palette className={`h-5 w-5 ${mobileActiveTab === "colors" ? 'text-cyan-400' : 'text-white/60'}`} />
-              </button>
               
-              {/* Options menu */}
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center" data-testid="button-menu-mobile" aria-label="Options menu">
-                    <MoreVertical className="h-5 w-5 text-white/60" />
-                  </button>
-                </DialogTrigger>
-              <DialogContent className="max-w-[90vw] bg-gray-900/95 backdrop-blur-xl border-white/10">
-                <DialogHeader>
-                  <DialogTitle className="text-white">About SFD Engine</DialogTitle>
-                  <DialogDescription asChild>
-                    <div className="pt-4 space-y-3 text-sm text-white/70">
-                      <span className="block">
-                        Structural Field Dynamics simulates complex adaptive systems
-                        through operator-driven field evolution.
-                      </span>
-                      <span className="block">
-                        <strong className="text-white/90">Operators:</strong> Curvature, Gradient-Tension,
-                        Neighbor-Coupling, Attractor-Formation, Global Redistribution
-                      </span>
-                    </div>
-                  </DialogDescription>
-                </DialogHeader>
-              </DialogContent>
-              </Dialog>
+              {/* Header actions */}
+              <div className="flex items-center gap-1">
+                {/* Colors button in header */}
+                <button
+                  onClick={() => setMobileActiveTab(mobileActiveTab === "colors" ? null : "colors")}
+                  className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl transition-all ${
+                    mobileActiveTab === "colors" ? 'bg-cyan-500/20' : 'active:bg-white/10'
+                  }`}
+                  data-testid="button-colors-header-mobile"
+                  aria-label="Choose color map"
+                >
+                  <Palette className={`h-5 w-5 ${mobileActiveTab === "colors" ? 'text-cyan-400' : 'text-white/60'}`} />
+                </button>
+                
+                {/* Options menu */}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl active:bg-white/10 transition-colors" data-testid="button-menu-mobile" aria-label="Options menu">
+                      <MoreVertical className="h-5 w-5 text-white/60" />
+                    </button>
+                  </DialogTrigger>
+                <DialogContent className="max-w-[90vw] bg-gray-900/95 backdrop-blur-xl border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="text-white">About SFD Engine</DialogTitle>
+                    <DialogDescription asChild>
+                      <div className="pt-4 space-y-3 text-sm text-white/70">
+                        <span className="block">
+                          Structural Field Dynamics simulates complex adaptive systems
+                          through operator-driven field evolution.
+                        </span>
+                        <span className="block">
+                          <strong className="text-white/90">Operators:</strong> Curvature, Gradient-Tension,
+                          Neighbor-Coupling, Attractor-Formation, Global Redistribution
+                        </span>
+                      </div>
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+                </Dialog>
+              </div>
             </div>
           </div>
         </div>
@@ -1763,96 +1765,98 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Primary Control Strip - 5 circular buttons */}
-        <div className="absolute bottom-0 left-0 right-0 z-30 bg-gray-950/70 backdrop-blur-md border-t border-white/10 pb-safe">
-          <div className="flex items-center justify-around h-20 px-4">
-                {/* Params button - toggles inline operator controls */}
-                <button
-                  onClick={() => setMobileActiveTab(mobileActiveTab === "params" ? null : "params")}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                    mobileActiveTab === "params" 
-                      ? 'bg-amber-500/20 border-2 border-amber-500/50' 
-                      : 'bg-white/10 border-2 border-white/20'
-                  }`}
-                  data-testid="button-params-mobile"
-                  aria-label="Adjust operator parameters"
-                >
-                  <SlidersHorizontal className={`h-5 w-5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/80'}`} />
-                  <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/60'}`}>Params</span>
-                </button>
+        {/* Primary Control Strip - iPhone-style enclosed panel */}
+        <div className="absolute bottom-0 left-3 right-3 z-30 pb-safe" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}>
+          <div className="bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg">
+            <div className="flex items-center justify-around h-20 px-2">
+                  {/* Params button - toggles inline operator controls */}
+                  <button
+                    onClick={() => setMobileActiveTab(mobileActiveTab === "params" ? null : "params")}
+                    className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                      mobileActiveTab === "params" 
+                        ? 'bg-amber-500/20 border-2 border-amber-500/50' 
+                        : 'bg-white/10 border border-white/20'
+                    }`}
+                    data-testid="button-params-mobile"
+                    aria-label="Adjust operator parameters"
+                  >
+                    <SlidersHorizontal className={`h-5 w-5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/80'}`} />
+                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/60'}`}>Params</span>
+                  </button>
 
-                {/* Regimes button - toggles inline regime controls */}
-                <button
-                  onClick={() => setMobileActiveTab(mobileActiveTab === "regimes" ? null : "regimes")}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                    mobileActiveTab === "regimes" 
-                      ? 'bg-purple-500/20 border-2 border-purple-500/50' 
-                      : 'bg-white/10 border-2 border-white/20'
-                  }`}
-                  data-testid="button-regimes-mobile"
-                  aria-label="Choose dynamic regime"
-                >
-                  <Zap className={`h-5 w-5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/80'}`} />
-                  <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/60'}`}>Regimes</span>
-                </button>
+                  {/* Regimes button - toggles inline regime controls */}
+                  <button
+                    onClick={() => setMobileActiveTab(mobileActiveTab === "regimes" ? null : "regimes")}
+                    className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                      mobileActiveTab === "regimes" 
+                        ? 'bg-purple-500/20 border-2 border-purple-500/50' 
+                        : 'bg-white/10 border border-white/20'
+                    }`}
+                    data-testid="button-regimes-mobile"
+                    aria-label="Choose dynamic regime"
+                  >
+                    <Zap className={`h-5 w-5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/80'}`} />
+                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/60'}`}>Regimes</span>
+                  </button>
 
-                {/* Layers button - toggles inline layer controls */}
-                <button
-                  onClick={() => setMobileActiveTab(mobileActiveTab === "layers" ? null : "layers")}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                    mobileActiveTab === "layers" 
-                      ? 'bg-cyan-500/20 border-2 border-cyan-500/50' 
-                      : 'bg-white/10 border-2 border-white/20'
-                  }`}
-                  data-testid="button-layers-mobile"
-                  aria-label="Select visualization layer"
-                >
-                  <Layers className={`h-5 w-5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/80'}`} />
-                  <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/60'}`}>Layers</span>
-                </button>
+                  {/* Layers button - toggles inline layer controls */}
+                  <button
+                    onClick={() => setMobileActiveTab(mobileActiveTab === "layers" ? null : "layers")}
+                    className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                      mobileActiveTab === "layers" 
+                        ? 'bg-cyan-500/20 border-2 border-cyan-500/50' 
+                        : 'bg-white/10 border border-white/20'
+                    }`}
+                    data-testid="button-layers-mobile"
+                    aria-label="Select visualization layer"
+                  >
+                    <Layers className={`h-5 w-5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/80'}`} />
+                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/60'}`}>Layers</span>
+                  </button>
 
-                {/* Run button - toggles scrub controls */}
-                <button
-                  onClick={() => setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub")}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                    state.isRunning
-                      ? 'bg-green-500/20 border-2 border-green-500/50' 
-                      : 'bg-white/10 border-2 border-white/20'
-                  }`}
-                  data-testid="button-scrub-mobile"
-                  aria-label="Open playback controls"
-                >
-                  {state.isRunning ? (
-                    <Pause className="h-5 w-5 text-green-400" />
-                  ) : (
-                    <Play className="h-5 w-5 text-green-400 ml-0.5" />
-                  )}
-                  <span className={`text-[9px] mt-0.5 ${state.isRunning ? 'text-green-400' : 'text-white/60'}`}>
-                    {state.isRunning ? 'Pause' : 'Run'}
-                  </span>
-                </button>
+                  {/* Run button - toggles scrub controls */}
+                  <button
+                    onClick={() => setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub")}
+                    className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                      state.isRunning
+                        ? 'bg-green-500/20 border-2 border-green-500/50' 
+                        : 'bg-white/10 border border-white/20'
+                    }`}
+                    data-testid="button-scrub-mobile"
+                    aria-label="Open playback controls"
+                  >
+                    {state.isRunning ? (
+                      <Pause className="h-5 w-5 text-green-400" />
+                    ) : (
+                      <Play className="h-5 w-5 text-green-400 ml-0.5" />
+                    )}
+                    <span className={`text-[9px] mt-0.5 ${state.isRunning ? 'text-green-400' : 'text-white/60'}`}>
+                      {state.isRunning ? 'Pause' : 'Run'}
+                    </span>
+                  </button>
 
-                {/* Share button */}
-                <button
-                  onClick={() => {
-                    const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
-                    if (canvas) {
-                      const regimeLabel = mobileRegimes.find(r => r.key === currentRegimeKey)?.label || "Equilibrium";
-                      exportMobileShareSnapshot(canvas, {
-                        regime: regimeLabel,
-                        stability: stabilityState,
-                        curvature: operatorContributions.curvature,
-                        energy: state.energy,
-                      });
-                    }
-                  }}
-                  className="w-14 h-14 rounded-full bg-white/10 border-2 border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
-                  data-testid="button-share-mobile"
-                  aria-label="Share snapshot"
-                >
-                  <Share2 className="h-5 w-5 text-white/80" />
-                  <span className="text-[9px] text-white/60 mt-0.5">Share</span>
-                </button>
+                  {/* Share button */}
+                  <button
+                    onClick={() => {
+                      const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
+                      if (canvas) {
+                        const regimeLabel = mobileRegimes.find(r => r.key === currentRegimeKey)?.label || "Equilibrium";
+                        exportMobileShareSnapshot(canvas, {
+                          regime: regimeLabel,
+                          stability: stabilityState,
+                          curvature: operatorContributions.curvature,
+                          energy: state.energy,
+                        });
+                      }
+                    }}
+                    className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                    data-testid="button-share-mobile"
+                    aria-label="Share snapshot"
+                  >
+                    <Share2 className="h-5 w-5 text-white/80" />
+                    <span className="text-[9px] text-white/60 mt-0.5">Share</span>
+                  </button>
+            </div>
           </div>
         </div>
       </div>
