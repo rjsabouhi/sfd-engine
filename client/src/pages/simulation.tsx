@@ -1201,18 +1201,6 @@ export default function SimulationPage() {
               
               {/* Header actions */}
               <div className="flex items-center gap-1">
-                {/* Colors button in header */}
-                <button
-                  onClick={() => setMobileActiveTab(mobileActiveTab === "colors" ? null : "colors")}
-                  className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl transition-all ${
-                    mobileActiveTab === "colors" ? 'bg-cyan-500/20' : 'active:bg-white/10'
-                  }`}
-                  data-testid="button-colors-header-mobile"
-                  aria-label="Choose color map"
-                >
-                  <Palette className={`h-5 w-5 ${mobileActiveTab === "colors" ? 'text-cyan-400' : 'text-white/60'}`} />
-                </button>
-                
                 {/* Options menu */}
                 <Dialog>
                   <DialogTrigger asChild>
