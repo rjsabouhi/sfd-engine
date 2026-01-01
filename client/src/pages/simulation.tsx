@@ -1287,15 +1287,15 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Inline Layers Panel - appears when Layers is active - compact design */}
+        {/* Inline Layers Panel - appears when Layers is active - expanded design */}
         {mobileActiveTab === "layers" && (
           <div className="absolute bottom-24 left-0 right-0 z-40 pb-safe">
-            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-3 py-2">
+            <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-4 py-4">
               {/* Subtab selector - inline with layer buttons */}
-              <div className="flex items-center justify-center gap-1.5 mb-2">
+              <div className="flex items-center justify-center gap-2 mb-3">
                 <button
                   onClick={() => setLayersSubtab('structure')}
-                  className={`px-2 py-1 rounded-md text-[10px] font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                     layersSubtab === 'structure'
                       ? 'bg-cyan-500/30 text-cyan-400'
                       : 'bg-white/10 text-white/60'
@@ -1306,7 +1306,7 @@ export default function SimulationPage() {
                 </button>
                 <button
                   onClick={() => setLayersSubtab('presets')}
-                  className={`px-2 py-1 rounded-md text-[10px] font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                     layersSubtab === 'presets'
                       ? 'bg-purple-500/30 text-purple-400'
                       : 'bg-white/10 text-white/60'
@@ -1320,7 +1320,7 @@ export default function SimulationPage() {
               {/* Structure subtab content */}
               {layersSubtab === 'structure' && (
                 <>
-                  <div className="flex items-center justify-center gap-2 flex-wrap">
+                  <div className="flex items-center justify-center gap-4 flex-wrap">
                     {mobileLayers.map((layer, idx) => (
                       <button
                         key={layer.key}
@@ -1330,7 +1330,7 @@ export default function SimulationPage() {
                           e.stopPropagation();
                           selectMobileLayer(idx);
                         }}
-                        className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                        className={`w-12 h-12 min-w-[48px] min-h-[48px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                           mobileLayerIndex === idx
                             ? 'bg-cyan-500/30 border-2 border-cyan-400'
                             : 'bg-white/10 border border-white/20 active:bg-white/20'
@@ -1338,7 +1338,7 @@ export default function SimulationPage() {
                         data-testid={`button-layer-${layer.key}-mobile`}
                         aria-label={layer.label}
                       >
-                        <span className={`text-sm ${mobileLayerIndex === idx ? 'text-cyan-400' : 'text-white/80'}`}>
+                        <span className={`text-lg ${mobileLayerIndex === idx ? 'text-cyan-400' : 'text-white/80'}`}>
                           {layer.icon}
                         </span>
                       </button>
@@ -1347,19 +1347,19 @@ export default function SimulationPage() {
                   
                   {/* Blend slider - inline, shown when overlay layer is selected */}
                   {mobileLayerIndex > 0 && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-[10px] text-white/50">Blend</span>
+                    <div className="flex items-center gap-3 mt-3">
+                      <span className="text-xs text-white/60">Blend</span>
                       <input
                         type="range"
                         min="0"
                         max="100"
                         value={blendOpacity * 100}
                         onChange={(e) => setBlendOpacity(parseInt(e.target.value) / 100)}
-                        className="flex-1 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                        className="flex-1 h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
                         data-testid="slider-blend-opacity-mobile"
                         aria-label="Blend opacity"
                       />
-                      <span className="text-[10px] text-cyan-300 w-8">{Math.round(blendOpacity * 100)}%</span>
+                      <span className="text-sm font-mono text-cyan-300 w-10 text-right">{Math.round(blendOpacity * 100)}%</span>
                     </div>
                   )}
                 </>
