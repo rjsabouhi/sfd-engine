@@ -170,19 +170,23 @@ function MobileOverlayCanvas({
   const panX = transform?.panX ?? 0;
   const panY = transform?.panY ?? 0;
 
+  // Hide until properly positioned
+  const isReady = baseRect.width > 0 && baseRect.height > 0;
+
   return (
     <canvas
       ref={canvasRef}
       data-testid="canvas-overlay"
       className="absolute pointer-events-none rounded-md"
       style={{ 
-        opacity,
-        width: baseRect.width || '100%',
-        height: baseRect.height || '100%',
+        opacity: isReady ? opacity : 0,
+        width: baseRect.width || 1,
+        height: baseRect.height || 1,
         left: baseRect.left,
         top: baseRect.top,
         transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
         transformOrigin: 'center center',
+        visibility: isReady ? 'visible' : 'hidden',
       }}
     />
   );
