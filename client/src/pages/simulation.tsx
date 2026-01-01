@@ -1430,13 +1430,13 @@ export default function SimulationPage() {
           <div className="absolute bottom-24 left-0 right-0 z-40 pb-safe">
             <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-4 py-3">
               {/* 5 Operator Circles with labels */}
-              <div className="flex items-center justify-center gap-2 mb-2">
+              <div className="flex items-center justify-between mb-2 px-1">
                 {([
                   { key: "wK" as const, symbol: "κ", label: "Curvature" },
                   { key: "wT" as const, symbol: "τ", label: "Tension" },
                   { key: "wC" as const, symbol: "γ", label: "Coupling" },
                   { key: "wA" as const, symbol: "α", label: "Attractor" },
-                  { key: "wR" as const, symbol: "ρ", label: "Redistribution" },
+                  { key: "wR" as const, symbol: "ρ", label: "Redist" },
                 ]).map((op) => (
                   <button
                     key={op.key}
@@ -1446,7 +1446,7 @@ export default function SimulationPage() {
                       e.stopPropagation();
                       setMobileSelectedOperator(op.key);
                     }}
-                    className="flex flex-col items-center gap-0.5"
+                    className="flex flex-col items-center gap-0.5 flex-1"
                     data-testid={`button-operator-${op.key}-mobile`}
                     aria-label={`Select ${op.label} operator`}
                   >
