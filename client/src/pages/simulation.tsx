@@ -1215,7 +1215,7 @@ export default function SimulationPage() {
 
         {/* Inline Regimes Panel - appears when Regimes is active */}
         {mobileActiveTab === "regimes" && (
-          <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
+          <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe mb-3">
             <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-2xl border border-white/10 p-4">
               <div className="flex items-center justify-center gap-3">
                 {mobileRegimes.map((regime) => (
@@ -1256,7 +1256,7 @@ export default function SimulationPage() {
 
         {/* Inline Colors Panel - appears when Colors is active */}
         {mobileActiveTab === "colors" && (
-          <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
+          <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe mb-3">
             <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-2xl border border-white/10 p-4">
               <div className="flex items-center justify-center gap-4">
                 {colorMaps.map((cm) => (
@@ -1291,7 +1291,7 @@ export default function SimulationPage() {
 
         {/* Inline Layers Panel - appears when Layers is active - compact design */}
         {mobileActiveTab === "layers" && (
-          <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
+          <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe mb-3">
             <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-3 py-2">
               {/* Subtab selector - inline with layer buttons */}
               <div className="flex items-center justify-center gap-1.5 mb-2">
@@ -1405,7 +1405,7 @@ export default function SimulationPage() {
 
         {/* Inline Operator Controls - appears when Params is active */}
         {mobileActiveTab === "params" && (
-          <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe">
+          <div className="absolute bottom-20 left-0 right-0 z-40 pb-safe mb-3">
             <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-2xl border border-white/10 p-4">
               {/* 5 Operator Circles */}
               <div className="flex items-center justify-center gap-3 mb-4">
@@ -1479,8 +1479,8 @@ export default function SimulationPage() {
 
         {/* Playback Scrubber Overlay - slides up when Run button is pressed */}
         {mobileActiveTab === "scrub" && (
-          <div className="absolute bottom-20 left-0 right-0 z-20 px-4 pb-2">
-            <div className="bg-gray-900/60 backdrop-blur-md rounded-xl border border-white/10 px-3 py-2 shadow-lg">
+          <div className="absolute bottom-20 left-0 right-0 z-20 pb-safe mb-3">
+            <div className="mx-4 bg-gray-900/60 backdrop-blur-md rounded-xl border border-white/10 px-3 py-2 shadow-lg">
               {/* Frame Counter with Close Button */}
               <div className="flex items-center justify-between text-xs mb-1">
                 <span className="text-white/70">Frame</span>
