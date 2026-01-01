@@ -64,7 +64,7 @@ function MobileOverlayCanvas({
   transform?: { zoom: number; panX: number; panY: number };
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [visualSize, setVisualSize] = useState(0);
+  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -73,27 +73,24 @@ function MobileOverlayCanvas({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Get the base canvas to match its exact size
+    // Get the base canvas to match its exact position and size
     const baseCanvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement | null;
-    let size: number;
     
     if (baseCanvas) {
-      // Match the base canvas CSS size exactly
-      size = baseCanvas.clientWidth;
+      // Match the base canvas pixel dimensions exactly
+      canvas.width = baseCanvas.width;
+      canvas.height = baseCanvas.height;
+      setCanvasSize({ width: baseCanvas.clientWidth, height: baseCanvas.clientHeight });
     } else {
-      // Fallback: Match VisualizationCanvas sizing formula
+      // Fallback
       const container = canvas.parentElement;
       if (container) {
-        const containerSize = Math.min(container.clientWidth, container.clientHeight);
-        size = Math.floor(containerSize * 0.88);
-      } else {
-        size = 300;
+        const size = Math.min(container.clientWidth, container.clientHeight);
+        canvas.width = size;
+        canvas.height = size;
+        setCanvasSize({ width: size, height: size });
       }
     }
-    
-    canvas.width = size;
-    canvas.height = size;
-    setVisualSize(size);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -157,13 +154,14 @@ function MobileOverlayCanvas({
     <canvas
       ref={canvasRef}
       data-testid="canvas-overlay"
-      className="absolute top-1/2 left-1/2 pointer-events-none rounded-md"
+      className="absolute inset-0 w-full h-full pointer-events-none rounded-md m-auto"
       style={{ 
-        opacity, 
-        transform: `translate(-50%, -50%) translate(${panX}px, ${panY}px) scale(${zoom})`,
+        opacity,
+        maxWidth: canvasSize.width || '100%',
+        maxHeight: canvasSize.height || '100%',
+        objectFit: 'contain',
+        transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
         transformOrigin: 'center center',
-        width: visualSize || 'auto',
-        height: visualSize || 'auto',
       }}
     />
   );
