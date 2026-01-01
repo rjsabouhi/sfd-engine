@@ -1038,18 +1038,32 @@ export default function SimulationPage() {
     const stabilityState = state.variance < 0.05 ? "Stable" : state.variance < 0.15 ? "Active" : "Unstable";
     const stabilityColor = state.variance < 0.05 ? "text-green-400" : state.variance < 0.15 ? "text-yellow-400" : "text-red-400";
 
+    // Calculate dynamic bottom offset based on active panel
+    const getPanelHeight = () => {
+      switch (mobileActiveTab) {
+        case "regimes": return 140; // Regime buttons + label
+        case "colors": return 120; // Color buttons + label
+        case "layers": return 200; // Tabs + buttons + slider/presets
+        case "params": return 240; // Multiple sliders
+        case "scrub": return 140; // Timeline + description
+        default: return 0;
+      }
+    };
+    const panelOffset = getPanelHeight();
+
     return (
       <div className="relative h-screen w-screen overflow-hidden bg-gray-950">
-        {/* Full-screen canvas with touch handlers and tilt parallax */}
+        {/* Full-screen canvas with touch handlers and tilt parallax - resizes when panels open */}
         <div 
           ref={touchContainerRef}
-          className="absolute inset-0"
+          className="absolute inset-x-0 top-0"
           onTouchStart={touchHandlers.onTouchStart}
           onTouchMove={touchHandlers.onTouchMove}
           onTouchEnd={touchHandlers.onTouchEnd}
           style={{
+            bottom: `${80 + panelOffset}px`, // 80px for bottom control strip + panel height
             transform: `translate(${tiltOffset.x}px, ${tiltOffset.y}px)`,
-            transition: 'transform 0.1s ease-out',
+            transition: 'bottom 0.3s ease-out, transform 0.1s ease-out',
             touchAction: 'none',
             userSelect: 'none',
             WebkitUserSelect: 'none',
