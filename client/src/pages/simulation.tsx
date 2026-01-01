@@ -1339,7 +1339,7 @@ export default function SimulationPage() {
               {/* Structure subtab content */}
               {layersSubtab === 'structure' && (
                 <>
-                  <div className="flex items-center justify-center gap-3 flex-wrap">
+                  <div className="flex items-center justify-center gap-2 flex-wrap">
                     {mobileLayers.map((layer, idx) => (
                       <button
                         key={layer.key}
@@ -1349,16 +1349,21 @@ export default function SimulationPage() {
                           e.stopPropagation();
                           selectMobileLayer(idx);
                         }}
-                        className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                          mobileLayerIndex === idx
-                            ? 'bg-cyan-500/30 border-2 border-cyan-400'
-                            : 'bg-white/10 border border-white/20 active:bg-white/20'
-                        }`}
+                        className="flex flex-col items-center gap-0.5"
                         data-testid={`button-layer-${layer.key}-mobile`}
                         aria-label={layer.label}
                       >
-                        <span className={`text-base ${mobileLayerIndex === idx ? 'text-cyan-400' : 'text-white/80'}`}>
-                          {layer.icon}
+                        <div className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                          mobileLayerIndex === idx
+                            ? 'bg-cyan-500/30 border-2 border-cyan-400'
+                            : 'bg-white/10 border border-white/20 active:bg-white/20'
+                        }`}>
+                          <span className={`text-sm ${mobileLayerIndex === idx ? 'text-cyan-400' : 'text-white/80'}`}>
+                            {layer.icon}
+                          </span>
+                        </div>
+                        <span className={`text-[9px] ${mobileLayerIndex === idx ? 'text-cyan-400' : 'text-white/50'}`}>
+                          {layer.label}
                         </span>
                       </button>
                     ))}
@@ -1424,14 +1429,14 @@ export default function SimulationPage() {
         {mobileActiveTab === "params" && (
           <div className="absolute bottom-24 left-0 right-0 z-40 pb-safe">
             <div className="mx-4 bg-gray-950/70 backdrop-blur-md rounded-xl border border-white/10 px-4 py-3">
-              {/* 5 Operator Circles - larger buttons */}
-              <div className="flex items-center justify-center gap-3 mb-3">
+              {/* 5 Operator Circles with labels */}
+              <div className="flex items-center justify-center gap-2 mb-2">
                 {([
-                  { key: "wK" as const, symbol: "κ", label: "Curvature" },
+                  { key: "wK" as const, symbol: "κ", label: "Curve" },
                   { key: "wT" as const, symbol: "τ", label: "Tension" },
-                  { key: "wC" as const, symbol: "γ", label: "Coupling" },
-                  { key: "wA" as const, symbol: "α", label: "Attractor" },
-                  { key: "wR" as const, symbol: "ρ", label: "Redistrib" },
+                  { key: "wC" as const, symbol: "γ", label: "Couple" },
+                  { key: "wA" as const, symbol: "α", label: "Attract" },
+                  { key: "wR" as const, symbol: "ρ", label: "Redist" },
                 ]).map((op) => (
                   <button
                     key={op.key}
@@ -1441,29 +1446,28 @@ export default function SimulationPage() {
                       e.stopPropagation();
                       setMobileSelectedOperator(op.key);
                     }}
-                    className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
-                      mobileSelectedOperator === op.key
-                        ? 'bg-amber-500/30 border-2 border-amber-400'
-                        : 'bg-white/10 border border-white/20 active:bg-white/20'
-                    }`}
+                    className="flex flex-col items-center gap-0.5"
                     data-testid={`button-operator-${op.key}-mobile`}
                     aria-label={`Select ${op.label} operator`}
                   >
-                    <span className={`text-base font-semibold ${mobileSelectedOperator === op.key ? 'text-amber-400' : 'text-white/80'}`}>
-                      {op.symbol}
+                    <div className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                      mobileSelectedOperator === op.key
+                        ? 'bg-amber-500/30 border-2 border-amber-400'
+                        : 'bg-white/10 border border-white/20 active:bg-white/20'
+                    }`}>
+                      <span className={`text-sm font-semibold ${mobileSelectedOperator === op.key ? 'text-amber-400' : 'text-white/80'}`}>
+                        {op.symbol}
+                      </span>
+                    </div>
+                    <span className={`text-[9px] ${mobileSelectedOperator === op.key ? 'text-amber-400' : 'text-white/50'}`}>
+                      {op.label}
                     </span>
                   </button>
                 ))}
               </div>
               
-              {/* Inline slider with label and value - larger style */}
+              {/* Inline slider with value */}
               <div className="flex items-center gap-3">
-                <span className="text-xs text-white/60 w-16">
-                  {mobileSelectedOperator === "wK" ? "Curvature" :
-                   mobileSelectedOperator === "wT" ? "Tension" :
-                   mobileSelectedOperator === "wC" ? "Coupling" :
-                   mobileSelectedOperator === "wA" ? "Attractor" : "Redistrib"}
-                </span>
                 <input
                   type="range"
                   min={0}
