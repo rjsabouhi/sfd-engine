@@ -1603,18 +1603,6 @@ export default function SimulationPage() {
                 </div>
               )}
 
-              {/* Frame counter */}
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <span className="text-[10px] text-white/50">Frame</span>
-                <span className="text-sm font-mono text-cyan-400" data-testid="text-frame-counter">
-                  {currentHistoryIndex + 1} / {historyLength}
-                </span>
-                <span className="text-[10px] text-white/50">Step</span>
-                <span className="text-sm font-mono text-cyan-400" data-testid="text-step-counter">
-                  {state.step}
-                </span>
-              </div>
-
               {/* Slider with frame nudge buttons - matches blend slider style */}
               <div className="flex items-center gap-2">
                 {/* Back 10 frames */}
@@ -1657,6 +1645,16 @@ export default function SimulationPage() {
                 >
                   <ChevronRight className="h-4 w-4 text-white/80" />
                 </button>
+
+                {/* Frame/Step counter */}
+                <div className="flex flex-col items-end text-right min-w-[50px]">
+                  <span className="text-[10px] font-mono text-cyan-400" data-testid="text-frame-counter">
+                    {currentHistoryIndex + 1}/{historyLength}
+                  </span>
+                  <span className="text-[9px] text-white/40" data-testid="text-step-counter">
+                    Step {state.step}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
