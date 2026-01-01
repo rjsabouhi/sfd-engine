@@ -1038,14 +1038,14 @@ export default function SimulationPage() {
     const stabilityState = state.variance < 0.05 ? "Stable" : state.variance < 0.15 ? "Active" : "Unstable";
     const stabilityColor = state.variance < 0.05 ? "text-green-400" : state.variance < 0.15 ? "text-yellow-400" : "text-red-400";
 
-    // Calculate dynamic bottom offset based on active panel (minimal offset to preserve visualization)
+    // Calculate dynamic bottom offset based on active panel - must match actual panel heights
     const getPanelHeight = () => {
       switch (mobileActiveTab) {
-        case "regimes": return 60;
-        case "colors": return 50;
-        case "layers": return 70; // Compact layers panel
-        case "params": return 100;
-        case "scrub": return 60;
+        case "regimes": return 120; // 5 buttons + label + padding
+        case "colors": return 110; // 6 color buttons + label + padding
+        case "layers": return 130; // tabs + buttons + slider + padding
+        case "params": return 160; // buttons + label + slider + ticks + padding
+        case "scrub": return 130; // frame counter + slider + ticks + playback buttons + padding
         default: return 0;
       }
     };
