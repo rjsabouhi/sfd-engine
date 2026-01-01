@@ -1057,7 +1057,7 @@ export default function SimulationPage() {
         case "colors": return 60; // compact row of color buttons
         case "layers": return layersSubtab === 'presets' ? 130 : 75; // presets tab is taller with cards
         case "params": return 75; // same offset as other panels
-        case "scrub": return 150; // playback buttons + recording progress + frame counter + slider + buttons + ticks
+        case "scrub": return 130; // playback buttons + recording progress + slider + buttons + ticks
         default: return 0;
       }
     };
@@ -1573,24 +1573,6 @@ export default function SimulationPage() {
                 </div>
               )}
 
-              {/* Frame Counter with Close Button */}
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-white/70">Frame</span>
-                <div className="flex items-center gap-3">
-                  <span className="font-mono text-green-400">
-                    {currentHistoryIndex + 1} / {historyLength || 1}
-                  </span>
-                  <button
-                    onClick={() => setMobileActiveTab(null)}
-                    className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center active:bg-white/20"
-                    data-testid="button-close-scrub-mobile"
-                    aria-label="Close playback controls"
-                  >
-                    <ChevronDown className="h-4 w-4 text-white/60" />
-                  </button>
-                </div>
-              </div>
-              
               {/* Slider with frame nudge buttons */}
               <div className="flex items-center gap-2">
                 {/* Back 10 frames */}
