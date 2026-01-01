@@ -1054,14 +1054,18 @@ export default function SimulationPage() {
     return (
       <div className="relative h-screen w-screen overflow-hidden bg-gray-950">
         {/* Full-screen canvas with touch handlers and tilt parallax - resizes when panels open */}
+        {/* Reduced by ~10% with padding on all sides */}
         <div 
           ref={touchContainerRef}
-          className="absolute inset-x-0 top-0"
+          className="absolute"
           onTouchStart={touchHandlers.onTouchStart}
           onTouchMove={touchHandlers.onTouchMove}
           onTouchEnd={touchHandlers.onTouchEnd}
           style={{
-            bottom: `${80 + panelOffset}px`, // 80px for bottom control strip + panel height
+            top: '16px',
+            left: '5%',
+            right: '5%',
+            bottom: `${96 + panelOffset}px`, // 96px for bottom control strip + panel height (was 80)
             transform: `translate(${tiltOffset.x}px, ${tiltOffset.y}px)`,
             transition: 'bottom 0.3s ease-out, transform 0.1s ease-out',
             touchAction: 'none',
