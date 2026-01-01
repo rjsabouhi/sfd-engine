@@ -1775,6 +1775,21 @@ export default function SimulationPage() {
                   <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/60'}`}>Regimes</span>
                 </button>
 
+                {/* Layers button - toggles inline layer controls */}
+                <button
+                  onClick={() => setMobileActiveTab(mobileActiveTab === "layers" ? null : "layers")}
+                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                    mobileActiveTab === "layers" 
+                      ? 'bg-cyan-500/20 border-2 border-cyan-500/50' 
+                      : 'bg-white/10 border-2 border-white/20'
+                  }`}
+                  data-testid="button-layers-mobile"
+                  aria-label="Select visualization layer"
+                >
+                  <Layers className={`h-5 w-5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/80'}`} />
+                  <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/60'}`}>Layers</span>
+                </button>
+
                 {/* Run button - toggles scrub controls */}
                 <button
                   onClick={() => setMobileActiveTab("scrub")}
@@ -1794,21 +1809,6 @@ export default function SimulationPage() {
                   <span className={`text-[9px] mt-0.5 ${state.isRunning ? 'text-green-400' : 'text-white/60'}`}>
                     {state.isRunning ? 'Pause' : 'Run'}
                   </span>
-                </button>
-
-                {/* Layers button - toggles inline layer controls */}
-                <button
-                  onClick={() => setMobileActiveTab(mobileActiveTab === "layers" ? null : "layers")}
-                  className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                    mobileActiveTab === "layers" 
-                      ? 'bg-cyan-500/20 border-2 border-cyan-500/50' 
-                      : 'bg-white/10 border-2 border-white/20'
-                  }`}
-                  data-testid="button-layers-mobile"
-                  aria-label="Select visualization layer"
-                >
-                  <Layers className={`h-5 w-5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/80'}`} />
-                  <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/60'}`}>Layers</span>
                 </button>
 
                 {/* Share button */}
