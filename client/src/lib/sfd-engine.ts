@@ -102,7 +102,7 @@ export class SFDEngine {
   };
   
   private basinMap: BasinMap | null = null;
-  private basinMapUpdateInterval: number = 10;
+  private basinMapUpdateInterval: number = 3; // Update more frequently for smoother overlays
   private lastBasinMapStep: number = 0;
   
   private structuralEvents: StructuralEvent[] = [];
@@ -128,7 +128,7 @@ export class SFDEngine {
   
   // Cached analytics - updated periodically to avoid per-frame computation
   private cachedSignature: StructuralSignature | null = null;
-  private signatureCacheInterval: number = 15; // Update every N steps
+  private signatureCacheInterval: number = 5; // Update every N steps (smoother metrics)
   private lastSignatureCacheStep: number = 0;
   
   // Coherence history for sparkline
