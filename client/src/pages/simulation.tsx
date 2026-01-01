@@ -64,52 +64,56 @@ function MobileOverlayCanvas({
   transform?: { zoom: number; panX: number; panY: number };
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [visualStyle, setVisualStyle] = useState<{ width: number; height: number; baseTransform: string } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [visualSize, setVisualSize] = useState(0);
 
-  // Sync size with base canvas
+  // Calculate visual size from container - matching VisualizationCanvas logic exactly
   useEffect(() => {
-    const syncSize = () => {
-      const baseCanvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement | null;
-      if (baseCanvas) {
-        // Get the CSS dimensions (visual size) from the base canvas style
-        const style = baseCanvas.style;
-        const width = parseFloat(style.width) || baseCanvas.offsetWidth;
-        const height = parseFloat(style.height) || baseCanvas.offsetHeight;
-        const baseTransform = style.transform || '';
-        
-        if (width > 0 && height > 0) {
-          setVisualStyle({ width, height, baseTransform });
-        }
+    const updateSize = () => {
+      const container = containerRef.current;
+      if (!container) return;
+      
+      const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
+      const canvasSize = Math.min(containerWidth, containerHeight);
+      const VISUAL_SCALE = 0.88; // Must match VisualizationCanvas
+      const newVisualSize = canvasSize * VISUAL_SCALE;
+      
+      if (newVisualSize > 0) {
+        setVisualSize(newVisualSize);
       }
     };
     
-    syncSize();
-    const timeout = setTimeout(syncSize, 50);
-    return () => clearTimeout(timeout);
-  }, [frameVersion]);
+    updateSize();
+    
+    // Also update on resize
+    const observer = new ResizeObserver(updateSize);
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    
+    return () => observer.disconnect();
+  }, []);
 
   // Render the overlay content
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !visualStyle) return;
+    if (!canvas || visualSize <= 0) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Get the base canvas to match pixel dimensions exactly
-    const baseCanvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement | null;
+    // Match the same DPI scaling as VisualizationCanvas
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    const renderSize = Math.floor((visualSize / 0.88) * dpr); // Undo visual scale to get base size, then apply DPR
     
-    if (baseCanvas && baseCanvas.width > 0 && baseCanvas.height > 0) {
-      canvas.width = baseCanvas.width;
-      canvas.height = baseCanvas.height;
-    } else {
-      return;
-    }
+    canvas.width = renderSize;
+    canvas.height = renderSize;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (basinMap && basinMap.labels.length > 0) {
-      // Render basin overlay with fully opaque colors (crossfade via canvas opacity)
+      // Render basin overlay with fully opaque colors
       const { labels, width, height } = basinMap;
       const cellW = canvas.width / width;
       const cellH = canvas.height / height;
@@ -122,7 +126,6 @@ function MobileOverlayCanvas({
             ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
             ctx.fillRect(x * cellW, y * cellH, cellW + 0.5, cellH + 0.5);
           } else {
-            // Fill unassigned pixels with dark background
             ctx.fillStyle = 'rgb(20, 20, 30)';
             ctx.fillRect(x * cellW, y * cellH, cellW + 0.5, cellH + 0.5);
           }
@@ -131,7 +134,6 @@ function MobileOverlayCanvas({
     } else if (derivedField) {
       // Render derived field overlay using plasma colormap
       const { grid, width, height } = derivedField;
-      // Compute min/max for normalization
       let min = Infinity, max = -Infinity;
       for (let i = 0; i < grid.length; i++) {
         if (grid[i] < min) min = grid[i];
@@ -157,33 +159,34 @@ function MobileOverlayCanvas({
         }
       }
     }
-  }, [derivedField, basinMap, frameVersion, visualStyle]);
+  }, [derivedField, basinMap, frameVersion, visualSize]);
 
-  // Apply same transform as base canvas for synchronized zoom/pan
   const zoom = transform?.zoom ?? 1;
   const panX = transform?.panX ?? 0;
   const panY = transform?.panY ?? 0;
 
-  const isReady = visualStyle !== null;
+  const isReady = visualSize > 0;
 
+  // Wrapper div fills container and uses flexbox to center canvas - matching VisualizationCanvas
   return (
-    <canvas
-      ref={canvasRef}
-      data-testid="canvas-overlay"
-      className="absolute pointer-events-none rounded-md"
-      style={{ 
-        opacity: isReady ? opacity : 0,
-        width: visualStyle?.width ?? 0,
-        height: visualStyle?.height ?? 0,
-        left: '50%',
-        top: '50%',
-        marginLeft: -(visualStyle?.width ?? 0) / 2,
-        marginTop: -(visualStyle?.height ?? 0) / 2,
-        transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
-        transformOrigin: 'center center',
-        visibility: isReady ? 'visible' : 'hidden',
-      }}
-    />
+    <div 
+      ref={containerRef}
+      className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden"
+    >
+      <canvas
+        ref={canvasRef}
+        data-testid="canvas-overlay"
+        className="rounded-md"
+        style={{ 
+          opacity: isReady ? opacity : 0,
+          width: `${visualSize}px`,
+          height: `${visualSize}px`,
+          transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
+          transformOrigin: 'center center',
+          visibility: isReady ? 'visible' : 'hidden',
+        }}
+      />
+    </div>
   );
 }
 
