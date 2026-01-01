@@ -1057,7 +1057,7 @@ export default function SimulationPage() {
       switch (mobileActiveTab) {
         case "regimes": return 60 + padding; // compact row of buttons
         case "colors": return 60 + padding; // compact row of color buttons
-        case "layers": return (layersSubtab === 'presets' ? 130 : 75) + padding; // presets tab is taller with cards
+        case "layers": return (layersSubtab === 'presets' ? 140 : 95) + padding; // structure tab taller with labels
         case "params": return 75 + padding; // same offset as other panels
         case "scrub": return 95 + padding; // playback buttons + recording progress + slider
         default: return 0;
