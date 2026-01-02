@@ -318,7 +318,7 @@ export default function SimulationPage() {
     } else {
       setShowDualView(true);
       setBlendMode(true);
-      setBlendOpacity(0.5);
+      // Don't reset blend opacity - let user's setting persist
       const layerKey = newLayer.key;
       setDerivedType(layerKey as OverlayType);
       if (engineRef.current) {
