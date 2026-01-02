@@ -257,7 +257,7 @@ export default function SimulationPage() {
   const [regimeOverlay, setRegimeOverlay] = useState<string | null>(null);
   const [instabilityFlash, setInstabilityFlash] = useState(false);
   const [tiltOffset, setTiltOffset] = useState({ x: 0, y: 0 });
-  const [mobileLayerIndex, setMobileLayerIndex] = useState(0);
+  const [mobileLayerIndex, setMobileLayerIndex] = useState(-1); // -1 = base field only, 0+ = overlay layer
   const [layersSubtab, setLayersSubtab] = useState<'structure' | 'presets'>('structure');
   const [activePresetId, setActivePresetId] = useState<string | null>(null);
   const touchContainerRef = useRef<HTMLDivElement>(null);
@@ -296,9 +296,8 @@ export default function SimulationPage() {
     }
   }, [recordedVideoBlob]);
   
-  // Mobile layers for layer selector
+  // Mobile layers for layer selector (no Base - tap to deselect shows base field alone)
   const mobileLayers = [
-    { key: "none", label: "Base", icon: "B" },
     { key: "constraintSkeleton", label: "Structure", icon: "S" },
     { key: "tension", label: "Tension", icon: "T" },
     { key: "curvature", label: "Curvature", icon: "K" },
@@ -306,27 +305,30 @@ export default function SimulationPage() {
     { key: "basins", label: "Basins", icon: "A" },
   ] as const;
 
-  // Helper function to select a mobile layer
+  // Helper function to select a mobile layer (tap again to deselect and show base)
   const selectMobileLayer = (layerIdx: number) => {
+    // If tapping the already-selected layer, deselect it (show base field alone)
+    if (mobileLayerIndex === layerIdx) {
+      setMobileLayerIndex(-1); // -1 means no overlay, just base field
+      setShowDualView(false);
+      setBlendMode(false);
+      return;
+    }
+    
     setMobileLayerIndex(layerIdx);
     const newLayer = mobileLayers[layerIdx];
     
-    // Toggle dual view based on layer selection
-    if (newLayer.key === "none") {
-      setShowDualView(false);
-      setBlendMode(false);
-    } else {
-      setShowDualView(true);
-      setBlendMode(true);
-      // Don't reset blend opacity - let user's setting persist
-      const layerKey = newLayer.key;
-      setDerivedType(layerKey as OverlayType);
-      if (engineRef.current) {
-        if (layerKey === "basins") {
-          setBasinMap(engineRef.current.getBasinMap());
-        } else {
-          setDerivedField(engineRef.current.computeDerivedField(layerKey as "constraintSkeleton" | "tension" | "curvature" | "variance"));
-        }
+    // Enable overlay mode
+    setShowDualView(true);
+    setBlendMode(true);
+    // Don't reset blend opacity - let user's setting persist
+    const layerKey = newLayer.key;
+    setDerivedType(layerKey as OverlayType);
+    if (engineRef.current) {
+      if (layerKey === "basins") {
+        setBasinMap(engineRef.current.getBasinMap());
+      } else {
+        setDerivedField(engineRef.current.computeDerivedField(layerKey as "constraintSkeleton" | "tension" | "curvature" | "variance"));
       }
     }
   };
@@ -1133,9 +1135,9 @@ export default function SimulationPage() {
             perceptualSmoothing={perceptualSmoothing}
             onTransformChange={setCanvasTransform}
             disableTouch={true}
-            overlayDerivedField={mobileLayerIndex > 0 && mobileLayers[mobileLayerIndex].key !== "basins" ? derivedField : null}
-            overlayBasinMap={mobileLayerIndex > 0 && mobileLayers[mobileLayerIndex].key === "basins" ? basinMap : null}
-            overlayOpacity={mobileLayerIndex > 0 ? blendOpacity : 0}
+            overlayDerivedField={mobileLayerIndex >= 0 && mobileLayers[mobileLayerIndex]?.key !== "basins" ? derivedField : null}
+            overlayBasinMap={mobileLayerIndex >= 0 && mobileLayers[mobileLayerIndex]?.key === "basins" ? basinMap : null}
+            overlayOpacity={mobileLayerIndex >= 0 ? blendOpacity : 0}
           />
         </div>
 
@@ -1390,7 +1392,7 @@ export default function SimulationPage() {
                   </div>
                   
                   {/* Blend slider - inline, shown when overlay layer is selected */}
-                  {mobileLayerIndex > 0 && (
+                  {mobileLayerIndex >= 0 && (
                     <div className="flex items-center gap-2 mt-2">
                       <span className="text-[10px] text-white/50">Blend</span>
                       <input
