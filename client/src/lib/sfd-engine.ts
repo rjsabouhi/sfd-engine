@@ -346,11 +346,10 @@ export class SFDEngine {
       this.notifyUpdate();
     } else if (params.wK !== undefined || params.wT !== undefined || 
                params.wC !== undefined || params.wA !== undefined || params.wR !== undefined) {
-      // Weight parameter changes - run one step to show immediate effect
-      if (!this.isRunning) {
-        this.updateStep();
-        this.notifyUpdate();
-      }
+      // Weight parameter changes - run one step immediately for responsive feedback
+      // This works whether paused or running, ensuring slider changes are instantly visible
+      this.updateStep();
+      this.notifyUpdate();
     }
   }
 
