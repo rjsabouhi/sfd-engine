@@ -1153,25 +1153,19 @@ export interface RecordingController {
  * Frame-based recording for iOS compatibility
  * Captures canvas frames as images and creates an animated GIF
  * Supports compositing an overlay canvas on top of the base canvas
+ * Records 1 frame per simulation step (call captureFrame on each step)
  */
 export async function startLiveRecordingFrameBased(
   canvas: HTMLCanvasElement,
-  durationSeconds: number = 10,
+  totalFrames: number = 50,
   onProgress?: (progress: number) => void,
   onComplete?: (blob: Blob) => void,
   onError?: (error: string) => void,
   overlayCanvas?: HTMLCanvasElement | null
-): Promise<RecordingController> {
-  // 5fps for reasonable file size, up to 10 seconds
-  const fps = 5;
-  const maxDuration = Math.min(durationSeconds, 10);
-  const totalFrames = Math.floor(maxDuration * fps); // 50 frames max
-  const frameInterval = 1000 / fps;
+): Promise<RecordingController & { captureFrame: () => void }> {
   const capturedFrames: string[] = [];
   let isActive = true;
   let frameIndex = 0;
-  let intervalId: NodeJS.Timeout | null = null;
-  const startTime = Date.now();
   
   // Create offscreen canvas for compositing if overlay exists
   const compositeCanvas = document.createElement("canvas");
@@ -1179,16 +1173,12 @@ export async function startLiveRecordingFrameBased(
   compositeCanvas.height = canvas.height;
   const compositeCtx = compositeCanvas.getContext("2d");
   
-  console.log("[Recording] Starting frame-based capture, targeting", totalFrames, "frames, overlay:", !!overlayCanvas);
+  console.log("[Recording] Starting step-based capture, targeting", totalFrames, "frames, overlay:", !!overlayCanvas);
   
-  // Capture frames at regular intervals
-  intervalId = setInterval(() => {
+  // Function to capture a single frame - called externally on each simulation step
+  const captureFrame = () => {
     if (!isActive || frameIndex >= totalFrames) {
-      if (intervalId) {
-        clearInterval(intervalId);
-        intervalId = null;
-      }
-      if (isActive) {
+      if (isActive && frameIndex >= totalFrames) {
         finishRecording();
       }
       return;
@@ -1216,17 +1206,18 @@ export async function startLiveRecordingFrameBased(
       
       const progress = frameIndex / totalFrames;
       onProgress?.(progress);
+      
+      // Auto-finish when we hit the target
+      if (frameIndex >= totalFrames) {
+        finishRecording();
+      }
     } catch (e) {
       console.error("[Recording] Frame capture error:", e);
     }
-  }, frameInterval);
+  };
   
   const finishRecording = async () => {
     isActive = false;
-    if (intervalId) {
-      clearInterval(intervalId);
-      intervalId = null;
-    }
     
     console.log("[Recording] Captured", capturedFrames.length, "frames, creating GIF...");
     
@@ -1240,12 +1231,15 @@ export async function startLiveRecordingFrameBased(
       const targetWidth = Math.min(canvas.width, 200);
       const targetHeight = Math.min(canvas.height, 200);
       
+      // 100ms delay per frame (10fps playback for smooth animation)
+      const frameDelay = 100;
+      
       // Create an animated GIF using our existing utility with timeout
       const gifPromise = createAnimatedGifFromDataUrls(
         capturedFrames, 
         targetWidth, 
         targetHeight, 
-        Math.floor(1000 / fps)
+        frameDelay
       );
       
       // Add timeout to prevent hanging (30s for 50 frames)
@@ -1273,6 +1267,7 @@ export async function startLiveRecordingFrameBased(
   };
   
   return {
+    captureFrame,
     stop: () => {
       if (isActive) {
         finishRecording();
@@ -1483,173 +1478,20 @@ async function createAnimatedGifFromDataUrls(
   return new Uint8Array(gifBytes);
 }
 
+/**
+ * Start step-based recording - captures 1 frame per simulation step
+ * Always uses frame-based approach for consistent behavior across platforms
+ */
 export async function startLiveRecording(
   canvas: HTMLCanvasElement,
-  durationSeconds: number = 10,
+  totalFrames: number = 50,
   onProgress?: (progress: number) => void,
   onComplete?: (blob: Blob) => void,
   onError?: (error: string) => void,
   overlayCanvas?: HTMLCanvasElement | null
-): Promise<RecordingController> {
-  // Detect iOS and use frame-based recording
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  if (isIOS) {
-    console.log("[Recording] Using frame-based recording for iOS");
-    return startLiveRecordingFrameBased(canvas, durationSeconds, onProgress, onComplete, onError, overlayCanvas);
-  }
-  
-  // Check for MediaRecorder support
-  if (typeof MediaRecorder === "undefined") {
-    console.error("[Recording] MediaRecorder not supported, falling back to frame-based");
-    return startLiveRecordingFrameBased(canvas, durationSeconds, onProgress, onComplete, onError, overlayCanvas);
-  }
-
-  // Check for captureStream support
-  if (!canvas.captureStream) {
-    console.error("[Recording] captureStream not supported, falling back to frame-based");
-    return startLiveRecordingFrameBased(canvas, durationSeconds, onProgress, onComplete, onError, overlayCanvas);
-  }
-
-  const fps = 30;
-  const stream = canvas.captureStream(fps);
-  const chunks: Blob[] = [];
-  
-  // Log stream info
-  console.log("[Recording] Stream tracks:", stream.getTracks().length);
-  
-  // Try different mime types for compatibility - prioritize MP4 for iOS
-  const mimeTypes = [
-    "video/mp4",
-    "video/webm;codecs=h264",
-    "video/webm;codecs=vp9",
-    "video/webm;codecs=vp8",
-    "video/webm",
-  ];
-  
-  let mimeType = "";
-  for (const type of mimeTypes) {
-    if (MediaRecorder.isTypeSupported(type)) {
-      mimeType = type;
-      console.log("[Recording] Using mime type:", type);
-      break;
-    }
-  }
-  
-  if (!mimeType) {
-    console.error("[Recording] No supported video format found");
-    onError?.("No supported video format found on this device");
-    return {
-      stop: () => {},
-      getProgress: () => 0,
-      isRecording: () => false
-    };
-  }
-  
-  let mediaRecorder: MediaRecorder;
-  try {
-    mediaRecorder = new MediaRecorder(stream, {
-      mimeType,
-      videoBitsPerSecond: 2500000
-    });
-  } catch (e) {
-    console.error("[Recording] Failed to create MediaRecorder:", e);
-    onError?.("Failed to initialize video recorder");
-    return {
-      stop: () => {},
-      getProgress: () => 0,
-      isRecording: () => false
-    };
-  }
-  
-  let isActive = true;
-  let startTime = Date.now();
-  let progressInterval: NodeJS.Timeout | null = null;
-  
-  mediaRecorder.ondataavailable = (e) => {
-    console.log("[Recording] Data available:", e.data.size, "bytes");
-    if (e.data.size > 0) {
-      chunks.push(e.data);
-    }
-  };
-  
-  mediaRecorder.onstop = () => {
-    isActive = false;
-    if (progressInterval) {
-      clearInterval(progressInterval);
-    }
-    
-    console.log("[Recording] Stopped. Total chunks:", chunks.length, "Total size:", chunks.reduce((a, b) => a + b.size, 0));
-    
-    if (chunks.length === 0) {
-      console.error("[Recording] No data captured!");
-      onError?.("No video data was captured");
-      return;
-    }
-    
-    const blob = new Blob(chunks, { type: mimeType.split(";")[0] });
-    console.log("[Recording] Final blob size:", blob.size, "type:", blob.type);
-    onComplete?.(blob);
-  };
-  
-  mediaRecorder.onerror = () => {
-    isActive = false;
-    if (progressInterval) {
-      clearInterval(progressInterval);
-    }
-    onError?.("Recording failed");
-  };
-  
-  // Helper to safely stop recording
-  const safeStop = () => {
-    if (progressInterval) {
-      clearInterval(progressInterval);
-      progressInterval = null;
-    }
-    try {
-      if (isActive && mediaRecorder.state === "recording") {
-        mediaRecorder.stop();
-      }
-    } catch (e) {
-      console.warn("[Recording] Error stopping recorder:", e);
-    }
-  };
-  
-  // Start recording
-  mediaRecorder.start(1000); // Collect data every 1 second for better compatibility
-  
-  // Progress updates
-  progressInterval = setInterval(() => {
-    if (!isActive) {
-      if (progressInterval) {
-        clearInterval(progressInterval);
-        progressInterval = null;
-      }
-      return;
-    }
-    const elapsed = (Date.now() - startTime) / 1000;
-    const progress = Math.min(elapsed / durationSeconds, 1);
-    onProgress?.(progress);
-    
-    if (elapsed >= durationSeconds) {
-      safeStop();
-    }
-  }, 100);
-  
-  // Auto-stop after duration (backup)
-  setTimeout(() => {
-    safeStop();
-  }, durationSeconds * 1000 + 500); // Add small buffer
-  
-  return {
-    stop: () => {
-      safeStop();
-    },
-    getProgress: () => {
-      const elapsed = (Date.now() - startTime) / 1000;
-      return Math.min(elapsed / durationSeconds, 1);
-    },
-    isRecording: () => isActive && mediaRecorder.state === "recording"
-  };
+): Promise<RecordingController & { captureFrame: () => void }> {
+  console.log("[Recording] Using step-based recording,", totalFrames, "frames");
+  return startLiveRecordingFrameBased(canvas, totalFrames, onProgress, onComplete, onError, overlayCanvas);
 }
 
 /**

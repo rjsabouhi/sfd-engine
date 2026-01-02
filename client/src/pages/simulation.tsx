@@ -270,7 +270,7 @@ export default function SimulationPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showVideoDialog, setShowVideoDialog] = useState(false);
   const [recordingError, setRecordingError] = useState<string | null>(null);
-  const recordingControllerRef = useRef<RecordingController | null>(null);
+  const recordingControllerRef = useRef<(RecordingController & { captureFrame: () => void }) | null>(null);
   
   // Manage preview URL lifecycle to prevent caching issues
   // Also trigger dialog display when new URL is ready
@@ -364,6 +364,11 @@ export default function SimulationPage() {
       frameCountRef.current += 1;
       const frameCount = frameCountRef.current;
       const inPlayback = engine.isInPlaybackMode();
+      
+      // Capture frame for recording (1 frame per step)
+      if (recordingControllerRef.current?.isRecording()) {
+        recordingControllerRef.current.captureFrame();
+      }
       
       unstable_batchedUpdates(() => {
         setState(newState);
@@ -482,7 +487,7 @@ export default function SimulationPage() {
     engineRef.current?.reset();
   }, []);
 
-  // Mobile video recording handler
+  // Mobile video recording handler - step-based (1 frame per simulation step)
   const handleStartRecording = useCallback(async () => {
     const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
     if (!canvas) {
@@ -508,9 +513,12 @@ export default function SimulationPage() {
     
     setIsRecording(true);
     
+    // 50 frames = 50 simulation steps
+    const totalFrames = 50;
+    
     const controller = await startLiveRecording(
       canvas,
-      10, // 10 seconds at 5fps = 50 frames
+      totalFrames,
       (progress) => setRecordingProgress(progress),
       (blob) => {
         setIsRecording(false);
@@ -1587,7 +1595,7 @@ export default function SimulationPage() {
                     />
                   </div>
                   <div className="text-center text-[10px] text-red-400 mt-0.5">
-                    Recording {Math.round(recordingProgress * 10)}s / 10s
+                    Recording {Math.round(recordingProgress * 50)} / 50 steps
                   </div>
                 </div>
               )}
