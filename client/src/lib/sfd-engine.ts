@@ -257,6 +257,21 @@ export class SFDEngine {
         this.grid = this.tempGrid;
         this.tempGrid = temp;
       }
+      
+      // Add gentle cosine ripple from center for circular evolution
+      // Lower amplitude (0.008) + radial falloff prevents abrupt jumps while 
+      // preserving the characteristic radial pattern formation
+      const rippleAmp = 0.008;
+      for (let y = 0; y < this.height; y++) {
+        for (let x = 0; x < this.width; x++) {
+          const dx = (x - cx) / this.width;
+          const dy = (y - cy) / this.height;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          // Radial falloff keeps edges calm (Gaussian window)
+          const falloff = Math.exp(-dist * dist * 4);
+          this.grid[y * this.width + x] += rippleAmp * Math.cos(dist * Math.PI * 2) * falloff;
+        }
+      }
     }
     this.step = 0;
     this.ringBuffer = [];
