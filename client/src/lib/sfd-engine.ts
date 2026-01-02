@@ -344,6 +344,13 @@ export class SFDEngine {
     } else if (params.couplingRadius !== undefined) {
       // Radius change affects rendering, notify immediately
       this.notifyUpdate();
+    } else if (params.wK !== undefined || params.wT !== undefined || 
+               params.wC !== undefined || params.wA !== undefined || params.wR !== undefined) {
+      // Weight parameter changes - run one step to show immediate effect
+      if (!this.isRunning) {
+        this.updateStep();
+        this.notifyUpdate();
+      }
     }
   }
 
