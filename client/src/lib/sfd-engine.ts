@@ -1588,6 +1588,8 @@ export class SFDEngine {
     this.playbackDisplayGrid = new Float32Array(snapshot.grid);
     this.playbackDisplayStep = snapshot.step;
     this.invalidateDerivedFieldCache();
+    // Recompute basin map for the scrubbed frame
+    this.updateBasinMap();
     this.notifyUpdate();
   }
   
