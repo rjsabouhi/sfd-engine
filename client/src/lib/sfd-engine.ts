@@ -931,6 +931,9 @@ export class SFDEngine {
   }
 
   private updateBasinMap(): void {
+    // Use playback display grid when in playback mode, otherwise use live grid
+    const sourceGrid = this.playbackDisplayGrid !== null ? this.playbackDisplayGrid : this.grid;
+    
     const labels = new Int32Array(this.width * this.height);
     labels.fill(-1);
     
@@ -948,7 +951,7 @@ export class SFDEngine {
           const cidx = cy * this.width + cx;
           path.push(cidx);
           
-          const cv = this.grid[cidx];
+          const cv = sourceGrid[cidx];
           let minVal = cv;
           let nx = cx, ny = cy;
           
@@ -957,7 +960,7 @@ export class SFDEngine {
               if (dx === 0 && dy === 0) continue;
               const px = ((cx + dx) % this.width + this.width) % this.width;
               const py = ((cy + dy) % this.height + this.height) % this.height;
-              const pv = this.grid[py * this.width + px];
+              const pv = sourceGrid[py * this.width + px];
               if (pv < minVal) {
                 minVal = pv;
                 nx = px;
