@@ -1822,20 +1822,34 @@ export default function SimulationPage() {
                     <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/60'}`}>Layers</span>
                   </button>
 
-                  {/* Run button - toggles scrub controls panel */}
+                  {/* Run button - play/pause simulation, long-press for scrub panel */}
                   <button
-                    onClick={() => setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub")}
+                    onClick={() => {
+                      if (state.isRunning) {
+                        handlePause();
+                      } else {
+                        handlePlay();
+                      }
+                    }}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub");
+                    }}
                     className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                      mobileActiveTab === "scrub"
+                      state.isRunning || mobileActiveTab === "scrub"
                         ? 'bg-green-500/20 border-2 border-green-500/50' 
                         : 'bg-white/10 border border-white/20'
                     }`}
-                    data-testid="button-scrub-mobile"
-                    aria-label="Open playback controls"
+                    data-testid="button-run-mobile"
+                    aria-label={state.isRunning ? "Pause simulation" : "Run simulation"}
                   >
-                    <Play className={`h-5 w-5 ${mobileActiveTab === "scrub" ? 'text-green-400' : 'text-white/80'} ml-0.5`} />
-                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "scrub" ? 'text-green-400' : 'text-white/60'}`}>
-                      Run
+                    {state.isRunning ? (
+                      <Pause className="h-5 w-5 text-green-400" />
+                    ) : (
+                      <Play className="h-5 w-5 text-white/80 ml-0.5" />
+                    )}
+                    <span className={`text-[9px] mt-0.5 ${state.isRunning || mobileActiveTab === "scrub" ? 'text-green-400' : 'text-white/60'}`}>
+                      {state.isRunning ? 'Pause' : 'Run'}
                     </span>
                   </button>
 
