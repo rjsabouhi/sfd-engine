@@ -284,7 +284,23 @@ export function VisualizationCanvas({
   useEffect(() => {
     const handleResize = () => render();
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    
+    // Use ResizeObserver to detect container size changes (e.g., when panels open/close)
+    const container = containerRef.current;
+    let resizeObserver: ResizeObserver | null = null;
+    if (container) {
+      resizeObserver = new ResizeObserver(() => {
+        render();
+      });
+      resizeObserver.observe(container);
+    }
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
   }, [render]);
 
   // Report transform changes to parent for overlay synchronization
