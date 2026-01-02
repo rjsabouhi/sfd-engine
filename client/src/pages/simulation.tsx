@@ -1569,24 +1569,6 @@ export default function SimulationPage() {
                   <SkipBack className="h-4 w-4 text-white/80" />
                 </button>
 
-                {/* Play/Pause - same size as others */}
-                <button
-                  onClick={state.isRunning ? handlePause : handlePlay}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 ${
-                    state.isRunning 
-                      ? 'bg-green-500/20 border-2 border-green-500/50' 
-                      : 'bg-white/10 border border-white/20'
-                  }`}
-                  data-testid={state.isRunning ? "button-pause-playback-mobile" : "button-play-playback-mobile"}
-                  aria-label={state.isRunning ? "Pause simulation" : "Play simulation"}
-                >
-                  {state.isRunning ? (
-                    <Pause className="h-4 w-4 text-green-400" />
-                  ) : (
-                    <Play className="h-4 w-4 text-white/80 ml-0.5" />
-                  )}
-                </button>
-
                 {/* Step Forward */}
                 <button
                   onClick={() => {
