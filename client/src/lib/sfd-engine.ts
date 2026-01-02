@@ -227,7 +227,7 @@ export class SFDEngine {
       }
     } else {
       // Standard initialization: gentle correlated noise for smooth evolution
-      // Lower amplitude (±0.02) prevents abrupt visual jumps in first frames
+      // Lower amplitude prevents abrupt visual jumps in first frames
       const noiseAmp = 0.04;
       
       for (let i = 0; i < this.grid.length; i++) {
@@ -237,6 +237,10 @@ export class SFDEngine {
       // Apply simple blur pass to create spatial correlation (smoother than raw noise)
       // This prevents the jarring visual snap when operators first engage
       for (let pass = 0; pass < 2; pass++) {
+        // First copy all values (handles edges)
+        this.tempGrid.set(this.grid);
+        
+        // Then blur interior pixels
         for (let y = 1; y < this.height - 1; y++) {
           for (let x = 1; x < this.width - 1; x++) {
             const idx = y * this.width + x;
