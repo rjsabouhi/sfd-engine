@@ -1271,7 +1271,7 @@ export default function SimulationPage() {
                         }
                       }
                     }}
-                    className="flex flex-col items-center gap-1"
+                    className="flex items-center justify-center"
                     data-testid={`button-regime-${regime.key}-mobile`}
                     aria-label={regime.label}
                   >
@@ -1284,9 +1284,6 @@ export default function SimulationPage() {
                         {regime.symbol}
                       </span>
                     </div>
-                    <span className={`text-[10px] ${currentRegimeKey === regime.key ? 'text-purple-400' : 'text-white/50'}`}>
-                      {regime.label.split('-')[0]}
-                    </span>
                   </button>
                 ))}
               </div>
