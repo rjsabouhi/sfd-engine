@@ -257,6 +257,8 @@ export default function SimulationPage() {
   const [regimeOverlay, setRegimeOverlay] = useState<string | null>(null);
   const [instabilityFlash, setInstabilityFlash] = useState(false);
   const [tiltOffset, setTiltOffset] = useState({ x: 0, y: 0 });
+  const [selectedRegimeKey, setSelectedRegimeKey] = useState<string | null>(null); // null = default params
+  const defaultParamsRef = useRef<SimulationParameters>(isMobile ? mobileParameters : defaultParameters); // Store initial params for regime toggle
   const [mobileLayerIndex, setMobileLayerIndex] = useState(-1); // -1 = base field only, 0+ = overlay layer
   const [layersSubtab, setLayersSubtab] = useState<'structure' | 'presets'>('structure');
   const [activePresetId, setActivePresetId] = useState<string | null>(null);
@@ -1265,7 +1267,12 @@ export default function SimulationPage() {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      if (structuralPresets[regime.key]) {
+                      // Toggle behavior: if tapping already-selected regime, revert to default
+                      if (selectedRegimeKey === regime.key) {
+                        setSelectedRegimeKey(null);
+                        handleParamsChange(defaultParamsRef.current);
+                      } else if (structuralPresets[regime.key]) {
+                        setSelectedRegimeKey(regime.key);
                         handleParamsChange(structuralPresets[regime.key]);
                         const smartConfig = getSmartViewConfig(regime.key);
                         if (smartConfig) {
@@ -1278,15 +1285,15 @@ export default function SimulationPage() {
                     aria-label={regime.label}
                   >
                     <div className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
-                      currentRegimeKey === regime.key
+                      selectedRegimeKey === regime.key
                         ? 'bg-purple-500/30 border-2 border-purple-400'
                         : 'bg-white/10 border border-white/20 active:bg-white/20'
                     }`}>
-                      <span className={`text-base font-semibold ${currentRegimeKey === regime.key ? 'text-purple-400' : 'text-white/80'}`}>
+                      <span className={`text-base font-semibold ${selectedRegimeKey === regime.key ? 'text-purple-400' : 'text-white/80'}`}>
                         {regime.symbol}
                       </span>
                     </div>
-                    <span className={`text-[10px] ${currentRegimeKey === regime.key ? 'text-purple-400' : 'text-white/50'}`}>
+                    <span className={`text-[10px] ${selectedRegimeKey === regime.key ? 'text-purple-400' : 'text-white/50'}`}>
                       {regime.label.split('-')[0]}
                     </span>
                   </button>
@@ -1840,7 +1847,7 @@ export default function SimulationPage() {
                     onClick={() => {
                       const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
                       if (canvas) {
-                        const regimeLabel = mobileRegimes.find(r => r.key === currentRegimeKey)?.label || "Equilibrium";
+                        const regimeLabel = mobileRegimes.find(r => r.key === selectedRegimeKey)?.label || "Default";
                         exportMobileShareSnapshot(canvas, {
                           regime: regimeLabel,
                           stability: stabilityState,
