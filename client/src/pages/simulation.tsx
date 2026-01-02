@@ -307,14 +307,10 @@ export default function SimulationPage() {
     { key: "basins", label: "Basins", icon: "A" },
   ] as const;
 
-  // Helper function to select a mobile layer (tap again to deselect and show base)
+  // Helper function to select a mobile layer (once selected, stays selected)
   const selectMobileLayer = (layerIdx: number) => {
-    // If tapping the already-selected layer, deselect it (show base field alone)
+    // If tapping the already-selected layer, do nothing (no toggle-off behavior)
     if (mobileLayerIndex === layerIdx) {
-      setMobileLayerIndex(-1); // -1 means no overlay, just base field
-      setShowDualView(false);
-      setBlendMode(false);
-      setHasUserSelectedOverlay(false); // Reset when deselecting
       return;
     }
     
