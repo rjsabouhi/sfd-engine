@@ -314,10 +314,12 @@ export default function SimulationPage() {
       setMobileLayerIndex(-1); // -1 means no overlay, just base field
       setShowDualView(false);
       setBlendMode(false);
+      setHasUserSelectedOverlay(false); // Reset when deselecting
       return;
     }
     
     setMobileLayerIndex(layerIdx);
+    setHasUserSelectedOverlay(true); // Mark that user manually selected a layer
     const newLayer = mobileLayers[layerIdx];
     
     // Enable overlay mode
@@ -1278,9 +1280,12 @@ export default function SimulationPage() {
                       } else if (structuralPresets[regime.key]) {
                         setSelectedRegimeKey(regime.key);
                         handleParamsChange(structuralPresets[regime.key]);
-                        const smartConfig = getSmartViewConfig(regime.key);
-                        if (smartConfig) {
-                          handleSmartViewApply(smartConfig);
+                        // Only apply smart view config if user hasn't manually selected a layer
+                        if (!hasUserSelectedOverlay) {
+                          const smartConfig = getSmartViewConfig(regime.key);
+                          if (smartConfig) {
+                            handleSmartViewApply(smartConfig);
+                          }
                         }
                       }
                     }}
