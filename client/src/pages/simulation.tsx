@@ -1185,38 +1185,61 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Double-tap field sampler tooltip */}
-        {touchState.lastDoubleTapData && (
-          <div 
-            className="absolute pointer-events-none z-50"
-            style={{
-              left: touchState.lastDoubleTapData.x,
-              top: touchState.lastDoubleTapData.y - 80,
-              transform: 'translateX(-50%)',
-            }}
-          >
+        {/* Double-tap field sampler tooltip - vertical stack for edge safety */}
+        {touchState.lastDoubleTapData && (() => {
+          const tapX = touchState.lastDoubleTapData.x;
+          const tapY = touchState.lastDoubleTapData.y;
+          const screenW = window.innerWidth;
+          const tooltipW = 90; // approximate width
+          const tooltipH = 100; // approximate height
+          
+          // Clamp horizontal position to stay within screen
+          const clampedX = Math.max(tooltipW / 2 + 12, Math.min(screenW - tooltipW / 2 - 12, tapX));
+          // Position above tap point, or below if too close to top
+          const posY = tapY > tooltipH + 20 ? tapY - 20 : tapY + 60;
+          const translateY = tapY > tooltipH + 20 ? '-100%' : '0%';
+          
+          return (
             <div 
-              className="bg-neutral-900/90 backdrop-blur-md px-3 py-2 rounded-lg border border-white/20 shadow-lg"
-              style={{ animation: 'fadeIn 0.2s ease-out' }}
+              className="absolute pointer-events-none z-50"
+              style={{
+                left: clampedX,
+                top: posY,
+                transform: `translateX(-50%) translateY(${translateY})`,
+              }}
             >
-              <div className="text-[10px] text-white/50 mb-1">Field Sample</div>
-              <div className="flex items-center gap-3 text-xs">
-                <span className="text-cyan-400 font-mono">
-                  k {touchState.lastDoubleTapData.localKappa.toFixed(3)}
-                </span>
-                <span className="text-amber-400 font-mono">
-                  e {touchState.lastDoubleTapData.localEpsilon.toFixed(3)}
-                </span>
-                <span className={`font-medium ${
-                  touchState.lastDoubleTapData.stabilityClass === 'stable' ? 'text-green-400' :
-                  touchState.lastDoubleTapData.stabilityClass === 'borderline' ? 'text-yellow-400' : 'text-red-400'
-                }`}>
-                  {touchState.lastDoubleTapData.stabilityClass}
-                </span>
+              <div 
+                className="bg-neutral-900/90 backdrop-blur-md px-3 py-2.5 rounded-lg border border-white/20 shadow-lg"
+                style={{ animation: 'fadeIn 0.2s ease-out' }}
+              >
+                <div className="text-[10px] text-white/50 mb-1.5 text-center">Field Sample</div>
+                <div className="flex flex-col gap-1 text-xs">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-white/50">kappa</span>
+                    <span className="text-cyan-400 font-mono">
+                      {touchState.lastDoubleTapData.localKappa.toFixed(3)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-white/50">epsilon</span>
+                    <span className="text-amber-400 font-mono">
+                      {touchState.lastDoubleTapData.localEpsilon.toFixed(3)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 pt-0.5 border-t border-white/10">
+                    <span className="text-white/50">state</span>
+                    <span className={`font-medium ${
+                      touchState.lastDoubleTapData.stabilityClass === 'stable' ? 'text-green-400' :
+                      touchState.lastDoubleTapData.stabilityClass === 'borderline' ? 'text-yellow-400' : 'text-red-400'
+                    }`}>
+                      {touchState.lastDoubleTapData.stabilityClass}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
 
         {/* Top Bar - iPhone-style enclosed panel with subtle gradient fade */}
