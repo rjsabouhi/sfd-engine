@@ -1518,12 +1518,12 @@ export default function SimulationPage() {
         {mobileActiveTab === "scrub" && (
           <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
             <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
-              {/* Playback Controls Row - evenly spaced, uniform size */}
-              <div className="flex items-center justify-between mb-3 px-2">
+              {/* Playback Controls Row - traditional media player layout */}
+              <div className="flex items-center justify-center gap-3 mb-3">
                 {/* Reset */}
                 <button
                   onClick={handleReset}
-                  className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
                   data-testid="button-reset-mobile"
                   aria-label="Reset simulation"
                 >
@@ -1536,24 +1536,24 @@ export default function SimulationPage() {
                     if (state.isRunning) handlePause();
                     handleStepBackward();
                   }}
-                  className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
                   data-testid="button-step-back-mobile"
                   aria-label="Step backward"
                 >
                   <SkipBack className="h-4 w-4 text-white/80" />
                 </button>
 
-                {/* Play/Pause - always highlighted green as primary action */}
+                {/* Play/Pause - larger center button, always highlighted green */}
                 <button
                   onClick={state.isRunning ? handlePause : handlePlay}
-                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 bg-green-500/20 border-2 border-green-500/50"
+                  className="w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-95 bg-green-500/20 border-2 border-green-500/50"
                   data-testid={state.isRunning ? "button-pause-playback-mobile" : "button-play-playback-mobile"}
                   aria-label={state.isRunning ? "Pause simulation" : "Play simulation"}
                 >
                   {state.isRunning ? (
-                    <Pause className="h-4 w-4 text-green-400" />
+                    <Pause className="h-5 w-5 text-green-400" />
                   ) : (
-                    <Play className="h-4 w-4 text-green-400 ml-0.5" />
+                    <Play className="h-5 w-5 text-green-400 ml-0.5" />
                   )}
                 </button>
 
@@ -1563,7 +1563,7 @@ export default function SimulationPage() {
                     if (state.isRunning) handlePause();
                     handleStep();
                   }}
-                  className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
                   data-testid="button-step-forward-mobile"
                   aria-label="Step forward"
                 >
@@ -1574,7 +1574,7 @@ export default function SimulationPage() {
                 <button
                   onClick={isRecording ? handleStopRecording : handleStartRecording}
                   disabled={isRecording && recordingProgress >= 1}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95 ${
                     isRecording
                       ? 'bg-red-500/20 border-2 border-red-500/50'
                       : 'bg-white/10 border border-white/20'
