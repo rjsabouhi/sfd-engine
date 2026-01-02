@@ -346,9 +346,9 @@ export class SFDEngine {
       this.notifyUpdate();
     } else if (params.wK !== undefined || params.wT !== undefined || 
                params.wC !== undefined || params.wA !== undefined || params.wR !== undefined) {
-      // Weight parameter changes - run one step immediately for responsive feedback
-      // This works whether paused or running, ensuring slider changes are instantly visible
-      this.updateStep();
+      // Weight parameter changes - just notify update for re-render
+      // Don't run steps automatically - let user control via play/pause
+      // Running steps on every slider change caused rapid uncontrolled simulation
       this.notifyUpdate();
     }
   }
