@@ -1825,21 +1825,6 @@ export default function SimulationPage() {
                     <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/60'}`}>Params</span>
                   </button>
 
-                  {/* Regimes button - toggles inline regime controls */}
-                  <button
-                    onClick={() => setMobileActiveTab(mobileActiveTab === "regimes" ? null : "regimes")}
-                    className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                      mobileActiveTab === "regimes" 
-                        ? 'bg-purple-500/20 border-2 border-purple-500/50' 
-                        : 'bg-white/10 border border-white/20'
-                    }`}
-                    data-testid="button-regimes-mobile"
-                    aria-label="Choose dynamic regime"
-                  >
-                    <Zap className={`h-5 w-5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/80'}`} />
-                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/60'}`}>Regimes</span>
-                  </button>
-
                   {/* Layers button - toggles inline layer controls */}
                   <button
                     onClick={() => setMobileActiveTab(mobileActiveTab === "layers" ? null : "layers")}
@@ -1870,6 +1855,21 @@ export default function SimulationPage() {
                     <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "scrub" ? 'text-green-400' : 'text-white/60'}`}>
                       Run
                     </span>
+                  </button>
+
+                  {/* Regimes button - toggles inline regime controls */}
+                  <button
+                    onClick={() => setMobileActiveTab(mobileActiveTab === "regimes" ? null : "regimes")}
+                    className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                      mobileActiveTab === "regimes" 
+                        ? 'bg-purple-500/20 border-2 border-purple-500/50' 
+                        : 'bg-white/10 border border-white/20'
+                    }`}
+                    data-testid="button-regimes-mobile"
+                    aria-label="Choose dynamic regime"
+                  >
+                    <Zap className={`h-5 w-5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/80'}`} />
+                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/60'}`}>Regimes</span>
                   </button>
 
                   {/* Share button */}
