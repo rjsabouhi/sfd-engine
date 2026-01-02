@@ -510,7 +510,7 @@ export default function SimulationPage() {
     
     const controller = await startLiveRecording(
       canvas,
-      4, // 4 seconds at 5fps = 20 frames for fast GIF creation
+      10, // 10 seconds at 5fps = 50 frames
       (progress) => setRecordingProgress(progress),
       (blob) => {
         setIsRecording(false);
@@ -1587,7 +1587,7 @@ export default function SimulationPage() {
                     />
                   </div>
                   <div className="text-center text-[10px] text-red-400 mt-0.5">
-                    Recording {Math.round(recordingProgress * 4)}s / 4s
+                    Recording {Math.round(recordingProgress * 10)}s / 10s
                   </div>
                 </div>
               )}

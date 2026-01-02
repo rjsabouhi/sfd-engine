@@ -1162,10 +1162,10 @@ export async function startLiveRecordingFrameBased(
   onError?: (error: string) => void,
   overlayCanvas?: HTMLCanvasElement | null
 ): Promise<RecordingController> {
-  // Reduce to 5fps and 4 seconds max for faster GIF creation
+  // 5fps for reasonable file size, up to 10 seconds
   const fps = 5;
-  const maxDuration = Math.min(durationSeconds, 4);
-  const totalFrames = Math.floor(maxDuration * fps); // 20 frames max
+  const maxDuration = Math.min(durationSeconds, 10);
+  const totalFrames = Math.floor(maxDuration * fps); // 50 frames max
   const frameInterval = 1000 / fps;
   const capturedFrames: string[] = [];
   let isActive = true;
@@ -1248,9 +1248,9 @@ export async function startLiveRecordingFrameBased(
         Math.floor(1000 / fps)
       );
       
-      // Add timeout to prevent hanging
+      // Add timeout to prevent hanging (30s for 50 frames)
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error("GIF creation timed out")), 15000);
+        setTimeout(() => reject(new Error("GIF creation timed out")), 30000);
       });
       
       const gifData = await Promise.race([gifPromise, timeoutPromise]);
