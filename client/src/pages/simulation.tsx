@@ -1606,52 +1606,50 @@ export default function SimulationPage() {
               )}
 
               {/* Slider with frame nudge buttons - center justified */}
-              <div className="flex flex-col items-center gap-2">
-                <div className="flex items-center justify-center gap-2 w-full">
-                  {/* Back 10 frames */}
-                  <button
-                    onClick={() => {
-                      if (state.isRunning) handlePause();
-                      handleAnimatedSeek(Math.max(0, currentHistoryIndex - 10));
-                    }}
-                    className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
-                    data-testid="button-back-10-mobile"
-                    aria-label="Back 10 frames"
-                  >
-                    <ChevronLeft className="h-4 w-4 text-white/80" />
-                  </button>
-                  
-                  {/* Slider - styled like blend slider */}
-                  <input
-                    type="range"
-                    min="0"
-                    max={Math.max(0, historyLength - 1)}
-                    value={currentHistoryIndex}
-                    onChange={(e) => {
-                      if (state.isRunning) handlePause();
-                      handleSeekFrame(parseInt(e.target.value));
-                    }}
-                    className="flex-1 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
-                    data-testid="slider-timeline-mobile"
-                    aria-label="Timeline scrubber"
-                  />
-                  
-                  {/* Forward 10 frames */}
-                  <button
-                    onClick={() => {
-                      if (state.isRunning) handlePause();
-                      handleAnimatedSeek(Math.min(historyLength - 1, currentHistoryIndex + 10));
-                    }}
-                    className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
-                    data-testid="button-forward-10-mobile"
-                    aria-label="Forward 10 frames"
-                  >
-                    <ChevronRight className="h-4 w-4 text-white/80" />
-                  </button>
-                </div>
+              <div className="flex items-center justify-center gap-2">
+                {/* Back 10 frames */}
+                <button
+                  onClick={() => {
+                    if (state.isRunning) handlePause();
+                    handleAnimatedSeek(Math.max(0, currentHistoryIndex - 10));
+                  }}
+                  className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-back-10-mobile"
+                  aria-label="Back 10 frames"
+                >
+                  <ChevronLeft className="h-4 w-4 text-white/80" />
+                </button>
+                
+                {/* Slider - reduced width */}
+                <input
+                  type="range"
+                  min="0"
+                  max={Math.max(0, historyLength - 1)}
+                  value={currentHistoryIndex}
+                  onChange={(e) => {
+                    if (state.isRunning) handlePause();
+                    handleSeekFrame(parseInt(e.target.value));
+                  }}
+                  className="w-32 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                  data-testid="slider-timeline-mobile"
+                  aria-label="Timeline scrubber"
+                />
+                
+                {/* Forward 10 frames */}
+                <button
+                  onClick={() => {
+                    if (state.isRunning) handlePause();
+                    handleAnimatedSeek(Math.min(historyLength - 1, currentHistoryIndex + 10));
+                  }}
+                  className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center active:bg-white/20 transition-colors"
+                  data-testid="button-forward-10-mobile"
+                  aria-label="Forward 10 frames"
+                >
+                  <ChevronRight className="h-4 w-4 text-white/80" />
+                </button>
 
-                {/* Frame/Step counter - centered below scrubber */}
-                <div className="flex items-center gap-2 text-center">
+                {/* Frame/Step counter - right side of scrubber */}
+                <div className="flex flex-col items-start min-w-[45px]">
                   <span className="text-[10px] font-mono text-cyan-400" data-testid="text-frame-counter">
                     {currentHistoryIndex + 1}/{historyLength}
                   </span>
