@@ -1827,15 +1827,19 @@ export default function SimulationPage() {
                     <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/60'}`}>Layers</span>
                   </button>
 
-                  {/* Run button - toggles scrub controls panel (no highlight when open) */}
+                  {/* Run button - toggles scrub controls panel */}
                   <button
                     onClick={() => setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub")}
-                    className="w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 bg-white/10 border border-white/20"
+                    className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                      mobileActiveTab === "scrub" 
+                        ? 'bg-green-500/20 border-2 border-green-500/50' 
+                        : 'bg-white/10 border border-white/20'
+                    }`}
                     data-testid="button-scrub-mobile"
                     aria-label="Open playback controls"
                   >
-                    <Play className="h-5 w-5 text-white/80 ml-0.5" />
-                    <span className="text-[9px] mt-0.5 text-white/60">
+                    <Play className={`h-5 w-5 ml-0.5 ${mobileActiveTab === "scrub" ? 'text-green-400' : 'text-white/80'}`} />
+                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "scrub" ? 'text-green-400' : 'text-white/60'}`}>
                       Run
                     </span>
                   </button>
@@ -1855,7 +1859,7 @@ export default function SimulationPage() {
                     <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/60'}`}>Regimes</span>
                   </button>
 
-                  {/* Share button */}
+                  {/* Share button - grey/silver utility color */}
                   <button
                     onClick={() => {
                       const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
@@ -1869,12 +1873,12 @@ export default function SimulationPage() {
                         });
                       }
                     }}
-                    className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex flex-col items-center justify-center active:bg-white/20 transition-colors"
+                    className="w-14 h-14 rounded-full bg-neutral-500/15 border border-neutral-400/30 flex flex-col items-center justify-center active:bg-neutral-500/25 transition-colors"
                     data-testid="button-share-mobile"
                     aria-label="Share snapshot"
                   >
-                    <Share2 className="h-5 w-5 text-white/80" />
-                    <span className="text-[9px] text-white/60 mt-0.5">Share</span>
+                    <Share2 className="h-5 w-5 text-neutral-300" />
+                    <span className="text-[9px] text-neutral-400 mt-0.5">Share</span>
                   </button>
             </div>
           </div>
