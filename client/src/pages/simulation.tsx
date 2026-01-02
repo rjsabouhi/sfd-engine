@@ -1569,21 +1569,17 @@ export default function SimulationPage() {
                   <SkipBack className="h-4 w-4 text-white/80" />
                 </button>
 
-                {/* Play/Pause - same size as others */}
+                {/* Play/Pause - always highlighted green as primary action */}
                 <button
                   onClick={state.isRunning ? handlePause : handlePlay}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 ${
-                    state.isRunning 
-                      ? 'bg-green-500/20 border-2 border-green-500/50' 
-                      : 'bg-white/10 border border-white/20'
-                  }`}
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 bg-green-500/20 border-2 border-green-500/50"
                   data-testid={state.isRunning ? "button-pause-playback-mobile" : "button-play-playback-mobile"}
                   aria-label={state.isRunning ? "Pause simulation" : "Play simulation"}
                 >
                   {state.isRunning ? (
                     <Pause className="h-4 w-4 text-green-400" />
                   ) : (
-                    <Play className="h-4 w-4 text-white/80 ml-0.5" />
+                    <Play className="h-4 w-4 text-green-400 ml-0.5" />
                   )}
                 </button>
 
@@ -1840,19 +1836,15 @@ export default function SimulationPage() {
                     <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/60'}`}>Layers</span>
                   </button>
 
-                  {/* Run button - toggles scrub controls panel */}
+                  {/* Run button - toggles scrub controls panel (no highlight when open) */}
                   <button
                     onClick={() => setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub")}
-                    className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                      mobileActiveTab === "scrub"
-                        ? 'bg-green-500/20 border-2 border-green-500/50' 
-                        : 'bg-white/10 border border-white/20'
-                    }`}
+                    className="w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 bg-white/10 border border-white/20"
                     data-testid="button-scrub-mobile"
                     aria-label="Open playback controls"
                   >
-                    <Play className={`h-5 w-5 ${mobileActiveTab === "scrub" ? 'text-green-400' : 'text-white/80'} ml-0.5`} />
-                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "scrub" ? 'text-green-400' : 'text-white/60'}`}>
+                    <Play className="h-5 w-5 text-white/80 ml-0.5" />
+                    <span className="text-[9px] mt-0.5 text-white/60">
                       Run
                     </span>
                   </button>
