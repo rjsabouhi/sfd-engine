@@ -358,7 +358,9 @@ export class SFDEngine {
   }
 
   private getValue(x: number, y: number): number {
-    return this.grid[this.getIndex(x, y)];
+    // Use playback display grid when in playback mode, otherwise use live grid
+    const sourceGrid = this.playbackDisplayGrid !== null ? this.playbackDisplayGrid : this.grid;
+    return sourceGrid[this.getIndex(x, y)];
   }
 
   private computeLaplacian(x: number, y: number): number {
@@ -1046,11 +1048,13 @@ export class SFDEngine {
 
   computeDerivedField(type: "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality" | "hysteresis" | "constraintSkeleton" | "stabilityField" | "gradientFlowLines"): DerivedField {
     const grid = new Float32Array(this.width * this.height);
+    // Use playback display grid when in playback mode
+    const sourceGrid = this.playbackDisplayGrid !== null ? this.playbackDisplayGrid : this.grid;
     
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         const idx = y * this.width + x;
-        const value = this.grid[idx];
+        const value = sourceGrid[idx];
         
         switch (type) {
           case "curvature": {
@@ -1425,10 +1429,13 @@ export class SFDEngine {
   }
 
   private computeDerivedFieldInto(type: "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality" | "hysteresis" | "constraintSkeleton" | "stabilityField" | "gradientFlowLines", grid: Float32Array): void {
+    // Use playback display grid when in playback mode
+    const sourceGrid = this.playbackDisplayGrid !== null ? this.playbackDisplayGrid : this.grid;
+    
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         const idx = y * this.width + x;
-        const value = this.grid[idx];
+        const value = sourceGrid[idx];
         
         switch (type) {
           case "curvature": {
