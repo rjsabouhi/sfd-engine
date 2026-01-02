@@ -226,18 +226,32 @@ export class SFDEngine {
         }
       }
     } else {
-      // Standard initialization for other modes
+      // Standard initialization: gentle correlated noise for smooth evolution
+      // Lower amplitude (±0.02) prevents abrupt visual jumps in first frames
+      const noiseAmp = 0.04;
+      
       for (let i = 0; i < this.grid.length; i++) {
-        this.grid[i] = (this.rng() - 0.5) * 0.1;
+        this.grid[i] = (this.rng() - 0.5) * noiseAmp;
       }
-      // Add cosine ripple from center for circular evolution
-      for (let y = 0; y < this.height; y++) {
-        for (let x = 0; x < this.width; x++) {
-          const dx = (x - cx) / this.width;
-          const dy = (y - cy) / this.height;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          this.grid[y * this.width + x] += 0.02 * Math.cos(dist * Math.PI * 2);
+      
+      // Apply simple blur pass to create spatial correlation (smoother than raw noise)
+      // This prevents the jarring visual snap when operators first engage
+      for (let pass = 0; pass < 2; pass++) {
+        for (let y = 1; y < this.height - 1; y++) {
+          for (let x = 1; x < this.width - 1; x++) {
+            const idx = y * this.width + x;
+            const neighbors = 
+              this.grid[(y-1) * this.width + x] +
+              this.grid[(y+1) * this.width + x] +
+              this.grid[y * this.width + (x-1)] +
+              this.grid[y * this.width + (x+1)];
+            this.tempGrid[idx] = this.grid[idx] * 0.5 + neighbors * 0.125;
+          }
         }
+        // Swap for next pass
+        const temp = this.grid;
+        this.grid = this.tempGrid;
+        this.tempGrid = temp;
       }
     }
     this.step = 0;
@@ -708,6 +722,18 @@ export class SFDEngine {
     
     const { dt, curvatureGain, couplingWeight, attractorStrength, redistributionRate, wK, wT, wC, wA, wR } = this.params;
 
+    // Warmup ramp: gradually increase operator strength over first 20 frames
+    // This prevents abrupt visual jumps when simulation starts
+    const warmupFrames = 20;
+    const warmupFactor = Math.min(1, this.step / warmupFrames);
+    
+    // Apply warmup to operator weights
+    const effectiveWK = wK * warmupFactor;
+    const effectiveWT = wT * warmupFactor;
+    const effectiveWC = wC * warmupFactor;
+    const effectiveWA = wA * warmupFactor;
+    const effectiveWR = wR * warmupFactor;
+
     let totalEnergy = 0;
     for (let i = 0; i < this.grid.length; i++) {
       totalEnergy += this.grid[i];
@@ -735,13 +761,13 @@ export class SFDEngine {
         const localMean = this.computeLocalMean(x, y);
         const A = -Math.tanh(attractorStrength * (value - localMean));
 
-        sumK += Math.abs(wK * K);
-        sumT += Math.abs(wT * T);
-        sumC += Math.abs(wC * C);
-        sumA += Math.abs(wA * A);
-        sumR += Math.abs(wR * R);
+        sumK += Math.abs(effectiveWK * K);
+        sumT += Math.abs(effectiveWT * T);
+        sumC += Math.abs(effectiveWC * C);
+        sumA += Math.abs(effectiveWA * A);
+        sumR += Math.abs(effectiveWR * R);
 
-        let delta = wK * K + wT * T + wC * C + wA * A + wR * R;
+        let delta = effectiveWK * K + effectiveWT * T + effectiveWC * C + effectiveWA * A + effectiveWR * R;
         if (!isFinite(delta)) delta = 0;
         delta = Math.max(-10, Math.min(10, delta));
         
