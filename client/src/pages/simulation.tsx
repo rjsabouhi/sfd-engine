@@ -449,6 +449,21 @@ export default function SimulationPage() {
       }
     }
   }, [showDualView, derivedType]);
+  
+  // Recompute overlay when params change if user has manually selected a layer
+  useEffect(() => {
+    if (hasUserSelectedOverlay && showDualView && engineRef.current) {
+      // Small delay to let the engine update after param change
+      const timer = setTimeout(() => {
+        if (derivedType === "basins") {
+          setBasinMap(engineRef.current!.getBasinMap());
+        } else {
+          setDerivedField(engineRef.current!.computeDerivedField(derivedType as any));
+        }
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [params, hasUserSelectedOverlay, showDualView, derivedType]);
 
   // Hidden diagnostic hotkey: CTRL+SHIFT+D
   useEffect(() => {
@@ -1275,6 +1290,7 @@ export default function SimulationPage() {
                       e.stopPropagation();
                       // Toggle behavior: if tapping already-selected regime, revert to default
                       if (selectedRegimeKey === regime.key) {
+                        // Reverting to default params
                         setSelectedRegimeKey(null);
                         handleParamsChange(defaultParamsRef.current);
                       } else if (structuralPresets[regime.key]) {
