@@ -259,7 +259,7 @@ export default function SimulationPage() {
   const [tiltOffset, setTiltOffset] = useState({ x: 0, y: 0 });
   const [selectedRegimeKey, setSelectedRegimeKey] = useState<string | null>(null); // null = default params
   const defaultParamsRef = useRef<SimulationParameters>(isMobile ? mobileParameters : defaultParameters); // Store initial params for regime toggle
-  const [mobileLayerIndex, setMobileLayerIndex] = useState(-1); // -1 = base field only, 0+ = overlay layer
+  const [mobileLayerIndex, setMobileLayerIndex] = useState(3); // -1 = base field only, 0+ = overlay layer (3 = variance)
   const [layersSubtab, setLayersSubtab] = useState<'structure' | 'presets'>('structure');
   const [activePresetId, setActivePresetId] = useState<string | null>(null);
   const touchContainerRef = useRef<HTMLDivElement>(null);
@@ -362,6 +362,10 @@ export default function SimulationPage() {
     // Set slower simulation speed on mobile for better viewing
     if (isMobile) {
       engine.setSimulationSpeed(8); // 8 steps per second on mobile
+      // Initialize variance overlay as default layer on mobile
+      setShowDualView(true);
+      setBlendMode(true);
+      setDerivedType("variance");
     }
 
     engine.onStateUpdate((newState, newField) => {
