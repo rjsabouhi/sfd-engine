@@ -1797,65 +1797,65 @@ export default function SimulationPage() {
         >
           <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg">
             <div className="flex items-center justify-around h-20 px-2">
-                  {/* Params button - toggles inline operator controls */}
+                  {/* Params button - ring highlight pattern: colored ring + label, grey icon */}
                   <button
                     onClick={() => setMobileActiveTab(mobileActiveTab === "params" ? null : "params")}
                     className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                       mobileActiveTab === "params" 
-                        ? 'bg-amber-500/20 border-2 border-amber-500/50' 
+                        ? 'bg-amber-500/10 border-2 border-amber-400' 
                         : 'bg-white/10 border border-white/20'
                     }`}
                     data-testid="button-params-mobile"
                     aria-label="Adjust operator parameters"
                   >
-                    <SlidersHorizontal className={`h-5 w-5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/80'}`} />
+                    <SlidersHorizontal className="h-5 w-5 text-white/80" />
                     <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/60'}`}>Params</span>
                   </button>
 
-                  {/* Layers button - toggles inline layer controls */}
+                  {/* Layers button - ring highlight pattern: colored ring + label, grey icon */}
                   <button
                     onClick={() => setMobileActiveTab(mobileActiveTab === "layers" ? null : "layers")}
                     className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                       mobileActiveTab === "layers" 
-                        ? 'bg-cyan-500/20 border-2 border-cyan-500/50' 
+                        ? 'bg-cyan-500/10 border-2 border-cyan-400' 
                         : 'bg-white/10 border border-white/20'
                     }`}
                     data-testid="button-layers-mobile"
                     aria-label="Select visualization layer"
                   >
-                    <Layers className={`h-5 w-5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/80'}`} />
+                    <Layers className="h-5 w-5 text-white/80" />
                     <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/60'}`}>Layers</span>
                   </button>
 
-                  {/* Run button - toggles scrub controls panel */}
+                  {/* Run button - ring highlight pattern: colored ring + label, grey icon */}
                   <button
                     onClick={() => setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub")}
                     className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                       mobileActiveTab === "scrub" 
-                        ? 'bg-green-500/20 border-2 border-green-500/50' 
+                        ? 'bg-green-500/10 border-2 border-green-400' 
                         : 'bg-white/10 border border-white/20'
                     }`}
                     data-testid="button-scrub-mobile"
                     aria-label="Open playback controls"
                   >
-                    <Play className={`h-5 w-5 ml-0.5 ${mobileActiveTab === "scrub" ? 'text-green-400' : 'text-white/80'}`} />
+                    <Play className="h-5 w-5 ml-0.5 text-white/80" />
                     <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "scrub" ? 'text-green-400' : 'text-white/60'}`}>
                       Run
                     </span>
                   </button>
 
-                  {/* Regimes button - toggles inline regime controls */}
+                  {/* Regimes button - ring highlight pattern: colored ring + label, grey icon */}
                   <button
                     onClick={() => setMobileActiveTab(mobileActiveTab === "regimes" ? null : "regimes")}
                     className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                       mobileActiveTab === "regimes" 
-                        ? 'bg-purple-500/20 border-2 border-purple-500/50' 
+                        ? 'bg-purple-500/10 border-2 border-purple-400' 
                         : 'bg-white/10 border border-white/20'
                     }`}
                     data-testid="button-regimes-mobile"
                     aria-label="Choose dynamic regime"
                   >
-                    <Zap className={`h-5 w-5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/80'}`} />
+                    <Zap className="h-5 w-5 text-white/80" />
                     <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/60'}`}>Regimes</span>
                   </button>
 
