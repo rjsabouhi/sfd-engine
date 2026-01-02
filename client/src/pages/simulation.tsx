@@ -1519,7 +1519,7 @@ export default function SimulationPage() {
           <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
             <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               {/* Playback Controls Row - traditional media player layout */}
-              <div className="flex items-center justify-center gap-3 mb-3">
+              <div className="relative flex items-center justify-center gap-3 mb-3">
                 {/* Reset */}
                 <button
                   onClick={handleReset}
@@ -1589,8 +1589,8 @@ export default function SimulationPage() {
                   )}
                 </button>
 
-                {/* Frame/Step counter - right of record button */}
-                <div className="flex flex-col items-end text-right min-w-[45px]">
+                {/* Frame/Step counter - positioned absolute right */}
+                <div className="absolute right-0 flex flex-col items-end text-right">
                   <span className="text-[10px] font-mono text-cyan-400" data-testid="text-frame-counter">
                     {currentHistoryIndex + 1}/{historyLength}
                   </span>
