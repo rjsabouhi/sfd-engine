@@ -1162,8 +1162,10 @@ export async function startLiveRecordingFrameBased(
   onError?: (error: string) => void,
   overlayCanvas?: HTMLCanvasElement | null
 ): Promise<RecordingController> {
-  const fps = 10; // Lower FPS for GIF to keep file size reasonable
-  const totalFrames = Math.floor(durationSeconds * fps);
+  // Reduce to 5fps and 4 seconds max for faster GIF creation
+  const fps = 5;
+  const maxDuration = Math.min(durationSeconds, 4);
+  const totalFrames = Math.floor(maxDuration * fps); // 20 frames max
   const frameInterval = 1000 / fps;
   const capturedFrames: string[] = [];
   let isActive = true;
@@ -1234,26 +1236,39 @@ export async function startLiveRecordingFrameBased(
     }
     
     try {
-      // Create a simple animated PNG or return frames for display
-      // For now, just return the last frame as an image
-      // GIF creation is complex, so we'll use a simpler approach
-      const lastFrame = capturedFrames[capturedFrames.length - 1];
-      const response = await fetch(lastFrame);
-      const blob = await response.blob();
+      // Use smaller canvas size for GIF to speed up processing
+      const targetWidth = Math.min(canvas.width, 200);
+      const targetHeight = Math.min(canvas.height, 200);
       
-      // Create an animated GIF using our existing utility
-      const gifData = await createAnimatedGifFromDataUrls(
+      // Create an animated GIF using our existing utility with timeout
+      const gifPromise = createAnimatedGifFromDataUrls(
         capturedFrames, 
-        canvas.width, 
-        canvas.height, 
+        targetWidth, 
+        targetHeight, 
         Math.floor(1000 / fps)
       );
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("GIF creation timed out")), 15000);
+      });
+      
+      const gifData = await Promise.race([gifPromise, timeoutPromise]);
       const gifBlob = new Blob([gifData], { type: "image/gif" });
       console.log("[Recording] GIF created, size:", gifBlob.size);
       onComplete?.(gifBlob);
     } catch (e) {
       console.error("[Recording] Failed to create GIF:", e);
-      onError?.("Failed to create animation");
+      // Fall back to returning last frame as PNG instead
+      try {
+        const lastFrame = capturedFrames[capturedFrames.length - 1];
+        const response = await fetch(lastFrame);
+        const blob = await response.blob();
+        console.log("[Recording] Falling back to PNG, size:", blob.size);
+        onComplete?.(blob);
+      } catch (e2) {
+        onError?.("Failed to create animation");
+      }
     }
   };
   
@@ -1272,6 +1287,7 @@ export async function startLiveRecordingFrameBased(
 
 /**
  * Create an animated GIF from data URLs
+ * Resizes frames to target dimensions for faster processing
  */
 async function createAnimatedGifFromDataUrls(
   frames: string[],
@@ -1290,7 +1306,8 @@ async function createAnimatedGifFromDataUrls(
     firstImg.onload = () => resolve();
     firstImg.src = frames[0];
   });
-  ctx.drawImage(firstImg, 0, 0);
+  // Draw scaled to target size
+  ctx.drawImage(firstImg, 0, 0, width, height);
   const firstImageData = ctx.getImageData(0, 0, width, height);
   
   // Build palette from image colors (improved quantization - 6-bit per channel for better quality)
@@ -1363,7 +1380,8 @@ async function createAnimatedGifFromDataUrls(
       img.src = frames[f];
     });
     
-    ctx.drawImage(img, 0, 0);
+    // Draw scaled to target size
+    ctx.drawImage(img, 0, 0, width, height);
     const imageData = ctx.getImageData(0, 0, width, height);
     
     // Graphics control extension
