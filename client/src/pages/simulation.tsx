@@ -359,6 +359,9 @@ export default function SimulationPage() {
     if (isMobile) {
       engine.setSimulationSpeed(8); // 8 steps per second on mobile
     }
+    
+    // Auto-start simulation so parameters have immediate effect
+    engine.start();
 
     engine.onStateUpdate((newState, newField) => {
       frameCountRef.current += 1;
