@@ -1175,7 +1175,7 @@ export default function SimulationPage() {
             }}
           >
             <div 
-              className="bg-gray-900/90 backdrop-blur-md px-3 py-2 rounded-lg border border-white/20 shadow-lg"
+              className="bg-neutral-900/90 backdrop-blur-md px-3 py-2 rounded-lg border border-white/20 shadow-lg"
               style={{ animation: 'fadeIn 0.2s ease-out' }}
             >
               <div className="text-[10px] text-white/50 mb-1">Field Sample</div>
@@ -1206,7 +1206,7 @@ export default function SimulationPage() {
             transition: 'top 0.3s ease-out',
           }}
         >
-          <div className="bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg">
+          <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg">
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-3">
                 <img src={sfdLogo} alt="SFD" className="w-7 h-7 rounded-md" />
@@ -1225,7 +1225,7 @@ export default function SimulationPage() {
                       <MoreVertical className="h-5 w-5 text-white/60" />
                     </button>
                   </DialogTrigger>
-                <DialogContent className="max-w-[90vw] bg-gray-900/95 backdrop-blur-xl border-white/10">
+                <DialogContent className="max-w-[90vw] bg-neutral-900/95 backdrop-blur-xl border-white/10">
                   <DialogHeader>
                     <DialogTitle className="text-white">About SFD Engine</DialogTitle>
                     <DialogDescription asChild>
@@ -1254,7 +1254,7 @@ export default function SimulationPage() {
         {/* Inline Regimes Panel - appears when Regimes is active - compact with labels */}
         {mobileActiveTab === "regimes" && (
           <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
-            <div className="bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
+            <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               <div className="flex items-center justify-center gap-3">
                 {mobileRegimes.map((regime) => (
                   <button
@@ -1297,7 +1297,7 @@ export default function SimulationPage() {
         {/* Inline Colors Panel - appears when Colors is active - compact design */}
         {mobileActiveTab === "colors" && (
           <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
-            <div className="bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
+            <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               <div className="flex items-center justify-center gap-2">
                 {colorMaps.map((cm) => (
                   <button
@@ -1329,7 +1329,7 @@ export default function SimulationPage() {
         {/* Inline Layers Panel - appears when Layers is active - compact design */}
         {mobileActiveTab === "layers" && (
           <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
-            <div className="bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
+            <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               {/* Subtab selector - inline with layer buttons */}
               <div className="flex items-center justify-center gap-1.5 mb-2">
                 <button
@@ -1448,7 +1448,7 @@ export default function SimulationPage() {
         {/* Inline Operator Controls - appears when Params is active - larger design */}
         {mobileActiveTab === "params" && (
           <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
-            <div className="bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
+            <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               {/* 5 Operator Circles with labels */}
               <div className="flex items-center justify-between mb-2 px-1">
                 {([
@@ -1508,7 +1508,7 @@ export default function SimulationPage() {
         {/* Playback Scrubber Overlay - slides up when Run button is pressed - compact design */}
         {mobileActiveTab === "scrub" && (
           <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
-            <div className="bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
+            <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               {/* Playback Controls Row - evenly spaced, uniform size */}
               <div className="flex items-center justify-between mb-3 px-2">
                 {/* Reset */}
@@ -1660,7 +1660,7 @@ export default function SimulationPage() {
         {/* Video Recorded Dialog */}
         {showVideoDialog && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-            <div className="mx-4 w-full max-w-sm bg-gray-900 rounded-2xl border border-white/20 p-5 shadow-2xl">
+            <div className="mx-4 w-full max-w-sm bg-neutral-900 rounded-2xl border border-white/20 p-5 shadow-2xl">
               {recordingError ? (
                 <>
                   <div className="text-center mb-4">
@@ -1773,7 +1773,7 @@ export default function SimulationPage() {
             paddingBottom: 'env(safe-area-inset-bottom)',
           }}
         >
-          <div className="bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg">
+          <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg">
             <div className="flex items-center justify-around h-20 px-2">
                   {/* Params button - toggles inline operator controls */}
                   <button
@@ -2080,7 +2080,7 @@ export default function SimulationPage() {
                         min={0}
                         max={1}
                         step={0.01}
-                        className="w-full [&_[role=slider]]:h-3 [&_[role=slider]]:w-3 [&_[role=slider]]:border-2 [&_[role=slider]]:border-cyan-400 [&_[role=slider]]:bg-gray-900 [&_[role=slider]]:shadow-[0_0_6px_rgba(34,211,238,0.4)] [&_.relative]:h-1.5 [&_[data-orientation=horizontal]>.bg-primary]:bg-gradient-to-r [&_[data-orientation=horizontal]>.bg-primary]:from-cyan-500 [&_[data-orientation=horizontal]>.bg-primary]:to-cyan-400"
+                        className="w-full [&_[role=slider]]:h-3 [&_[role=slider]]:w-3 [&_[role=slider]]:border-2 [&_[role=slider]]:border-cyan-400 [&_[role=slider]]:bg-neutral-900 [&_[role=slider]]:shadow-[0_0_6px_rgba(34,211,238,0.4)] [&_.relative]:h-1.5 [&_[data-orientation=horizontal]>.bg-primary]:bg-gradient-to-r [&_[data-orientation=horizontal]>.bg-primary]:from-cyan-500 [&_[data-orientation=horizontal]>.bg-primary]:to-cyan-400"
                         data-testid="slider-blend-opacity"
                       />
                     </div>
