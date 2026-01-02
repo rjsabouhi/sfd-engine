@@ -1202,7 +1202,7 @@ export default function SimulationPage() {
         <div 
           className="absolute left-3 right-3 z-20 pt-safe"
           style={{
-            top: mobileActiveTab ? '-80px' : '8px',
+            top: mobileActiveTab ? '-80px' : '12px',
             transition: 'top 0.3s ease-out',
           }}
         >
@@ -1769,7 +1769,7 @@ export default function SimulationPage() {
         <div 
           className="absolute left-3 right-3 z-30 transition-all duration-300 ease-out"
           style={{ 
-            bottom: mobileActiveTab ? '8px' : '8px',
+            bottom: mobileActiveTab ? '8px' : '20px',
             paddingBottom: 'env(safe-area-inset-bottom)',
           }}
         >
