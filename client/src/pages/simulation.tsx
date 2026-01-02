@@ -1260,6 +1260,32 @@ export default function SimulationPage() {
           <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
             <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               <div className="flex items-center justify-center gap-3">
+                {/* Default button - applies initial/default parameters */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedRegimeKey(null);
+                    handleParamsChange(defaultParamsRef.current);
+                  }}
+                  className="flex flex-col items-center gap-1"
+                  data-testid="button-regime-default-mobile"
+                  aria-label="Default parameters"
+                >
+                  <div className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center transition-all active:scale-95 ${
+                    selectedRegimeKey === null
+                      ? 'bg-purple-500/30 border-2 border-purple-400'
+                      : 'bg-white/10 border border-white/20 active:bg-white/20'
+                  }`}>
+                    <span className={`text-base font-semibold ${selectedRegimeKey === null ? 'text-purple-400' : 'text-white/80'}`}>
+                      O
+                    </span>
+                  </div>
+                  <span className={`text-[10px] ${selectedRegimeKey === null ? 'text-purple-400' : 'text-white/50'}`}>
+                    Default
+                  </span>
+                </button>
                 {mobileRegimes.map((regime) => (
                   <button
                     key={regime.key}
