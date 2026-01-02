@@ -1219,20 +1219,30 @@ export default function SimulationPage() {
         )}
 
 
-        {/* Top Bar - iPhone-style enclosed panel */}
+        {/* Top Bar - iPhone-style enclosed panel with subtle gradient fade */}
         <div 
-          className="absolute left-3 right-3 z-20 pt-safe"
+          className="absolute left-0 right-0 z-20 pt-safe"
           style={{
-            top: mobileActiveTab ? '-80px' : '16px',
+            top: mobileActiveTab ? '-80px' : '0px',
             transition: 'top 0.3s ease-out',
           }}
         >
-          <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg">
+          {/* Subtle dark-to-transparent gradient for premium separation */}
+          <div 
+            className="absolute inset-x-0 top-0 h-24 pointer-events-none"
+            style={{
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)',
+            }}
+          />
+          <div className="relative mx-3 mt-4 bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg">
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-3">
                 <img src={sfdLogo} alt="SFD" className="w-7 h-7 rounded-md" />
                 <div>
-                  <h1 className="text-sm font-semibold text-white">SFD Engine</h1>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-sm font-semibold text-white">SFD Engine</h1>
+                    <span className="text-[9px] text-white/30 font-medium">v1.0 Preview</span>
+                  </div>
                   <p className="text-[10px] text-white/50">Structural Field Explorer</p>
                 </div>
               </div>
