@@ -122,6 +122,18 @@ function interpolateColor(t: number, colormap: typeof INFERNO_COLORS): [number, 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 10;
 
+// Colormap transition state
+interface ColormapTransition {
+  fromColormap: "inferno" | "viridis" | "cividis";
+  toColormap: "inferno" | "viridis" | "cividis";
+  startTime: number;
+  duration: number;
+}
+
+function getColormapColors(cm: "inferno" | "viridis" | "cividis") {
+  return cm === "cividis" ? CIVIDIS_COLORS : cm === "inferno" ? INFERNO_COLORS : VIRIDIS_COLORS;
+}
+
 export function VisualizationCanvas({ 
   field, 
   colormap = "inferno", 
@@ -151,6 +163,55 @@ export function VisualizationCanvas({
   
   const lastTouchDistRef = useRef<number | null>(null);
   const lastTouchCenterRef = useRef<{ x: number; y: number } | null>(null);
+  
+  // Colormap transition state
+  const colormapTransitionRef = useRef<ColormapTransition | null>(null);
+  const prevColormapRef = useRef<"inferno" | "viridis" | "cividis">(colormap);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  
+  // Detect colormap changes and start transition
+  useEffect(() => {
+    if (colormap !== prevColormapRef.current) {
+      colormapTransitionRef.current = {
+        fromColormap: prevColormapRef.current,
+        toColormap: colormap,
+        startTime: performance.now(),
+        duration: 350, // 350ms transition
+      };
+      prevColormapRef.current = colormap;
+      setIsTransitioning(true);
+      
+      // Schedule end of transition
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+        colormapTransitionRef.current = null;
+      }, 350);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [colormap]);
+  
+  // Force re-render during transition using requestAnimationFrame
+  const [transitionTick, setTransitionTick] = useState(0);
+  
+  useEffect(() => {
+    if (!isTransitioning) return;
+    
+    let animationId: number;
+    const animate = () => {
+      // Force a re-render by incrementing state
+      if (colormapTransitionRef.current) {
+        const elapsed = performance.now() - colormapTransitionRef.current.startTime;
+        if (elapsed < colormapTransitionRef.current.duration) {
+          setTransitionTick(t => t + 1);
+          animationId = requestAnimationFrame(animate);
+        }
+      }
+    };
+    animationId = requestAnimationFrame(animate);
+    
+    return () => cancelAnimationFrame(animationId);
+  }, [isTransitioning]);
 
   const render = useCallback(() => {
     const canvas = canvasRef.current;
@@ -178,7 +239,27 @@ export function VisualizationCanvas({
     // Create imageData at grid resolution, then scale up
     const imageData = ctx.createImageData(field.width, field.height);
     const data = imageData.data;
-    const colors = colormap === "cividis" ? CIVIDIS_COLORS : colormap === "inferno" ? INFERNO_COLORS : VIRIDIS_COLORS;
+    
+    // Check if we're in a colormap transition
+    const transition = colormapTransitionRef.current;
+    let transitionProgress = 1; // 1 = fully transitioned to new colormap
+    let fromColors = getColormapColors(colormap);
+    let toColors = getColormapColors(colormap);
+    
+    if (transition) {
+      const elapsed = performance.now() - transition.startTime;
+      transitionProgress = Math.min(elapsed / transition.duration, 1);
+      
+      if (transitionProgress >= 1) {
+        // Transition complete, clear it
+        colormapTransitionRef.current = null;
+      } else {
+        fromColors = getColormapColors(transition.fromColormap);
+        toColors = getColormapColors(transition.toColormap);
+      }
+    }
+    
+    const colors = toColors; // For non-transition rendering
 
     // Apply temporal smoothing if enabled (Perceptual Safety Layer)
     let displayGrid = field.grid;
@@ -238,7 +319,19 @@ export function VisualizationCanvas({
       // Apply hue shift
       let adjustedNorm = Math.max(0, Math.min(1, normalized + hueShift));
       
-      let [r, g, b] = interpolateColor(adjustedNorm, colors);
+      // Blend between colormaps during transition
+      let r: number, g: number, b: number;
+      if (transitionProgress < 1) {
+        const [r1, g1, b1] = interpolateColor(adjustedNorm, fromColors);
+        const [r2, g2, b2] = interpolateColor(adjustedNorm, toColors);
+        // Use ease-out cubic for smoother perceptual transition
+        const eased = 1 - Math.pow(1 - transitionProgress, 3);
+        r = Math.round(r1 + (r2 - r1) * eased);
+        g = Math.round(g1 + (g2 - g1) * eased);
+        b = Math.round(b1 + (b2 - b1) * eased);
+      } else {
+        [r, g, b] = interpolateColor(adjustedNorm, colors);
+      }
       
       // Gamma compression for softer contrast (Perceptual Safety)
       if (perceptualSmoothing) {
@@ -275,7 +368,7 @@ export function VisualizationCanvas({
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(offscreen, 0, 0, renderSize, renderSize);
     }
-  }, [field, colormap, basinMap, showBasins, perceptualSmoothing]);
+  }, [field, colormap, basinMap, showBasins, perceptualSmoothing, transitionTick]);
 
   useEffect(() => {
     render();
