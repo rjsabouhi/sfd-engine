@@ -1238,9 +1238,10 @@ export async function startLiveRecordingFrameBased(
     }
     
     try {
-      // Use smaller canvas size for GIF to speed up processing
-      const targetWidth = Math.min(canvas.width, 200);
-      const targetHeight = Math.min(canvas.height, 200);
+      // Use moderate canvas size for GIF - balance quality vs processing time
+      // 320px gives much better quality while still being fast enough
+      const targetWidth = Math.min(canvas.width, 320);
+      const targetHeight = Math.min(canvas.height, 320);
       
       // 100ms delay per frame (10fps playback for smooth animation)
       const frameDelay = 100;
@@ -1316,13 +1317,13 @@ async function createAnimatedGifFromDataUrls(
   ctx.drawImage(firstImg, 0, 0, width, height);
   const firstImageData = ctx.getImageData(0, 0, width, height);
   
-  // Build palette from image colors (improved quantization - 6-bit per channel for better quality)
+  // Build palette from image colors using full 8-bit precision for better quality
   const colorCounts = new Map<string, number>();
   for (let i = 0; i < firstImageData.data.length; i += 4) {
-    // Use 6-bit quantization (64 levels per channel) for better quality
-    const r = Math.round(firstImageData.data[i] / 4) * 4;
-    const g = Math.round(firstImageData.data[i + 1] / 4) * 4;
-    const b = Math.round(firstImageData.data[i + 2] / 4) * 4;
+    // Use full 8-bit colors, only slight quantization to reduce unique colors
+    const r = Math.round(firstImageData.data[i] / 2) * 2;
+    const g = Math.round(firstImageData.data[i + 1] / 2) * 2;
+    const b = Math.round(firstImageData.data[i + 2] / 2) * 2;
     const key = `${r},${g},${b}`;
     colorCounts.set(key, (colorCounts.get(key) || 0) + 1);
   }
@@ -1338,8 +1339,13 @@ async function createAnimatedGifFromDataUrls(
   
   const palette = sortedColors.map(([r, g, b]) => [r, g, b]);
   
-  // Find nearest palette color
+  // Find nearest palette color with caching for speed
+  const nearestCache = new Map<string, number>();
   const findNearest = (r: number, g: number, b: number): number => {
+    const key = `${r},${g},${b}`;
+    const cached = nearestCache.get(key);
+    if (cached !== undefined) return cached;
+    
     let best = 0;
     let bestDist = Infinity;
     for (let i = 0; i < palette.length; i++) {
@@ -1352,7 +1358,76 @@ async function createAnimatedGifFromDataUrls(
         best = i;
       }
     }
+    nearestCache.set(key, best);
     return best;
+  };
+  
+  // Floyd-Steinberg dithering helper - applies error diffusion for smoother gradients
+  const applyDithering = (imageData: ImageData): Uint8ClampedArray => {
+    const data = new Float32Array(imageData.data.length);
+    for (let i = 0; i < imageData.data.length; i++) {
+      data[i] = imageData.data[i];
+    }
+    
+    const result = new Uint8ClampedArray(width * height);
+    const w = width;
+    const h = height;
+    
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const idx = (y * w + x) * 4;
+        
+        // Get current color (clamped to valid range)
+        const oldR = Math.max(0, Math.min(255, Math.round(data[idx])));
+        const oldG = Math.max(0, Math.min(255, Math.round(data[idx + 1])));
+        const oldB = Math.max(0, Math.min(255, Math.round(data[idx + 2])));
+        
+        // Find nearest palette color
+        const paletteIdx = findNearest(oldR, oldG, oldB);
+        result[y * w + x] = paletteIdx;
+        
+        // Calculate quantization error
+        const newR = palette[paletteIdx][0];
+        const newG = palette[paletteIdx][1];
+        const newB = palette[paletteIdx][2];
+        
+        const errR = oldR - newR;
+        const errG = oldG - newG;
+        const errB = oldB - newB;
+        
+        // Distribute error to neighbors (Floyd-Steinberg pattern)
+        // Right pixel: 7/16
+        if (x + 1 < w) {
+          const ni = idx + 4;
+          data[ni] += errR * 7 / 16;
+          data[ni + 1] += errG * 7 / 16;
+          data[ni + 2] += errB * 7 / 16;
+        }
+        // Bottom-left: 3/16
+        if (y + 1 < h && x > 0) {
+          const ni = idx + w * 4 - 4;
+          data[ni] += errR * 3 / 16;
+          data[ni + 1] += errG * 3 / 16;
+          data[ni + 2] += errB * 3 / 16;
+        }
+        // Bottom: 5/16
+        if (y + 1 < h) {
+          const ni = idx + w * 4;
+          data[ni] += errR * 5 / 16;
+          data[ni + 1] += errG * 5 / 16;
+          data[ni + 2] += errB * 5 / 16;
+        }
+        // Bottom-right: 1/16
+        if (y + 1 < h && x + 1 < w) {
+          const ni = idx + w * 4 + 4;
+          data[ni] += errR * 1 / 16;
+          data[ni + 1] += errG * 1 / 16;
+          data[ni + 2] += errB * 1 / 16;
+        }
+      }
+    }
+    
+    return result;
   };
   
   const gifBytes: number[] = [];
@@ -1406,15 +1481,9 @@ async function createAnimatedGifFromDataUrls(
     // LZW minimum code size
     gifBytes.push(0x08);
     
-    // Convert to palette indices
-    const indices: number[] = [];
-    for (let i = 0; i < imageData.data.length; i += 4) {
-      indices.push(findNearest(
-        imageData.data[i],
-        imageData.data[i + 1],
-        imageData.data[i + 2]
-      ));
-    }
+    // Convert to palette indices with Floyd-Steinberg dithering for smoother gradients
+    const ditheredIndices = applyDithering(imageData);
+    const indices: number[] = Array.from(ditheredIndices);
     
     // Simple LZW compression
     const codeSize = 8;
