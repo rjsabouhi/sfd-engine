@@ -546,6 +546,11 @@ export default function SimulationPage() {
         setRecordingProgress(0);
         recordingControllerRef.current = null;
         
+        // Pause simulation when recording completes (before showing save dialog)
+        if (engineRef.current) {
+          engineRef.current.stop();
+        }
+        
         // Store the blob - dialog will be shown by useEffect when previewUrl is ready
         if (blob.size > 0) {
           setRecordedVideoBlob(blob);
@@ -559,6 +564,12 @@ export default function SimulationPage() {
         setIsRecording(false);
         setRecordingProgress(0);
         recordingControllerRef.current = null;
+        
+        // Pause simulation on recording error too
+        if (engineRef.current) {
+          engineRef.current.stop();
+        }
+        
         console.error("Recording error:", error);
         setRecordingError(error);
         setShowVideoDialog(true);
