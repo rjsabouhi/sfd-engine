@@ -961,6 +961,44 @@ export default function SimulationPage() {
 
   // Visual preset application with smooth tweening
   const handleApplyPreset = useCallback((preset: VisualPreset) => {
+    // If clicking the already active preset, deselect and reset to defaults
+    if (activePresetId === preset.id) {
+      setActivePresetId(null);
+      
+      // Reset to default values with smooth transition
+      const defaultCurvature = defaultParamsRef.current.wK;
+      const startBlend = blendOpacity;
+      const startCurvature = params.wK;
+      const startTime = performance.now();
+      const duration = 400;
+      
+      const animate = () => {
+        const elapsed = performance.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+        
+        // Tween blend to 0.5 (default)
+        setBlendOpacity(startBlend + (0.5 - startBlend) * eased);
+        
+        // Tween curvature back to default
+        const newCurvature = startCurvature + (defaultCurvature - startCurvature) * eased;
+        const newParams = { ...params, wK: newCurvature };
+        setParams(newParams);
+        engineRef.current?.setParams(newParams);
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          // Reset colormap to viridis (default)
+          setColormap('viridis');
+          setHasUserSelectedColormap(false);
+        }
+      };
+      
+      requestAnimationFrame(animate);
+      return;
+    }
+    
     setActivePresetId(preset.id);
     
     applyPreset(preset, {
@@ -985,7 +1023,7 @@ export default function SimulationPage() {
       },
       transitionDuration: 400,
     });
-  }, [blendOpacity, perceptualSmoothing, params]);
+  }, [activePresetId, blendOpacity, perceptualSmoothing, params]);
 
   // Compute regime-sensitive amplitude for touch interactions
   const regimeAmplitude = useMemo(() => {
