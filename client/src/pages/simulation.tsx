@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal, Circle, Square } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal, Circle, Square, Rewind } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -265,6 +265,10 @@ export default function SimulationPage() {
   const touchContainerRef = useRef<HTMLDivElement>(null);
   const regimeOverlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
+  // Playback direction state for mobile three-way button
+  const [playbackDirection, setPlaybackDirection] = useState<'forward' | 'backward' | null>(null);
+  const reversePlaybackRef = useRef<NodeJS.Timeout | null>(null);
+  
   // Recording state for mobile video capture
   const [isRecording, setIsRecording] = useState(false);
   const [recordingProgress, setRecordingProgress] = useState(0);
@@ -501,7 +505,79 @@ export default function SimulationPage() {
 
   const handlePause = useCallback(() => {
     engineRef.current?.stop();
+    setPlaybackDirection(null);
   }, []);
+  
+  // Sync playbackDirection when engine starts forward play
+  const handlePlayForward = useCallback(() => {
+    // Stop any reverse playback
+    if (reversePlaybackRef.current) {
+      clearInterval(reversePlaybackRef.current);
+      reversePlaybackRef.current = null;
+    }
+    setPlaybackDirection('forward');
+    handlePlay();
+  }, [handlePlay]);
+  
+  // Handle reverse playback using history stepping
+  const handlePlayBackward = useCallback(() => {
+    const engine = engineRef.current;
+    if (!engine) return;
+    
+    // Stop forward playback first
+    engine.stop();
+    setPlaybackDirection('backward');
+    
+    // Start stepping backward at ~10fps
+    reversePlaybackRef.current = setInterval(() => {
+      const eng = engineRef.current;
+      if (!eng) return;
+      
+      // Check if at the beginning of history
+      if (currentHistoryIndex <= 0) {
+        // Reached the beginning, stop
+        if (reversePlaybackRef.current) {
+          clearInterval(reversePlaybackRef.current);
+          reversePlaybackRef.current = null;
+        }
+        setPlaybackDirection(null);
+        return;
+      }
+      eng.stepBackward();
+    }, 100);
+  }, [currentHistoryIndex]);
+  
+  // Cleanup reverse playback on unmount
+  useEffect(() => {
+    return () => {
+      if (reversePlaybackRef.current) {
+        clearInterval(reversePlaybackRef.current);
+      }
+    };
+  }, []);
+  
+  // Handle three-way button cycling: paused -> forward -> backward -> paused
+  const handlePlaybackCycle = useCallback(() => {
+    if (playbackDirection === null) {
+      // Paused -> Play Forward
+      handlePlayForward();
+    } else if (playbackDirection === 'forward') {
+      // Forward -> Play Backward  
+      if (reversePlaybackRef.current) {
+        clearInterval(reversePlaybackRef.current);
+        reversePlaybackRef.current = null;
+      }
+      engineRef.current?.stop();
+      handlePlayBackward();
+    } else {
+      // Backward -> Pause
+      if (reversePlaybackRef.current) {
+        clearInterval(reversePlaybackRef.current);
+        reversePlaybackRef.current = null;
+      }
+      setPlaybackDirection(null);
+    }
+  }, [playbackDirection, handlePlayForward, handlePlayBackward]);
 
   const handleReset = useCallback(() => {
     clearTemporalBuffer();
@@ -1646,17 +1722,37 @@ export default function SimulationPage() {
                   <SkipBack className="h-4 w-4 text-white/80" />
                 </button>
 
-                {/* Play/Pause - larger center button, always highlighted green */}
+                {/* Play/Pause/Reverse - larger center button, cycles through three states */}
                 <button
-                  onClick={state.isRunning ? handlePause : handlePlay}
-                  className="w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-95 bg-green-500/20 border-2 border-green-500/50"
-                  data-testid={state.isRunning ? "button-pause-playback-mobile" : "button-play-playback-mobile"}
-                  aria-label={state.isRunning ? "Pause simulation" : "Play simulation"}
+                  onClick={handlePlaybackCycle}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-95 border-2 ${
+                    playbackDirection === 'forward' 
+                      ? 'bg-green-500/20 border-green-500/50' 
+                      : playbackDirection === 'backward'
+                        ? 'bg-blue-500/20 border-blue-500/50'
+                        : 'bg-white/10 border-white/30'
+                  }`}
+                  data-testid={
+                    playbackDirection === 'forward' 
+                      ? "button-playing-forward-mobile" 
+                      : playbackDirection === 'backward'
+                        ? "button-playing-backward-mobile"
+                        : "button-paused-mobile"
+                  }
+                  aria-label={
+                    playbackDirection === 'forward' 
+                      ? "Playing forward - tap for reverse" 
+                      : playbackDirection === 'backward'
+                        ? "Playing backward - tap to pause"
+                        : "Paused - tap to play"
+                  }
                 >
-                  {state.isRunning ? (
-                    <Pause className="h-5 w-5 text-green-400" />
-                  ) : (
+                  {playbackDirection === 'forward' ? (
                     <Play className="h-5 w-5 text-green-400 ml-0.5" />
+                  ) : playbackDirection === 'backward' ? (
+                    <Rewind className="h-5 w-5 text-blue-400" />
+                  ) : (
+                    <Pause className="h-5 w-5 text-white/80" />
                   )}
                 </button>
 
