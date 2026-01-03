@@ -504,22 +504,39 @@ export function VisualizationCanvas({
 
     if (overlayBasinMap && overlayBasinMap.labels.length > 0) {
       const { labels, width, height } = overlayBasinMap;
-      const cellW = canvas.width / width;
-      const cellH = canvas.height / height;
       
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const basinId = labels[y * width + x];
-          if (basinId >= 0) {
-            const color = BASIN_COLORS[basinId % BASIN_COLORS.length];
-            ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-            ctx.fillRect(x * cellW, y * cellH, cellW + 0.5, cellH + 0.5);
-          } else {
-            ctx.fillStyle = 'rgb(20, 20, 30)';
-            ctx.fillRect(x * cellW, y * cellH, cellW + 0.5, cellH + 0.5);
-          }
+      // Use offscreen canvas at grid resolution for smooth scaling
+      const offscreen = document.createElement("canvas");
+      offscreen.width = width;
+      offscreen.height = height;
+      const offCtx = offscreen.getContext("2d");
+      if (!offCtx) return;
+      
+      const imageData = offCtx.createImageData(width, height);
+      const data = imageData.data;
+      
+      for (let i = 0; i < labels.length; i++) {
+        const basinId = labels[i];
+        const pixelIdx = i * 4;
+        if (basinId >= 0) {
+          const color = BASIN_COLORS[basinId % BASIN_COLORS.length];
+          data[pixelIdx] = color[0];
+          data[pixelIdx + 1] = color[1];
+          data[pixelIdx + 2] = color[2];
+          data[pixelIdx + 3] = 255;
+        } else {
+          data[pixelIdx] = 20;
+          data[pixelIdx + 1] = 20;
+          data[pixelIdx + 2] = 30;
+          data[pixelIdx + 3] = 255;
         }
       }
+      
+      offCtx.putImageData(imageData, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(offscreen, 0, 0, renderSize, renderSize);
+      
     } else if (overlayDerivedField) {
       const { grid, width, height } = overlayDerivedField;
       let min = Infinity, max = -Infinity;
@@ -528,24 +545,38 @@ export function VisualizationCanvas({
         if (grid[i] > max) max = grid[i];
       }
       const range = max - min || 1;
-      const cellW = canvas.width / width;
-      const cellH = canvas.height / height;
 
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const val = grid[y * width + x];
-          const t = Math.max(0, Math.min(1, (val - min) / range));
-          const idx = Math.min(Math.floor(t * (PLASMA_COLORS.length - 1)), PLASMA_COLORS.length - 2);
-          const f = t * (PLASMA_COLORS.length - 1) - idx;
-          const c1 = PLASMA_COLORS[idx];
-          const c2 = PLASMA_COLORS[idx + 1];
-          const r = Math.round(c1[0] + f * (c2[0] - c1[0]));
-          const g = Math.round(c1[1] + f * (c2[1] - c1[1]));
-          const b = Math.round(c1[2] + f * (c2[2] - c1[2]));
-          ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-          ctx.fillRect(x * cellW, y * cellH, cellW + 0.5, cellH + 0.5);
-        }
+      // Use offscreen canvas at grid resolution for smooth scaling
+      const offscreen = document.createElement("canvas");
+      offscreen.width = width;
+      offscreen.height = height;
+      const offCtx = offscreen.getContext("2d");
+      if (!offCtx) return;
+      
+      const imageData = offCtx.createImageData(width, height);
+      const data = imageData.data;
+
+      for (let i = 0; i < grid.length; i++) {
+        const val = grid[i];
+        const t = Math.max(0, Math.min(1, (val - min) / range));
+        const idx = Math.min(Math.floor(t * (PLASMA_COLORS.length - 1)), PLASMA_COLORS.length - 2);
+        const f = t * (PLASMA_COLORS.length - 1) - idx;
+        const c1 = PLASMA_COLORS[idx];
+        const c2 = PLASMA_COLORS[idx + 1];
+        const r = Math.round(c1[0] + f * (c2[0] - c1[0]));
+        const g = Math.round(c1[1] + f * (c2[1] - c1[1]));
+        const b = Math.round(c1[2] + f * (c2[2] - c1[2]));
+        const pixelIdx = i * 4;
+        data[pixelIdx] = r;
+        data[pixelIdx + 1] = g;
+        data[pixelIdx + 2] = b;
+        data[pixelIdx + 3] = 255;
       }
+      
+      offCtx.putImageData(imageData, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(offscreen, 0, 0, renderSize, renderSize);
     }
   }, [overlayDerivedField, overlayBasinMap, canvasSize]);
 
