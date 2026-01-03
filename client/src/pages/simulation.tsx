@@ -39,6 +39,7 @@ import { getSmartViewConfig, type SmartViewConfig } from "@/config/smart-view-ma
 import { useTouchController, type DoubleTapData } from "@/lib/touch-controller";
 import { visualPresets, type VisualPreset } from "@/config/visual-presets";
 import { applyPreset, cancelPresetTransition } from "@/lib/apply-preset";
+import { WelcomeModal } from "@/components/welcome-modal";
 
 // Lightweight overlay canvas for mobile projection layers
 const PLASMA_COLORS = [
@@ -1175,6 +1176,7 @@ export default function SimulationPage() {
 
     return (
       <div className="relative h-screen w-screen overflow-hidden bg-black">
+        <WelcomeModal />
         {/* Full-screen canvas with touch handlers and tilt parallax - resizes when panels open */}
         {/* Reduced by ~10% with generous padding on all sides */}
         <div 
@@ -1978,6 +1980,7 @@ export default function SimulationPage() {
 
   return (
     <div className="flex flex-col h-screen bg-background">
+      <WelcomeModal />
       <OnboardingModal ref={onboardingRef} />
       
       {/* Header - spans full width */}
