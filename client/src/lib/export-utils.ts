@@ -38,6 +38,8 @@ export interface MobileShareOptions {
   stability: string;
   curvature: number;
   energy: number;
+  overlayCanvas?: HTMLCanvasElement | null;
+  overlayOpacity?: number;
 }
 
 export async function exportMobileShareSnapshot(
@@ -58,7 +60,16 @@ export async function exportMobileShareSnapshot(
   
   const fieldSize = size - 120;
   const offset = 60;
+  
+  // Draw base field
   ctx.drawImage(canvas, offset, offset, fieldSize, fieldSize);
+  
+  // Composite overlay if provided
+  if (options.overlayCanvas && options.overlayOpacity && options.overlayOpacity > 0) {
+    ctx.globalAlpha = options.overlayOpacity;
+    ctx.drawImage(options.overlayCanvas, offset, offset, fieldSize, fieldSize);
+    ctx.globalAlpha = 1.0;
+  }
   
   ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
   ctx.fillRect(offset, offset, fieldSize, 40);

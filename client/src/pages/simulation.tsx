@@ -1900,6 +1900,7 @@ export default function SimulationPage() {
                   <button
                     onClick={() => {
                       const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
+                      const overlayCanvas = document.querySelector('[data-testid="canvas-overlay"]') as HTMLCanvasElement | null;
                       if (canvas) {
                         const regimeLabel = mobileRegimes.find(r => r.key === selectedRegimeKey)?.label || "Default";
                         exportMobileShareSnapshot(canvas, {
@@ -1907,6 +1908,8 @@ export default function SimulationPage() {
                           stability: stabilityState,
                           curvature: operatorContributions.curvature,
                           energy: state.energy,
+                          overlayCanvas: mobileLayerIndex >= 0 ? overlayCanvas : null,
+                          overlayOpacity: mobileLayerIndex >= 0 ? blendOpacity : 0,
                         });
                       }
                     }}
