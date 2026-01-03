@@ -1135,7 +1135,7 @@ export default function SimulationPage() {
           onTouchMove={touchHandlers.onTouchMove}
           onTouchEnd={touchHandlers.onTouchEnd}
           style={{
-            top: mobileActiveTab ? '12px' : '76px', // 76px clears header (8px + ~60px header + 8px gap), 12px when header slides away
+            top: mobileActiveTab ? '12px' : '56px', // 56px clears compact header (8px + ~40px header + 8px gap), 12px when header slides away
             left: '6%',
             right: '6%',
             bottom: `${100 + panelOffset}px`, // 100px for bottom control strip (8px margin + 80px height + 12px gap) + panel offset
@@ -1242,31 +1242,28 @@ export default function SimulationPage() {
         })()}
 
 
-        {/* Top Bar - iPhone-style enclosed panel with subtle gradient fade */}
+        {/* Top Bar - iPhone-style enclosed panel with subtle gradient fade - compact */}
         <div 
           className="absolute left-0 right-0 z-20 pt-safe"
           style={{
-            top: mobileActiveTab ? '-80px' : '0px',
+            top: mobileActiveTab ? '-60px' : '0px',
             transition: 'top 0.3s ease-out',
           }}
         >
           {/* Subtle dark-to-transparent gradient for premium separation */}
           <div 
-            className="absolute inset-x-0 top-0 h-24 pointer-events-none"
+            className="absolute inset-x-0 top-0 h-16 pointer-events-none"
             style={{
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)',
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)',
             }}
           />
-          <div className="relative mx-3 mt-4 bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg">
-            <div className="flex items-center justify-between px-4 py-3">
-              <div className="flex items-center gap-3">
-                <img src={sfdLogo} alt="SFD" className="w-7 h-7 rounded-md" />
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-sm font-semibold text-white">SFD Engine</h1>
-                    <span className="text-[9px] text-white/30 font-medium">v1.0 Preview</span>
-                  </div>
-                  <p className="text-[10px] text-white/50">Structural Field Explorer</p>
+          <div className="relative mx-3 mt-2 bg-neutral-900/90 backdrop-blur-xl rounded-xl border border-white/15 shadow-lg">
+            <div className="flex items-center justify-between px-3 py-2">
+              <div className="flex items-center gap-2">
+                <img src={sfdLogo} alt="SFD" className="w-6 h-6 rounded-md" />
+                <div className="flex items-center gap-2">
+                  <h1 className="text-sm font-semibold text-white">SFD Engine</h1>
+                  <span className="text-[9px] text-white/30 font-medium">v1.0</span>
                 </div>
               </div>
               
