@@ -40,11 +40,13 @@ const DOUBLE_TAP_DISTANCE = 30;
 const PERTURBATION_DECAY_MS = 800;
 const SHEAR_INTENSITY_CAP = 0.15;
 const DOUBLE_TAP_FADEOUT_MS = 1500;
-const TOUCH_MOVE_THROTTLE_MS = 32; // ~30fps throttle for touch moves
-const MIN_DRAG_DISTANCE = 4; // Minimum pixels to move before applying shear
 
 function easeOutExpo(t: number): number {
   return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+}
+
+function gaussianKernel(distance: number, sigma: number): number {
+  return Math.exp(-(distance * distance) / (2 * sigma * sigma));
 }
 
 export interface TouchControllerOptions {
@@ -75,9 +77,8 @@ export function useTouchController(
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const perturbationRef = useRef<PerturbationState | null>(null);
   const perturbationAnimRef = useRef<number | null>(null);
+  const dragPathRef = useRef<TouchPoint[]>([]);
   const doubleTapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastMoveTimeRef = useRef<number>(0);
-  const lastShearPointRef = useRef<{ x: number; y: number } | null>(null);
 
   const getFieldCoords = useCallback((clientX: number, clientY: number) => {
     if (!containerRef.current) return null;
@@ -176,11 +177,22 @@ export function useTouchController(
     
     if (distance < 1) return;
     
-    // Simplified: single perturbation at destination with magnitude based on distance
-    const magnitude = Math.min(distance * 0.015, SHEAR_INTENSITY_CAP);
-    const radius = Math.min(8 + distance * 0.3, 15);
+    const magnitude = Math.min(distance * 0.01, SHEAR_INTENSITY_CAP);
     
-    engineRef.current.perturbField(toX, toY, magnitude, radius);
+    const steps = Math.ceil(distance / 3);
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const x = Math.floor(fromX + dx * t);
+      const y = Math.floor(fromY + dy * t);
+      
+      const perpX = -dy / distance;
+      const perpY = dx / distance;
+      
+      const falloff = gaussianKernel(Math.abs(i - steps / 2), steps / 3);
+      const shearMag = magnitude * falloff;
+      
+      engineRef.current.perturbField(x, y, shearMag, 6);
+    }
   }, [engineRef]);
 
   const getLocalFieldData = useCallback((fieldX: number, fieldY: number): DoubleTapData | null => {
@@ -272,11 +284,6 @@ export function useTouchController(
     e.preventDefault();
     if (!touchStartRef.current || e.touches.length !== 1) return;
     
-    // Throttle touch moves for performance
-    const now = Date.now();
-    if (now - lastMoveTimeRef.current < TOUCH_MOVE_THROTTLE_MS) return;
-    lastMoveTimeRef.current = now;
-    
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
@@ -292,23 +299,31 @@ export function useTouchController(
     
     if (distance > 10 && !touchState.isDragging) {
       setTouchState(prev => ({ ...prev, isDragging: true, isLongPressing: false }));
-      lastShearPointRef.current = { x: coords.fieldX, y: coords.fieldY };
+      dragPathRef.current = [{
+        x: touchStartRef.current.x,
+        y: touchStartRef.current.y,
+        clientX: touchStartRef.current.clientX,
+        clientY: touchStartRef.current.clientY,
+        time: touchStartRef.current.time,
+      }];
     }
     
-    if (touchState.isDragging && lastShearPointRef.current) {
-      // Only apply shear if moved enough in field coordinates
-      const shearDx = coords.fieldX - lastShearPointRef.current.x;
-      const shearDy = coords.fieldY - lastShearPointRef.current.y;
-      const shearDist = Math.sqrt(shearDx * shearDx + shearDy * shearDy);
+    if (touchState.isDragging) {
+      const lastPoint = dragPathRef.current[dragPathRef.current.length - 1];
+      if (lastPoint) {
+        applyShearDeformation(lastPoint.x, lastPoint.y, coords.fieldX, coords.fieldY);
+      }
       
-      if (shearDist >= MIN_DRAG_DISTANCE) {
-        applyShearDeformation(
-          lastShearPointRef.current.x,
-          lastShearPointRef.current.y,
-          coords.fieldX,
-          coords.fieldY
-        );
-        lastShearPointRef.current = { x: coords.fieldX, y: coords.fieldY };
+      dragPathRef.current.push({
+        x: coords.fieldX,
+        y: coords.fieldY,
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        time: Date.now(),
+      });
+      
+      if (dragPathRef.current.length > 10) {
+        dragPathRef.current = dragPathRef.current.slice(-10);
       }
     }
   }, [getFieldCoords, touchState.isDragging, applyShearDeformation]);
@@ -353,7 +368,7 @@ export function useTouchController(
       perturbationRef.current.active = false;
     }
     
-    lastShearPointRef.current = null;
+    dragPathRef.current = [];
     touchStartRef.current = null;
   }, [touchState.isDragging, touchState.isLongPressing, onSwipeLeft, onSwipeRight]);
 
