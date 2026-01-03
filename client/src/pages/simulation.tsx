@@ -534,8 +534,8 @@ export default function SimulationPage() {
     
     setIsRecording(true);
     
-    // 50 frames = 50 simulation steps
-    const totalFrames = 50;
+    // 100 frames = 100 simulation steps = 10 seconds at 10fps playback
+    const totalFrames = 100;
     
     const controller = await startLiveRecording(
       canvas,
@@ -1664,7 +1664,7 @@ export default function SimulationPage() {
                     />
                   </div>
                   <div className="text-center text-[10px] text-red-400 mt-0.5">
-                    Recording {Math.round(recordingProgress * 50)} / 50 steps
+                    Recording {Math.round(recordingProgress * 100)} / 100 steps
                   </div>
                 </div>
               )}
