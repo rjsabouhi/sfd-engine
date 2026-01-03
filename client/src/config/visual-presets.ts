@@ -1,7 +1,7 @@
 export interface VisualPreset {
   id: string;
   label: string;
-  colorMap: 'viridis' | 'inferno' | 'plasma' | 'magma' | 'cividis';
+  colorMap: 'viridis' | 'inferno' | 'cividis';
   blend: number;
   noiseWeight: number;
   curvature: number;
@@ -34,26 +34,26 @@ export const visualPresets: VisualPreset[] = [
     previewColor2: '#fcffa4',
   },
   {
-    id: 'fractalSoft',
-    label: 'Fractal Soft',
-    colorMap: 'plasma',
-    blend: 0.5,
-    noiseWeight: 0.15,
-    curvature: 0.8,
-    smoothing: 0.4,
-    previewColor1: '#0d0887',
-    previewColor2: '#f0f921',
+    id: 'highContrast',
+    label: 'High Contrast',
+    colorMap: 'cividis',
+    blend: 0.8,
+    noiseWeight: 0.05,
+    curvature: 1.5,
+    smoothing: 0.3,
+    previewColor1: '#00224e',
+    previewColor2: '#fef287',
   },
   {
-    id: 'collapseFog',
-    label: 'Collapse Fog',
-    colorMap: 'magma',
+    id: 'deepFire',
+    label: 'Deep Fire',
+    colorMap: 'inferno',
     blend: 0.9,
     noiseWeight: 0.05,
     curvature: 2.0,
     smoothing: 0.8,
-    previewColor1: '#000004',
-    previewColor2: '#fcfdbf',
+    previewColor1: '#420a68',
+    previewColor2: '#f98e09',
   },
   {
     id: 'oceanDepth',
@@ -74,8 +74,8 @@ export const visualPresets: VisualPreset[] = [
     noiseWeight: 0.08,
     curvature: 1.8,
     smoothing: 0.3,
-    previewColor1: '#420a68',
-    previewColor2: '#f98e09',
+    previewColor1: '#000004',
+    previewColor2: '#fcffa4',
   },
   {
     id: 'crystalMatrix',
@@ -89,26 +89,26 @@ export const visualPresets: VisualPreset[] = [
     previewColor2: '#3b528b',
   },
   {
-    id: 'nebulaDrift',
-    label: 'Nebula Drift',
-    colorMap: 'plasma',
+    id: 'twilightZone',
+    label: 'Twilight Zone',
+    colorMap: 'viridis',
     blend: 0.65,
     noiseWeight: 0.18,
     curvature: 1.0,
     smoothing: 0.45,
-    previewColor1: '#7e03a8',
-    previewColor2: '#cc4778',
+    previewColor1: '#440154',
+    previewColor2: '#21918c',
   },
   {
-    id: 'thermalVent',
-    label: 'Thermal Vent',
-    colorMap: 'magma',
+    id: 'sunsetGlow',
+    label: 'Sunset Glow',
+    colorMap: 'inferno',
     blend: 0.7,
     noiseWeight: 0.14,
     curvature: 1.5,
     smoothing: 0.35,
-    previewColor1: '#b63679',
-    previewColor2: '#fb8761',
+    previewColor1: '#bc3754',
+    previewColor2: '#f98e09',
   },
   {
     id: 'deepSpace',

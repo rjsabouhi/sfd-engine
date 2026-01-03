@@ -124,7 +124,7 @@ export interface ApplyPresetOptions {
   onSmoothingChange: (value: number) => void;
   onNoiseWeightChange?: (value: number) => void;
   onCurvatureChange?: (value: number) => void;
-  onColorMapChange: (colorMap: 'viridis' | 'inferno' | 'plasma' | 'magma' | 'cividis') => void;
+  onColorMapChange: (colorMap: 'viridis' | 'inferno' | 'cividis') => void;
   onComplete?: () => void;
   transitionDuration?: number;
 }
