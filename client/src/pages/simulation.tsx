@@ -1460,9 +1460,11 @@ export default function SimulationPage() {
                       ? 'bg-purple-500/30 border-2 border-purple-400'
                       : 'bg-white/10 border border-white/20 active:bg-white/20'
                   }`}>
-                    <span className={`text-base font-semibold ${selectedRegimeKey === null ? 'text-purple-400' : 'text-white/80'}`}>
-                      O
-                    </span>
+                    {/* Abstract reset glyph: circle with vertical line */}
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className={selectedRegimeKey === null ? 'text-purple-400' : 'text-white/80'}>
+                      <circle cx="9" cy="9" r="6.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                      <line x1="9" y1="4" x2="9" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
                   </div>
                   <span className={`text-[10px] ${selectedRegimeKey === null ? 'text-purple-400' : 'text-white/50'}`}>
                     Default
