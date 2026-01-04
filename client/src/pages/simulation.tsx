@@ -211,9 +211,7 @@ export default function SimulationPage() {
   const [hasUserSelectedColormap, setHasUserSelectedColormap] = useState(false);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [mobileActiveTab, setMobileActiveTab] = useState<string | null>(null);
-  const [showRunPulse, setShowRunPulse] = useState(() => {
-    return !localStorage.getItem('sfd-hasSeenIntro');
-  });
+  const [showRunPulse, setShowRunPulse] = useState(true);
   const [mobileSelectedOperator, setMobileSelectedOperator] = useState<"wK" | "wT" | "wC" | "wA" | "wR">("wK");
   const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("structural");
     
