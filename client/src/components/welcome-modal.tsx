@@ -3,11 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const STORAGE_KEY = 'sfd-hasSeenIntro';
 
-interface WelcomeModalProps {
-  onStart?: () => void;
-}
-
-export function WelcomeModal({ onStart }: WelcomeModalProps) {
+export function WelcomeModal() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -22,7 +18,6 @@ export function WelcomeModal({ onStart }: WelcomeModalProps) {
   const handleDismiss = () => {
     setIsVisible(false);
     localStorage.setItem(STORAGE_KEY, 'true');
-    onStart?.();
   };
 
   return (
