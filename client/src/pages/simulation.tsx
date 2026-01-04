@@ -1228,10 +1228,10 @@ export default function SimulationPage() {
           onTouchMove={touchHandlers.onTouchMove}
           onTouchEnd={touchHandlers.onTouchEnd}
           style={{
-            top: mobileActiveTab ? '16px' : '84px', // 84px clears header with more padding, 16px when header slides away
+            top: mobileActiveTab ? '8px' : '68px', // 68px clears header with minimal padding, 8px when header slides away
             left: '6%',
             right: '6%',
-            bottom: `calc(${116 + panelOffset}px + env(safe-area-inset-bottom, 0px))`, // 116px for bottom control strip + extra padding + panel offset + safe area
+            bottom: `calc(${88 + panelOffset}px + env(safe-area-inset-bottom, 0px))`, // 88px for bottom control strip with minimal padding + panel offset + safe area
             transform: `translate(${tiltOffset.x}px, ${tiltOffset.y}px)`,
             transition: 'top 0.3s ease-out, bottom 0.3s ease-out, transform 0.1s ease-out',
             touchAction: 'none',
@@ -1400,7 +1400,7 @@ export default function SimulationPage() {
 
         {/* Inline Regimes Panel - appears when Regimes is active - compact with labels */}
         {mobileActiveTab === "regimes" && (
-          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(116px + env(safe-area-inset-bottom))' }}>
+          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(88px + env(safe-area-inset-bottom))' }}>
             <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               <div className="flex items-center justify-center gap-3">
                 {mobileRegimes.map((regime) => (
@@ -1456,7 +1456,7 @@ export default function SimulationPage() {
 
         {/* Inline Colors Panel - appears when Colors is active - compact design */}
         {mobileActiveTab === "colors" && (
-          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(116px + env(safe-area-inset-bottom))' }}>
+          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(88px + env(safe-area-inset-bottom))' }}>
             <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               <div className="flex items-center justify-center gap-2">
                 {colorMaps.map((cm) => (
@@ -1488,7 +1488,7 @@ export default function SimulationPage() {
 
         {/* Inline Layers Panel - appears when Layers is active - compact design */}
         {mobileActiveTab === "layers" && (
-          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(116px + env(safe-area-inset-bottom))' }}>
+          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(88px + env(safe-area-inset-bottom))' }}>
             <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               {/* Subtab selector - inline with layer buttons */}
               <div className="flex items-center justify-center gap-1.5 mb-2">
@@ -1603,7 +1603,7 @@ export default function SimulationPage() {
 
         {/* Inline Operator Controls - appears when Params is active - larger design */}
         {mobileActiveTab === "params" && (
-          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(116px + env(safe-area-inset-bottom))' }}>
+          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(88px + env(safe-area-inset-bottom))' }}>
             <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               {/* 5 Operator Circles with labels */}
               <div className="flex items-center justify-between mb-2 px-1">
@@ -1663,7 +1663,7 @@ export default function SimulationPage() {
 
         {/* Playback Scrubber Overlay - slides up when Run button is pressed - compact design */}
         {mobileActiveTab === "scrub" && (
-          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(116px + env(safe-area-inset-bottom))' }}>
+          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(88px + env(safe-area-inset-bottom))' }}>
             <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               {/* Playback Controls Row - traditional media player layout */}
               <div className="relative flex items-center justify-center gap-3 mb-3">
