@@ -263,7 +263,7 @@ export default function SimulationPage() {
   const defaultParamsRef = useRef<SimulationParameters>(isMobile ? mobileParameters : defaultParameters); // Store initial params for regime toggle
   const [mobileLayerIndex, setMobileLayerIndex] = useState(3); // -1 = base field only, 0+ = overlay layer (3 = variance)
   const [layersSubtab, setLayersSubtab] = useState<'structure' | 'presets'>('structure');
-  const [activePresetId, setActivePresetId] = useState<string | null>(null);
+  const [activePresetId, setActivePresetId] = useState<string | null>('quantumFrost');
   const touchContainerRef = useRef<HTMLDivElement>(null);
   const regimeOverlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -1055,6 +1055,24 @@ export default function SimulationPage() {
       cancelPresetTransition();
     };
   }, [clearDoubleTapData]);
+
+  // Apply default preset (Quantum Frost) on initial mount
+  useEffect(() => {
+    const defaultPreset = visualPresets.find(p => p.id === 'quantumFrost');
+    if (defaultPreset) {
+      // Apply preset settings immediately without transition
+      setBlendOpacity(defaultPreset.blend);
+      setPerceptualSmoothing(defaultPreset.smoothing > 0.5);
+      setColormap(defaultPreset.colorMap);
+      setHasUserSelectedColormap(true);
+      // Apply curvature to engine params
+      setParams(prev => {
+        const newParams = { ...prev, wK: defaultPreset.curvature };
+        engineRef.current?.setParams(newParams);
+        return newParams;
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
