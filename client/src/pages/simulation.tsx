@@ -1908,43 +1908,18 @@ export default function SimulationPage() {
                     <span className="text-[9px] mt-0.5 text-white/60">Layers</span>
                   </button>
 
-                  {/* Run button - cyan styling with pulse and breathing */}
-                  <div className="relative">
-                    {showRunPulse && (
-                      <span 
-                        className="absolute rounded-full border-2 border-cyan-400 pointer-events-none"
-                        style={{ 
-                          inset: '-4px',
-                          animation: 'pulse-ring 2s ease-out infinite',
-                        }}
-                      />
-                    )}
-                    <button
-                      onClick={() => {
-                        setShowRunPulse(false);
-                        setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub");
-                      }}
-                      className="relative w-14 h-14 rounded-full flex flex-col items-center justify-center bg-cyan-500/30 border-2 border-cyan-400"
-                      style={{
-                        animation: showRunPulse ? 'breathe 3s ease-in-out infinite' : undefined,
-                      }}
-                      data-testid="button-scrub-mobile"
-                      aria-label="Open playback controls"
-                    >
-                      <Play className="h-5 w-5 ml-0.5 text-cyan-400" />
-                      <span className="text-[9px] mt-0.5 text-cyan-400">Run</span>
-                    </button>
-                  </div>
-                  <style>{`
-                    @keyframes breathe {
-                      0%, 100% { transform: scale(1); }
-                      50% { transform: scale(1.06); }
-                    }
-                    @keyframes pulse-ring {
-                      0% { opacity: 0.7; transform: scale(1); }
-                      100% { opacity: 0; transform: scale(1.25); }
-                    }
-                  `}</style>
+                  {/* Run button - standard grey like other footer buttons */}
+                  <button
+                    onClick={() => {
+                      setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub");
+                    }}
+                    className="w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 bg-white/10 border border-white/20"
+                    data-testid="button-scrub-mobile"
+                    aria-label="Open playback controls"
+                  >
+                    <Play className="h-5 w-5 ml-0.5 text-white/80" />
+                    <span className="text-[9px] mt-0.5 text-white/60">Run</span>
+                  </button>
 
                   {/* Regimes button - ring highlight pattern: colored ring + label, grey icon */}
                   <button
