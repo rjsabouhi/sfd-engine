@@ -1403,15 +1403,31 @@ export default function SimulationPage() {
           <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
             <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               <div className="flex items-center justify-center gap-3">
-                {/* Default button - highlighted when no regime selected, resets simulation */}
+                {/* Default button - highlighted when no regime selected, resets to startup state */}
                 <button
                   type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    // Reset to default params and reset simulation
+                    // Reset to startup state: Quantum Frost preset + default params
                     setSelectedRegimeKey(null);
-                    handleParamsChange(defaultParamsRef.current);
+                    
+                    // Restore Quantum Frost preset (same as initial mount)
+                    const defaultPreset = visualPresets.find(p => p.id === 'quantumFrost');
+                    if (defaultPreset) {
+                      setBlendOpacity(defaultPreset.blend);
+                      setPerceptualSmoothing(defaultPreset.smoothing > 0.5);
+                      setColormap(defaultPreset.colorMap);
+                      setActivePresetId('quantumFrost');
+                      // Apply base params with preset curvature
+                      const resetParams = { ...defaultParamsRef.current, wK: defaultPreset.curvature };
+                      setParams(resetParams);
+                      engineRef.current?.setParams(resetParams);
+                    } else {
+                      handleParamsChange(defaultParamsRef.current);
+                    }
+                    
+                    // Reset the field
                     handleReset();
                   }}
                   className="flex flex-col items-center gap-1"
