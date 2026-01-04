@@ -1949,6 +1949,9 @@ export default function SimulationPage() {
                     )}
                     <button
                       onClick={() => {
+                        if (showRunPulse) {
+                          handlePlay();
+                        }
                         setShowRunPulse(false);
                         setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub");
                       }}
