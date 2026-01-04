@@ -1195,7 +1195,7 @@ export default function SimulationPage() {
 
     return (
       <div className="relative h-screen w-screen overflow-hidden bg-black">
-        <WelcomeModal />
+        <WelcomeModal onStart={handlePlay} />
         {/* Full-screen canvas with touch handlers and tilt parallax - resizes when panels open */}
         {/* Reduced by ~10% with generous padding on all sides */}
         <div 
@@ -2026,7 +2026,7 @@ export default function SimulationPage() {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      <WelcomeModal />
+      <WelcomeModal onStart={handlePlay} />
       <OnboardingModal ref={onboardingRef} />
       
       {/* Header - spans full width */}
