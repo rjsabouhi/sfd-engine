@@ -1409,6 +1409,7 @@ export default function SimulationPage() {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    
                     // Reset EVERYTHING to exact startup state
                     setSelectedRegimeKey(null);
                     
@@ -1427,16 +1428,24 @@ export default function SimulationPage() {
                       setPerceptualSmoothing(defaultPreset.smoothing > 0.5);
                       setColormap(defaultPreset.colorMap);
                       setActivePresetId('quantumFrost');
-                      // Apply base params with preset curvature
-                      const resetParams = { ...defaultParamsRef.current, wK: defaultPreset.curvature };
-                      setParams(resetParams);
-                      engineRef.current?.setParams(resetParams);
-                    } else {
-                      handleParamsChange(defaultParamsRef.current);
                     }
                     
-                    // Reset the field
-                    handleReset();
+                    // Reset engine to mobile defaults with Quantum Frost curvature
+                    const baseParams = { ...mobileParameters };
+                    if (defaultPreset) {
+                      baseParams.wK = defaultPreset.curvature;
+                    }
+                    
+                    // Clear temporal buffer first
+                    clearTemporalBuffer();
+                    
+                    // Set params and reinitialize engine completely
+                    setParams(baseParams);
+                    if (engineRef.current) {
+                      // Force full parameter reset on engine
+                      engineRef.current.setParams(baseParams);
+                      engineRef.current.reset();
+                    }
                   }}
                   className="flex flex-col items-center gap-1"
                   data-testid="button-regime-default-mobile"
