@@ -1923,7 +1923,7 @@ export default function SimulationPage() {
                         className="absolute rounded-full"
                         style={{ 
                           inset: '-4px',
-                          background: 'rgba(255, 255, 255, 0.3)',
+                          background: 'rgba(0, 180, 180, 0.35)',
                           animation: 'pulse-short 2s ease-in-out infinite',
                         }}
                       />
