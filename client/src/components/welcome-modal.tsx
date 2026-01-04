@@ -38,47 +38,35 @@ export function WelcomeModal() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="w-[85%] max-w-[420px] max-h-[85vh] overflow-y-auto rounded-[18px] p-6"
+            className="w-[85%] max-w-[400px] rounded-[18px] p-5"
             style={{
               backgroundColor: '#0f0f0f',
               boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
-              lineHeight: 1.45,
+              lineHeight: 1.5,
             }}
             onClick={(e) => e.stopPropagation()}
             data-testid="welcome-modal-card"
           >
             <h1 
-              className="text-xl font-semibold mb-5"
+              className="text-lg font-semibold mb-3"
               style={{ color: '#ffffff' }}
             >
               Welcome.
             </h1>
             
-            <p className="mb-4" style={{ color: '#e8e8e8' }}>
-              This tool generates and visualizes emergent behavior in complex adaptive systems.
+            <p className="mb-3 text-sm" style={{ color: '#e8e8e8' }}>
+              This tool visualizes emergent behavior in complex adaptive systems. It shows how simple local rules produce structured global patterns.
             </p>
 
-            <p className="mb-5" style={{ color: '#e8e8e8' }}>
-              It shows how simple local rules can produce structured global patterns.
+            <p className="mb-3 text-sm" style={{ color: '#e8e8e8' }}>
+              It is not a physics engine, neural model, or predictive system. It is an environment for observing how structure forms, changes, and dissolves.
             </p>
 
-            <p className="mb-4" style={{ color: '#e8e8e8' }}>
-              It is not a physics engine, not a neural model, and not a predictive system.
+            <p className="mb-4 text-sm" style={{ color: '#e8e8e8' }}>
+              There is no correct interpretation. Just watch what the system does.
             </p>
 
-            <p className="mb-5" style={{ color: '#e8e8e8' }}>
-              It is an interactive environment for observing how structure forms, changes, and dissolves.
-            </p>
-
-            <p className="mb-4" style={{ color: '#e8e8e8' }}>
-              There is no correct interpretation.
-            </p>
-
-            <p className="mb-6" style={{ color: '#e8e8e8' }}>
-              Just watch what the system does.
-            </p>
-
-            <div className="flex flex-col items-center pt-2">
+            <div className="flex flex-col items-center">
               <button
                 onClick={handleDismiss}
                 className="px-6 py-2.5 rounded-full text-sm font-medium transition-opacity hover:opacity-90"
