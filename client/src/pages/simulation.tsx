@@ -1923,8 +1923,7 @@ export default function SimulationPage() {
                         className="absolute rounded-full"
                         style={{ 
                           inset: '-4px',
-                          background: 'conic-gradient(from 0deg, #440154, #31688e, #35b779, #fde725, #440154)',
-                          opacity: 0.7,
+                          background: 'rgba(255, 255, 255, 0.3)',
                           animation: 'pulse-short 2s ease-in-out infinite',
                         }}
                       />
