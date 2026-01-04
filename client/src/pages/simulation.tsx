@@ -1960,6 +1960,25 @@ export default function SimulationPage() {
                         }}
                       />
                     )}
+                    {showRunPulse && (
+                      <span 
+                        className="absolute inset-0 rounded-full overflow-hidden"
+                      >
+                        <span
+                          className="absolute inset-0"
+                          style={{
+                            background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.5) 50%, transparent 60%)',
+                            animation: 'shimmer 2.5s ease-in-out infinite',
+                          }}
+                        />
+                      </span>
+                    )}
+                    <style>{`
+                      @keyframes shimmer {
+                        0% { transform: translateX(-100%); }
+                        100% { transform: translateX(100%); }
+                      }
+                    `}</style>
                     <Play className="h-5 w-5 ml-0.5 text-white/80" />
                     <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "scrub" ? 'text-green-400' : showRunPulse ? 'text-green-400' : 'text-white/60'}`}>
                       Run
