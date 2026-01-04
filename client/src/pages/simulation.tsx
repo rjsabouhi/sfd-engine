@@ -1908,36 +1908,18 @@ export default function SimulationPage() {
                     <span className="text-[9px] mt-0.5 text-white/60">Layers</span>
                   </button>
 
-                  {/* Run button - ring highlight pattern: colored ring + label, grey icon */}
+                  {/* Run button - same styling as Layers */}
                   <button
                     onClick={() => {
                       setShowRunPulse(false);
                       setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub");
                     }}
-                    className="relative w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 bg-white/10 border border-white/20"
+                    className="w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 bg-white/10 border border-white/20"
                     data-testid="button-scrub-mobile"
                     aria-label="Open playback controls"
                   >
-                    {showRunPulse && (
-                      <span 
-                        className="absolute rounded-full"
-                        style={{ 
-                          inset: '-4px',
-                          background: 'rgba(100, 220, 220, 0.45)',
-                          animation: 'pulse-short 2s ease-in-out infinite',
-                        }}
-                      />
-                    )}
-                    <style>{`
-                      @keyframes pulse-short {
-                        0%, 100% { opacity: 0.7; transform: scale(1); }
-                        50% { opacity: 0.4; transform: scale(1.08); }
-                      }
-                    `}</style>
                     <Play className="h-5 w-5 ml-0.5 text-white/80" />
-                    <span className="text-[9px] mt-0.5 text-white/60">
-                      Run
-                    </span>
+                    <span className="text-[9px] mt-0.5 text-white/60">Run</span>
                   </button>
 
                   {/* Regimes button - ring highlight pattern: colored ring + label, grey icon */}
