@@ -1908,16 +1908,38 @@ export default function SimulationPage() {
                     <span className="text-[9px] mt-0.5 text-white/60">Layers</span>
                   </button>
 
-                  {/* Run button - cyan styling like layer buttons */}
+                  {/* Run button - cyan styling with pulse and breathing */}
                   <button
                     onClick={() => {
                       setShowRunPulse(false);
                       setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub");
                     }}
-                    className="w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 bg-cyan-500/30 border-2 border-cyan-400"
+                    className="relative w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 bg-cyan-500/30 border-2 border-cyan-400"
+                    style={{
+                      animation: showRunPulse ? 'breathe 3s ease-in-out infinite' : undefined,
+                    }}
                     data-testid="button-scrub-mobile"
                     aria-label="Open playback controls"
                   >
+                    {showRunPulse && (
+                      <span 
+                        className="absolute rounded-full border-2 border-cyan-400"
+                        style={{ 
+                          inset: '-6px',
+                          animation: 'pulse-ring 2s ease-out infinite',
+                        }}
+                      />
+                    )}
+                    <style>{`
+                      @keyframes breathe {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.04); }
+                      }
+                      @keyframes pulse-ring {
+                        0% { opacity: 0.6; transform: scale(1); }
+                        100% { opacity: 0; transform: scale(1.15); }
+                      }
+                    `}</style>
                     <Play className="h-5 w-5 ml-0.5 text-cyan-400" />
                     <span className="text-[9px] mt-0.5 text-cyan-400">Run</span>
                   </button>
