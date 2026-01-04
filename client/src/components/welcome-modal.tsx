@@ -54,27 +54,27 @@ export function WelcomeModal() {
               Welcome.
             </h1>
             
-            <p className="mb-2.5 text-sm" style={{ color: '#e8e8e8' }}>
+            <p className="mb-3.5 text-sm" style={{ color: '#e8e8e8' }}>
               This tool generates and visualizes emergent behavior in complex adaptive systems.
             </p>
 
-            <p className="mb-3 text-sm" style={{ color: '#e8e8e8' }}>
+            <p className="mb-4 text-sm" style={{ color: '#e8e8e8' }}>
               It shows how simple local rules can produce structured global patterns.
             </p>
 
-            <p className="mb-2.5 text-sm" style={{ color: '#e8e8e8' }}>
+            <p className="mb-3.5 text-sm" style={{ color: '#e8e8e8' }}>
               It is not a physics engine, not a neural model, and not a predictive system.
             </p>
 
-            <p className="mb-3 text-sm" style={{ color: '#e8e8e8' }}>
+            <p className="mb-4 text-sm" style={{ color: '#e8e8e8' }}>
               It is an interactive environment for observing how structure forms, changes, and dissolves.
             </p>
 
-            <p className="mb-2.5 text-sm" style={{ color: '#e8e8e8' }}>
+            <p className="mb-3.5 text-sm" style={{ color: '#e8e8e8' }}>
               There is no correct interpretation.
             </p>
 
-            <p className="mb-4 text-sm" style={{ color: '#e8e8e8' }}>
+            <p className="mb-5 text-sm" style={{ color: '#e8e8e8' }}>
               Just watch what the system does.
             </p>
 
