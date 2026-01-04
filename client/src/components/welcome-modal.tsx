@@ -7,10 +7,12 @@ export function WelcomeModal() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const hasSeenIntro = localStorage.getItem(STORAGE_KEY);
-    if (!hasSeenIntro) {
-      setIsVisible(true);
-    }
+    // TODO: Restore localStorage check after testing
+    // const hasSeenIntro = localStorage.getItem(STORAGE_KEY);
+    // if (!hasSeenIntro) {
+    //   setIsVisible(true);
+    // }
+    setIsVisible(true); // Always show for testing
   }, []);
 
   const handleDismiss = () => {
