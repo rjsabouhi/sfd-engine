@@ -300,6 +300,29 @@ export default function SimulationPage() {
     }
   }, [recordedVideoBlob]);
   
+  // Safari-compatible viewport height management
+  // Uses visualViewport API for accurate height on iOS Safari
+  useEffect(() => {
+    const updateViewportHeight = () => {
+      // Use visualViewport for accurate mobile viewport height (accounts for browser chrome)
+      const vh = window.visualViewport?.height || window.innerHeight;
+      document.documentElement.style.setProperty('--app-height', `${vh}px`);
+    };
+    
+    updateViewportHeight();
+    
+    // Listen to both resize and visualViewport changes
+    window.addEventListener('resize', updateViewportHeight);
+    window.visualViewport?.addEventListener('resize', updateViewportHeight);
+    window.visualViewport?.addEventListener('scroll', updateViewportHeight);
+    
+    return () => {
+      window.removeEventListener('resize', updateViewportHeight);
+      window.visualViewport?.removeEventListener('resize', updateViewportHeight);
+      window.visualViewport?.removeEventListener('scroll', updateViewportHeight);
+    };
+  }, []);
+
   // Mobile layers for layer selector (no Base - tap to deselect shows base field alone)
   const mobileLayers = [
     { key: "constraintSkeleton", label: "Structure", icon: "S" },
@@ -1194,7 +1217,7 @@ export default function SimulationPage() {
     const panelOffset = getPanelHeight();
 
     return (
-      <div className="relative w-screen overflow-hidden bg-black" style={{ height: '100dvh' }}>
+      <div className="relative w-screen overflow-hidden bg-black" style={{ height: 'var(--app-height, 100dvh)' }}>
         <WelcomeModal />
         {/* Full-screen canvas with touch handlers and tilt parallax - resizes when panels open */}
         {/* Reduced by ~10% with generous padding on all sides */}
@@ -1208,7 +1231,7 @@ export default function SimulationPage() {
             top: mobileActiveTab ? '12px' : '76px', // 76px clears header (8px + ~60px header + 8px gap), 12px when header slides away
             left: '6%',
             right: '6%',
-            bottom: `${100 + panelOffset}px`, // 100px for bottom control strip (8px margin + 80px height + 12px gap) + panel offset
+            bottom: `calc(${100 + panelOffset}px + env(safe-area-inset-bottom, 0px))`, // 100px for bottom control strip + panel offset + safe area
             transform: `translate(${tiltOffset.x}px, ${tiltOffset.y}px)`,
             transition: 'top 0.3s ease-out, bottom 0.3s ease-out, transform 0.1s ease-out',
             touchAction: 'none',
@@ -1898,8 +1921,9 @@ export default function SimulationPage() {
         <div 
           className="absolute left-3 right-3 z-30 transition-all duration-300 ease-out"
           style={{ 
-            bottom: mobileActiveTab ? '8px' : '24px',
-            paddingBottom: 'env(safe-area-inset-bottom)',
+            bottom: mobileActiveTab 
+              ? 'calc(8px + env(safe-area-inset-bottom, 0px))' 
+              : 'calc(24px + env(safe-area-inset-bottom, 0px))',
           }}
         >
           <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg">
