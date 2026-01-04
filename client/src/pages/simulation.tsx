@@ -1414,10 +1414,11 @@ export default function SimulationPage() {
                     setSelectedRegimeKey(null);
                     
                     // Reset all regime-related state to initial values
-                    setShowDualView(false);
+                    // Mobile startup has showDualView=true with variance overlay
+                    setShowDualView(true);
                     setBlendMode(false);
-                    setDerivedType("constraintSkeleton");
-                    setMobileLayerIndex(3); // variance
+                    setMobileLayerIndex(3); // variance (startup default)
+                    setDerivedType("variance");
                     setHasUserSelectedOverlay(false);
                     setHasUserSelectedColormap(false);
                     
@@ -1445,6 +1446,9 @@ export default function SimulationPage() {
                       // Force full parameter reset on engine
                       engineRef.current.setParams(baseParams);
                       engineRef.current.reset();
+                      
+                      // CRITICAL: Recompute the variance derived field to match startup
+                      setDerivedField(engineRef.current.computeDerivedField("variance"));
                     }
                   }}
                   className="flex flex-col items-center gap-1"
