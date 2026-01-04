@@ -1889,31 +1889,23 @@ export default function SimulationPage() {
                   {/* Params button - ring highlight pattern: colored ring + label, grey icon */}
                   <button
                     onClick={() => setMobileActiveTab(mobileActiveTab === "params" ? null : "params")}
-                    className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                      mobileActiveTab === "params" 
-                        ? 'bg-amber-500/10 border-2 border-amber-400' 
-                        : 'bg-white/10 border border-white/20'
-                    }`}
+                    className="w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 bg-white/10 border border-white/20"
                     data-testid="button-params-mobile"
                     aria-label="Adjust operator parameters"
                   >
                     <SlidersHorizontal className="h-5 w-5 text-white/80" />
-                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "params" ? 'text-amber-400' : 'text-white/60'}`}>Params</span>
+                    <span className="text-[9px] mt-0.5 text-white/60">Params</span>
                   </button>
 
                   {/* Layers button - ring highlight pattern: colored ring + label, grey icon */}
                   <button
                     onClick={() => setMobileActiveTab(mobileActiveTab === "layers" ? null : "layers")}
-                    className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                      mobileActiveTab === "layers" 
-                        ? 'bg-cyan-500/10 border-2 border-cyan-400' 
-                        : 'bg-white/10 border border-white/20'
-                    }`}
+                    className="w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 bg-white/10 border border-white/20"
                     data-testid="button-layers-mobile"
                     aria-label="Select visualization layer"
                   >
                     <Layers className="h-5 w-5 text-white/80" />
-                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "layers" ? 'text-cyan-400' : 'text-white/60'}`}>Layers</span>
+                    <span className="text-[9px] mt-0.5 text-white/60">Layers</span>
                   </button>
 
                   {/* Run button - ring highlight pattern: colored ring + label, grey icon */}
@@ -1984,16 +1976,12 @@ export default function SimulationPage() {
                   {/* Regimes button - ring highlight pattern: colored ring + label, grey icon */}
                   <button
                     onClick={() => setMobileActiveTab(mobileActiveTab === "regimes" ? null : "regimes")}
-                    className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                      mobileActiveTab === "regimes" 
-                        ? 'bg-purple-500/10 border-2 border-purple-400' 
-                        : 'bg-white/10 border border-white/20'
-                    }`}
+                    className="w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 bg-white/10 border border-white/20"
                     data-testid="button-regimes-mobile"
                     aria-label="Choose dynamic regime"
                   >
                     <Zap className="h-5 w-5 text-white/80" />
-                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "regimes" ? 'text-purple-400' : 'text-white/60'}`}>Regimes</span>
+                    <span className="text-[9px] mt-0.5 text-white/60">Regimes</span>
                   </button>
 
                   {/* Share button - grey/silver utility color */}
