@@ -1920,51 +1920,19 @@ export default function SimulationPage() {
                   >
                     {showRunPulse && (
                       <span 
-                        className="absolute inset-0 rounded-full animate-ping"
+                        className="absolute rounded-full"
                         style={{ 
-                          animationDuration: '3s',
+                          inset: '-4px',
                           background: 'conic-gradient(from 0deg, #440154, #31688e, #35b779, #fde725, #440154)',
-                          opacity: 0.6,
+                          opacity: 0.7,
+                          animation: 'pulse-short 2s ease-in-out infinite',
                         }}
                       />
-                    )}
-                    {showRunPulse && (
-                      <span 
-                        className="absolute inset-0 rounded-full animate-spin"
-                        style={{
-                          animationDuration: '8s',
-                          background: 'conic-gradient(from 0deg, #440154, #31688e, #35b779, #fde725, #440154)',
-                          opacity: 0.4,
-                        }}
-                      />
-                    )}
-                    {showRunPulse && (
-                      <span 
-                        className="absolute inset-0 rounded-full animate-spin"
-                        style={{
-                          animationDuration: '5s',
-                          animationDirection: 'reverse',
-                          background: 'conic-gradient(from 180deg, transparent 0%, rgba(255,255,255,0.4) 10%, transparent 20%, transparent 50%, rgba(255,255,255,0.3) 60%, transparent 70%)',
-                        }}
-                      />
-                    )}
-                    {showRunPulse && (
-                      <span 
-                        className="absolute inset-0 rounded-full overflow-hidden"
-                      >
-                        <span
-                          className="absolute inset-0"
-                          style={{
-                            background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.5) 50%, transparent 60%)',
-                            animation: 'shimmer 2.5s ease-in-out infinite',
-                          }}
-                        />
-                      </span>
                     )}
                     <style>{`
-                      @keyframes shimmer {
-                        0% { transform: translateX(-100%); }
-                        100% { transform: translateX(100%); }
+                      @keyframes pulse-short {
+                        0%, 100% { opacity: 0.7; transform: scale(1); }
+                        50% { opacity: 0.4; transform: scale(1.08); }
                       }
                     `}</style>
                     <Play className="h-5 w-5 ml-0.5 text-white/80" />
