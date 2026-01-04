@@ -89,7 +89,7 @@ export function WelcomeModal() {
                 }}
                 data-testid="button-begin"
               >
-                Press run.
+                Press Run.
               </button>
             </div>
           </motion.div>
