@@ -1409,8 +1409,16 @@ export default function SimulationPage() {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    // Reset to startup state: Quantum Frost preset + default params
+                    // Reset EVERYTHING to exact startup state
                     setSelectedRegimeKey(null);
+                    
+                    // Reset all regime-related state to initial values
+                    setShowDualView(false);
+                    setBlendMode(false);
+                    setDerivedType("constraintSkeleton");
+                    setMobileLayerIndex(3); // variance
+                    setHasUserSelectedOverlay(false);
+                    setHasUserSelectedColormap(false);
                     
                     // Restore Quantum Frost preset (same as initial mount)
                     const defaultPreset = visualPresets.find(p => p.id === 'quantumFrost');
