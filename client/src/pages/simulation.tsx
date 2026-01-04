@@ -1908,18 +1908,18 @@ export default function SimulationPage() {
                     <span className="text-[9px] mt-0.5 text-white/60">Layers</span>
                   </button>
 
-                  {/* Run button - same styling as Layers */}
+                  {/* Run button - cyan styling like layer buttons */}
                   <button
                     onClick={() => {
                       setShowRunPulse(false);
                       setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub");
                     }}
-                    className="w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 bg-white/10 border border-white/20"
+                    className="w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 bg-cyan-500/30 border-2 border-cyan-400"
                     data-testid="button-scrub-mobile"
                     aria-label="Open playback controls"
                   >
-                    <Play className="h-5 w-5 ml-0.5 text-white/80" />
-                    <span className="text-[9px] mt-0.5 text-white/60">Run</span>
+                    <Play className="h-5 w-5 ml-0.5 text-cyan-400" />
+                    <span className="text-[9px] mt-0.5 text-cyan-400">Run</span>
                   </button>
 
                   {/* Regimes button - ring highlight pattern: colored ring + label, grey icon */}
