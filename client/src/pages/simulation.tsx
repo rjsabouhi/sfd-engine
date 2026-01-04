@@ -1942,10 +1942,21 @@ export default function SimulationPage() {
                     )}
                     {showRunPulse && (
                       <span 
-                        className="absolute inset-0 rounded-full"
+                        className="absolute inset-0 rounded-full animate-spin"
                         style={{
+                          animationDuration: '3s',
                           background: 'conic-gradient(from 0deg, #440154, #31688e, #35b779, #fde725, #440154)',
-                          opacity: 0.3,
+                          opacity: 0.4,
+                        }}
+                      />
+                    )}
+                    {showRunPulse && (
+                      <span 
+                        className="absolute inset-0 rounded-full animate-spin"
+                        style={{
+                          animationDuration: '2s',
+                          animationDirection: 'reverse',
+                          background: 'conic-gradient(from 180deg, transparent 0%, rgba(255,255,255,0.4) 10%, transparent 20%, transparent 50%, rgba(255,255,255,0.3) 60%, transparent 70%)',
                         }}
                       />
                     )}
