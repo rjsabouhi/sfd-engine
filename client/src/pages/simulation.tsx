@@ -1949,6 +1949,10 @@ export default function SimulationPage() {
                     )}
                     <button
                       onClick={() => {
+                        // On first press, start the simulation
+                        if (showRunPulse && !state.isRunning) {
+                          handlePlay();
+                        }
                         setShowRunPulse(false);
                         setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub");
                       }}
