@@ -1980,7 +1980,7 @@ export default function SimulationPage() {
                       }
                     `}</style>
                     <Play className="h-5 w-5 ml-0.5 text-white/80" />
-                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "scrub" ? 'text-green-400' : showRunPulse ? 'text-green-400' : 'text-white/60'}`}>
+                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "scrub" ? 'text-green-400' : 'text-white/60'}`}>
                       Run
                     </span>
                   </button>
