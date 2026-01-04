@@ -1201,126 +1201,57 @@ export default function SimulationPage() {
     const stabilityState = state.variance < 0.05 ? "Stable" : state.variance < 0.15 ? "Active" : "Unstable";
     const stabilityColor = state.variance < 0.05 ? "text-green-400" : state.variance < 0.15 ? "text-yellow-400" : "text-red-400";
 
-    // Calculate panel height for layout
+    // Calculate dynamic bottom offset based on active panel - compact uniform sizing
+    // Add 20px padding between panels and canvas for better spacing
     const getPanelHeight = () => {
+      const padding = 20;
       switch (mobileActiveTab) {
-        case "regimes": return 56;
-        case "colors": return 56;
-        case "layers": return 120;
-        case "params": return 80;
-        case "scrub": return 90;
+        case "regimes": return 60 + padding; // compact row of buttons
+        case "colors": return 60 + padding; // compact row of color buttons
+        case "layers": return 130 + padding; // fixed height for both subtabs to prevent layout shift
+        case "params": return 85 + padding; // operator circles + slider
+        case "scrub": return 95 + padding; // playback buttons + recording progress + slider
         default: return 0;
       }
     };
-    const panelHeight = getPanelHeight();
+    const panelOffset = getPanelHeight();
 
     return (
-      <div 
-        className="flex flex-col w-screen bg-black overflow-hidden"
-        style={{ 
-          height: 'var(--app-height, 100dvh)',
-          paddingTop: 'env(safe-area-inset-top, 0px)',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-        }}
-      >
+      <div className="relative w-screen overflow-hidden bg-black" style={{ height: 'var(--app-height, 100dvh)' }}>
         <WelcomeModal />
-        
-        {/* Header - flex-shrink-0, slides up when panel active */}
-        <div 
-          className="flex-shrink-0 relative z-20 px-3 pt-1"
-          style={{
-            marginTop: mobileActiveTab ? '-80px' : '0px',
-            transition: 'margin-top 0.3s ease-out',
-          }}
-        >
-          <div 
-            className="absolute inset-x-0 top-0 h-20 pointer-events-none"
-            style={{
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)',
-            }}
-          />
-          <div className="relative bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg">
-            <div className="flex items-center justify-between px-4 py-2.5">
-              <div className="flex items-center gap-3">
-                <img src={sfdLogo} alt="SFD" className="w-7 h-7 rounded-md" />
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-sm font-semibold text-white">SFD Engine</h1>
-                    <span className="text-[9px] text-white/30 font-medium">v1.0 Preview</span>
-                  </div>
-                  <p className="text-[10px] text-white/50">Structural Field Explorer</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <button className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl active:bg-white/10 transition-colors" data-testid="button-menu-mobile" aria-label="Options menu">
-                      <MoreVertical className="h-5 w-5 text-white/60" />
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-[90vw] bg-neutral-900/95 backdrop-blur-xl border-white/10">
-                    <DialogHeader>
-                      <DialogTitle className="text-white">About SFD Engine</DialogTitle>
-                      <DialogDescription asChild>
-                        <div className="pt-4 space-y-3 text-sm text-white/70">
-                          <span className="block">
-                            Structural Field Dynamics simulates complex adaptive systems
-                            through operator-driven field evolution.
-                          </span>
-                          <span className="block">
-                            <strong className="text-white/90">Operators:</strong> Curvature, Gradient-Tension,
-                            Neighbor-Coupling, Attractor-Formation, Global Redistribution
-                          </span>
-                        </div>
-                      </DialogDescription>
-                    </DialogHeader>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Canvas area - flex-grow, fills available space */}
+        {/* Full-screen canvas with touch handlers and tilt parallax - resizes when panels open */}
+        {/* Reduced by ~10% with generous padding on all sides */}
         <div 
           ref={touchContainerRef}
-          className="flex-1 flex items-center justify-center px-[6%] py-2 min-h-0"
+          className="absolute"
           onTouchStart={touchHandlers.onTouchStart}
           onTouchMove={touchHandlers.onTouchMove}
           onTouchEnd={touchHandlers.onTouchEnd}
           style={{
+            top: mobileActiveTab ? '6px' : '72px', // 72px clears header (mt-4 + ~56px panel), 6px when header slides away
+            left: '6%',
+            right: '6%',
+            bottom: `calc(${100 + panelOffset}px + env(safe-area-inset-bottom, 0px))`, // 100px = 80px nav + 12px bottom + 8px gap + panel offset + safe area
             transform: `translate(${tiltOffset.x}px, ${tiltOffset.y}px)`,
-            transition: 'transform 0.1s ease-out',
+            transition: 'top 0.3s ease-out, bottom 0.3s ease-out, transform 0.1s ease-out',
             touchAction: 'none',
             userSelect: 'none',
             WebkitUserSelect: 'none',
             WebkitTouchCallout: 'none',
           } as React.CSSProperties}
         >
-          <div className="w-full h-full max-h-full flex items-center justify-center">
-            <VisualizationCanvas 
-              field={field} 
-              colormap={colormap} 
-              basinMap={basinMap}
-              perceptualSmoothing={perceptualSmoothing}
-              onTransformChange={setCanvasTransform}
-              disableTouch={true}
-              overlayDerivedField={mobileLayerIndex >= 0 && mobileLayers[mobileLayerIndex]?.key !== "basins" ? derivedField : null}
-              overlayBasinMap={mobileLayerIndex >= 0 && mobileLayers[mobileLayerIndex]?.key === "basins" ? basinMap : null}
-              overlayOpacity={mobileLayerIndex >= 0 ? blendOpacity : 0}
-            />
-          </div>
+          <VisualizationCanvas 
+            field={field} 
+            colormap={colormap} 
+            basinMap={basinMap}
+            perceptualSmoothing={perceptualSmoothing}
+            onTransformChange={setCanvasTransform}
+            disableTouch={true}
+            overlayDerivedField={mobileLayerIndex >= 0 && mobileLayers[mobileLayerIndex]?.key !== "basins" ? derivedField : null}
+            overlayBasinMap={mobileLayerIndex >= 0 && mobileLayers[mobileLayerIndex]?.key === "basins" ? basinMap : null}
+            overlayOpacity={mobileLayerIndex >= 0 ? blendOpacity : 0}
+          />
         </div>
-
-        {/* Pop-up panels container - positioned above footer */}
-        <div 
-          className="flex-shrink-0 px-3 relative z-40"
-          style={{ 
-            height: panelHeight > 0 ? `${panelHeight}px` : '0px',
-            transition: 'height 0.2s ease-out',
-            overflow: 'hidden',
-          }}
-        >
 
         {/* Instability flash overlay */}
         {instabilityFlash && (
@@ -1469,7 +1400,7 @@ export default function SimulationPage() {
 
         {/* Inline Regimes Panel - appears when Regimes is active - compact with labels */}
         {mobileActiveTab === "regimes" && (
-          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(92px + env(safe-area-inset-bottom))' }}>
+          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
             <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               <div className="flex items-center justify-center gap-3">
                 {mobileRegimes.map((regime) => (
@@ -1525,7 +1456,7 @@ export default function SimulationPage() {
 
         {/* Inline Colors Panel - appears when Colors is active - compact design */}
         {mobileActiveTab === "colors" && (
-          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(92px + env(safe-area-inset-bottom))' }}>
+          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
             <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               <div className="flex items-center justify-center gap-2">
                 {colorMaps.map((cm) => (
@@ -1557,7 +1488,7 @@ export default function SimulationPage() {
 
         {/* Inline Layers Panel - appears when Layers is active - compact design */}
         {mobileActiveTab === "layers" && (
-          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(92px + env(safe-area-inset-bottom))' }}>
+          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
             <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               {/* Subtab selector - inline with layer buttons */}
               <div className="flex items-center justify-center gap-1.5 mb-2">
@@ -1672,7 +1603,7 @@ export default function SimulationPage() {
 
         {/* Inline Operator Controls - appears when Params is active - larger design */}
         {mobileActiveTab === "params" && (
-          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(92px + env(safe-area-inset-bottom))' }}>
+          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
             <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               {/* 5 Operator Circles with labels */}
               <div className="flex items-center justify-between mb-2 px-1">
@@ -1732,7 +1663,7 @@ export default function SimulationPage() {
 
         {/* Playback Scrubber Overlay - slides up when Run button is pressed - compact design */}
         {mobileActiveTab === "scrub" && (
-          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(92px + env(safe-area-inset-bottom))' }}>
+          <div className="absolute left-3 right-3 z-40" style={{ bottom: 'calc(100px + env(safe-area-inset-bottom))' }}>
             <div className="bg-neutral-900/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg px-4 py-3">
               {/* Playback Controls Row - traditional media player layout */}
               <div className="relative flex items-center justify-center gap-3 mb-3">
