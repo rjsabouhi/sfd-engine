@@ -259,7 +259,7 @@ export default function SimulationPage() {
   const [regimeOverlay, setRegimeOverlay] = useState<string | null>(null);
   const [instabilityFlash, setInstabilityFlash] = useState(false);
   const [tiltOffset, setTiltOffset] = useState({ x: 0, y: 0 });
-  const [selectedRegimeKey, setSelectedRegimeKey] = useState<string | null>("equilibrium"); // Start with equilibrium highlighted
+  const [selectedRegimeKey, setSelectedRegimeKey] = useState<string | null>(null); // Start with Default highlighted
   const defaultParamsRef = useRef<SimulationParameters>(isMobile ? mobileParameters : defaultParameters); // Store initial params for regime toggle
   const [mobileLayerIndex, setMobileLayerIndex] = useState(3); // -1 = base field only, 0+ = overlay layer (3 = variance)
   const [layersSubtab, setLayersSubtab] = useState<'structure' | 'presets'>('structure');
