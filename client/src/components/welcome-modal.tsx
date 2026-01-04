@@ -48,80 +48,37 @@ export function WelcomeModal() {
             data-testid="welcome-modal-card"
           >
             <h1 
-              className="text-xl font-semibold mb-4"
+              className="text-xl font-semibold mb-5"
               style={{ color: '#ffffff' }}
             >
-              Welcome to the SFD Engine.
+              Welcome.
             </h1>
             
             <p className="mb-4" style={{ color: '#e8e8e8' }}>
-              A visualization tool for exploring emergent patterns in complex systems.
+              This tool generates and visualizes emergent behavior in complex adaptive systems.
+            </p>
+
+            <p className="mb-5" style={{ color: '#e8e8e8' }}>
+              It shows how simple local rules can produce structured global patterns.
             </p>
 
             <p className="mb-4" style={{ color: '#e8e8e8' }}>
-              What you're about to see is mathematics in motion — flows, tensions, and attractors that unfold and reorganize in real time.
+              It is not a physics engine, not a neural model, and not a predictive system.
+            </p>
+
+            <p className="mb-5" style={{ color: '#e8e8e8' }}>
+              It is an interactive environment for observing how structure forms, changes, and dissolves.
+            </p>
+
+            <p className="mb-4" style={{ color: '#e8e8e8' }}>
+              There is no correct interpretation.
             </p>
 
             <p className="mb-6" style={{ color: '#e8e8e8' }}>
-              It is not alive, and it is not reacting to you. But many people find the patterns strangely familiar because our brains naturally recognize structure, symmetry, and change.
+              Just watch what the system does.
             </p>
 
-            <h2 
-              className="text-lg font-medium mb-3"
-              style={{ color: '#ffffff' }}
-            >
-              How to Use It
-            </h2>
-            
-            <ul className="mb-6 space-y-2" style={{ color: '#e8e8e8' }}>
-              <li className="flex gap-2">
-                <span className="shrink-0">•</span>
-                <span>Press <span className="font-medium">▶</span> to start the simulation.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="shrink-0">•</span>
-                <span>Touch & drag inside the field to add perturbations.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="shrink-0">•</span>
-                <span>Tap the bottom panels to explore layers, parameters, and playback.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="shrink-0">•</span>
-                <span>You can't break anything. Every change simply reshapes the dynamics.</span>
-              </li>
-            </ul>
-
-            <h2 
-              className="text-lg font-medium mb-3"
-              style={{ color: '#ffffff' }}
-            >
-              If You Feel Disoriented
-            </h2>
-            
-            <p className="mb-6" style={{ color: '#e8e8e8' }}>
-              Some visuals can feel immersive or intense. If that happens, just pause the simulation and take a moment.
-            </p>
-
-            <h2 
-              className="text-lg font-medium mb-3"
-              style={{ color: '#ffffff' }}
-            >
-              What This Is
-            </h2>
-            
-            <p className="mb-6" style={{ color: '#e8e8e8' }}>
-              The SFD Engine is a real-time emergent dynamics simulator. It helps you see how structure forms, dissolves, and stabilizes inside a complex system. No background knowledge required.
-            </p>
-
-            <div className="flex flex-col items-center gap-3 pt-2">
-              <p 
-                className="text-sm opacity-70"
-                style={{ color: '#e8e8e8' }}
-              >
-                Tap anywhere to begin.
-              </p>
-              
+            <div className="flex flex-col items-center pt-2">
               <button
                 onClick={handleDismiss}
                 className="px-6 py-2.5 rounded-full text-sm font-medium transition-opacity hover:opacity-90"
@@ -132,7 +89,7 @@ export function WelcomeModal() {
                 }}
                 data-testid="button-begin"
               >
-                Begin
+                Press play.
               </button>
             </div>
           </motion.div>
