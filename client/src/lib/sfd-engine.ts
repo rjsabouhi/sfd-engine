@@ -80,7 +80,7 @@ export class SFDEngine {
   private height: number;
   private params: SimulationParameters;
   private step: number = 0;
-  private playbackDisplayStep: number = 0; // Separate step counter for playback display
+  private playbackDisplayStep: number | null = null; // Separate step counter for playback display (null = use live step)
   private isRunning: boolean = false;
   private animationId: number | null = null;
   private lastFrameTime: number = 0;
@@ -277,6 +277,7 @@ export class SFDEngine {
     this.ringBuffer = [];
     this.ringBufferIndex = 0;
     this.currentPlaybackIndex = -1;
+    this.playbackDisplayStep = null;
     this.structuralEvents = [];
     this.lastVariance = 0;
     this.lastBasinCount = 0;
@@ -325,6 +326,7 @@ export class SFDEngine {
     // Reinitialize the field with current parameters (keeps current preset/mode)
     this.currentPlaybackIndex = -1;
     this.playbackDisplayGrid = null;
+    this.playbackDisplayStep = null;
     this.initialize();
     this.notifyUpdate();
   }
@@ -338,6 +340,7 @@ export class SFDEngine {
     this.tempGrid = new Float32Array(this.width * this.height);
     this.currentPlaybackIndex = -1;
     this.playbackDisplayGrid = null;
+    this.playbackDisplayStep = null;
     this.initialize();
     this.notifyUpdate();
   }
@@ -360,6 +363,7 @@ export class SFDEngine {
       this.ringBufferIndex = 0;
       this.currentPlaybackIndex = -1;
       this.playbackDisplayGrid = null;
+      this.playbackDisplayStep = null;
     }
     
     if (needsResize) {
@@ -1632,6 +1636,7 @@ export class SFDEngine {
       // Exiting playback mode - clear the display grid
       this.currentPlaybackIndex = -1;
       this.playbackDisplayGrid = null;
+      this.playbackDisplayStep = null;
       return false;
     }
   }
@@ -1659,7 +1664,9 @@ export class SFDEngine {
     
     // Restore live state from the current playback frame
     this.grid.set(this.playbackDisplayGrid);
-    this.step = this.playbackDisplayStep;
+    if (this.playbackDisplayStep !== null) {
+      this.step = this.playbackDisplayStep;
+    }
     
     // Truncate history after this point (future frames are now invalid)
     this.truncateHistoryAfter(this.currentPlaybackIndex);
@@ -1667,6 +1674,7 @@ export class SFDEngine {
     // Exit playback mode
     this.currentPlaybackIndex = -1;
     this.playbackDisplayGrid = null;
+    this.playbackDisplayStep = null;
     
     this.invalidateDerivedFieldCache();
     this.updateBasinMap();
@@ -1707,6 +1715,7 @@ export class SFDEngine {
   exitPlaybackMode(): void {
     this.currentPlaybackIndex = -1;
     this.playbackDisplayGrid = null;
+    this.playbackDisplayStep = null;
   }
 
   isInPlaybackMode(): boolean {
@@ -1886,6 +1895,7 @@ export class SFDEngine {
     if (this.isRunning) return;
     this.currentPlaybackIndex = -1;
     this.playbackDisplayGrid = null; // Clear playback display to use live grid
+    this.playbackDisplayStep = null;
     this.isRunning = true;
     this.lastFrameTime = performance.now();
     this.lastStepTimestamp = performance.now();
