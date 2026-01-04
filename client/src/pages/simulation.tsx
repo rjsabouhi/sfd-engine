@@ -1934,7 +1934,7 @@ export default function SimulationPage() {
                       <span 
                         className="absolute inset-0 rounded-full animate-ping"
                         style={{ 
-                          animationDuration: '1.5s',
+                          animationDuration: '3s',
                           background: 'conic-gradient(from 0deg, #440154, #31688e, #35b779, #fde725, #440154)',
                           opacity: 0.6,
                         }}
@@ -1944,7 +1944,7 @@ export default function SimulationPage() {
                       <span 
                         className="absolute inset-0 rounded-full animate-spin"
                         style={{
-                          animationDuration: '3s',
+                          animationDuration: '8s',
                           background: 'conic-gradient(from 0deg, #440154, #31688e, #35b779, #fde725, #440154)',
                           opacity: 0.4,
                         }}
@@ -1954,7 +1954,7 @@ export default function SimulationPage() {
                       <span 
                         className="absolute inset-0 rounded-full animate-spin"
                         style={{
-                          animationDuration: '2s',
+                          animationDuration: '5s',
                           animationDirection: 'reverse',
                           background: 'conic-gradient(from 180deg, transparent 0%, rgba(255,255,255,0.4) 10%, transparent 20%, transparent 50%, rgba(255,255,255,0.3) 60%, transparent 70%)',
                         }}
