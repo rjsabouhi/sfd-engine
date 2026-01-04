@@ -1922,11 +1922,7 @@ export default function SimulationPage() {
                       setShowRunPulse(false);
                       setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub");
                     }}
-                    className={`relative w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
-                      mobileActiveTab === "scrub" 
-                        ? 'bg-green-500/10 border-2 border-green-400' 
-                        : 'bg-white/10 border border-white/20'
-                    }`}
+                    className="relative w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 bg-white/10 border border-white/20"
                     data-testid="button-scrub-mobile"
                     aria-label="Open playback controls"
                   >
@@ -1980,7 +1976,7 @@ export default function SimulationPage() {
                       }
                     `}</style>
                     <Play className="h-5 w-5 ml-0.5 text-white/80" />
-                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "scrub" ? 'text-green-400' : 'text-white/60'}`}>
+                    <span className="text-[9px] mt-0.5 text-white/60">
                       Run
                     </span>
                   </button>
