@@ -211,6 +211,9 @@ export default function SimulationPage() {
   const [hasUserSelectedColormap, setHasUserSelectedColormap] = useState(false);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [mobileActiveTab, setMobileActiveTab] = useState<string | null>(null);
+  const [showRunPulse, setShowRunPulse] = useState(() => {
+    return !localStorage.getItem('sfd-hasSeenIntro');
+  });
   const [mobileSelectedOperator, setMobileSelectedOperator] = useState<"wK" | "wT" | "wC" | "wA" | "wR">("wK");
   const [interpretationMode, setInterpretationMode] = useState<InterpretationMode>("structural");
     
@@ -1917,8 +1920,11 @@ export default function SimulationPage() {
 
                   {/* Run button - ring highlight pattern: colored ring + label, grey icon */}
                   <button
-                    onClick={() => setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub")}
-                    className={`w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
+                    onClick={() => {
+                      setShowRunPulse(false);
+                      setMobileActiveTab(mobileActiveTab === "scrub" ? null : "scrub");
+                    }}
+                    className={`relative w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                       mobileActiveTab === "scrub" 
                         ? 'bg-green-500/10 border-2 border-green-400' 
                         : 'bg-white/10 border border-white/20'
@@ -1926,8 +1932,19 @@ export default function SimulationPage() {
                     data-testid="button-scrub-mobile"
                     aria-label="Open playback controls"
                   >
+                    {showRunPulse && (
+                      <span 
+                        className="absolute inset-0 rounded-full border-2 border-green-400 animate-ping"
+                        style={{ animationDuration: '1.5s' }}
+                      />
+                    )}
+                    {showRunPulse && (
+                      <span 
+                        className="absolute inset-0 rounded-full border-2 border-green-400/50"
+                      />
+                    )}
                     <Play className="h-5 w-5 ml-0.5 text-white/80" />
-                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "scrub" ? 'text-green-400' : 'text-white/60'}`}>
+                    <span className={`text-[9px] mt-0.5 ${mobileActiveTab === "scrub" ? 'text-green-400' : showRunPulse ? 'text-green-400' : 'text-white/60'}`}>
                       Run
                     </span>
                   </button>
