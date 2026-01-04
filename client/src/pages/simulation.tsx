@@ -1913,7 +1913,7 @@ export default function SimulationPage() {
                     {showRunPulse && (
                       <>
                         <span 
-                          className="absolute rounded-full border-2 border-cyan-400/60 pointer-events-none"
+                          className="absolute rounded-full border-2 border-green-400/60 pointer-events-none"
                           style={{ 
                             inset: '-6px',
                             animation: 'pulse-ring 2s ease-out infinite',
@@ -1923,7 +1923,7 @@ export default function SimulationPage() {
                           className="absolute rounded-full pointer-events-none"
                           style={{ 
                             inset: '-3px',
-                            background: 'radial-gradient(circle, rgba(34,211,238,0.25) 0%, transparent 70%)',
+                            background: 'radial-gradient(circle, rgba(34,197,94,0.25) 0%, transparent 70%)',
                             animation: 'glow-pulse 2s ease-in-out infinite',
                           }}
                         />
@@ -1936,7 +1936,7 @@ export default function SimulationPage() {
                       }}
                       className={`relative w-14 h-14 rounded-full flex flex-col items-center justify-center transition-all active:scale-95 ${
                         showRunPulse 
-                          ? 'bg-cyan-500/20 border-2 border-cyan-400/70' 
+                          ? 'bg-green-500/20 border-2 border-green-400/70' 
                           : 'bg-white/10 border border-white/20'
                       }`}
                       style={{
@@ -1945,8 +1945,8 @@ export default function SimulationPage() {
                       data-testid="button-scrub-mobile"
                       aria-label="Open playback controls"
                     >
-                      <Play className={`h-5 w-5 ml-0.5 ${showRunPulse ? 'text-cyan-400' : 'text-white/80'}`} />
-                      <span className={`text-[9px] mt-0.5 ${showRunPulse ? 'text-cyan-400' : 'text-white/60'}`}>Run</span>
+                      <Play className={`h-5 w-5 ml-0.5 ${showRunPulse ? 'text-green-400' : 'text-white/80'}`} />
+                      <span className={`text-[9px] mt-0.5 ${showRunPulse ? 'text-green-400' : 'text-white/60'}`}>Run</span>
                     </button>
                   </div>
                   <style>{`
