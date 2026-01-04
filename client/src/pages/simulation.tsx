@@ -1932,13 +1932,21 @@ export default function SimulationPage() {
                   >
                     {showRunPulse && (
                       <span 
-                        className="absolute inset-0 rounded-full border-2 border-green-400 animate-ping"
-                        style={{ animationDuration: '1.5s' }}
+                        className="absolute inset-0 rounded-full animate-ping"
+                        style={{ 
+                          animationDuration: '1.5s',
+                          background: 'conic-gradient(from 0deg, #440154, #31688e, #35b779, #fde725, #440154)',
+                          opacity: 0.6,
+                        }}
                       />
                     )}
                     {showRunPulse && (
                       <span 
-                        className="absolute inset-0 rounded-full border-2 border-green-400/50"
+                        className="absolute inset-0 rounded-full"
+                        style={{
+                          background: 'conic-gradient(from 0deg, #440154, #31688e, #35b779, #fde725, #440154)',
+                          opacity: 0.3,
+                        }}
                       />
                     )}
                     <Play className="h-5 w-5 ml-0.5 text-white/80" />
