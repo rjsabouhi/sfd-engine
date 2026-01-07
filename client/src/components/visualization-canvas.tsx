@@ -217,6 +217,9 @@ export function VisualizationCanvas({
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container || !field) return;
+    
+    // Guard against zero dimensions during resizing
+    if (field.width <= 0 || field.height <= 0) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -224,11 +227,18 @@ export function VisualizationCanvas({
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
     const size = Math.min(containerWidth, containerHeight);
+    
+    // Guard against zero container size during resizing
+    if (size <= 0) return;
+    
     setCanvasSize(size);
     
     // High-DPI scaling: render at display resolution for crisp visuals
     const dpr = Math.min(window.devicePixelRatio || 1, 3); // Cap at 3x for performance
     const renderSize = Math.floor(size * dpr);
+    
+    // Guard against zero render size
+    if (renderSize <= 0) return;
     
     canvas.width = renderSize;
     canvas.height = renderSize;
@@ -598,6 +608,9 @@ export function VisualizationCanvas({
     if (overlayBasinMap && overlayBasinMap.labels.length > 0) {
       const { labels, width, height } = overlayBasinMap;
       
+      // Guard against zero dimensions
+      if (width <= 0 || height <= 0) return;
+      
       // Use offscreen canvas at grid resolution for smooth scaling
       const offscreen = document.createElement("canvas");
       offscreen.width = width;
@@ -632,6 +645,10 @@ export function VisualizationCanvas({
       
     } else if (overlayDerivedField) {
       const { grid, width, height } = overlayDerivedField;
+      
+      // Guard against zero dimensions
+      if (width <= 0 || height <= 0) return;
+      
       let min = Infinity, max = -Infinity;
       for (let i = 0; i < grid.length; i++) {
         if (grid[i] < min) min = grid[i];

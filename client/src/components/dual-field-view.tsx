@@ -192,7 +192,7 @@ export function DualFieldView({
     }
 
     if (derivedType === "basins") {
-      if (!basinMap) {
+      if (!basinMap || basinMap.width <= 0 || basinMap.height <= 0) {
         clearCanvas();
         return;
       }
@@ -234,7 +234,7 @@ export function DualFieldView({
       return;
     }
 
-    if (!derivedField) {
+    if (!derivedField || derivedField.width <= 0 || derivedField.height <= 0) {
       clearCanvas();
       return;
     }
