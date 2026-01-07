@@ -372,8 +372,8 @@ export function DualFieldView({
   const currentLabel = OVERLAY_OPTIONS.find(o => o.value === derivedType)?.label || derivedType;
   const zoomPercent = Math.round(zoom * 100);
   const size = Math.min(containerSize.width, containerSize.height);
-  const visualScale = 0.88;
-  const visualSize = size * visualScale;
+  // Use full container size to match VisualizationCanvas sizing
+  const visualSize = size;
 
   const currentOption = OVERLAY_OPTIONS.find(o => o.value === derivedType);
   const displayLabel = hasUserSelectedOverlay ? (currentOption?.label || "Layers") : "Layers";

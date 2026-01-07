@@ -322,7 +322,7 @@ export default function SimulationPage() {
       window.visualViewport?.removeEventListener('scroll', updateViewportHeight);
     };
   }, []);
-
+  
   // Mobile layers for layer selector (no Base - tap to deselect shows base field alone)
   const mobileLayers = [
     { key: "constraintSkeleton", label: "Structure", icon: "S" },
