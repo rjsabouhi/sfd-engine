@@ -214,15 +214,16 @@ export function VisualizationCanvas({
   }, [isTransitioning]);
 
   const render = useCallback(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container || !field) return;
-    
-    // Guard against zero dimensions during resizing
-    if (field.width <= 0 || field.height <= 0) return;
+    try {
+      const canvas = canvasRef.current;
+      const container = containerRef.current;
+      if (!canvas || !container || !field) return;
+      
+      // Guard against zero dimensions during resizing
+      if (field.width <= 0 || field.height <= 0) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
@@ -377,6 +378,9 @@ export function VisualizationCanvas({
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(offscreen, 0, 0, renderSize, renderSize);
+    }
+    } catch (e) {
+      // Silently handle canvas errors during resize
     }
   }, [field, colormap, basinMap, showBasins, perceptualSmoothing, transitionTick]);
 
@@ -590,12 +594,13 @@ export function VisualizationCanvas({
 
   // Render overlay canvas when overlay data is provided
   useEffect(() => {
-    const canvas = overlayCanvasRef.current;
-    if (!canvas || canvasSize <= 0) return;
-    if (!overlayDerivedField && !overlayBasinMap) return;
+    try {
+      const canvas = overlayCanvasRef.current;
+      if (!canvas || canvasSize <= 0) return;
+      if (!overlayDerivedField && !overlayBasinMap) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 3);
     const renderSize = Math.floor(canvasSize * dpr);
@@ -687,6 +692,9 @@ export function VisualizationCanvas({
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(offscreen, 0, 0, renderSize, renderSize);
+    }
+    } catch (e) {
+      // Silently handle canvas errors during resize
     }
   }, [overlayDerivedField, overlayBasinMap, canvasSize]);
 

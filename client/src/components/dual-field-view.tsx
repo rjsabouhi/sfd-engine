@@ -150,14 +150,15 @@ export function DualFieldView({
   }, [blendMode, primaryColormap]);
 
   const render = useCallback(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
+    try {
+      const canvas = canvasRef.current;
+      const container = containerRef.current;
+      if (!canvas || !container) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-    setContainerSize({ width: container.clientWidth, height: container.clientHeight });
+      setContainerSize({ width: container.clientWidth, height: container.clientHeight });
 
     // Clear canvas before any early returns to prevent stale content
     const clearCanvas = () => {
@@ -275,6 +276,9 @@ export function DualFieldView({
     }
 
     ctx.putImageData(imageData, 0, 0);
+    } catch (e) {
+      // Silently handle canvas errors during resize
+    }
   }, [derivedField, basinMap, derivedType, blendOpacity, primaryField, blendColorHelper]);
 
   useEffect(() => {
