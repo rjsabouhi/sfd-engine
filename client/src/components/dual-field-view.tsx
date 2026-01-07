@@ -158,7 +158,10 @@ export function DualFieldView({
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      setContainerSize({ width: container.clientWidth, height: container.clientHeight });
+      // Use containerSize from state (updated by ResizeObserver) rather than reading directly
+      // This ensures the component responds to panel resize events
+      const currentWidth = containerSize.width || container.clientWidth;
+      const currentHeight = containerSize.height || container.clientHeight;
 
     // Clear canvas before any early returns to prevent stale content
     const clearCanvas = () => {
@@ -279,16 +282,36 @@ export function DualFieldView({
     } catch (e) {
       // Silently handle canvas errors during resize
     }
-  }, [derivedField, basinMap, derivedType, blendOpacity, primaryField, blendColorHelper]);
+  }, [derivedField, basinMap, derivedType, blendOpacity, primaryField, blendColorHelper, containerSize]);
 
   useEffect(() => {
     render();
   }, [render]);
 
+  // Use ResizeObserver to detect panel resize (not just window resize)
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          setContainerSize({ width, height });
+        }
+      }
+    });
+    
+    resizeObserver.observe(container);
+    
+    // Also listen to window resize as a fallback
     const handleResize = () => render();
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", handleResize);
+    };
   }, [render]);
 
   const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
