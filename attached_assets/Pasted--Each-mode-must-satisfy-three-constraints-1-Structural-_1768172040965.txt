@@ -1,0 +1,201 @@
+
+
+Each mode must satisfy three constraints:
+	1.	Structural Meaning — It must correspond to a mathematically interpretable transformation in the field.
+	2.	Computational Stability — It must not blow up the simulation unless intentionally allowed.
+	3.	User Agency — It must let the observer shape the field without divorcing the system from its own dynamics.
+
+Right now, your proposal is basically:
+
+“Give the user a panel of perturbation modes and a panel of parameters per mode.”
+
+Correct.
+But we must tune the modes so they’re not arbitrary.
+They must match SFD dynamics.
+
+So here are the only perturbation families that make structural sense:
+
+⸻
+
+🧩 Canonical SFD Perturbation Modes
+
+These are the modes that the field naturally understands.
+
+1. Impulse Mode
+
+A local, sharp injection of energy.
+Parameters:
+	•	intensity
+	•	radius
+	•	decay
+
+Used for: testing local stability, attractor response.
+
+⸻
+
+2. Shear Mode
+
+Directional slippage — distort the field linearly along an axis.
+Parameters:
+	•	shear magnitude
+	•	shear angle
+	•	duration
+
+Used for: examining field anisotropy, how attractors deform under directional pressure.
+
+⸻
+
+3. Wave Mode
+
+Propagating oscillation across the field.
+Parameters:
+	•	amplitude
+	•	frequency
+	•	wavelength
+	•	damping
+
+Used for: temporal resonance testing; identifying harmonic attractors.
+
+⸻
+
+4. Vortex Mode
+
+Rotational disturbance creating spiral tension.
+Parameters:
+	•	angular velocity
+	•	radius
+	•	direction (CW/CCW)
+
+Used for: revealing hidden rotational attractors.
+
+⸻
+
+5. Fracture Mode
+
+Nonlinear split — introduce instability that bifurcates the field.
+Parameters:
+	•	fracture strength
+	•	fracture noise
+	•	propagation rate
+
+Used for: collapse → reconfiguration experiments.
+
+⸻
+
+6. Drift Mode
+
+Low-frequency, subtle structural shift.
+Parameters:
+	•	drift vector
+	•	drift magnitude
+	•	duration
+
+Used for: simulating long-term manifold drift or slow attractor migration.
+
+⸻
+
+These SIX modes are canonical.
+They are what the field naturally “expects.”
+Anything outside them is noise.
+
+⸻
+
+SECOND: UI Specification for Desktop (Only What You Need)
+
+No complex UI.
+
+Your UI should be:
+
+Perturbation Panel
+	•	Dropdown: Mode Selector
+	•	Dynamic: Parameter Sliders (auto-generated based on selected mode)
+	•	Single button: APPLY PERTURBATION
+
+This is exactly what Replit needs to build.
+
+⸻
+
+THIRD: NOW — The Exact Prompt to Give to Replit
+
+Here is the clean, precise engineering prompt that will produce the correct implementation:
+
+⸻
+
+✅ COPY + PASTE THIS INTO REPLIT
+
+I need to add a structured perturbation system to the desktop version of the SFD Engine.
+Implement the following exactly:
+
+⸻
+
+1. Add a “Perturbation Panel” UI (desktop only)
+	•	A dropdown selector called Perturbation Mode.
+	•	When a mode is selected, dynamically display the appropriate sliders for that mode’s parameters.
+	•	Include a single button: Apply Perturbation.
+
+⸻
+
+2. Implement these SIX perturbation modes at the engine level
+
+IMPULSE
+	•	intensity (0–10)
+	•	radius (0–200)
+	•	decay (0–1)
+
+SHEAR
+	•	magnitude (0–10)
+	•	angle (0–360)
+	•	duration (0–10)
+
+WAVE
+	•	amplitude (0–10)
+	•	frequency (0–10)
+	•	wavelength (0–200)
+	•	damping (0–1)
+
+VORTEX
+	•	angular_velocity (0–20)
+	•	radius (0–200)
+	•	direction (enum: CW, CCW)
+
+FRACTURE
+	•	strength (0–10)
+	•	noise (0–5)
+	•	propagation_rate (0–10)
+
+DRIFT
+	•	magnitude (0–5)
+	•	vector (x, y components: –1 to 1)
+	•	duration (0–20)
+
+⸻
+
+3. Each mode must call a centralized apply_disturbance(mode, params) function
+
+This function already receives the field grid.
+Extend it to apply the correct transformation based on the mode.
+
+Ensure all transformations preserve field stability unless extreme values are chosen.
+
+⸻
+
+4. Keep the architecture modular
+	•	Put all new mode implementations in a new module: perturbations/
+	•	UI logic should go in the desktop UI file only
+	•	Engine logic should not depend on the UI
+
+⸻
+
+5. After implementing, run tests to confirm:
+	•	Parameter sliders update correctly
+	•	Disturbances render correctly
+	•	No crash at extreme parameter values
+	•	Undo/Reset still works
+
+⸻
+
+Implement all of this.
+
+⸻
+
+END OF PROMPT

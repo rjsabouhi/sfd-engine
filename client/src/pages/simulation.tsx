@@ -41,6 +41,8 @@ import { visualPresets, type VisualPreset } from "@/config/visual-presets";
 import { applyPreset, cancelPresetTransition } from "@/lib/apply-preset";
 import { WelcomeModal } from "@/components/welcome-modal";
 import { FullscreenMenuBar } from "@/components/fullscreen-menubar";
+import { PerturbationPanel } from "@/components/perturbation-panel";
+import { type PerturbationMode, DEFAULT_PARAMS } from "@/lib/perturbations/types";
 
 // Lightweight overlay canvas for mobile projection layers
 const PLASMA_COLORS = [
@@ -247,6 +249,8 @@ export default function SimulationPage() {
   // New MVP feature states
   const [fieldInspectorEnabled, setFieldInspectorEnabled] = useState(false);
   const [perturbMode, setPerturbMode] = useState(false);
+  const [selectedPerturbMode, setSelectedPerturbMode] = useState<PerturbationMode>('impulse');
+  const [perturbParams, setPerturbParams] = useState<Record<string, any>>(DEFAULT_PARAMS.impulse);
   const [trajectoryProbeActive, setTrajectoryProbeActive] = useState(false);
   const [trajectoryProbePoint, setTrajectoryProbePoint] = useState<{ x: number; y: number } | null>(null);
   const [blendMode, setBlendMode] = useState(false);
@@ -958,12 +962,19 @@ export default function SimulationPage() {
     if (!engine) return;
     
     if (perturbMode) {
-      const magnitude = shiftKey ? -0.15 : 0.15;
-      engine.perturbField(x, y, magnitude, 5);
+      // Use the new structured perturbation system
+      engine.applyDisturbance(x, y, selectedPerturbMode, perturbParams);
     } else if (trajectoryProbeActive) {
       setTrajectoryProbePoint({ x, y });
     }
-  }, [perturbMode, trajectoryProbeActive]);
+  }, [perturbMode, trajectoryProbeActive, selectedPerturbMode, perturbParams]);
+
+  // Apply perturbation at a specific point with current mode and params
+  const handleApplyPerturbation = useCallback((mode: PerturbationMode, params: Record<string, any>, x: number, y: number) => {
+    const engine = engineRef.current;
+    if (!engine) return;
+    engine.applyDisturbance(x, y, mode, params);
+  }, []);
 
   const colormapLabel = hasUserSelectedColormap 
     ? (colormap === "viridis" ? "Viridis" : colormap === "inferno" ? "Inferno" : "Cividis") 
@@ -2772,6 +2783,18 @@ export default function SimulationPage() {
         </button>
         
         <aside className={`${metricsPanelCollapsed ? 'w-0 overflow-hidden' : 'w-[420px]'} flex-none border-l border-border bg-card flex flex-col overflow-hidden transition-all duration-300`}>
+          <div className="p-3 border-b border-border">
+            <PerturbationPanel
+              onApplyPerturbation={handleApplyPerturbation}
+              fieldWidth={isMobile ? 150 : 300}
+              fieldHeight={isMobile ? 150 : 300}
+              perturbMode={perturbMode}
+              onPerturbModeChange={setPerturbMode}
+              selectedMode={selectedPerturbMode}
+              onModeChange={setSelectedPerturbMode}
+              onParamsChange={setPerturbParams}
+            />
+          </div>
           <ControlPanel
                 params={params}
                 state={state}

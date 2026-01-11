@@ -1751,6 +1751,238 @@ export class SFDEngine {
     this.notifyUpdate();
   }
 
+  // Advanced Perturbation - Apply structured disturbance using canonical modes
+  applyDisturbance(
+    x: number, 
+    y: number, 
+    mode: string,
+    params: Record<string, any>
+  ): void {
+    if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
+    
+    // If in playback mode, commit the current frame to live state first
+    if (this.isInPlaybackMode()) {
+      this.commitPlaybackFrame();
+    }
+    
+    // Import and apply the disturbance dynamically
+    // The actual implementation is in perturbations module
+    this.applyDisturbanceInternal(x, y, mode, params);
+    
+    this.invalidateDerivedFieldCache();
+    this.updateBasinMap();
+    this.notifyUpdate();
+  }
+
+  private applyDisturbanceInternal(
+    x: number, 
+    y: number, 
+    mode: string, 
+    params: Record<string, any>
+  ): void {
+    const grid = this.grid;
+    const width = this.width;
+    const height = this.height;
+
+    switch (mode) {
+      case 'impulse':
+        this.applyImpulseMode(x, y, params);
+        break;
+      case 'shear':
+        this.applyShearMode(x, y, params);
+        break;
+      case 'wave':
+        this.applyWaveMode(x, y, params);
+        break;
+      case 'vortex':
+        this.applyVortexMode(x, y, params);
+        break;
+      case 'fracture':
+        this.applyFractureMode(x, y, params);
+        break;
+      case 'drift':
+        this.applyDriftMode(x, y, params);
+        break;
+    }
+  }
+
+  private wrapCoord(val: number, max: number): number {
+    return ((val % max) + max) % max;
+  }
+
+  private applyImpulseMode(centerX: number, centerY: number, params: any): void {
+    const { intensity = 3, radius = 30, decay = 0.5 } = params;
+    const radiusSq = radius * radius;
+    const normalizedIntensity = intensity * 0.1;
+    
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        let dx = x - centerX;
+        let dy = y - centerY;
+        
+        if (dx > this.width / 2) dx -= this.width;
+        if (dx < -this.width / 2) dx += this.width;
+        if (dy > this.height / 2) dy -= this.height;
+        if (dy < -this.height / 2) dy += this.height;
+        
+        const distSq = dx * dx + dy * dy;
+        
+        if (distSq < radiusSq) {
+          const dist = Math.sqrt(distSq);
+          const falloff = Math.exp(-decay * dist / radius * 3);
+          const idx = y * this.width + x;
+          this.grid[idx] += normalizedIntensity * falloff;
+        }
+      }
+    }
+  }
+
+  private applyShearMode(centerX: number, centerY: number, params: any): void {
+    const { magnitude = 2, angle = 45, duration = 3 } = params;
+    const angleRad = (angle * Math.PI) / 180;
+    const shearX = Math.cos(angleRad);
+    const shearY = Math.sin(angleRad);
+    const normalizedMag = magnitude * 0.05 * (duration / 5);
+    const effectRadius = Math.min(this.width, this.height) * 0.4;
+    
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        let dx = x - centerX;
+        let dy = y - centerY;
+        
+        if (dx > this.width / 2) dx -= this.width;
+        if (dx < -this.width / 2) dx += this.width;
+        if (dy > this.height / 2) dy -= this.height;
+        if (dy < -this.height / 2) dy += this.height;
+        
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < effectRadius) {
+          const falloff = 1 - (dist / effectRadius);
+          const projection = dx * shearX + dy * shearY;
+          const idx = y * this.width + x;
+          this.grid[idx] += normalizedMag * projection * falloff * 0.01;
+        }
+      }
+    }
+  }
+
+  private applyWaveMode(centerX: number, centerY: number, params: any): void {
+    const { amplitude = 2, frequency = 3, wavelength = 50, damping = 0.3 } = params;
+    const normalizedAmp = amplitude * 0.05;
+    const waveK = (2 * Math.PI) / Math.max(wavelength, 1);
+    const omega = frequency * 0.5;
+    
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        let dx = x - centerX;
+        let dy = y - centerY;
+        
+        if (dx > this.width / 2) dx -= this.width;
+        if (dx < -this.width / 2) dx += this.width;
+        if (dy > this.height / 2) dy -= this.height;
+        if (dy < -this.height / 2) dy += this.height;
+        
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const envelope = Math.exp(-damping * dist * 0.02);
+        const waveValue = Math.sin(waveK * dist - omega);
+        
+        const idx = y * this.width + x;
+        this.grid[idx] += normalizedAmp * waveValue * envelope;
+      }
+    }
+  }
+
+  private applyVortexMode(centerX: number, centerY: number, params: any): void {
+    const { angularVelocity = 5, radius = 40, direction = 'CCW' } = params;
+    const radiusSq = radius * radius;
+    const dirSign = direction === 'CW' ? 1 : -1;
+    const normalizedVel = angularVelocity * 0.01 * dirSign;
+    
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        let dx = x - centerX;
+        let dy = y - centerY;
+        
+        if (dx > this.width / 2) dx -= this.width;
+        if (dx < -this.width / 2) dx += this.width;
+        if (dy > this.height / 2) dy -= this.height;
+        if (dy < -this.height / 2) dy += this.height;
+        
+        const distSq = dx * dx + dy * dy;
+        
+        if (distSq < radiusSq && distSq > 1) {
+          const dist = Math.sqrt(distSq);
+          const falloff = 1 - (dist / radius);
+          const tangentialStrength = normalizedVel * falloff;
+          
+          const angle = Math.atan2(dy, dx);
+          const spiralComponent = Math.sin(angle * 2 + dist * 0.1);
+          
+          const idx = y * this.width + x;
+          this.grid[idx] += tangentialStrength * spiralComponent;
+        }
+      }
+    }
+  }
+
+  private applyFractureMode(centerX: number, centerY: number, params: any): void {
+    const { strength = 3, noise = 1, propagationRate = 2 } = params;
+    const normalizedStrength = strength * 0.1;
+    const effectRadius = propagationRate * 20;
+    
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        let dx = x - centerX;
+        let dy = y - centerY;
+        
+        if (dx > this.width / 2) dx -= this.width;
+        if (dx < -this.width / 2) dx += this.width;
+        if (dy > this.height / 2) dy -= this.height;
+        if (dy < -this.height / 2) dy += this.height;
+        
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < effectRadius) {
+          const falloff = 1 - (dist / effectRadius);
+          const noiseVal = (Math.random() - 0.5) * noise * 0.2;
+          const angle = Math.atan2(dy, dx);
+          const fracturePattern = Math.sin(angle * 4) * Math.cos(dist * 0.2);
+          
+          const idx = y * this.width + x;
+          const currentVal = this.grid[idx];
+          const bifurcation = currentVal > 0 ? 1 : -1;
+          
+          this.grid[idx] += normalizedStrength * falloff * (fracturePattern + noiseVal) * bifurcation;
+        }
+      }
+    }
+  }
+
+  private applyDriftMode(centerX: number, centerY: number, params: any): void {
+    const { magnitude = 1, vectorX = 0.5, vectorY = 0.3, duration = 5 } = params;
+    const normalizedMag = magnitude * 0.02 * (duration / 10);
+    
+    const tempGrid = new Float32Array(this.grid.length);
+    tempGrid.set(this.grid);
+    
+    const shiftX = vectorX * magnitude * 2;
+    const shiftY = vectorY * magnitude * 2;
+    
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        const sourceX = this.wrapCoord(Math.round(x - shiftX), this.width);
+        const sourceY = this.wrapCoord(Math.round(y - shiftY), this.height);
+        
+        const srcIdx = sourceY * this.width + sourceX;
+        const dstIdx = y * this.width + x;
+        
+        const blend = normalizedMag;
+        this.grid[dstIdx] = this.grid[dstIdx] * (1 - blend) + tempGrid[srcIdx] * blend;
+      }
+    }
+  }
+
   // Jump to next event in event log
   jumpToNextEvent(currentStep: number): number | null {
     const events = this.structuralEvents;
