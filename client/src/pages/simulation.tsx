@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal, Circle, Square } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal, Circle, Square, Maximize2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -40,6 +40,7 @@ import { useTouchController, type DoubleTapData } from "@/lib/touch-controller";
 import { visualPresets, type VisualPreset } from "@/config/visual-presets";
 import { applyPreset, cancelPresetTransition } from "@/lib/apply-preset";
 import { WelcomeModal } from "@/components/welcome-modal";
+import { FullscreenMenuBar } from "@/components/fullscreen-menubar";
 
 // Lightweight overlay canvas for mobile projection layers
 const PLASMA_COLORS = [
@@ -253,6 +254,7 @@ export default function SimulationPage() {
   const [canvasTransform, setCanvasTransform] = useState<{ zoom: number; panX: number; panY: number }>({ zoom: 1, panX: 0, panY: 0 });
   const [perceptualSmoothing, setPerceptualSmoothing] = useState(true); // Perceptual Safety Layer
   const [metricsPanelCollapsed, setMetricsPanelCollapsed] = useState(false);
+  const [focusMode, setFocusMode] = useState(false); // Fullscreen/focus mode with menubar
   const configInputRef = useRef<HTMLInputElement>(null);
   
   // Mobile touch interaction states
@@ -878,6 +880,33 @@ export default function SimulationPage() {
     }
   }, [colormap]);
 
+  // Visual preset application for focus mode menubar
+  const handleVisualPresetApply = useCallback((presetIndex: number) => {
+    const preset = visualPresets[presetIndex];
+    if (!preset) return;
+    
+    setActivePresetId(preset.id);
+    setHasUserSelectedColormap(true);
+    
+    applyPreset(preset, {
+      currentBlend: blendOpacity,
+      currentSmoothing: perceptualSmoothing ? 1 : 0,
+      currentCurvature: params.wK,
+      onBlendChange: setBlendOpacity,
+      onSmoothingChange: (v) => {
+        // Only convert to boolean at the end of the transition
+        // for now, use threshold to maintain compatibility
+        setPerceptualSmoothing(v > 0.5);
+      },
+      onCurvatureChange: (v) => handleParamsChange({ wK: v }),
+      onColorMapChange: setColormap,
+      onComplete: () => {
+        // Apply final smoothing value from preset
+        setPerceptualSmoothing(preset.smoothing > 0.5);
+      },
+    });
+  }, [blendOpacity, perceptualSmoothing, params.wK, handleParamsChange]);
+
   const handleHover = useCallback((x: number, y: number, screenX: number, screenY: number) => {
     if (engineRef.current) {
       const data = engineRef.current.computeProbeData(x, y);
@@ -1118,12 +1147,38 @@ export default function SimulationPage() {
         case "KeyR":
           handleReset();
           break;
+        case "Escape":
+          if (focusMode) {
+            setFocusMode(false);
+          }
+          break;
+        case "F11":
+          e.preventDefault();
+          if (focusMode) {
+            // Exit focus mode and also exit browser fullscreen if active
+            if (document.fullscreenElement) {
+              document.exitFullscreen();
+            }
+            setFocusMode(false);
+          } else {
+            // Enter focus mode and request browser fullscreen
+            setFocusMode(true);
+            document.documentElement.requestFullscreen?.().catch(() => {
+              // Fullscreen may be denied, but focus mode still works
+            });
+          }
+          break;
+        case "KeyF":
+          if (!e.ctrlKey && !e.shiftKey && !e.metaKey) {
+            setFocusMode(prev => !prev);
+          }
+          break;
       }
     };
     
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [state.isRunning, handlePause, handlePlay, handleReset, handleToggleDualView]);
+  }, [state.isRunning, handlePause, handlePlay, handleReset, handleToggleDualView, focusMode]);
 
   const interpretationSentence = generateInterpretationSentence(
     state.basinCount,
@@ -2119,6 +2174,168 @@ export default function SimulationPage() {
     );
   }
 
+  // Focus mode layout - maximized visualization with menubar
+  if (focusMode) {
+    return (
+      <div className="flex flex-col h-screen bg-gray-950">
+        <WelcomeModal />
+        <OnboardingModal ref={onboardingRef} />
+        
+        <FullscreenMenuBar
+          isFullscreen={focusMode}
+          onToggleFullscreen={() => setFocusMode(false)}
+          state={state}
+          params={params}
+          colormap={colormap}
+          derivedType={derivedType}
+          showDualView={showDualView}
+          blendMode={blendMode}
+          blendOpacity={blendOpacity}
+          fieldInspectorEnabled={fieldInspectorEnabled}
+          trajectoryProbeActive={trajectoryProbeActive}
+          perturbMode={perturbMode}
+          diagnosticsVisible={diagnosticsVisible}
+          onPlay={handlePlay}
+          onPause={handlePause}
+          onReset={handleReset}
+          onStep={handleStep}
+          onStepBackward={handleStepBackward}
+          onStepForward={handleStepForward}
+          onColormapChange={setColormap}
+          onDerivedTypeChange={setDerivedType}
+          onShowDualViewChange={handleToggleDualView}
+          onBlendModeChange={setBlendMode}
+          onBlendOpacityChange={setBlendOpacity}
+          onFieldInspectorChange={setFieldInspectorEnabled}
+          onTrajectoryProbeChange={setTrajectoryProbeActive}
+          onPerturbModeChange={setPerturbMode}
+          onDiagnosticsChange={setDiagnosticsVisible}
+          onParamsChange={handleParamsChange}
+          onVisualPresetApply={handleVisualPresetApply}
+          onExportPNG={handleExportPNG}
+          onExportJSON={handleExportJSON}
+          onExportAnimation={handleExportAnimation}
+          onExportSimulationData={handleExportSimulationData}
+          onExportMetrics={handleExportMetrics}
+          onExportStateSnapshot={handleExportStateSnapshot}
+          onExportNumPy={handleExportNumPy}
+          onExportBatchSpec={handleExportBatchSpec}
+          onExportPython={handleExportPython}
+          onExportOperators={handleExportOperators}
+          onExportLayers={handleExportLayers}
+          onExportArchive={handleExportArchive}
+          onExportWebM={handleExportWebM}
+          onShowIntro={() => onboardingRef.current?.replay()}
+          onOpenParameterPanel={() => setFocusMode(false)}
+        />
+        
+        <div className="flex-1 relative overflow-hidden">
+          {showDualView ? (
+            <ResizablePanelGroup direction="horizontal" className="h-full">
+              <ResizablePanel defaultSize={50} minSize={25} className="overflow-hidden">
+                <div className="h-full min-h-0 flex flex-col bg-gray-950 overflow-hidden">
+                  <div className="relative flex-1 min-h-0 flex items-center justify-center overflow-hidden">
+                    <VisualizationCanvas 
+                      field={field} 
+                      colormap={colormap}
+                      basinMap={basinMap}
+                      onHover={handleHover}
+                      onHoverEnd={handleHoverEnd}
+                      onClick={handleFieldClick}
+                      perturbMode={perturbMode}
+                      trajectoryProbePoint={trajectoryProbePoint}
+                      perceptualSmoothing={perceptualSmoothing}
+                    />
+                  </div>
+                  <StructuralFieldFooter 
+                    probeData={probeData} 
+                    basinMap={basinMap} 
+                    isHovering={probeVisible} 
+                  />
+                </div>
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={50} minSize={25} className="overflow-hidden">
+                <div className="h-full min-h-0 flex flex-col bg-gray-950 overflow-hidden">
+                  <DualFieldView
+                    derivedField={derivedField}
+                    basinMap={basinMap}
+                    derivedType={derivedType}
+                    onTypeChange={setDerivedType}
+                    probeData={probeData}
+                    primaryField={field}
+                    primaryColormap={colormap}
+                    blendMode={blendMode}
+                    blendOpacity={blendOpacity}
+                    onBlendModeChange={setBlendMode}
+                    onBlendOpacityChange={setBlendOpacity}
+                    compact={true}
+                  />
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          ) : (
+            <div className="h-full flex flex-col bg-gray-950">
+              <div className="relative flex-1 flex items-center justify-center">
+                <VisualizationCanvas 
+                  field={field} 
+                  colormap={colormap}
+                  basinMap={basinMap}
+                  onHover={handleHover}
+                  onHoverEnd={handleHoverEnd}
+                  onClick={handleFieldClick}
+                  perturbMode={perturbMode}
+                  trajectoryProbePoint={trajectoryProbePoint}
+                  perceptualSmoothing={perceptualSmoothing}
+                />
+              </div>
+              <StructuralFieldFooter 
+                probeData={probeData} 
+                basinMap={basinMap} 
+                isHovering={probeVisible} 
+              />
+            </div>
+          )}
+          
+          {fieldInspectorEnabled && (
+            <HoverProbe
+              data={probeData}
+              modeLabels={modeLabels}
+              visible={probeVisible}
+              position={probePosition}
+            />
+          )}
+          
+          {state.isRunning && (
+            <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span className="text-xs font-mono text-white/70">Running</span>
+            </div>
+          )}
+          {isPlaybackMode && (
+            <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-yellow-500/80 backdrop-blur-sm rounded px-2 py-1">
+              <span className="text-xs font-mono text-black">Playback Mode</span>
+            </div>
+          )}
+        </div>
+        
+        <FloatingDiagnostics
+          engine={engineRef.current}
+          isVisible={diagnosticsVisible}
+          onClose={() => setDiagnosticsVisible(false)}
+          events={events}
+          isRunning={state.isRunning}
+          currentHistoryIndex={currentHistoryIndex}
+          historyLength={historyLength}
+          colormap={colormap}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen bg-background">
       <WelcomeModal />
@@ -2135,6 +2352,23 @@ export default function SimulationPage() {
         </div>
         
         <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setFocusMode(true)} 
+                data-testid="button-focus-mode"
+                className="h-7 text-xs gap-1.5"
+              >
+                <Maximize2 className="h-3.5 w-3.5" />
+                Focus Mode
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              Enter fullscreen focus mode (F)
+            </TooltipContent>
+          </Tooltip>
           <Button 
             variant="ghost" 
             size="sm" 
