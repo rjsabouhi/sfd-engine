@@ -2293,6 +2293,8 @@ export default function SimulationPage() {
             setDiagnosticsVisible(visible);
             if (visible) bringPanelToFront('diagnostics');
           }}
+          selectedRegimeKey={selectedRegimeKey}
+          onRegimeChange={setSelectedRegimeKey}
         />
         
         <div className="flex-1 relative overflow-hidden">

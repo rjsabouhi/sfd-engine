@@ -110,6 +110,8 @@ interface FullscreenMenuBarProps {
   perturbPanelOpen?: boolean;
   onTogglePerturbPanel?: (rect?: DOMRect) => void;
   onDiagnosticsChangeWithRect?: (visible: boolean, rect?: DOMRect) => void;
+  selectedRegimeKey?: string | null;
+  onRegimeChange?: (key: string | null) => void;
 }
 
 export function FullscreenMenuBar({
@@ -163,9 +165,10 @@ export function FullscreenMenuBar({
   perturbPanelOpen,
   onTogglePerturbPanel,
   onDiagnosticsChangeWithRect,
+  selectedRegimeKey,
+  onRegimeChange,
 }: FullscreenMenuBarProps) {
   const [aboutOpen, setAboutOpen] = useState(false);
-  const [selectedRegime, setSelectedRegime] = useState<string>("");
   
   const playbackButtonRef = useRef<HTMLButtonElement>(null);
   const diagnosticsButtonRef = useRef<HTMLButtonElement>(null);
@@ -262,7 +265,7 @@ export function FullscreenMenuBar({
                 data-testid="dropdown-regimes"
               >
                 <Compass className="h-3 w-3" />
-                Structural Regimes
+                {selectedRegimeKey ? structuralPresets[selectedRegimeKey as keyof typeof structuralPresets]?.name || "Structural Regimes" : "Default"}
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
@@ -271,15 +274,25 @@ export function FullscreenMenuBar({
         </Tooltip>
         <DropdownMenuContent className="bg-popover border-border min-w-[180px] z-[200]">
           <DropdownMenuRadioGroup 
-            value={selectedRegime}
+            value={selectedRegimeKey || ""}
             onValueChange={(value) => {
-              setSelectedRegime(value);
-              const preset = structuralPresets[value];
-              if (preset) {
-                onParamsChange(preset);
+              const key = value === "" ? null : value;
+              onRegimeChange?.(key);
+              if (key) {
+                const preset = structuralPresets[key as keyof typeof structuralPresets];
+                if (preset) {
+                  onParamsChange(preset);
+                }
               }
             }}
           >
+            <DropdownMenuRadioItem 
+              value=""
+              className="text-xs cursor-pointer"
+              data-testid="regime-default"
+            >
+              Default
+            </DropdownMenuRadioItem>
             {Object.entries(structuralPresets).map(([key]) => (
               <DropdownMenuRadioItem 
                 key={key} 
@@ -307,7 +320,7 @@ export function FullscreenMenuBar({
                 data-testid="dropdown-projection-layer"
               >
                 <Layers className="h-3 w-3" />
-                <span>Constraint Layer</span>
+                <span>{currentOverlayLabel}</span>
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
