@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal, Circle, Square, Maximize2 } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal, Circle, Square, Maximize2, ArrowRightLeft, Waves, Sparkles, Wind, X } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -29,6 +29,13 @@ import {
 } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { SimulationParameters, SimulationState, FieldData, ProbeData, OperatorContributions, StructuralSignature, StructuralEvent, DerivedField, BasinMap, TrendMetrics } from "@shared/schema";
 import { defaultParameters, mobileParameters, structuralPresets } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
@@ -251,6 +258,7 @@ export default function SimulationPage() {
   const [perturbMode, setPerturbMode] = useState(false);
   const [selectedPerturbMode, setSelectedPerturbMode] = useState<PerturbationMode>('impulse');
   const [perturbParams, setPerturbParams] = useState<Record<string, any>>(DEFAULT_PARAMS.impulse);
+  const [perturbControlsOpen, setPerturbControlsOpen] = useState(false);
   const [trajectoryProbeActive, setTrajectoryProbeActive] = useState(false);
   const [trajectoryProbePoint, setTrajectoryProbePoint] = useState<{ x: number; y: number } | null>(null);
   const [blendMode, setBlendMode] = useState(false);
@@ -2464,24 +2472,80 @@ export default function SimulationPage() {
                 Pin a point to track its metrics over time
               </TooltipContent>
             </Tooltip>
-            {/* Perturb */}
-            <Tooltip>
-              <TooltipTrigger asChild>
+            {/* Perturb Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => { setPerturbMode(!perturbMode); if (!perturbMode) setTrajectoryProbeActive(false); }}
-                  data-testid="button-perturb-mode"
+                  data-testid="button-perturb-dropdown"
                   className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${perturbMode ? "bg-white/20 text-white" : ""}`}
                 >
                   <Zap className="h-3 w-3" />
                   Perturb
+                  <ChevronDown className="h-2.5 w-2.5 ml-0.5" />
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="text-xs">
-                Click on the field to inject energy at that point
-              </TooltipContent>
-            </Tooltip>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem 
+                  onClick={() => { setSelectedPerturbMode('impulse'); setPerturbMode(true); setTrajectoryProbeActive(false); }}
+                  className={`text-xs gap-2 ${selectedPerturbMode === 'impulse' && perturbMode ? 'bg-accent' : ''}`}
+                  data-testid="menu-perturb-impulse"
+                >
+                  <Zap className="h-3.5 w-3.5" />
+                  Impulse
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setSelectedPerturbMode('shear'); setPerturbMode(true); setTrajectoryProbeActive(false); }}
+                  className={`text-xs gap-2 ${selectedPerturbMode === 'shear' && perturbMode ? 'bg-accent' : ''}`}
+                  data-testid="menu-perturb-shear"
+                >
+                  <ArrowRightLeft className="h-3.5 w-3.5" />
+                  Shear
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setSelectedPerturbMode('wave'); setPerturbMode(true); setTrajectoryProbeActive(false); }}
+                  className={`text-xs gap-2 ${selectedPerturbMode === 'wave' && perturbMode ? 'bg-accent' : ''}`}
+                  data-testid="menu-perturb-wave"
+                >
+                  <Waves className="h-3.5 w-3.5" />
+                  Wave
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setSelectedPerturbMode('vortex'); setPerturbMode(true); setTrajectoryProbeActive(false); }}
+                  className={`text-xs gap-2 ${selectedPerturbMode === 'vortex' && perturbMode ? 'bg-accent' : ''}`}
+                  data-testid="menu-perturb-vortex"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Vortex
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setSelectedPerturbMode('fracture'); setPerturbMode(true); setTrajectoryProbeActive(false); }}
+                  className={`text-xs gap-2 ${selectedPerturbMode === 'fracture' && perturbMode ? 'bg-accent' : ''}`}
+                  data-testid="menu-perturb-fracture"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Fracture
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => { setSelectedPerturbMode('drift'); setPerturbMode(true); setTrajectoryProbeActive(false); }}
+                  className={`text-xs gap-2 ${selectedPerturbMode === 'drift' && perturbMode ? 'bg-accent' : ''}`}
+                  data-testid="menu-perturb-drift"
+                >
+                  <Wind className="h-3.5 w-3.5" />
+                  Drift
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={() => setPerturbControlsOpen(true)}
+                  className="text-xs gap-2"
+                  data-testid="menu-perturb-controls"
+                >
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  Controls...
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             {/* Diagnostics */}
             <Tooltip>
               <TooltipTrigger asChild>
@@ -2843,6 +2907,36 @@ export default function SimulationPage() {
         </aside>
       </div>
       
+      {/* Perturbation Controls Dialog */}
+      <Dialog open={perturbControlsOpen} onOpenChange={setPerturbControlsOpen}>
+        <DialogContent className="max-w-md bg-neutral-900/95 backdrop-blur-xl border-white/10">
+          <DialogHeader className="flex flex-row items-center justify-between">
+            <DialogTitle className="text-white">Perturbation Controls</DialogTitle>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setPerturbControlsOpen(false)}
+              className="h-6 w-6 rounded-full hover:bg-white/10"
+              data-testid="button-close-perturb-controls"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </DialogHeader>
+          <div className="pt-2">
+            <PerturbationPanel
+              onApplyPerturbation={handleApplyPerturbation}
+              fieldWidth={isMobile ? 150 : 300}
+              fieldHeight={isMobile ? 150 : 300}
+              perturbMode={perturbMode}
+              onPerturbModeChange={(enabled) => { setPerturbMode(enabled); if (enabled) setTrajectoryProbeActive(false); }}
+              selectedMode={selectedPerturbMode}
+              onModeChange={setSelectedPerturbMode}
+              onParamsChange={setPerturbParams}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Floating Diagnostics Console - CTRL+SHIFT+D to toggle */}
       <FloatingDiagnostics
         engine={engineRef.current}
