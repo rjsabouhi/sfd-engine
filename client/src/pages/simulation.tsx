@@ -3253,10 +3253,10 @@ export default function SimulationPage() {
         </aside>
       </div>
       
-      {/* Floating Diagnostics Console - CTRL+SHIFT+D to toggle */}
+      {/* Floating Diagnostics Console - CTRL+SHIFT+D to toggle - only visible in focusMode */}
       <FloatingDiagnostics
         engine={engineRef.current}
-        isVisible={diagnosticsVisible}
+        isVisible={diagnosticsVisible && focusMode}
         onClose={() => setDiagnosticsVisible(false)}
         onReset={handleReset}
         events={events}
@@ -3266,6 +3266,9 @@ export default function SimulationPage() {
         colormap={colormap}
         zIndex={getPanelZIndex('diagnostics')}
         onFocus={() => bringPanelToFront('diagnostics')}
+        isPinned={diagnosticsPinned.isPinned}
+        pinnedPosition={diagnosticsPinned.position}
+        onPinnedChange={(isPinned, position) => setDiagnosticsPinned({ isPinned, position })}
       />
     </div>
   );
