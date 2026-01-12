@@ -10,7 +10,6 @@ import {
   MapPin,
   ExternalLink,
   MousePointer2,
-  Hand,
   Crosshair,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -246,22 +245,6 @@ export function FloatingInspectorPanel({
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="text-xs">Select</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => onCursorModeChange?.('pan')}
-                      className={`p-1 rounded transition-colors ${
-                        cursorMode === 'pan' 
-                          ? 'bg-emerald-500/20 text-emerald-400' 
-                          : 'text-neutral-500 hover:text-neutral-300 hover:bg-white/5'
-                      }`}
-                      data-testid="cursor-mode-pan"
-                    >
-                      <Hand className="h-3 w-3" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs">Pan</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
