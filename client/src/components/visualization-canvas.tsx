@@ -807,46 +807,21 @@ export function VisualizationCanvas({
               }}
               data-testid={`probe-marker-${probe.id}`}
             >
-              {/* Outer thin ring */}
-              <div 
-                className="absolute"
-                style={{ 
-                  width: '26px',
-                  height: '26px',
-                  marginLeft: '-13px',
-                  marginTop: '-13px',
-                  borderRadius: '50%',
-                  border: `1.5px solid ${probe.color}`,
-                  opacity: 0.9,
-                }}
-              />
-              {/* Middle shaded region */}
-              <div 
-                className="absolute"
-                style={{ 
-                  width: '20px',
-                  height: '20px',
-                  marginLeft: '-10px',
-                  marginTop: '-10px',
-                  borderRadius: '50%',
-                  background: `radial-gradient(circle, transparent 40%, ${probe.color}33 70%, ${probe.color}55 100%)`,
-                }}
-              />
-              {/* Inner ring with number */}
+              {/* Single ring with number - matching mobile button style */}
               <div 
                 className="absolute flex items-center justify-center"
                 style={{ 
-                  width: '14px',
-                  height: '14px',
-                  marginLeft: '-7px',
-                  marginTop: '-7px',
+                  width: '24px',
+                  height: '24px',
+                  marginLeft: '-12px',
+                  marginTop: '-12px',
                   borderRadius: '50%',
-                  border: `1.5px solid ${probe.color}`,
-                  backgroundColor: `${probe.color}22`,
+                  border: `2px solid ${probe.color}`,
+                  backgroundColor: `${probe.color}15`,
                 }}
               >
                 <span 
-                  className="text-[9px] font-semibold"
+                  className="text-[11px] font-medium"
                   style={{ color: probe.color }}
                 >
                   {probe.label.replace('P', '')}
