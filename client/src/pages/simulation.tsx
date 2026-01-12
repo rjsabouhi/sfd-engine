@@ -290,6 +290,17 @@ export default function SimulationPage() {
   const [diagnosticsAnchorRect, setDiagnosticsAnchorRect] = useState<DOMRect | null>(null);
   const [inspectorAnchorRect, setInspectorAnchorRect] = useState<DOMRect | null>(null);
   
+  // Track which panels were open before switching away from focusMode
+  const savedPanelOpenStateRef = useRef<{
+    playback: boolean;
+    perturb: boolean;
+    inspector: boolean;
+    diagnostics: boolean;
+    probeDetail: boolean;
+    fieldInspectorEnabled: boolean;
+    perturbMode: boolean;
+  } | null>(null);
+  
   // Pinned state for floating panels - using module-level store for persistence
   // We use local state that syncs with the store to trigger re-renders
   const [playbackPinned, setPlaybackPinnedState] = useState(() => getPanelState('playback'));
@@ -315,11 +326,25 @@ export default function SimulationPage() {
     setDiagnosticsPinnedState(state);
   };
   
-  // Close all floating panels when exiting focus mode (switching to dashboard)
-  // but preserve their pinned positions in the store
-  // Re-sync from store when returning to focus mode to get latest pinned positions
+  // Save panel open states before closing when exiting focus mode
+  // Restore open states and pinned positions when returning to focus mode
+  const prevFocusModeRef = useRef(focusMode);
   useEffect(() => {
-    if (!focusMode) {
+    const wasInFocusMode = prevFocusModeRef.current;
+    prevFocusModeRef.current = focusMode;
+    
+    if (!focusMode && wasInFocusMode) {
+      // Exiting focus mode - save which panels were open before closing
+      savedPanelOpenStateRef.current = {
+        playback: playbackPanelOpen,
+        perturb: perturbPanelOpen,
+        inspector: inspectorPanelOpen,
+        diagnostics: diagnosticsVisible,
+        probeDetail: probeDetailOpen,
+        fieldInspectorEnabled: fieldInspectorEnabled,
+        perturbMode: perturbMode,
+      };
+      // Close all panels
       setPlaybackPanelOpen(false);
       setPerturbPanelOpen(false);
       setPerturbMode(false);
@@ -327,12 +352,24 @@ export default function SimulationPage() {
       setFieldInspectorEnabled(false);
       setDiagnosticsVisible(false);
       setProbeDetailOpen(false);
-    } else {
-      // Re-read pinned positions from store when returning to focusMode
+    } else if (focusMode && !wasInFocusMode) {
+      // Returning to focus mode - re-sync pinned positions from store
       setPlaybackPinnedState(getPanelState('playback'));
       setPerturbPinnedState(getPanelState('perturbation'));
       setInspectorPinnedState(getPanelState('inspector'));
       setDiagnosticsPinnedState(getPanelState('diagnostics'));
+      
+      // Restore which panels were open
+      if (savedPanelOpenStateRef.current) {
+        const saved = savedPanelOpenStateRef.current;
+        setPlaybackPanelOpen(saved.playback);
+        setPerturbPanelOpen(saved.perturb);
+        setInspectorPanelOpen(saved.inspector);
+        setDiagnosticsVisible(saved.diagnostics);
+        setProbeDetailOpen(saved.probeDetail);
+        setFieldInspectorEnabled(saved.fieldInspectorEnabled);
+        setPerturbMode(saved.perturbMode);
+      }
     }
   }, [focusMode]);
   
