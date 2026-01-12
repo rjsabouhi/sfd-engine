@@ -93,6 +93,15 @@ export interface StructuralEvent {
   location?: { x: number; y: number };
 }
 
+export interface InspectorMark {
+  id: string;
+  gridX: number;
+  gridY: number;
+  step: number;
+  timestamp: number;
+  probe: ProbeData;
+}
+
 export interface StructuralSignature {
   basinCount: number;
   avgBasinDepth: number;

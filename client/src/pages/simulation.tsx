@@ -36,7 +36,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { SimulationParameters, SimulationState, FieldData, ProbeData, OperatorContributions, StructuralSignature, StructuralEvent, DerivedField, BasinMap, TrendMetrics } from "@shared/schema";
+import type { SimulationParameters, SimulationState, FieldData, ProbeData, OperatorContributions, StructuralSignature, StructuralEvent, DerivedField, BasinMap, TrendMetrics, InspectorMark } from "@shared/schema";
 import { defaultParameters, mobileParameters, structuralPresets } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
@@ -51,6 +51,7 @@ import { FullscreenMenuBar } from "@/components/fullscreen-menubar";
 import { FloatingPlaybackPanel } from "@/components/floating-playback-panel";
 import { FloatingPerturbationPanel } from "@/components/floating-perturbation-panel";
 import { PerturbationPanel } from "@/components/perturbation-panel";
+import { FieldInspectorPanel } from "@/components/field-inspector-panel";
 import { type PerturbationMode, DEFAULT_PARAMS } from "@/lib/perturbations/types";
 
 // Lightweight overlay canvas for mobile projection layers
@@ -257,6 +258,8 @@ export default function SimulationPage() {
   
   // New MVP feature states
   const [fieldInspectorEnabled, setFieldInspectorEnabled] = useState(false);
+  const [inspectorMarks, setInspectorMarks] = useState<InspectorMark[]>([]);
+  const [inspectorMarkMode, setInspectorMarkMode] = useState(false); // When true, clicks add marks
   const [perturbMode, setPerturbMode] = useState(false);
   const [selectedPerturbMode, setSelectedPerturbMode] = useState<PerturbationMode>('impulse');
   const [perturbParams, setPerturbParams] = useState<Record<string, any>>(DEFAULT_PARAMS.impulse);
