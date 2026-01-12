@@ -333,8 +333,9 @@ export function FullscreenMenuBar({
               value={[blendOpacity * 100]}
               onValueChange={(v) => {
                 onBlendOpacityChange(v[0] / 100);
+                // Keep blendMode true - don't toggle it off at 0% because
+                // that causes rendering to jump to 100% overlay
                 if (v[0] > 0 && !blendMode) onBlendModeChange(true);
-                if (v[0] === 0 && blendMode) onBlendModeChange(false);
               }}
               className="w-20"
               data-testid="slider-blend"
