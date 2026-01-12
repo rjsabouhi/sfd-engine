@@ -2311,6 +2311,9 @@ export default function SimulationPage() {
                       perturbMode={perturbMode}
                       trajectoryProbePoint={trajectoryProbePoint}
                       perceptualSmoothing={perceptualSmoothing}
+                      overlayDerivedField={blendMode && derivedType !== "basins" ? derivedField : null}
+                      overlayBasinMap={blendMode && derivedType === "basins" ? basinMap : null}
+                      overlayOpacity={blendMode ? blendOpacity : 0}
                     />
                   </div>
                   <StructuralFieldFooter 
@@ -2353,6 +2356,9 @@ export default function SimulationPage() {
                   perturbMode={perturbMode}
                   trajectoryProbePoint={trajectoryProbePoint}
                   perceptualSmoothing={perceptualSmoothing}
+                  overlayDerivedField={blendMode && derivedType !== "basins" ? derivedField : null}
+                  overlayBasinMap={blendMode && derivedType === "basins" ? basinMap : null}
+                  overlayOpacity={blendMode ? blendOpacity : 0}
                 />
               </div>
               <StructuralFieldFooter 
