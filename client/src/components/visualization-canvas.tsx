@@ -197,6 +197,9 @@ export function VisualizationCanvas({
   const mouseDownPosRef = useRef<{ x: number; y: number } | null>(null);
   const didDragRef = useRef(false);
   
+  // Track pending click for double-click detection on probes
+  const probeClickTimeoutRef = useRef<{ id: string; timeout: NodeJS.Timeout } | null>(null);
+  
   // Colormap transition state
   const colormapTransitionRef = useRef<ColormapTransition | null>(null);
   const prevColormapRef = useRef<"inferno" | "viridis" | "cividis">(colormap);
@@ -881,17 +884,33 @@ export function VisualizationCanvas({
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  // Toggle: if this probe is already selected (detail open), close it
-                  // Otherwise, select this probe to open its detail panel
-                  if (selectedProbeId === probe.id && onCloseProbeDetail) {
-                    onCloseProbeDetail();
-                  } else {
-                    onSelectProbe?.(probe.id);
+                  // Delay single-click action to detect if it's a double-click
+                  // Clear any existing pending click
+                  if (probeClickTimeoutRef.current) {
+                    clearTimeout(probeClickTimeoutRef.current.timeout);
+                    probeClickTimeoutRef.current = null;
                   }
+                  // Set a delayed action for single-click
+                  const timeout = setTimeout(() => {
+                    probeClickTimeoutRef.current = null;
+                    // Toggle: if this probe is already selected (detail open), close it
+                    // Otherwise, select this probe to open its detail panel
+                    if (selectedProbeId === probe.id && onCloseProbeDetail) {
+                      onCloseProbeDetail();
+                    } else {
+                      onSelectProbe?.(probe.id);
+                    }
+                  }, 200); // 200ms delay to detect double-click
+                  probeClickTimeoutRef.current = { id: probe.id, timeout };
                 }}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
+                  // Cancel pending single-click action
+                  if (probeClickTimeoutRef.current) {
+                    clearTimeout(probeClickTimeoutRef.current.timeout);
+                    probeClickTimeoutRef.current = null;
+                  }
                   // Only act if not dragging
                   if (!draggingProbeRef.current) {
                     // If detail panel is open, close it (don't delete)
