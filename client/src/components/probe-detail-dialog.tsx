@@ -24,8 +24,8 @@ interface ProbeDetailDialogProps {
   getNeighborhoodData?: (x: number, y: number) => NeighborhoodData | null;
   zIndex?: number;
   onFocus?: () => void;
-  // Other panel rects for dynamic positioning to avoid overlaps
-  otherPanelRects?: PanelRect[];
+  // Inspector panel rect for 25% max overlap constraint
+  inspectorRect?: PanelRect | null;
 }
 
 export interface NeighborhoodData {
@@ -56,7 +56,7 @@ export function ProbeDetailDialog({
   getNeighborhoodData,
   zIndex = 60,
   onFocus,
-  otherPanelRects = [],
+  inspectorRect = null,
 }: ProbeDetailDialogProps) {
   const [isPinned, setIsPinned] = useState(false);
   const [pinnedPosition, setPinnedPosition] = useState<{ x: number; y: number } | null>(null);
@@ -70,73 +70,96 @@ export function ProbeDetailDialog({
   const resizeStartRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
   const hasPositionedRef = useRef(false);
 
-  // Helper to check if a rect overlaps with any panel
-  const checkOverlap = useCallback((x: number, y: number, w: number, h: number): boolean => {
-    for (const panel of otherPanelRects) {
-      const panelRight = panel.left + panel.width;
-      const panelBottom = panel.top + panel.height;
-      const myRight = x + w;
-      const myBottom = y + h;
-      
-      // Check for overlap
-      if (x < panelRight && myRight > panel.left && y < panelBottom && myBottom > panel.top) {
-        return true;
-      }
+  // Calculate overlap area between two rects
+  const getOverlapArea = useCallback((x: number, y: number, w: number, h: number, panel: PanelRect): number => {
+    const overlapLeft = Math.max(x, panel.left);
+    const overlapRight = Math.min(x + w, panel.left + panel.width);
+    const overlapTop = Math.max(y, panel.top);
+    const overlapBottom = Math.min(y + h, panel.top + panel.height);
+    
+    if (overlapRight <= overlapLeft || overlapBottom <= overlapTop) {
+      return 0; // No overlap
     }
-    return false;
-  }, [otherPanelRects]);
+    
+    return (overlapRight - overlapLeft) * (overlapBottom - overlapTop);
+  }, []);
 
-  // Find a position that doesn't overlap with other panels - prefer slight offsets
+  // Check if overlap with inspector is within 25% limit
+  const isOverlapAcceptable = useCallback((x: number, y: number, w: number, h: number): boolean => {
+    if (!inspectorRect) return true; // No inspector, any position is fine
+    
+    const inspectorArea = inspectorRect.width * inspectorRect.height;
+    const overlapArea = getOverlapArea(x, y, w, h, inspectorRect);
+    const overlapRatio = overlapArea / inspectorArea;
+    
+    return overlapRatio <= 0.25; // Max 25% overlap
+  }, [inspectorRect, getOverlapArea]);
+
+  // Find position with max 25% inspector overlap - tries nearby positions first
   const findClearPosition = useCallback((preferredX: number, preferredY: number, w: number, h: number): { x: number; y: number } => {
     const padding = 20;
     const headerHeight = 60;
-    const nudgeAmount = 40; // Small offset to avoid overlap
+    
+    const clamp = (x: number, y: number) => ({
+      x: Math.max(padding, Math.min(window.innerWidth - w - padding, x)),
+      y: Math.max(headerHeight, Math.min(window.innerHeight - h - padding, y))
+    });
     
     // Try preferred position first
-    if (!checkOverlap(preferredX, preferredY, w, h)) {
-      return { x: preferredX, y: preferredY };
+    const preferred = clamp(preferredX, preferredY);
+    if (isOverlapAcceptable(preferred.x, preferred.y, w, h)) {
+      return preferred;
     }
     
-    // Try small nudges first (just offset slightly from blocking panels)
-    const smallNudges = [
-      { x: preferredX + nudgeAmount, y: preferredY }, // Nudge right
-      { x: preferredX - nudgeAmount, y: preferredY }, // Nudge left
-      { x: preferredX, y: preferredY + nudgeAmount }, // Nudge down
-      { x: preferredX + nudgeAmount, y: preferredY + nudgeAmount }, // Nudge right+down
-      { x: preferredX - nudgeAmount, y: preferredY + nudgeAmount }, // Nudge left+down
-    ];
+    // Generate candidate positions in expanding rings from preferred
+    const candidates: { x: number; y: number; dist: number }[] = [];
+    const steps = [30, 60, 90, 120, 150]; // Distance increments
+    const angles = [0, 45, 90, 135, 180, 225, 270, 315]; // 8 directions
     
-    for (const pos of smallNudges) {
-      const clampedX = Math.max(padding, Math.min(window.innerWidth - w - padding, pos.x));
-      const clampedY = Math.max(headerHeight, Math.min(window.innerHeight - h - padding, pos.y));
-      
-      if (!checkOverlap(clampedX, clampedY, w, h)) {
-        return { x: clampedX, y: clampedY };
+    for (const step of steps) {
+      for (const angle of angles) {
+        const rad = (angle * Math.PI) / 180;
+        const testX = preferredX + Math.cos(rad) * step;
+        const testY = preferredY + Math.sin(rad) * step;
+        const clamped = clamp(testX, testY);
+        
+        if (isOverlapAcceptable(clamped.x, clamped.y, w, h)) {
+          const dist = Math.sqrt(Math.pow(clamped.x - preferredX, 2) + Math.pow(clamped.y - preferredY, 2));
+          candidates.push({ ...clamped, dist });
+        }
       }
     }
     
-    // Try slightly larger offsets if small nudges don't work
-    const mediumOffsets = [
-      { x: preferredX + 100, y: preferredY },
-      { x: preferredX - 100, y: preferredY },
-      { x: preferredX, y: preferredY + 80 },
-    ];
+    // Return closest acceptable position
+    if (candidates.length > 0) {
+      candidates.sort((a, b) => a.dist - b.dist);
+      return { x: candidates[0].x, y: candidates[0].y };
+    }
     
-    for (const pos of mediumOffsets) {
-      const clampedX = Math.max(padding, Math.min(window.innerWidth - w - padding, pos.x));
-      const clampedY = Math.max(headerHeight, Math.min(window.innerHeight - h - padding, pos.y));
-      
-      if (!checkOverlap(clampedX, clampedY, w, h)) {
-        return { x: clampedX, y: clampedY };
+    // Fallback: find position with minimal overlap ratio
+    let bestPos = preferred;
+    let bestOverlapRatio = 1;
+    
+    for (const step of [50, 100, 150, 200]) {
+      for (const angle of angles) {
+        const rad = (angle * Math.PI) / 180;
+        const testX = preferredX + Math.cos(rad) * step;
+        const testY = preferredY + Math.sin(rad) * step;
+        const clamped = clamp(testX, testY);
+        
+        if (inspectorRect) {
+          const overlapArea = getOverlapArea(clamped.x, clamped.y, w, h, inspectorRect);
+          const overlapRatio = overlapArea / (inspectorRect.width * inspectorRect.height);
+          if (overlapRatio < bestOverlapRatio) {
+            bestOverlapRatio = overlapRatio;
+            bestPos = clamped;
+          }
+        }
       }
     }
     
-    // Fallback: position at preferred spot anyway (overlapping is better than far away)
-    return { 
-      x: Math.max(padding, Math.min(window.innerWidth - w - padding, preferredX)), 
-      y: Math.max(headerHeight, Math.min(window.innerHeight - h - padding, preferredY)) 
-    };
-  }, [checkOverlap]);
+    return bestPos;
+  }, [isOverlapAcceptable, getOverlapArea, inspectorRect]);
 
   useEffect(() => {
     if (isOpen && containerRef.current && !hasPositionedRef.current) {

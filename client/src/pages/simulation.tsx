@@ -2628,25 +2628,16 @@ export default function SimulationPage() {
           getNeighborhoodData={getNeighborhoodData}
           zIndex={getPanelZIndex('probedetail')}
           onFocus={() => bringPanelToFront('probedetail')}
-          otherPanelRects={(() => {
-            // Collect rects of other visible floating panels
-            const rects: { left: number; top: number; width: number; height: number }[] = [];
-            const panelSelectors = [
-              '[data-testid="floating-playback-panel"]',
-              '[data-testid="floating-perturbation-panel"]',
-              '[data-testid="floating-diagnostics"]',
-              '[data-testid="floating-inspector-panel"]',
-            ];
-            panelSelectors.forEach(selector => {
-              const el = document.querySelector(selector);
-              if (el) {
-                const rect = el.getBoundingClientRect();
-                if (rect.width > 0 && rect.height > 0) {
-                  rects.push({ left: rect.left, top: rect.top, width: rect.width, height: rect.height });
-                }
+          inspectorRect={(() => {
+            // Get inspector panel rect for 25% max overlap constraint
+            const el = document.querySelector('[data-testid="floating-inspector-panel"]');
+            if (el) {
+              const rect = el.getBoundingClientRect();
+              if (rect.width > 0 && rect.height > 0) {
+                return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
               }
-            });
-            return rects;
+            }
+            return null;
           })()}
         />
       </div>
