@@ -2525,7 +2525,7 @@ export default function SimulationPage() {
             </div>
           )}
           
-          {fieldInspectorEnabled && (
+          {fieldInspectorEnabled && !probeDetailOpen && (
             <HoverProbe
               data={probeData}
               modeLabels={modeLabels}
@@ -3090,7 +3090,7 @@ export default function SimulationPage() {
                 </div>
               )}
               
-              {fieldInspectorEnabled && (
+              {fieldInspectorEnabled && !probeDetailOpen && (
                 <HoverProbe
                   data={probeData}
                   modeLabels={modeLabels}

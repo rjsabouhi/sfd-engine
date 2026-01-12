@@ -881,8 +881,13 @@ export function VisualizationCanvas({
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  // Select this probe (switches detail panel to show this probe)
-                  onSelectProbe?.(probe.id);
+                  // Toggle: if this probe is already selected (detail open), close it
+                  // Otherwise, select this probe to open its detail panel
+                  if (selectedProbeId === probe.id && onCloseProbeDetail) {
+                    onCloseProbeDetail();
+                  } else {
+                    onSelectProbe?.(probe.id);
+                  }
                 }}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
