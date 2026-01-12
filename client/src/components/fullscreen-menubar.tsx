@@ -298,7 +298,7 @@ export function FullscreenMenuBar({
                 data-testid="dropdown-projection-layer"
               >
                 <Layers className="h-3 w-3" />
-                <span>{currentOverlayLabel}</span>
+                <span>Constraint Layer</span>
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
