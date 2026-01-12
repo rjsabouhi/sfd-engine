@@ -258,6 +258,7 @@ export default function SimulationPage() {
   const [perturbMode, setPerturbMode] = useState(false);
   const [selectedPerturbMode, setSelectedPerturbMode] = useState<PerturbationMode>('impulse');
   const [perturbParams, setPerturbParams] = useState<Record<string, any>>(DEFAULT_PARAMS.impulse);
+  const [showPerturbControls, setShowPerturbControls] = useState(false); // Shows perturbation panel in sidebar when Controls... clicked
   const [trajectoryProbeActive, setTrajectoryProbeActive] = useState(false);
   const [trajectoryProbePoint, setTrajectoryProbePoint] = useState<{ x: number; y: number } | null>(null);
   const [blendMode, setBlendMode] = useState(false);
@@ -2534,7 +2535,16 @@ export default function SimulationPage() {
                   <Wind className="h-3.5 w-3.5" />
                   Drift
                 </DropdownMenuItem>
-                              </DropdownMenuContent>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={() => setShowPerturbControls(!showPerturbControls)}
+                  className={`text-xs gap-2 ${showPerturbControls ? 'bg-accent' : ''}`}
+                  data-testid="menu-perturb-controls"
+                >
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  Controls...
+                </DropdownMenuItem>
+              </DropdownMenuContent>
             </DropdownMenu>
             {/* Diagnostics */}
             <Tooltip>
@@ -2837,18 +2847,32 @@ export default function SimulationPage() {
         </button>
         
         <aside className={`${metricsPanelCollapsed ? 'w-0 overflow-hidden' : 'w-[420px]'} flex-none border-l border-border bg-card flex flex-col overflow-hidden transition-all duration-300`}>
-          <div className="p-3 border-b border-border">
-            <PerturbationPanel
-              onApplyPerturbation={handleApplyPerturbation}
-              fieldWidth={isMobile ? 150 : 300}
-              fieldHeight={isMobile ? 150 : 300}
-              perturbMode={perturbMode}
-              onPerturbModeChange={setPerturbMode}
-              selectedMode={selectedPerturbMode}
-              onModeChange={setSelectedPerturbMode}
-              onParamsChange={setPerturbParams}
-            />
-          </div>
+          {showPerturbControls && (
+            <div className="p-3 border-b border-border">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-white/80">Perturbation Controls</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowPerturbControls(false)}
+                  className="h-5 w-5 rounded-full hover:bg-white/10"
+                  data-testid="button-close-perturb-controls"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+              <PerturbationPanel
+                onApplyPerturbation={handleApplyPerturbation}
+                fieldWidth={isMobile ? 150 : 300}
+                fieldHeight={isMobile ? 150 : 300}
+                perturbMode={perturbMode}
+                onPerturbModeChange={setPerturbMode}
+                selectedMode={selectedPerturbMode}
+                onModeChange={setSelectedPerturbMode}
+                onParamsChange={setPerturbParams}
+              />
+            </div>
+          )}
           <ControlPanel
                 params={params}
                 state={state}
