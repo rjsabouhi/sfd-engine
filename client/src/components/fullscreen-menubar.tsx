@@ -269,7 +269,7 @@ export function FullscreenMenuBar({
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-xs">Structural Regimes</TooltipContent>
         </Tooltip>
-        <DropdownMenuContent className="bg-popover border-border min-w-[180px]">
+        <DropdownMenuContent className="bg-popover border-border min-w-[180px] z-[200]">
           <DropdownMenuRadioGroup 
             value={selectedRegime}
             onValueChange={(value) => {
@@ -311,7 +311,7 @@ export function FullscreenMenuBar({
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-popover border-border max-h-64 overflow-y-auto">
+            <DropdownMenuContent className="bg-popover border-border max-h-64 overflow-y-auto z-[200]">
               <DropdownMenuRadioGroup value={derivedType} onValueChange={(v) => onDerivedTypeChange(v as OverlayType)}>
                 {OVERLAY_OPTIONS.map((option) => (
                   <DropdownMenuRadioItem key={option.value} value={option.value} className="text-xs">
@@ -349,7 +349,7 @@ export function FullscreenMenuBar({
           <MenubarTrigger className="text-xs px-2 py-1 h-6" data-testid="menu-parameters">
             Parameters
           </MenubarTrigger>
-          <MenubarContent className="bg-popover border-border min-w-[220px]">
+          <MenubarContent className="bg-popover border-border min-w-[220px] z-[200]">
             <MenubarLabel className="text-[10px] text-muted-foreground uppercase tracking-wider">Structural Regimes</MenubarLabel>
             {Object.entries(structuralPresets).map(([key, preset]) => (
               <MenubarItem 
@@ -409,7 +409,7 @@ export function FullscreenMenuBar({
           <MenubarTrigger className="text-xs px-2 py-1 h-6" data-testid="menu-export">
             Export
           </MenubarTrigger>
-          <MenubarContent className="bg-popover border-border min-w-[200px]">
+          <MenubarContent className="bg-popover border-border min-w-[200px] z-[200]">
             <MenubarLabel className="text-[10px] text-muted-foreground uppercase tracking-wider">Visual</MenubarLabel>
             <MenubarItem onClick={onExportPNG} className="text-xs gap-2" data-testid="menu-export-png">
               <Image className="h-3.5 w-3.5" />
@@ -487,7 +487,7 @@ export function FullscreenMenuBar({
           <MenubarTrigger className="text-xs px-2 py-1 h-6" data-testid="menu-help">
             Help
           </MenubarTrigger>
-          <MenubarContent className="bg-popover border-border">
+          <MenubarContent className="bg-popover border-border z-[200]">
             <MenubarItem onClick={onShowIntro} className="text-xs gap-2" data-testid="menu-show-intro">
               <BookOpen className="h-3.5 w-3.5" />
               Show Introduction
