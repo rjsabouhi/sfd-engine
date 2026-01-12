@@ -53,26 +53,35 @@ export function FloatingPlaybackPanel({
   onFocus,
   anchorRect,
 }: FloatingPlaybackPanelProps) {
-  const [position, setPosition] = useState({ x: 80, y: 50 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [hasDragged, setHasDragged] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
   const [pinnedPosition, setPinnedPosition] = useState<{ x: number; y: number } | null>(null);
-  const dragRef = useRef<{ startX: number; startY: number; initialX: number; initialY: number } | null>(null);
+  const [hasDragged, setHasDragged] = useState(false);
+  
+  const containerRef = useRef<HTMLDivElement>(null);
+  const positionRef = useRef({ x: 80, y: 50 });
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
 
   // Reposition when anchor rect is provided (on open)
   useEffect(() => {
-    if (isVisible) {
-      // If pinned, use pinned position
+    if (isVisible && containerRef.current) {
+      let newPos: { x: number; y: number } | null = null;
+      
       if (isPinned && pinnedPosition) {
-        setPosition(pinnedPosition);
+        newPos = pinnedPosition;
       } else if (anchorRect && !hasDragged) {
         const x = Math.max(8, Math.min(
           anchorRect.left + anchorRect.width / 2 - PANEL_WIDTH / 2,
           window.innerWidth - PANEL_WIDTH - 8
         ));
         const y = anchorRect.bottom + GAP_FROM_MENUBAR;
-        setPosition({ x, y });
+        newPos = { x, y };
+      }
+      
+      if (newPos) {
+        positionRef.current = newPos;
+        containerRef.current.style.left = `${newPos.x}px`;
+        containerRef.current.style.top = `${newPos.y}px`;
       }
     }
   }, [anchorRect, isVisible, hasDragged, isPinned, pinnedPosition]);
@@ -90,49 +99,47 @@ export function FloatingPlaybackPanel({
       setPinnedPosition(null);
     } else {
       setIsPinned(true);
-      setPinnedPosition(position);
+      setPinnedPosition(positionRef.current);
     }
   };
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    setIsDragging(true);
+    isDraggingRef.current = true;
     setHasDragged(true);
-    dragRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      initialX: position.x,
-      initialY: position.y,
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      posX: positionRef.current.x,
+      posY: positionRef.current.y,
     };
-  }, [position]);
+  }, []);
 
-  // Use window-level event listeners for smooth dragging
+  // Use window-level event listeners for smooth dragging with refs
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging || !dragRef.current) return;
-      const dx = e.clientX - dragRef.current.startX;
-      const dy = e.clientY - dragRef.current.startY;
-      setPosition({
-        x: dragRef.current.initialX + dx,
-        y: dragRef.current.initialY + dy,
-      });
+      if (!isDraggingRef.current || !containerRef.current) return;
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+      const newX = dragStartRef.current.posX + dx;
+      const newY = dragStartRef.current.posY + dy;
+      positionRef.current = { x: newX, y: newY };
+      containerRef.current.style.left = `${newX}px`;
+      containerRef.current.style.top = `${newY}px`;
     };
 
     const handleMouseUp = () => {
-      setIsDragging(false);
-      dragRef.current = null;
+      isDraggingRef.current = false;
     };
 
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-    }
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging]);
+  }, []);
 
   const handleSliderChange = (value: number[]) => {
     onSeekFrame(value[0]);
@@ -150,8 +157,9 @@ export function FloatingPlaybackPanel({
 
   return (
     <div 
+      ref={containerRef}
       className="fixed"
-      style={{ left: position.x, top: position.y, zIndex }}
+      style={{ left: positionRef.current.x, top: positionRef.current.y, zIndex }}
       onMouseDown={() => onFocus?.()}
       data-testid="floating-playback-panel"
     >

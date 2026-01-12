@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -43,6 +43,50 @@ interface FloatingDiagnosticsProps {
 
 const DEFAULT_WIDTH = 420;
 const GAP_FROM_MENUBAR = 8;
+
+// Memoized event item to prevent re-renders during drag
+const EventItem = memo(function EventItem({ 
+  event, 
+  compactView 
+}: { 
+  event: StructuralEvent; 
+  compactView: boolean; 
+}) {
+  return (
+    <div className={`text-xs ${compactView ? 'py-0.5' : 'py-1 border-b border-white/5'}`}>
+      <div className="flex items-start gap-2">
+        <span className="text-neutral-500 font-mono shrink-0">{event.step}</span>
+        <Badge variant="outline" className="text-[10px] px-1 py-0 shrink-0 border-neutral-700">
+          {event.type}
+        </Badge>
+      </div>
+      {!compactView && (
+        <div className="text-neutral-400 pl-8 mt-0.5">{event.description}</div>
+      )}
+    </div>
+  );
+});
+
+// Memoized event list to prevent re-renders during drag
+const EventList = memo(function EventList({ 
+  events, 
+  compactView 
+}: { 
+  events: StructuralEvent[]; 
+  compactView: boolean; 
+}) {
+  if (events.length === 0) {
+    return <div className="text-xs text-neutral-500 text-center py-4">No events</div>;
+  }
+  
+  return (
+    <>
+      {events.map((event, i) => (
+        <EventItem key={i} event={event} compactView={compactView} />
+      ))}
+    </>
+  );
+});
 
 function Sparkline({ data, width = 140, height = 28, color = "#10b981" }: { data: number[]; width?: number; height?: number; color?: string }) {
   if (data.length < 2) return <div className="h-7 bg-white/5 rounded" style={{ width }} />;
@@ -587,26 +631,7 @@ export function FloatingDiagnostics({
                   ref={eventLogRef}
                   className="h-48 overflow-y-auto bg-black/40 rounded p-2 space-y-1"
                 >
-                  {filteredEvents.length === 0 ? (
-                    <div className="text-xs text-neutral-500 text-center py-4">No events</div>
-                  ) : (
-                    filteredEvents.map((event, i) => (
-                      <div 
-                        key={i} 
-                        className={`text-xs ${compactView ? 'py-0.5' : 'py-1 border-b border-white/5'}`}
-                      >
-                        <div className="flex items-start gap-2">
-                          <span className="text-neutral-500 font-mono shrink-0">{event.step}</span>
-                          <Badge variant="outline" className="text-[10px] px-1 py-0 shrink-0 border-neutral-700">
-                            {event.type}
-                          </Badge>
-                        </div>
-                        {!compactView && (
-                          <div className="text-neutral-400 pl-8 mt-0.5">{event.description}</div>
-                        )}
-                      </div>
-                    ))
-                  )}
+                  <EventList events={filteredEvents} compactView={compactView} />
                 </div>
 
                 <Button size="sm" variant="outline" onClick={handleExportEvents} className="w-full h-7 text-xs border-white/10 text-neutral-300">
