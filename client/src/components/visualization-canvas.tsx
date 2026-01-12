@@ -807,64 +807,47 @@ export function VisualizationCanvas({
               }}
               data-testid={`probe-marker-${probe.id}`}
             >
-              {/* Crosshair lines */}
-              <div 
-                className="absolute"
-                style={{
-                  width: '24px',
-                  height: '2px',
-                  backgroundColor: 'white',
-                  left: '-12px',
-                  top: '-1px',
-                  boxShadow: '0 0 4px rgba(0,0,0,0.8)',
-                }}
-              />
-              <div 
-                className="absolute"
-                style={{
-                  width: '2px',
-                  height: '24px',
-                  backgroundColor: 'white',
-                  left: '-1px',
-                  top: '-12px',
-                  boxShadow: '0 0 4px rgba(0,0,0,0.8)',
-                }}
-              />
-              {/* Outer bright ring */}
+              {/* Outer thin ring */}
               <div 
                 className="absolute"
                 style={{ 
-                  width: '28px',
-                  height: '28px',
-                  marginLeft: '-14px',
-                  marginTop: '-14px',
+                  width: '26px',
+                  height: '26px',
+                  marginLeft: '-13px',
+                  marginTop: '-13px',
                   borderRadius: '50%',
-                  border: `2px solid ${probe.color}`,
-                  boxShadow: `0 0 12px ${probe.color}, 0 0 20px ${probe.color}`,
-                  filter: 'brightness(1.5) saturate(1.2)',
+                  border: `1.5px solid ${probe.color}`,
+                  opacity: 0.9,
                 }}
               />
-              {/* Inner darker ring - transparent center */}
+              {/* Middle shaded region */}
+              <div 
+                className="absolute"
+                style={{ 
+                  width: '20px',
+                  height: '20px',
+                  marginLeft: '-10px',
+                  marginTop: '-10px',
+                  borderRadius: '50%',
+                  background: `radial-gradient(circle, transparent 40%, ${probe.color}33 70%, ${probe.color}55 100%)`,
+                }}
+              />
+              {/* Inner ring with number */}
               <div 
                 className="absolute flex items-center justify-center"
                 style={{ 
-                  width: '22px',
-                  height: '22px',
-                  marginLeft: '-11px',
-                  marginTop: '-11px',
+                  width: '14px',
+                  height: '14px',
+                  marginLeft: '-7px',
+                  marginTop: '-7px',
                   borderRadius: '50%',
-                  border: `3px solid ${probe.color}`,
-                  backgroundColor: 'transparent',
-                  filter: 'brightness(0.7) saturate(1.1)',
+                  border: `1.5px solid ${probe.color}`,
+                  backgroundColor: `${probe.color}22`,
                 }}
               >
                 <span 
-                  className="text-[10px] font-bold"
-                  style={{ 
-                    color: probe.color,
-                    filter: 'brightness(1.5) saturate(1.2)',
-                    textShadow: `0 0 6px ${probe.color}, 0 0 10px ${probe.color}`,
-                  }}
+                  className="text-[9px] font-semibold"
+                  style={{ color: probe.color }}
                 >
                   {probe.label.replace('P', '')}
                 </span>
