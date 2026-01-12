@@ -22,6 +22,9 @@ import {
   Share2,
   Pin,
   GripVertical,
+  Lock,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -56,6 +59,8 @@ interface ExportOption {
   category: ExportCategory;
   action: () => Promise<boolean>;
   requires?: string;
+  requiresAdvanced?: boolean;
+  advancedNote?: string;
 }
 
 interface FloatingExportDialogProps {
@@ -106,6 +111,7 @@ export function FloatingExportDialog({
   const [selectedCategory, setSelectedCategory] = useState<ExportCategory>('visual');
   const [loadingExport, setLoadingExport] = useState<string | null>(null);
   const [completedExports, setCompletedExports] = useState<Set<string>>(new Set());
+  const [advancedMode, setAdvancedMode] = useState(false); // Does not persist across reloads
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Use lifted state if provided, otherwise use local state
@@ -199,6 +205,7 @@ export function FloatingExportDialog({
   const getState = useCallback(() => engine?.getState(), [engine]);
 
   const exportOptions: ExportOption[] = [
+    // === VISUAL (Safe for sharing) ===
     {
       id: 'snapshot',
       name: 'Field Snapshot',
@@ -238,6 +245,7 @@ export function FloatingExportDialog({
       format: 'WebM',
       category: 'visual',
       requires: 'playback history',
+      advancedNote: 'Full-length history export requires Advanced Mode',
       action: async () => {
         if (!engine || !canvasRef.current) return false;
         return exportVideoWebM(engine, canvasRef.current, colormap);
@@ -246,30 +254,19 @@ export function FloatingExportDialog({
     {
       id: 'layers',
       name: 'Field Layers',
-      description: 'Separate images for each derived field',
+      description: 'Separate PNG images for each derived field',
       icon: <Layers className="h-5 w-5" />,
-      format: 'JSON + PNGs',
+      format: 'PNG',
       category: 'visual',
       action: async () => {
         if (!engine) return false;
         return exportLayersSeparate(engine, "png");
       },
     },
-    {
-      id: 'sim-data',
-      name: 'Simulation Data',
-      description: 'Complete field data with all frame history',
-      icon: <Database className="h-5 w-5" />,
-      format: 'CSV',
-      category: 'data',
-      action: async () => {
-        if (!engine) return false;
-        return exportSimulationData(engine);
-      },
-    },
+    // === DATA (Mixed: summary safe, full matrices require advanced) ===
     {
       id: 'metrics',
-      name: 'Metrics Log',
+      name: 'Metrics Summary',
       description: 'Time series of energy, variance, and curvature',
       icon: <BarChart3 className="h-5 w-5" />,
       format: 'CSV',
@@ -289,21 +286,36 @@ export function FloatingExportDialog({
       action: async () => exportEventLog(events),
     },
     {
+      id: 'sim-data',
+      name: 'Full Field Data',
+      description: 'Complete field matrices with frame history',
+      icon: <Database className="h-5 w-5" />,
+      format: 'CSV',
+      category: 'data',
+      requiresAdvanced: true,
+      action: async () => {
+        if (!engine) return false;
+        return exportSimulationData(engine);
+      },
+    },
+    {
       id: 'operators',
       name: 'Operator Contributions',
       description: 'How each operator influenced the field',
       icon: <BarChart3 className="h-5 w-5" />,
       format: 'JSON',
       category: 'data',
+      requiresAdvanced: true,
       action: async () => {
         if (!engine) return false;
         return exportOperatorContributions(engine);
       },
     },
+    // === PROBES (Current values safe, histories require advanced) ===
     {
       id: 'probes-csv',
-      name: 'Probe Data (Spreadsheet)',
-      description: 'All saved probes with current values',
+      name: 'Probe Values',
+      description: 'Current probe positions and values',
       icon: <Target className="h-5 w-5" />,
       format: 'CSV',
       category: 'probes',
@@ -312,14 +324,16 @@ export function FloatingExportDialog({
     },
     {
       id: 'probes-json',
-      name: 'Probe Data (Detailed)',
-      description: 'Full probe data including baselines',
+      name: 'Full Probe Data',
+      description: 'Complete probe histories with baselines',
       icon: <Target className="h-5 w-5" />,
       format: 'JSON',
       category: 'probes',
       requires: 'saved probes',
+      requiresAdvanced: true,
       action: exportProbesJSON,
     },
+    // === TECHNICAL (All require Advanced Mode) ===
     {
       id: 'settings',
       name: 'Settings',
@@ -327,6 +341,7 @@ export function FloatingExportDialog({
       icon: <Settings className="h-5 w-5" />,
       format: 'JSON',
       category: 'technical',
+      requiresAdvanced: true,
       action: async () => {
         if (!engine) return false;
         return exportSettingsJSON(engine);
@@ -339,6 +354,7 @@ export function FloatingExportDialog({
       icon: <Code className="h-5 w-5" />,
       format: '.npy',
       category: 'technical',
+      requiresAdvanced: true,
       action: async () => {
         if (!engine) return false;
         return exportNumPyArray(engine);
@@ -351,6 +367,7 @@ export function FloatingExportDialog({
       icon: <FileText className="h-5 w-5" />,
       format: '.py',
       category: 'technical',
+      requiresAdvanced: true,
       action: async () => {
         if (!engine) return false;
         return exportPythonScript(engine);
@@ -363,6 +380,7 @@ export function FloatingExportDialog({
       icon: <FileJson className="h-5 w-5" />,
       format: 'JSON',
       category: 'technical',
+      requiresAdvanced: true,
       action: async () => {
         if (!engine) return false;
         return exportBatchSpec(engine);
@@ -375,6 +393,7 @@ export function FloatingExportDialog({
       icon: <Archive className="h-5 w-5" />,
       format: 'JSON',
       category: 'technical',
+      requiresAdvanced: true,
       action: async () => {
         if (!engine) return false;
         return exportFullArchive(engine, events, colormap);
@@ -542,25 +561,40 @@ export function FloatingExportDialog({
           </div>
         </div>
 
-        <div className="flex">
-          <div className="w-28 border-r border-white/10 p-2 space-y-1">
+        <div className="flex flex-1 min-h-0">
+          <div className="w-28 border-r border-white/10 p-2 space-y-1 flex flex-col">
             {(Object.keys(CATEGORY_INFO) as ExportCategory[]).map(cat => {
               const info = CATEGORY_INFO[cat];
               const isSelected = selectedCategory === cat;
+              const isTechLocked = cat === 'technical' && !advancedMode;
+              
               return (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left text-xs transition-colors ${
-                    isSelected
-                      ? 'bg-white/10 text-white'
-                      : 'text-neutral-400 hover:text-neutral-200 hover:bg-white/5'
-                  }`}
-                  data-testid={`export-category-${cat}`}
-                >
-                  <span className={isSelected ? info.color : ''}>{info.icon}</span>
-                  <span>{info.label}</span>
-                </button>
+                <Tooltip key={cat}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => !isTechLocked && setSelectedCategory(cat)}
+                      disabled={isTechLocked}
+                      className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left text-xs transition-colors ${
+                        isTechLocked
+                          ? 'opacity-40 cursor-not-allowed text-neutral-500'
+                          : isSelected
+                            ? 'bg-white/10 text-white'
+                            : 'text-neutral-400 hover:text-neutral-200 hover:bg-white/5'
+                      }`}
+                      data-testid={`export-category-${cat}`}
+                    >
+                      <span className={isSelected && !isTechLocked ? info.color : ''}>
+                        {isTechLocked ? <Lock className="h-4 w-4" /> : info.icon}
+                      </span>
+                      <span>{info.label}</span>
+                    </button>
+                  </TooltipTrigger>
+                  {isTechLocked && (
+                    <TooltipContent side="right" className="text-xs max-w-[180px]">
+                      Technical exports require Advanced Mode
+                    </TooltipContent>
+                  )}
+                </Tooltip>
               );
             })}
           </div>
@@ -570,9 +604,11 @@ export function FloatingExportDialog({
               {filteredOptions.map(option => {
                 const isLoading = loadingExport === option.id;
                 const isCompleted = completedExports.has(option.id);
-                const isDisabled = isLoading || (option.requires === 'saved probes' && savedProbes.length === 0);
+                const needsProbes = option.requires === 'saved probes' && savedProbes.length === 0;
+                const needsAdvanced = option.requiresAdvanced && !advancedMode;
+                const isDisabled = isLoading || needsProbes || needsAdvanced;
                 
-                return (
+                const exportButton = (
                   <button
                     key={option.id}
                     onClick={() => !isDisabled && handleExport(option)}
@@ -584,11 +620,13 @@ export function FloatingExportDialog({
                     }`}
                     data-testid={`export-option-${option.id}`}
                   >
-                    <div className={`shrink-0 p-2 rounded-lg ${CATEGORY_INFO[option.category].color} bg-white/5`}>
+                    <div className={`shrink-0 p-2 rounded-lg ${needsAdvanced ? 'text-neutral-500' : CATEGORY_INFO[option.category].color} bg-white/5`}>
                       {isLoading ? (
                         <Loader2 className="h-5 w-5 animate-spin" />
                       ) : isCompleted ? (
                         <Check className="h-5 w-5 text-green-400" />
+                      ) : needsAdvanced ? (
+                        <Lock className="h-5 w-5" />
                       ) : (
                         option.icon
                       )}
@@ -599,21 +637,72 @@ export function FloatingExportDialog({
                         <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-neutral-400">
                           {option.format}
                         </span>
+                        {needsAdvanced && (
+                          <span className="text-[9px] px-1 py-0.5 rounded bg-amber-500/20 text-amber-400">
+                            Advanced
+                          </span>
+                        )}
                       </div>
                       <p className="text-[11px] text-neutral-500 mt-0.5 leading-snug">
                         {option.description}
                       </p>
-                      {option.requires && (
+                      {option.requires && !needsAdvanced && (
                         <p className="text-[10px] text-amber-500/70 mt-1">
                           Requires: {option.requires}
+                        </p>
+                      )}
+                      {option.advancedNote && !advancedMode && (
+                        <p className="text-[10px] text-neutral-500 mt-1 italic">
+                          {option.advancedNote}
                         </p>
                       )}
                     </div>
                   </button>
                 );
+
+                // Wrap with tooltip if disabled due to advanced mode
+                if (needsAdvanced) {
+                  return (
+                    <Tooltip key={option.id}>
+                      <TooltipTrigger asChild>
+                        {exportButton}
+                      </TooltipTrigger>
+                      <TooltipContent side="left" className="text-xs max-w-[200px]">
+                        Enable Advanced Mode to export numerical data
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                }
+
+                return exportButton;
               })}
             </div>
           </div>
+        </div>
+
+        {/* Advanced Mode Toggle */}
+        <div className="flex items-center justify-between px-3 py-2 border-t border-white/10 bg-white/5">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setAdvancedMode(!advancedMode)}
+              className="flex items-center gap-1.5"
+              data-testid="export-advanced-toggle"
+            >
+              {advancedMode ? (
+                <ToggleRight className="h-5 w-5 text-cyan-400" />
+              ) : (
+                <ToggleLeft className="h-5 w-5 text-neutral-500" />
+              )}
+              <span className={`text-xs font-medium ${advancedMode ? 'text-cyan-400' : 'text-neutral-400'}`}>
+                Advanced Mode
+              </span>
+            </button>
+          </div>
+          <p className="text-[10px] text-neutral-500 max-w-[200px] text-right">
+            {advancedMode 
+              ? 'Full export access enabled' 
+              : 'Unlocks matrices, histories, solver internals'}
+          </p>
         </div>
       </div>
     </div>
