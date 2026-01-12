@@ -427,16 +427,6 @@ export function FullscreenMenuBar({
       </Menubar>
 
       <div className="flex-1" />
-      
-      <div className="flex items-center gap-2 text-[10px] text-white/50 font-mono">
-        <span>Step: {state.step}</span>
-        <span className="text-white/30">|</span>
-        <span>Energy: {state.energy.toFixed(4)}</span>
-        <span className="text-white/30">|</span>
-        <span>Basins: {state.basinCount}</span>
-        <span className="text-white/30">|</span>
-        <span>{state.fps} FPS</span>
-      </div>
 
       <Button
         variant="ghost"
