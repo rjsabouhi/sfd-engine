@@ -239,7 +239,7 @@ export default function SimulationPage() {
   const [historyLength, setHistoryLength] = useState(0);
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
   const [isPlaybackMode, setIsPlaybackMode] = useState(false);
-  const [showDualView, setShowDualView] = useState(false);
+  const [showDualView, setShowDualView] = useState(true);
   const [derivedType, setDerivedType] = useState<OverlayType>("constraintSkeleton");
   const [hasUserSelectedOverlay, setHasUserSelectedOverlay] = useState(false);
   const [derivedField, setDerivedField] = useState<DerivedField | null>(null);

@@ -219,22 +219,6 @@ export function FullscreenMenuBar({
         <TooltipContent side="bottom" className="text-xs">Toggle Perturbation Mode</TooltipContent>
       </Tooltip>
 
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onShowDualViewChange(!showDualView)}
-            className={`h-6 text-xs px-2 text-white/80 hover:text-white hover:bg-white/10 ${showDualView ? 'bg-white/15 text-white' : ''}`}
-            data-testid="button-split-view"
-          >
-            <Columns2 className="h-3 w-3 mr-1" />
-            Split
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className="text-xs">Toggle Split View</TooltipContent>
-      </Tooltip>
-
       {showDualView && (
         <>
           <div className="w-px h-4 bg-white/10 mx-1" />
