@@ -278,7 +278,7 @@ export default function SimulationPage() {
   const [savedProbes, setSavedProbes] = useState<import("@shared/schema").SavedProbe[]>([]); // Multi-point probe storage
   const [probeDetailOpen, setProbeDetailOpen] = useState(false); // Probe detail dialog
   const [selectedDetailProbeId, setSelectedDetailProbeId] = useState<string | null>(null);
-  const [cursorMode, setCursorMode] = useState<'select' | 'pan' | 'probe'>('select'); // Cursor interaction mode
+  const [cursorMode] = useState<'select' | 'pan' | 'probe'>('probe'); // Cursor interaction mode - probe only
   
   // Derive selected probe from savedProbes to keep it synchronized after mutations
   const selectedDetailProbe = savedProbes.find(p => p.id === selectedDetailProbeId) || null;
@@ -2720,8 +2720,6 @@ export default function SimulationPage() {
           onOpenProbeDetail={handleOpenProbeDetail}
           currentStep={state.step}
           getProbeDataAt={getProbeDataAt}
-          cursorMode={cursorMode}
-          onCursorModeChange={setCursorMode}
           isPinned={inspectorPinned.isPinned}
           pinnedPosition={inspectorPinned.position}
           onPinnedChange={(isPinned, position) => setInspectorPinned({ isPinned, position })}

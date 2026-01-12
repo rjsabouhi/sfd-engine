@@ -9,8 +9,6 @@ import {
   Star,
   MapPin,
   ExternalLink,
-  MousePointer2,
-  Crosshair,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState, useRef, useCallback, useEffect } from "react";
@@ -28,8 +26,6 @@ const PROBE_COLORS = [
   "#84cc16", // lime
 ];
 
-export type CursorMode = 'select' | 'pan' | 'probe';
-
 interface FloatingInspectorPanelProps {
   isVisible: boolean;
   probeData: ProbeData | null;
@@ -45,8 +41,6 @@ interface FloatingInspectorPanelProps {
   onOpenProbeDetail: (probe: SavedProbe) => void;
   currentStep: number;
   getProbeDataAt: (x: number, y: number) => ProbeData | null;
-  cursorMode?: CursorMode;
-  onCursorModeChange?: (mode: CursorMode) => void;
   // Lifted pinned state for persistence across view switches
   isPinned?: boolean;
   pinnedPosition?: { x: number; y: number } | null;
@@ -71,8 +65,6 @@ export function FloatingInspectorPanel({
   onOpenProbeDetail,
   currentStep,
   getProbeDataAt,
-  cursorMode = 'select',
-  onCursorModeChange,
   isPinned: isPinnedProp,
   pinnedPosition: pinnedPositionProp,
   onPinnedChange,
@@ -274,40 +266,6 @@ export function FloatingInspectorPanel({
           <div className="px-3 py-2 border-b border-white/10">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] text-neutral-500 uppercase tracking-wide">Current Hover</span>
-              <div className="flex items-center gap-0.5 bg-white/5 rounded p-0.5">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => onCursorModeChange?.('select')}
-                      className={`p-1 rounded transition-colors ${
-                        cursorMode === 'select' 
-                          ? 'bg-emerald-500/20 text-emerald-400' 
-                          : 'text-neutral-500 hover:text-neutral-300 hover:bg-white/5'
-                      }`}
-                      data-testid="cursor-mode-select"
-                    >
-                      <MousePointer2 className="h-3 w-3" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs">Select</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => onCursorModeChange?.('probe')}
-                      className={`p-1 rounded transition-colors ${
-                        cursorMode === 'probe' 
-                          ? 'bg-emerald-500/20 text-emerald-400' 
-                          : 'text-neutral-500 hover:text-neutral-300 hover:bg-white/5'
-                      }`}
-                      data-testid="cursor-mode-probe"
-                    >
-                      <Crosshair className="h-3 w-3" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs">Add Probe</TooltipContent>
-                </Tooltip>
-              </div>
             </div>
             
             {probeData ? (
