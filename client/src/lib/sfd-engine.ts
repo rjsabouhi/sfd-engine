@@ -17,6 +17,10 @@ interface FrameSnapshot {
   step: number;
   stats: { energy: number; variance: number; basinCount: number };
   fieldState: "calm" | "unsettled" | "reorganizing" | "transforming";
+  // Full parameter state at this frame - enables complete state restoration on scrub
+  params: SimulationParameters;
+  // Optional marker for significant events (regime changes, etc.)
+  eventMarker?: string;
 }
 
 // Diagnostic data types
@@ -452,15 +456,17 @@ export class SFDEngine {
     return sum / weight;
   }
 
-  private saveToRingBuffer(): void {
-    // Only save every N frames to reduce memory allocations
-    if (this.step % this.ringBufferSampleInterval !== 0) return;
+  private saveToRingBuffer(eventMarker?: string): void {
+    // Only save every N frames to reduce memory allocations (unless forced by event)
+    if (!eventMarker && this.step % this.ringBufferSampleInterval !== 0) return;
     
     const snapshot: FrameSnapshot = {
       grid: new Float32Array(this.grid),
       step: this.step,
       stats: this.computeStatistics(),
       fieldState: this.displayedFieldState, // Capture current field state for playback
+      params: { ...this.params }, // Capture full parameter state for complete restoration
+      eventMarker,
     };
     
     if (this.ringBuffer.length < this.ringBufferSize) {
