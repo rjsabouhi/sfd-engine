@@ -33,6 +33,8 @@ interface VisualizationCanvasProps {
   onRemoveProbe?: (id: string) => void;
   onMoveProbe?: (id: string, x: number, y: number) => void;
   onSelectProbe?: (id: string) => void;
+  // Cursor mode - controls interaction behavior
+  cursorMode?: 'select' | 'pan' | 'probe';
 }
 
 // Temporal smoothing buffer for perceptual safety
@@ -166,6 +168,7 @@ export function VisualizationCanvas({
   onRemoveProbe,
   onMoveProbe,
   onSelectProbe,
+  cursorMode = 'select',
 }: VisualizationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -611,6 +614,9 @@ export function VisualizationCanvas({
       return;
     }
     
+    // In pan mode, don't process clicks as they're for panning
+    if (cursorMode === 'pan') return;
+    
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -622,19 +628,34 @@ export function VisualizationCanvas({
     const y = Math.floor((e.clientY - rect.top) * scaleY);
     
     if (x >= 0 && x < field.width && y >= 0 && y < field.height) {
-      // In inspector mode, clicks add probes; otherwise delegate to onClick
-      if (inspectorMode && onAddProbe) {
+      // Cursor mode determines behavior
+      if (cursorMode === 'probe' && onAddProbe) {
+        onAddProbe(x, y);
+      } else if (cursorMode === 'select') {
+        // In select mode, clicks on empty space do nothing (probe clicks handled by markers)
+        // Delegate to onClick for perturbation if not in inspector mode
+        if (!inspectorMode && onClick) {
+          onClick(x, y, e.shiftKey);
+        }
+      } else if (inspectorMode && onAddProbe) {
+        // Legacy inspector mode behavior
         onAddProbe(x, y);
       } else if (onClick) {
         onClick(x, y, e.shiftKey);
       }
     }
-  }, [field, onClick, isPanning, inspectorMode, onAddProbe]);
+  }, [field, onClick, isPanning, inspectorMode, onAddProbe, cursorMode]);
 
   const zoomPercent = Math.round(zoom * 100);
   
   const getCursor = () => {
-    if (inspectorMode) return 'copy'; // Indicates adding a probe marker
+    // Cursor mode takes priority when inspector is open
+    if (cursorMode === 'pan') return isPanning ? 'grabbing' : 'grab';
+    if (cursorMode === 'probe') return 'copy'; // Adding probe marker
+    if (cursorMode === 'select') return 'default';
+    
+    // Legacy behavior for other modes
+    if (inspectorMode) return 'copy';
     if (perturbMode) return 'cell';
     if (zoom > 1) return isPanning ? 'grabbing' : 'grab';
     return 'crosshair';
