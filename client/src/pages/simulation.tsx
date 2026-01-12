@@ -2543,6 +2543,23 @@ export default function SimulationPage() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
+                variant={fieldInspectorEnabled ? "secondary" : "ghost"}
+                size="sm" 
+                onClick={() => setFieldInspectorEnabled(!fieldInspectorEnabled)} 
+                data-testid="button-header-inspector"
+                className="h-7 text-xs gap-1.5"
+              >
+                <Crosshair className="h-3.5 w-3.5" />
+                Inspector
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              Toggle field inspector (hover to probe values)
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => { setFocusMode(true); setBlendMode(true); setBlendOpacity(0.5); }} 
