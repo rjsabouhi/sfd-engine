@@ -817,7 +817,7 @@ export function VisualizationCanvas({
                   marginTop: '-12px',
                   borderRadius: '50%',
                   border: `2px solid ${probe.color}`,
-                  backgroundColor: `${probe.color}15`,
+                  backgroundColor: '#1a1a1a',
                 }}
               >
                 <span 
