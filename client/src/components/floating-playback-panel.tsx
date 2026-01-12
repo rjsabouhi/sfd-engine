@@ -103,6 +103,7 @@ export function FloatingPlaybackPanel({
         >
           <div className="flex items-center gap-1.5">
             <GripVertical className="h-3 w-3 text-muted-foreground" />
+            <Play className="h-3 w-3 text-cyan-400" />
             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Playback</span>
           </div>
           <Button
