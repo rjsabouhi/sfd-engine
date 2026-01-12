@@ -80,6 +80,7 @@ export class SFDEngine {
   private grid: Float32Array;
   private tempGrid: Float32Array;
   private playbackDisplayGrid: Float32Array | null = null; // Separate grid for playback display only
+  private playbackDisplayParams: SimulationParameters | null = null; // Params at the playback frame for UI sync
   private width: number;
   private height: number;
   private params: SimulationParameters;
@@ -331,6 +332,7 @@ export class SFDEngine {
     this.currentPlaybackIndex = -1;
     this.playbackDisplayGrid = null;
     this.playbackDisplayStep = null;
+    this.playbackDisplayParams = null;
     this.initialize();
     this.notifyUpdate();
   }
@@ -345,6 +347,7 @@ export class SFDEngine {
     this.currentPlaybackIndex = -1;
     this.playbackDisplayGrid = null;
     this.playbackDisplayStep = null;
+    this.playbackDisplayParams = null;
     this.initialize();
     this.notifyUpdate();
   }
@@ -1653,6 +1656,7 @@ export class SFDEngine {
       // Display-only: don't modify live simulation grid during scrubbing
       this.playbackDisplayGrid = new Float32Array(snapshot.grid);
       this.playbackDisplayStep = snapshot.step;
+      this.playbackDisplayParams = { ...snapshot.params }; // Store params for UI access
       this.invalidateDerivedFieldCache();
       this.notifyUpdate();
       return true;
@@ -1670,14 +1674,16 @@ export class SFDEngine {
       // Display-only: don't modify live simulation grid during scrubbing
       this.playbackDisplayGrid = new Float32Array(snapshot.grid);
       this.playbackDisplayStep = snapshot.step;
+      this.playbackDisplayParams = { ...snapshot.params }; // Store params for UI access
       this.invalidateDerivedFieldCache();
       this.notifyUpdate();
       return true;
     } else {
-      // Exiting playback mode - clear the display grid
+      // Exiting playback mode - clear the display grid and params
       this.currentPlaybackIndex = -1;
       this.playbackDisplayGrid = null;
       this.playbackDisplayStep = null;
+      this.playbackDisplayParams = null;
       return false;
     }
   }
@@ -1691,6 +1697,7 @@ export class SFDEngine {
     // Display-only: don't modify live simulation grid during scrubbing
     this.playbackDisplayGrid = new Float32Array(snapshot.grid);
     this.playbackDisplayStep = snapshot.step;
+    this.playbackDisplayParams = { ...snapshot.params }; // Store params for UI access
     this.invalidateDerivedFieldCache();
     // Recompute basin map for the scrubbed frame
     this.updateBasinMap();
@@ -1699,7 +1706,7 @@ export class SFDEngine {
   
   // Commit the current playback frame to live state
   // Called when resuming simulation from a scrubbed position
-  // This syncs the live grid to the displayed frame and prunes future history
+  // This syncs the live grid AND params to the displayed frame and prunes future history
   commitPlaybackFrame(): void {
     if (this.currentPlaybackIndex < 0 || !this.playbackDisplayGrid) return;
     
@@ -1709,6 +1716,12 @@ export class SFDEngine {
       this.step = this.playbackDisplayStep;
     }
     
+    // GLOBAL PLAYBACK: Also restore the params from that frame
+    // This ensures the simulation continues with the exact parameters that created that frame
+    if (this.playbackDisplayParams) {
+      this.params = { ...this.playbackDisplayParams };
+    }
+    
     // Truncate history after this point (future frames are now invalid)
     this.truncateHistoryAfter(this.currentPlaybackIndex);
     
@@ -1716,10 +1729,17 @@ export class SFDEngine {
     this.currentPlaybackIndex = -1;
     this.playbackDisplayGrid = null;
     this.playbackDisplayStep = null;
+    this.playbackDisplayParams = null;
     
     this.invalidateDerivedFieldCache();
     this.updateBasinMap();
     this.notifyUpdate();
+  }
+  
+  // Get the params from the current playback frame (or null if not in playback)
+  // Used by UI to show/sync params when scrubbing through history
+  getPlaybackParams(): SimulationParameters | null {
+    return this.playbackDisplayParams ? { ...this.playbackDisplayParams } : null;
   }
   
   // Truncate ring buffer history after the given index
@@ -1757,6 +1777,7 @@ export class SFDEngine {
     this.currentPlaybackIndex = -1;
     this.playbackDisplayGrid = null;
     this.playbackDisplayStep = null;
+    this.playbackDisplayParams = null;
   }
 
   isInPlaybackMode(): boolean {

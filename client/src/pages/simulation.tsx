@@ -569,9 +569,15 @@ export default function SimulationPage() {
     if (!engine) return;
     
     // If resuming from playback mode, commit the current frame to live state
-    // This syncs the simulation state to the displayed frame and prunes future history
+    // This syncs the simulation state AND params to the displayed frame and prunes future history
     if (engine.isInPlaybackMode()) {
+      // Get the params that will be restored before committing
+      const restoredParams = engine.getPlaybackParams();
       engine.commitPlaybackFrame();
+      // Sync React state with the restored params so UI reflects historical settings
+      if (restoredParams) {
+        setParams(restoredParams);
+      }
     }
     
     engine.start();
