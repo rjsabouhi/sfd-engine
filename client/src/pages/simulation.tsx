@@ -2409,6 +2409,7 @@ export default function SimulationPage() {
           engine={engineRef.current}
           isVisible={diagnosticsVisible}
           onClose={() => setDiagnosticsVisible(false)}
+          onReset={handleReset}
           events={events}
           isRunning={state.isRunning}
           currentHistoryIndex={currentHistoryIndex}
@@ -2992,6 +2993,7 @@ export default function SimulationPage() {
         engine={engineRef.current}
         isVisible={diagnosticsVisible}
         onClose={() => setDiagnosticsVisible(false)}
+        onReset={handleReset}
         events={events}
         isRunning={state.isRunning}
         currentHistoryIndex={currentHistoryIndex}

@@ -20,7 +20,8 @@ import {
   Minimize2,
   Maximize2,
   GripHorizontal,
-  Settings2
+  Settings2,
+  RotateCcw
 } from "lucide-react";
 import type { SFDEngine, DiagnosticSolverData, DiagnosticRenderData, DiagnosticInternalsData, DeterminismReport } from "@/lib/sfd-engine";
 import type { StructuralEvent } from "@shared/schema";
@@ -29,6 +30,7 @@ interface FloatingDiagnosticsProps {
   engine: SFDEngine | null;
   isVisible: boolean;
   onClose: () => void;
+  onReset?: () => void;
   events: StructuralEvent[];
   isRunning: boolean;
   currentHistoryIndex: number;
@@ -87,6 +89,7 @@ export function FloatingDiagnostics({
   engine,
   isVisible,
   onClose,
+  onReset,
   events,
   isRunning,
   currentHistoryIndex,
@@ -291,6 +294,17 @@ export function FloatingDiagnostics({
           <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Diagnostics</span>
         </div>
         <div className="flex items-center gap-1" data-no-drag>
+          {onReset && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onReset}
+              className="h-6 w-6 text-neutral-500 hover:text-cyan-400"
+              data-testid="button-reset-diagnostics"
+            >
+              <RotateCcw className="h-3 w-3" />
+            </Button>
+          )}
           <Button 
             variant="ghost" 
             size="icon" 
