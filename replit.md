@@ -100,6 +100,15 @@ Added comprehensive export capabilities for research use:
 - **Batch Spec (.json)**: Minimal parameter specification for automated testing
 - **Full Archive (.json)**: Comprehensive bundle with field, operators, events, metrics, config
 
+### Multi-Point Probe System with Detail Dialog (January 2026)
+Advanced probe analysis system for research-grade field inspection:
+- **Multi-Point Probes**: Save up to 8 color-coded probe locations by clicking on the field
+- **Probe Detail Dialog**: Click expand button or double-click probe to open comprehensive analysis
+- **Neighborhood Analysis**: 7×7 toroidal sampling with local min/max/mean/std, gradient direction/magnitude, anisotropy
+- **Baseline Comparison**: Freeze probe state for delta calculations and percentage change tracking
+- **Canvas Overlay Markers**: Visual indicators for saved probe positions with numbered labels
+- **Reactive State**: Dialog stays synchronized with probe mutations (baseline toggles, deletions)
+
 ### Global Playback Architecture (January 2026)
 Complete simulation history preservation across all parameter and regime changes:
 - **FrameSnapshot Extended**: Each frame now stores full SimulationParameters alongside grid data
