@@ -157,10 +157,10 @@ export function FloatingInspectorPanel({
   if (!isVisible) return null;
 
   const baselineProbe = savedProbes.find(p => p.isBaseline);
-  const baselineData = baselineProbe ? getProbeDataAt(baselineProbe.x, baselineProbe.y) : null;
+  const baselineSnapshot = baselineProbe?.baselineSnapshot || null;
 
-  const formatDelta = (current: number, baseline: number | undefined) => {
-    if (baseline === undefined) return null;
+  const formatDelta = (current: number, baseline: number | undefined | null) => {
+    if (baseline === undefined || baseline === null) return null;
     const delta = current - baseline;
     const sign = delta >= 0 ? '+' : '';
     return `${sign}${delta.toFixed(3)}`;
@@ -361,9 +361,9 @@ export function FloatingInspectorPanel({
                           <div className="bg-black/30 rounded px-1 py-0.5">
                             <span className="text-neutral-500 block">Val</span>
                             <span className="text-neutral-300 font-mono">{liveData.value.toFixed(2)}</span>
-                            {baselineData && !probe.isBaseline && (
-                              <span className={`block font-mono ${liveData.value >= baselineData.value ? 'text-emerald-400' : 'text-red-400'}`}>
-                                {formatDelta(liveData.value, baselineData.value)}
+                            {baselineSnapshot && !probe.isBaseline && (
+                              <span className={`block font-mono ${liveData.value >= baselineSnapshot.value ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {formatDelta(liveData.value, baselineSnapshot.value)}
                               </span>
                             )}
                           </div>

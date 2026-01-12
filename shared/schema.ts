@@ -93,6 +93,8 @@ export interface SavedProbe {
   color: string;
   createdAtStep: number;
   isBaseline: boolean;
+  // Frozen snapshot of probe data when set as baseline
+  baselineSnapshot?: ProbeData | null;
 }
 
 export interface StructuralEvent {

@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback, useState } from "react";
-import type { FieldData, BasinMap, DerivedField } from "@shared/schema";
+import type { FieldData, BasinMap, DerivedField, SavedProbe } from "@shared/schema";
 
 export interface CanvasTransform {
   zoom: number;
@@ -24,6 +24,9 @@ interface VisualizationCanvasProps {
   overlayDerivedField?: DerivedField | null;
   overlayBasinMap?: BasinMap | null;
   overlayOpacity?: number;
+  // Saved probe markers
+  savedProbes?: SavedProbe[];
+  showProbeMarkers?: boolean;
 }
 
 // Temporal smoothing buffer for perceptual safety
@@ -150,6 +153,8 @@ export function VisualizationCanvas({
   overlayDerivedField,
   overlayBasinMap,
   overlayOpacity = 0,
+  savedProbes = [],
+  showProbeMarkers = true,
 }: VisualizationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -779,6 +784,46 @@ export function VisualizationCanvas({
               />
             </div>
           )}
+          {showProbeMarkers && field && savedProbes.map((probe) => (
+            <div 
+              key={probe.id}
+              className="absolute pointer-events-none"
+              style={{
+                left: `calc(50% - ${visualSize/2}px + ${(probe.x / field.width) * visualSize}px + ${pan.x}px)`,
+                top: `calc(50% - ${visualSize/2}px + ${(probe.y / field.height) * visualSize}px + ${pan.y}px)`,
+                transform: `scale(${zoom})`,
+                transformOrigin: 'center center',
+              }}
+              data-testid={`probe-marker-${probe.id}`}
+            >
+              <div 
+                className="flex items-center justify-center"
+                style={{ 
+                  width: '16px',
+                  height: '16px',
+                  marginLeft: '-8px',
+                  marginTop: '-8px',
+                  borderRadius: '50%',
+                  border: `2px solid ${probe.color}`,
+                  backgroundColor: `${probe.color}33`,
+                  boxShadow: `0 0 8px ${probe.color}99`,
+                }}
+              >
+                <span 
+                  className="text-[8px] font-bold"
+                  style={{ color: probe.color }}
+                >
+                  {probe.label.replace('P', '')}
+                </span>
+              </div>
+              {probe.isBaseline && (
+                <div 
+                  className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400"
+                  style={{ boxShadow: '0 0 4px rgba(251, 191, 36, 0.8)' }}
+                />
+              )}
+            </div>
+          ))}
           {zoom > 1 && (
             <div className="absolute bottom-2 left-2 bg-background/80 text-xs px-2 py-1 rounded text-muted-foreground" data-testid="zoom-indicator">
               {zoomPercent}% (double-click to reset)

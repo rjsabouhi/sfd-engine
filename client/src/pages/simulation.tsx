@@ -603,6 +603,52 @@ export default function SimulationPage() {
     }
   }, [derivedType]);
 
+  // Multi-point probe handlers
+  const handleAddProbe = useCallback((x: number, y: number) => {
+    const PROBE_COLORS = [
+      "#10b981", "#f59e0b", "#3b82f6", "#ef4444", 
+      "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16",
+    ];
+    const isFirstProbe = savedProbes.length === 0;
+    const snapshot = isFirstProbe ? engineRef.current?.computeProbeData(x, y) || null : null;
+    const newProbe: import("@shared/schema").SavedProbe = {
+      id: `probe-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      label: `P${savedProbes.length + 1}`,
+      x,
+      y,
+      color: PROBE_COLORS[savedProbes.length % PROBE_COLORS.length],
+      createdAtStep: state.step,
+      isBaseline: isFirstProbe, // First probe is baseline by default
+      baselineSnapshot: snapshot,
+    };
+    setSavedProbes(prev => [...prev, newProbe]);
+  }, [savedProbes.length, state.step]);
+
+  const handleRemoveProbe = useCallback((id: string) => {
+    setSavedProbes(prev => prev.filter(p => p.id !== id));
+  }, []);
+
+  const handleSetProbeBaseline = useCallback((id: string | null) => {
+    setSavedProbes(prev => prev.map(p => {
+      if (p.id === id) {
+        // Freeze current probe data as baseline snapshot
+        const snapshot = engineRef.current?.computeProbeData(p.x, p.y) || null;
+        return { ...p, isBaseline: true, baselineSnapshot: snapshot };
+      }
+      // Clear baseline flag and snapshot from other probes
+      return { ...p, isBaseline: false, baselineSnapshot: null };
+    }));
+  }, []);
+
+  const handleSelectProbe = useCallback((probe: import("@shared/schema").SavedProbe) => {
+    // Could add future functionality like centering view on probe
+    console.log(`Selected probe ${probe.label} at (${probe.x}, ${probe.y})`);
+  }, []);
+
+  const getProbeDataAt = useCallback((x: number, y: number) => {
+    return engineRef.current?.computeProbeData(x, y) || null;
+  }, []);
+
   // Mobile video recording handler - step-based (1 frame per simulation step)
   const handleStartRecording = useCallback(async () => {
     const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
@@ -2402,6 +2448,8 @@ export default function SimulationPage() {
                   perturbMode={perturbMode}
                   trajectoryProbePoint={trajectoryProbePoint}
                   perceptualSmoothing={perceptualSmoothing}
+                  savedProbes={savedProbes}
+                  showProbeMarkers={inspectorPanelOpen}
                 />
               </div>
               <StructuralFieldFooter 
@@ -2501,6 +2549,13 @@ export default function SimulationPage() {
           zIndex={getPanelZIndex('inspector')}
           onFocus={() => bringPanelToFront('inspector')}
           anchorRect={inspectorAnchorRect}
+          savedProbes={savedProbes}
+          onAddProbe={handleAddProbe}
+          onRemoveProbe={handleRemoveProbe}
+          onSetBaseline={handleSetProbeBaseline}
+          onSelectProbe={handleSelectProbe}
+          currentStep={state.step}
+          getProbeDataAt={getProbeDataAt}
         />
       </div>
     );
