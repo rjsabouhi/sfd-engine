@@ -424,15 +424,34 @@ export function FloatingPerturbationPanel({
             {renderParameterSliders()}
           </div>
 
-          <Button
-            onClick={handleApplyAtCenter}
-            className="w-full h-7 text-xs"
-            size="sm"
-            data-testid="floating-apply-perturbation"
-          >
-            <Target className="h-3 w-3 mr-1.5" />
-            Apply at Center
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={handleApplyAtCenter}
+              className="flex-1 h-7 text-xs"
+              size="sm"
+              data-testid="floating-apply-perturbation"
+            >
+              <Target className="h-3 w-3 mr-1.5" />
+              Apply at Center
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setImpulseParams(DEFAULT_PARAMS.impulse);
+                setShearParams(DEFAULT_PARAMS.shear);
+                setWaveParams(DEFAULT_PARAMS.wave);
+                setVortexParams(DEFAULT_PARAMS.vortex);
+                setFractureParams(DEFAULT_PARAMS.fracture);
+                setDriftParams(DEFAULT_PARAMS.drift);
+                onParamsChange(DEFAULT_PARAMS[selectedMode]);
+              }}
+              className="h-7 text-xs px-2"
+              size="sm"
+              data-testid="floating-reset-perturbation"
+            >
+              <RotateCcw className="h-3 w-3" />
+            </Button>
+          </div>
           
           {perturbMode && (
             <p className="text-[10px] text-center text-white/50">

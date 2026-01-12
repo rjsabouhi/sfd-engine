@@ -2253,7 +2253,11 @@ export default function SimulationPage() {
           playbackPanelOpen={playbackPanelOpen}
           onTogglePlaybackPanel={() => setPlaybackPanelOpen(!playbackPanelOpen)}
           perturbPanelOpen={perturbPanelOpen}
-          onTogglePerturbPanel={() => setPerturbPanelOpen(!perturbPanelOpen)}
+          onTogglePerturbPanel={() => {
+            const newOpen = !perturbPanelOpen;
+            setPerturbPanelOpen(newOpen);
+            if (newOpen) setPerturbMode(true);
+          }}
         />
         
         <div className="flex-1 relative overflow-hidden">
