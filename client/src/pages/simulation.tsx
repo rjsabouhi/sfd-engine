@@ -280,7 +280,7 @@ export default function SimulationPage() {
   
   // Derive selected probe from savedProbes to keep it synchronized after mutations
   const selectedDetailProbe = savedProbes.find(p => p.id === selectedDetailProbeId) || null;
-  const [activePanelOrder, setActivePanelOrder] = useState<('playback' | 'perturbation' | 'diagnostics' | 'inspector')[]>(['playback', 'perturbation', 'diagnostics', 'inspector']); // Z-index order for floating panels
+  const [activePanelOrder, setActivePanelOrder] = useState<('playback' | 'perturbation' | 'diagnostics' | 'inspector' | 'probedetail')[]>(['playback', 'perturbation', 'diagnostics', 'inspector', 'probedetail']); // Z-index order for floating panels
   
   // Anchor rects for positioning floating panels under their menubar buttons
   const [playbackAnchorRect, setPlaybackAnchorRect] = useState<DOMRect | null>(null);
@@ -289,7 +289,7 @@ export default function SimulationPage() {
   const [inspectorAnchorRect, setInspectorAnchorRect] = useState<DOMRect | null>(null);
   
   // Bring a panel to front by moving it to end of order array
-  const bringPanelToFront = (panel: 'playback' | 'perturbation' | 'diagnostics' | 'inspector') => {
+  const bringPanelToFront = (panel: 'playback' | 'perturbation' | 'diagnostics' | 'inspector' | 'probedetail') => {
     setActivePanelOrder(prev => {
       const filtered = prev.filter(p => p !== panel);
       return [...filtered, panel];
@@ -297,7 +297,7 @@ export default function SimulationPage() {
   };
   
   // Get z-index for a panel based on its position in the order
-  const getPanelZIndex = (panel: 'playback' | 'perturbation' | 'diagnostics' | 'inspector') => {
+  const getPanelZIndex = (panel: 'playback' | 'perturbation' | 'diagnostics' | 'inspector' | 'probedetail') => {
     const baseZ = 50;
     const index = activePanelOrder.indexOf(panel);
     return baseZ + index;
@@ -654,6 +654,7 @@ export default function SimulationPage() {
   const handleOpenProbeDetail = useCallback((probe: import("@shared/schema").SavedProbe) => {
     setSelectedDetailProbeId(probe.id);
     setProbeDetailOpen(true);
+    bringPanelToFront('probedetail');
   }, []);
 
   const getNeighborhoodData = useCallback((x: number, y: number): NeighborhoodData | null => {
@@ -2595,6 +2596,8 @@ export default function SimulationPage() {
           onSetBaseline={handleSetProbeBaseline}
           onRemoveProbe={handleRemoveProbe}
           getNeighborhoodData={getNeighborhoodData}
+          zIndex={getPanelZIndex('probedetail')}
+          onFocus={() => bringPanelToFront('probedetail')}
         />
       </div>
     );
