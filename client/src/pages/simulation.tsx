@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal, Circle, Square, Maximize2, ArrowRightLeft, Waves, Sparkles, Wind, X } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal, Circle, Square, Maximize2, ArrowRightLeft, Waves, Sparkles, Wind, X, MapPin } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -606,6 +606,34 @@ export default function SimulationPage() {
       }
     }
   }, [derivedType]);
+  
+  // Inspector mark handlers - add/remove points for multi-point field inspection
+  const handleAddInspectorMark = useCallback((gridX: number, gridY: number) => {
+    const engine = engineRef.current;
+    if (!engine) return;
+    
+    const probe = engine.computeProbeData(gridX, gridY);
+    if (!probe) return;
+    
+    const mark: InspectorMark = {
+      id: `mark-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      gridX,
+      gridY,
+      step: state.step,
+      timestamp: Date.now(),
+      probe,
+    };
+    
+    setInspectorMarks(prev => [...prev, mark]);
+  }, [state.step]);
+  
+  const handleRemoveInspectorMark = useCallback((id: string) => {
+    setInspectorMarks(prev => prev.filter(m => m.id !== id));
+  }, []);
+  
+  const handleClearAllInspectorMarks = useCallback(() => {
+    setInspectorMarks([]);
+  }, []);
 
   // Mobile video recording handler - step-based (1 frame per simulation step)
   const handleStartRecording = useCallback(async () => {
@@ -1029,13 +1057,16 @@ export default function SimulationPage() {
     const engine = engineRef.current;
     if (!engine) return;
     
-    if (perturbMode) {
+    if (inspectorMarkMode) {
+      // Add a mark at this point
+      handleAddInspectorMark(x, y);
+    } else if (perturbMode) {
       // Use the new structured perturbation system
       engine.applyDisturbance(x, y, selectedPerturbMode, perturbParams);
     } else if (trajectoryProbeActive) {
       setTrajectoryProbePoint({ x, y });
     }
-  }, [perturbMode, trajectoryProbeActive, selectedPerturbMode, perturbParams]);
+  }, [inspectorMarkMode, perturbMode, trajectoryProbeActive, selectedPerturbMode, perturbParams, handleAddInspectorMark]);
 
   // Apply perturbation at a specific point with current mode and params
   const handleApplyPerturbation = useCallback((mode: PerturbationMode, params: Record<string, any>, x: number, y: number) => {
@@ -2413,6 +2444,18 @@ export default function SimulationPage() {
             />
           )}
           
+          {/* Multi-point Inspector Panel */}
+          {inspectorMarkMode && (
+            <div className="absolute top-12 right-3 z-40 w-56">
+              <FieldInspectorPanel
+                marks={inspectorMarks}
+                onRemoveMark={handleRemoveInspectorMark}
+                onClearAll={handleClearAllInspectorMarks}
+                modeLabels={modeLabels}
+              />
+            </div>
+          )}
+          
           {state.isRunning && (
             <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
               <span className="relative flex h-2 w-2">
@@ -2588,6 +2631,24 @@ export default function SimulationPage() {
               </TooltipTrigger>
               <TooltipContent side="top" className="text-xs">
                 Hover over the field to see local values
+              </TooltipContent>
+            </Tooltip>
+            {/* Mark Points */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setInspectorMarkMode(!inspectorMarkMode)}
+                  data-testid="button-mark-points"
+                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${inspectorMarkMode ? "bg-amber-500/30 text-amber-300 border border-amber-500/50" : ""}`}
+                >
+                  <MapPin className="h-3 w-3" />
+                  Mark Points
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">
+                Click on field to mark inspection points
               </TooltipContent>
             </Tooltip>
             {/* Probe */}
@@ -2953,6 +3014,18 @@ export default function SimulationPage() {
                   visible={probeVisible}
                   position={probePosition}
                 />
+              )}
+              
+              {/* Multi-point Inspector Panel (Dashboard view) */}
+              {inspectorMarkMode && (
+                <div className="absolute top-12 right-3 z-40 w-56">
+                  <FieldInspectorPanel
+                    marks={inspectorMarks}
+                    onRemoveMark={handleRemoveInspectorMark}
+                    onClearAll={handleClearAllInspectorMarks}
+                    modeLabels={modeLabels}
+                  />
+                </div>
               )}
               
               {state.isRunning && (
