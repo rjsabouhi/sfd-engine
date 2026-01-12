@@ -1150,6 +1150,75 @@ export class SFDEngine {
     };
   }
 
+  // Extended neighborhood analysis for probe detail view
+  computeNeighborhoodData(x: number, y: number, radius: number = 3): {
+    localMin: number;
+    localMax: number;
+    localMean: number;
+    localStd: number;
+    gradientAngle: number;
+    gradientMagnitude: number;
+    anisotropy: number;
+  } | null {
+    if (x < 0 || x >= this.width || y < 0 || y >= this.height) return null;
+
+    let min = Infinity, max = -Infinity, sum = 0, count = 0;
+    const values: number[] = [];
+
+    // Sample neighborhood with toroidal wrapping
+    for (let dy = -radius; dy <= radius; dy++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        const v = this.getValue(x + dx, y + dy);
+        values.push(v);
+        sum += v;
+        if (v < min) min = v;
+        if (v > max) max = v;
+        count++;
+      }
+    }
+
+    const mean = sum / count;
+    let varianceSum = 0;
+    for (const v of values) {
+      varianceSum += (v - mean) * (v - mean);
+    }
+    const std = Math.sqrt(varianceSum / count);
+
+    // Gradient at center
+    const gx = (this.getValue(x + 1, y) - this.getValue(x - 1, y)) / 2;
+    const gy = (this.getValue(x, y + 1) - this.getValue(x, y - 1)) / 2;
+    const gradientMagnitude = Math.sqrt(gx * gx + gy * gy);
+    const gradientAngle = Math.atan2(-gy, gx); // negative gy because y increases downward
+
+    // Anisotropy: compute second-order derivatives to estimate curvature directions
+    const dxx = this.getValue(x + 1, y) - 2 * this.getValue(x, y) + this.getValue(x - 1, y);
+    const dyy = this.getValue(x, y + 1) - 2 * this.getValue(x, y) + this.getValue(x, y - 1);
+    const dxy = (this.getValue(x + 1, y + 1) - this.getValue(x - 1, y + 1) 
+               - this.getValue(x + 1, y - 1) + this.getValue(x - 1, y - 1)) / 4;
+    
+    // Eigenvalues of Hessian give principal curvatures
+    const trace = dxx + dyy;
+    const det = dxx * dyy - dxy * dxy;
+    const discriminant = Math.sqrt(Math.max(0, trace * trace - 4 * det));
+    const lambda1 = (trace + discriminant) / 2;
+    const lambda2 = (trace - discriminant) / 2;
+    
+    // Anisotropy: ratio of eigenvalues (1 = isotropic, >1 = elongated)
+    const absL1 = Math.abs(lambda1);
+    const absL2 = Math.abs(lambda2);
+    const anisotropy = absL2 > 0.0001 ? absL1 / absL2 : 1;
+
+    return {
+      localMin: min,
+      localMax: max,
+      localMean: mean,
+      localStd: std,
+      gradientAngle,
+      gradientMagnitude,
+      anisotropy: Math.min(anisotropy, 10), // cap for display
+    };
+  }
+
   computeDerivedField(type: "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality" | "hysteresis" | "constraintSkeleton" | "stabilityField" | "gradientFlowLines"): DerivedField {
     const grid = new Float32Array(this.width * this.height);
     // Use playback display grid when in playback mode

@@ -50,6 +50,7 @@ import { WelcomeModal } from "@/components/welcome-modal";
 import { FullscreenMenuBar } from "@/components/fullscreen-menubar";
 import { FloatingPlaybackPanel } from "@/components/floating-playback-panel";
 import { FloatingInspectorPanel } from "@/components/floating-inspector-panel";
+import { ProbeDetailDialog, type NeighborhoodData } from "@/components/probe-detail-dialog";
 import { FloatingPerturbationPanel } from "@/components/floating-perturbation-panel";
 import { PerturbationPanel } from "@/components/perturbation-panel";
 import { type PerturbationMode, DEFAULT_PARAMS } from "@/lib/perturbations/types";
@@ -274,6 +275,11 @@ export default function SimulationPage() {
   const [perturbPanelOpen, setPerturbPanelOpen] = useState(false); // Floating perturbation panel in focus mode
   const [inspectorPanelOpen, setInspectorPanelOpen] = useState(false); // Floating inspector panel in focus mode
   const [savedProbes, setSavedProbes] = useState<import("@shared/schema").SavedProbe[]>([]); // Multi-point probe storage
+  const [probeDetailOpen, setProbeDetailOpen] = useState(false); // Probe detail dialog
+  const [selectedDetailProbeId, setSelectedDetailProbeId] = useState<string | null>(null);
+  
+  // Derive selected probe from savedProbes to keep it synchronized after mutations
+  const selectedDetailProbe = savedProbes.find(p => p.id === selectedDetailProbeId) || null;
   const [activePanelOrder, setActivePanelOrder] = useState<('playback' | 'perturbation' | 'diagnostics' | 'inspector')[]>(['playback', 'perturbation', 'diagnostics', 'inspector']); // Z-index order for floating panels
   
   // Anchor rects for positioning floating panels under their menubar buttons
@@ -643,6 +649,15 @@ export default function SimulationPage() {
   const handleSelectProbe = useCallback((probe: import("@shared/schema").SavedProbe) => {
     // Could add future functionality like centering view on probe
     console.log(`Selected probe ${probe.label} at (${probe.x}, ${probe.y})`);
+  }, []);
+
+  const handleOpenProbeDetail = useCallback((probe: import("@shared/schema").SavedProbe) => {
+    setSelectedDetailProbeId(probe.id);
+    setProbeDetailOpen(true);
+  }, []);
+
+  const getNeighborhoodData = useCallback((x: number, y: number): NeighborhoodData | null => {
+    return engineRef.current?.computeNeighborhoodData(x, y) || null;
   }, []);
 
   const getProbeDataAt = useCallback((x: number, y: number) => {
@@ -2563,8 +2578,23 @@ export default function SimulationPage() {
           onRemoveProbe={handleRemoveProbe}
           onSetBaseline={handleSetProbeBaseline}
           onSelectProbe={handleSelectProbe}
+          onOpenProbeDetail={handleOpenProbeDetail}
           currentStep={state.step}
           getProbeDataAt={getProbeDataAt}
+        />
+        
+        <ProbeDetailDialog
+          isOpen={probeDetailOpen && selectedDetailProbe !== null}
+          onClose={() => {
+            setProbeDetailOpen(false);
+            setSelectedDetailProbeId(null);
+          }}
+          probe={selectedDetailProbe}
+          liveData={selectedDetailProbe ? getProbeDataAt(selectedDetailProbe.x, selectedDetailProbe.y) : null}
+          currentStep={state.step}
+          onSetBaseline={handleSetProbeBaseline}
+          onRemoveProbe={handleRemoveProbe}
+          getNeighborhoodData={getNeighborhoodData}
         />
       </div>
     );

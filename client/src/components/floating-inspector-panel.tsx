@@ -5,10 +5,10 @@ import {
   GripVertical,
   Pin,
   Target,
-  Plus,
   Trash2,
   Star,
   MapPin,
+  ExternalLink,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState, useRef, useCallback, useEffect } from "react";
@@ -38,6 +38,7 @@ interface FloatingInspectorPanelProps {
   onRemoveProbe: (id: string) => void;
   onSetBaseline: (id: string | null) => void;
   onSelectProbe: (probe: SavedProbe) => void;
+  onOpenProbeDetail: (probe: SavedProbe) => void;
   currentStep: number;
   getProbeDataAt: (x: number, y: number) => ProbeData | null;
 }
@@ -57,6 +58,7 @@ export function FloatingInspectorPanel({
   onRemoveProbe,
   onSetBaseline,
   onSelectProbe,
+  onOpenProbeDetail,
   currentStep,
   getProbeDataAt,
 }: FloatingInspectorPanelProps) {
@@ -276,6 +278,7 @@ export function FloatingInspectorPanel({
                         setSelectedProbeId(isSelected ? null : probe.id);
                         onSelectProbe(probe);
                       }}
+                      onDoubleClick={() => onOpenProbeDetail(probe)}
                       data-testid={`saved-probe-${probe.id}`}
                     >
                       <div className="flex items-center justify-between mb-1">
@@ -290,6 +293,23 @@ export function FloatingInspectorPanel({
                           )}
                         </div>
                         <div className="flex items-center gap-0.5">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onOpenProbeDetail(probe);
+                                }}
+                                className="h-4 w-4 rounded text-neutral-500 hover:text-cyan-400"
+                                data-testid={`probe-detail-${probe.id}`}
+                              >
+                                <ExternalLink className="h-2.5 w-2.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="text-xs">View Details</TooltipContent>
+                          </Tooltip>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
