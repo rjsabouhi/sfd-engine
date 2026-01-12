@@ -382,19 +382,6 @@ export function FloatingPerturbationPanel({
         </div>
         
         <div className="p-3 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] text-white/60">Mode Active</span>
-            <Button
-              variant={perturbMode ? "default" : "outline"}
-              size="sm"
-              onClick={() => onPerturbModeChange(!perturbMode)}
-              className="h-6 text-[10px] px-2"
-              data-testid="floating-toggle-perturb"
-            >
-              {perturbMode ? "ON" : "OFF"}
-            </Button>
-          </div>
-
           <div className="space-y-1.5">
             <Label className="text-[11px] text-white/60">Type</Label>
             <Select value={selectedMode} onValueChange={(v) => handleModeChange(v as PerturbationMode)}>

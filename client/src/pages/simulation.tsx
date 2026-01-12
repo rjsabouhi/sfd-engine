@@ -2370,7 +2370,10 @@ export default function SimulationPage() {
         
         <FloatingPerturbationPanel
           isVisible={perturbPanelOpen}
-          onClose={() => setPerturbPanelOpen(false)}
+          onClose={() => {
+            setPerturbPanelOpen(false);
+            setPerturbMode(false);
+          }}
           onApplyPerturbation={handleApplyPerturbation}
           fieldWidth={field?.width || 300}
           fieldHeight={field?.height || 300}
