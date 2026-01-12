@@ -486,7 +486,7 @@ export function FloatingPerturbationPanel({
         >
           <div className="flex items-center gap-1.5">
             <GripVertical className="h-3 w-3 text-neutral-500" />
-            <Zap className="h-3 w-3 text-yellow-400" />
+            <Zap className="h-3 w-3 text-red-400" />
             <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Perturbation</span>
           </div>
           <div className="flex items-center gap-1">

@@ -230,7 +230,7 @@ export function FloatingInspectorPanel({
         >
           <div className="flex items-center gap-1.5">
             <GripVertical className="h-3 w-3 text-neutral-500" />
-            <Eye className="h-3 w-3 text-emerald-400" />
+            <Eye className="h-3 w-3 text-purple-400" />
             <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Multi-Point Inspector</span>
           </div>
           <div className="flex items-center gap-1">

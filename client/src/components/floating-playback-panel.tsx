@@ -221,7 +221,7 @@ export function FloatingPlaybackPanel({
         >
           <div className="flex items-center gap-1.5">
             <GripVertical className="h-3 w-3 text-neutral-500" />
-            <Play className="h-3 w-3 text-cyan-400" />
+            <Play className="h-3 w-3 text-green-400" />
             <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Playback</span>
           </div>
           <div className="flex items-center gap-1">

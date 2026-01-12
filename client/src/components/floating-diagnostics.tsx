@@ -436,7 +436,7 @@ export function FloatingDiagnostics({
       >
         <div className="flex items-center gap-1.5">
           <GripHorizontal className="h-3 w-3 text-neutral-500" />
-          <Gauge className="h-3 w-3 text-emerald-400" />
+          <Gauge className="h-3 w-3 text-yellow-400" />
           <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Diagnostics</span>
         </div>
         <div className="flex items-center gap-1" data-no-drag>
