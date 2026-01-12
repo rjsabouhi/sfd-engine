@@ -812,10 +812,18 @@ export function VisualizationCanvas({
                 style={{
                   left: `calc(50% - ${visualSize/2}px + ${scaledX}px)`,
                   top: `calc(50% - ${visualSize/2}px + ${scaledY}px)`,
+                  zIndex: 10,
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
                 }}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                   onRemoveProbe?.(probe.id);
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
                 }}
                 data-testid={`probe-marker-${probe.id}`}
               >
