@@ -111,6 +111,8 @@ interface FullscreenMenuBarProps {
   perturbPanelOpen?: boolean;
   onTogglePerturbPanel?: (rect?: DOMRect) => void;
   onDiagnosticsChangeWithRect?: (visible: boolean, rect?: DOMRect) => void;
+  inspectorPanelOpen?: boolean;
+  onToggleInspectorPanel?: (rect?: DOMRect) => void;
 }
 
 export function FullscreenMenuBar({
@@ -164,6 +166,8 @@ export function FullscreenMenuBar({
   perturbPanelOpen,
   onTogglePerturbPanel,
   onDiagnosticsChangeWithRect,
+  inspectorPanelOpen,
+  onToggleInspectorPanel,
 }: FullscreenMenuBarProps) {
   const [aboutOpen, setAboutOpen] = useState(false);
   const [selectedRegime, setSelectedRegime] = useState<string>("");
@@ -171,6 +175,7 @@ export function FullscreenMenuBar({
   const playbackButtonRef = useRef<HTMLButtonElement>(null);
   const diagnosticsButtonRef = useRef<HTMLButtonElement>(null);
   const perturbButtonRef = useRef<HTMLButtonElement>(null);
+  const inspectorButtonRef = useRef<HTMLButtonElement>(null);
   
   const handleTogglePlayback = useCallback(() => {
     const rect = playbackButtonRef.current?.getBoundingClientRect();
@@ -190,6 +195,11 @@ export function FullscreenMenuBar({
     const rect = perturbButtonRef.current?.getBoundingClientRect();
     onTogglePerturbPanel?.(rect);
   }, [onTogglePerturbPanel]);
+  
+  const handleToggleInspector = useCallback(() => {
+    const rect = inspectorButtonRef.current?.getBoundingClientRect();
+    onToggleInspectorPanel?.(rect);
+  }, [onToggleInspectorPanel]);
 
   const currentOverlayLabel = OVERLAY_OPTIONS.find(o => o.value === derivedType)?.label || "Constraint Layer";
 
@@ -255,17 +265,18 @@ export function FullscreenMenuBar({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
+            ref={inspectorButtonRef}
             variant="ghost"
             size="sm"
-            onClick={() => onFieldInspectorChange(!fieldInspectorEnabled)}
-            className={`h-6 text-xs px-2 ${fieldInspectorEnabled ? 'bg-accent text-accent-foreground' : ''}`}
+            onClick={handleToggleInspector}
+            className={`h-6 text-xs px-2 ${inspectorPanelOpen ? 'bg-accent text-accent-foreground' : ''}`}
             data-testid="button-field-inspector-inspection"
           >
             <Eye className="h-3 w-3 mr-1" />
             Inspector
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="text-xs">Hover over the field to see local values</TooltipContent>
+        <TooltipContent side="bottom" className="text-xs">Toggle Inspector Panel</TooltipContent>
       </Tooltip>
 
       <DropdownMenu>

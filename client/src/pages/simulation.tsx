@@ -49,6 +49,7 @@ import { applyPreset, cancelPresetTransition } from "@/lib/apply-preset";
 import { WelcomeModal } from "@/components/welcome-modal";
 import { FullscreenMenuBar } from "@/components/fullscreen-menubar";
 import { FloatingPlaybackPanel } from "@/components/floating-playback-panel";
+import { FloatingInspectorPanel } from "@/components/floating-inspector-panel";
 import { FloatingPerturbationPanel } from "@/components/floating-perturbation-panel";
 import { PerturbationPanel } from "@/components/perturbation-panel";
 import { type PerturbationMode, DEFAULT_PARAMS } from "@/lib/perturbations/types";
@@ -271,15 +272,17 @@ export default function SimulationPage() {
   const [focusMode, setFocusMode] = useState(false); // Fullscreen/focus mode with menubar
   const [playbackPanelOpen, setPlaybackPanelOpen] = useState(false); // Floating playback panel in focus mode
   const [perturbPanelOpen, setPerturbPanelOpen] = useState(false); // Floating perturbation panel in focus mode
-  const [activePanelOrder, setActivePanelOrder] = useState<('playback' | 'perturbation' | 'diagnostics')[]>(['playback', 'perturbation', 'diagnostics']); // Z-index order for floating panels
+  const [inspectorPanelOpen, setInspectorPanelOpen] = useState(false); // Floating inspector panel in focus mode
+  const [activePanelOrder, setActivePanelOrder] = useState<('playback' | 'perturbation' | 'diagnostics' | 'inspector')[]>(['playback', 'perturbation', 'diagnostics', 'inspector']); // Z-index order for floating panels
   
   // Anchor rects for positioning floating panels under their menubar buttons
   const [playbackAnchorRect, setPlaybackAnchorRect] = useState<DOMRect | null>(null);
   const [perturbAnchorRect, setPerturbAnchorRect] = useState<DOMRect | null>(null);
   const [diagnosticsAnchorRect, setDiagnosticsAnchorRect] = useState<DOMRect | null>(null);
+  const [inspectorAnchorRect, setInspectorAnchorRect] = useState<DOMRect | null>(null);
   
   // Bring a panel to front by moving it to end of order array
-  const bringPanelToFront = (panel: 'playback' | 'perturbation' | 'diagnostics') => {
+  const bringPanelToFront = (panel: 'playback' | 'perturbation' | 'diagnostics' | 'inspector') => {
     setActivePanelOrder(prev => {
       const filtered = prev.filter(p => p !== panel);
       return [...filtered, panel];
@@ -287,7 +290,7 @@ export default function SimulationPage() {
   };
   
   // Get z-index for a panel based on its position in the order
-  const getPanelZIndex = (panel: 'playback' | 'perturbation' | 'diagnostics') => {
+  const getPanelZIndex = (panel: 'playback' | 'perturbation' | 'diagnostics' | 'inspector') => {
     const baseZ = 50;
     const index = activePanelOrder.indexOf(panel);
     return baseZ + index;
@@ -2326,6 +2329,18 @@ export default function SimulationPage() {
             setDiagnosticsVisible(visible);
             if (visible) bringPanelToFront('diagnostics');
           }}
+          inspectorPanelOpen={inspectorPanelOpen}
+          onToggleInspectorPanel={(rect) => {
+            if (rect) setInspectorAnchorRect(rect);
+            const newOpen = !inspectorPanelOpen;
+            setInspectorPanelOpen(newOpen);
+            if (newOpen) {
+              setFieldInspectorEnabled(true);
+              bringPanelToFront('inspector');
+            } else {
+              setFieldInspectorEnabled(false);
+            }
+          }}
         />
         
         <div className="flex-1 relative overflow-hidden">
@@ -2472,6 +2487,19 @@ export default function SimulationPage() {
           zIndex={getPanelZIndex('diagnostics')}
           onFocus={() => bringPanelToFront('diagnostics')}
           anchorRect={diagnosticsAnchorRect}
+        />
+        
+        <FloatingInspectorPanel
+          isVisible={inspectorPanelOpen}
+          probeData={probeData}
+          modeLabels={modeLabels}
+          onClose={() => {
+            setInspectorPanelOpen(false);
+            setFieldInspectorEnabled(false);
+          }}
+          zIndex={getPanelZIndex('inspector')}
+          onFocus={() => bringPanelToFront('inspector')}
+          anchorRect={inspectorAnchorRect}
         />
       </div>
     );
