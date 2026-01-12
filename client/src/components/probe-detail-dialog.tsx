@@ -38,12 +38,12 @@ export interface NeighborhoodData {
   anisotropy: number;
 }
 
-const DEFAULT_WIDTH = 300;
-const DEFAULT_HEIGHT = 420;
-const MIN_WIDTH = 260;
-const MAX_WIDTH = 500;
-const MIN_HEIGHT = 300;
-const MAX_HEIGHT = 600;
+const DEFAULT_WIDTH = 280;
+const DEFAULT_HEIGHT = 380;
+const MIN_WIDTH = 240;
+const MAX_WIDTH = 360;
+const MIN_HEIGHT = 280;
+const MAX_HEIGHT = 450;
 
 export function ProbeDetailDialog({
   isOpen,
