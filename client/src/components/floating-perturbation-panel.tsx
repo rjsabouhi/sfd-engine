@@ -164,22 +164,22 @@ export function FloatingPerturbationPanel({
     <div className="space-y-2">
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Intensity</Label>
-          <span className="font-mono text-white/70">{impulseParams.intensity.toFixed(1)}</span>
+          <Label className="text-muted-foreground">Intensity</Label>
+          <span className="font-mono text-foreground/70">{impulseParams.intensity.toFixed(1)}</span>
         </div>
         <Slider value={[impulseParams.intensity]} min={0} max={10} step={0.5} onValueChange={([v]) => updateImpulseParams({ intensity: v })} />
       </div>
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Radius</Label>
-          <span className="font-mono text-white/70">{impulseParams.radius}</span>
+          <Label className="text-muted-foreground">Radius</Label>
+          <span className="font-mono text-foreground/70">{impulseParams.radius}</span>
         </div>
         <Slider value={[impulseParams.radius]} min={5} max={200} step={5} onValueChange={([v]) => updateImpulseParams({ radius: v })} />
       </div>
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Decay</Label>
-          <span className="font-mono text-white/70">{impulseParams.decay.toFixed(2)}</span>
+          <Label className="text-muted-foreground">Decay</Label>
+          <span className="font-mono text-foreground/70">{impulseParams.decay.toFixed(2)}</span>
         </div>
         <Slider value={[impulseParams.decay]} min={0} max={1} step={0.05} onValueChange={([v]) => updateImpulseParams({ decay: v })} />
       </div>
@@ -190,22 +190,22 @@ export function FloatingPerturbationPanel({
     <div className="space-y-2">
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Magnitude</Label>
-          <span className="font-mono text-white/70">{shearParams.magnitude.toFixed(1)}</span>
+          <Label className="text-muted-foreground">Magnitude</Label>
+          <span className="font-mono text-foreground/70">{shearParams.magnitude.toFixed(1)}</span>
         </div>
         <Slider value={[shearParams.magnitude]} min={0} max={10} step={0.5} onValueChange={([v]) => updateShearParams({ magnitude: v })} />
       </div>
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Angle</Label>
-          <span className="font-mono text-white/70">{shearParams.angle}°</span>
+          <Label className="text-muted-foreground">Angle</Label>
+          <span className="font-mono text-foreground/70">{shearParams.angle}°</span>
         </div>
         <Slider value={[shearParams.angle]} min={0} max={360} step={15} onValueChange={([v]) => updateShearParams({ angle: v })} />
       </div>
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Duration</Label>
-          <span className="font-mono text-white/70">{shearParams.duration.toFixed(1)}</span>
+          <Label className="text-muted-foreground">Duration</Label>
+          <span className="font-mono text-foreground/70">{shearParams.duration.toFixed(1)}</span>
         </div>
         <Slider value={[shearParams.duration]} min={0} max={10} step={0.5} onValueChange={([v]) => updateShearParams({ duration: v })} />
       </div>
@@ -216,29 +216,29 @@ export function FloatingPerturbationPanel({
     <div className="space-y-2">
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Amplitude</Label>
-          <span className="font-mono text-white/70">{waveParams.amplitude.toFixed(1)}</span>
+          <Label className="text-muted-foreground">Amplitude</Label>
+          <span className="font-mono text-foreground/70">{waveParams.amplitude.toFixed(1)}</span>
         </div>
         <Slider value={[waveParams.amplitude]} min={0} max={10} step={0.5} onValueChange={([v]) => updateWaveParams({ amplitude: v })} />
       </div>
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Frequency</Label>
-          <span className="font-mono text-white/70">{waveParams.frequency.toFixed(1)}</span>
+          <Label className="text-muted-foreground">Frequency</Label>
+          <span className="font-mono text-foreground/70">{waveParams.frequency.toFixed(1)}</span>
         </div>
         <Slider value={[waveParams.frequency]} min={0} max={10} step={0.5} onValueChange={([v]) => updateWaveParams({ frequency: v })} />
       </div>
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Wavelength</Label>
-          <span className="font-mono text-white/70">{waveParams.wavelength}</span>
+          <Label className="text-muted-foreground">Wavelength</Label>
+          <span className="font-mono text-foreground/70">{waveParams.wavelength}</span>
         </div>
         <Slider value={[waveParams.wavelength]} min={10} max={200} step={10} onValueChange={([v]) => updateWaveParams({ wavelength: v })} />
       </div>
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Damping</Label>
-          <span className="font-mono text-white/70">{waveParams.damping.toFixed(2)}</span>
+          <Label className="text-muted-foreground">Damping</Label>
+          <span className="font-mono text-foreground/70">{waveParams.damping.toFixed(2)}</span>
         </div>
         <Slider value={[waveParams.damping]} min={0} max={1} step={0.05} onValueChange={([v]) => updateWaveParams({ damping: v })} />
       </div>
@@ -249,28 +249,28 @@ export function FloatingPerturbationPanel({
     <div className="space-y-2">
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Angular Velocity</Label>
-          <span className="font-mono text-white/70">{vortexParams.angularVelocity.toFixed(1)}</span>
+          <Label className="text-muted-foreground">Angular Velocity</Label>
+          <span className="font-mono text-foreground/70">{vortexParams.angularVelocity.toFixed(1)}</span>
         </div>
         <Slider value={[vortexParams.angularVelocity]} min={0} max={20} step={1} onValueChange={([v]) => updateVortexParams({ angularVelocity: v })} />
       </div>
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Radius</Label>
-          <span className="font-mono text-white/70">{vortexParams.radius}</span>
+          <Label className="text-muted-foreground">Radius</Label>
+          <span className="font-mono text-foreground/70">{vortexParams.radius}</span>
         </div>
         <Slider value={[vortexParams.radius]} min={10} max={200} step={10} onValueChange={([v]) => updateVortexParams({ radius: v })} />
       </div>
       <div className="space-y-1">
-        <Label className="text-white/60 text-[11px]">Direction</Label>
+        <Label className="text-muted-foreground text-[11px]">Direction</Label>
         <RadioGroup value={vortexParams.direction} onValueChange={(v) => updateVortexParams({ direction: v as 'CW' | 'CCW' })} className="flex gap-3">
           <div className="flex items-center gap-1">
             <RadioGroupItem value="CCW" id="float-ccw" className="h-3 w-3" />
-            <Label htmlFor="float-ccw" className="text-[11px] text-white/70">CCW</Label>
+            <Label htmlFor="float-ccw" className="text-[11px] text-foreground/70">CCW</Label>
           </div>
           <div className="flex items-center gap-1">
             <RadioGroupItem value="CW" id="float-cw" className="h-3 w-3" />
-            <Label htmlFor="float-cw" className="text-[11px] text-white/70">CW</Label>
+            <Label htmlFor="float-cw" className="text-[11px] text-foreground/70">CW</Label>
           </div>
         </RadioGroup>
       </div>
@@ -281,22 +281,22 @@ export function FloatingPerturbationPanel({
     <div className="space-y-2">
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Strength</Label>
-          <span className="font-mono text-white/70">{fractureParams.strength.toFixed(1)}</span>
+          <Label className="text-muted-foreground">Strength</Label>
+          <span className="font-mono text-foreground/70">{fractureParams.strength.toFixed(1)}</span>
         </div>
         <Slider value={[fractureParams.strength]} min={0} max={10} step={0.5} onValueChange={([v]) => updateFractureParams({ strength: v })} />
       </div>
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Noise</Label>
-          <span className="font-mono text-white/70">{fractureParams.noise.toFixed(1)}</span>
+          <Label className="text-muted-foreground">Noise</Label>
+          <span className="font-mono text-foreground/70">{fractureParams.noise.toFixed(1)}</span>
         </div>
         <Slider value={[fractureParams.noise]} min={0} max={5} step={0.25} onValueChange={([v]) => updateFractureParams({ noise: v })} />
       </div>
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Propagation</Label>
-          <span className="font-mono text-white/70">{fractureParams.propagationRate.toFixed(1)}</span>
+          <Label className="text-muted-foreground">Propagation</Label>
+          <span className="font-mono text-foreground/70">{fractureParams.propagationRate.toFixed(1)}</span>
         </div>
         <Slider value={[fractureParams.propagationRate]} min={0} max={10} step={0.5} onValueChange={([v]) => updateFractureParams({ propagationRate: v })} />
       </div>
@@ -307,29 +307,29 @@ export function FloatingPerturbationPanel({
     <div className="space-y-2">
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Magnitude</Label>
-          <span className="font-mono text-white/70">{driftParams.magnitude.toFixed(1)}</span>
+          <Label className="text-muted-foreground">Magnitude</Label>
+          <span className="font-mono text-foreground/70">{driftParams.magnitude.toFixed(1)}</span>
         </div>
         <Slider value={[driftParams.magnitude]} min={0} max={5} step={0.25} onValueChange={([v]) => updateDriftParams({ magnitude: v })} />
       </div>
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Vector X</Label>
-          <span className="font-mono text-white/70">{driftParams.vectorX.toFixed(2)}</span>
+          <Label className="text-muted-foreground">Vector X</Label>
+          <span className="font-mono text-foreground/70">{driftParams.vectorX.toFixed(2)}</span>
         </div>
         <Slider value={[driftParams.vectorX]} min={-1} max={1} step={0.1} onValueChange={([v]) => updateDriftParams({ vectorX: v })} />
       </div>
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Vector Y</Label>
-          <span className="font-mono text-white/70">{driftParams.vectorY.toFixed(2)}</span>
+          <Label className="text-muted-foreground">Vector Y</Label>
+          <span className="font-mono text-foreground/70">{driftParams.vectorY.toFixed(2)}</span>
         </div>
         <Slider value={[driftParams.vectorY]} min={-1} max={1} step={0.1} onValueChange={([v]) => updateDriftParams({ vectorY: v })} />
       </div>
       <div className="space-y-1">
         <div className="flex justify-between text-[11px]">
-          <Label className="text-white/60">Duration</Label>
-          <span className="font-mono text-white/70">{driftParams.duration.toFixed(1)}</span>
+          <Label className="text-muted-foreground">Duration</Label>
+          <span className="font-mono text-foreground/70">{driftParams.duration.toFixed(1)}</span>
         </div>
         <Slider value={[driftParams.duration]} min={0} max={20} step={1} onValueChange={([v]) => updateDriftParams({ duration: v })} />
       </div>
@@ -360,21 +360,21 @@ export function FloatingPerturbationPanel({
       onMouseLeave={handleMouseUp}
       data-testid="floating-perturbation-panel"
     >
-      <div className="bg-gray-900/95 backdrop-blur-xl border border-white/15 rounded-xl shadow-2xl w-[260px]">
+      <div className="bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl w-[260px]">
         <div 
-          className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 cursor-move select-none"
+          className="flex items-center justify-between px-3 py-1.5 border-b border-border cursor-move select-none"
           onMouseDown={handleMouseDown}
         >
           <div className="flex items-center gap-1.5">
-            <GripVertical className="h-3 w-3 text-white/40" />
+            <GripVertical className="h-3 w-3 text-muted-foreground" />
             <Zap className="h-3 w-3 text-yellow-400" />
-            <span className="text-[10px] font-medium text-white/70 uppercase tracking-wide">Perturbation</span>
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Perturbation</span>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="h-5 w-5 rounded-full hover:bg-white/10 text-white/50 hover:text-white"
+            className="h-5 w-5 rounded-full"
             data-testid="perturbation-close"
           >
             <X className="h-3 w-3" />
@@ -383,9 +383,9 @@ export function FloatingPerturbationPanel({
         
         <div className="p-3 space-y-3">
           <div className="space-y-1.5">
-            <Label className="text-[11px] text-white/60">Type</Label>
+            <Label className="text-[11px] text-muted-foreground">Type</Label>
             <Select value={selectedMode} onValueChange={(v) => handleModeChange(v as PerturbationMode)}>
-              <SelectTrigger className="h-7 text-xs bg-white/5 border-white/10" data-testid="floating-select-mode">
+              <SelectTrigger className="h-7 text-xs" data-testid="floating-select-mode">
                 <SelectValue>
                   <div className="flex items-center gap-2">
                     {ICONS[selectedMode]}
@@ -393,7 +393,7 @@ export function FloatingPerturbationPanel({
                   </div>
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent className="bg-gray-900 border-white/20">
+              <SelectContent className="bg-popover border-border">
                 {PERTURBATION_MODES.map(mode => (
                   <SelectItem key={mode.id} value={mode.id}>
                     <div className="flex items-center gap-2">
@@ -406,8 +406,8 @@ export function FloatingPerturbationPanel({
             </Select>
           </div>
 
-          <div className="pt-2 border-t border-white/10">
-            <div className="text-[10px] text-white/50 mb-2 uppercase tracking-wide">
+          <div className="pt-2 border-t border-border">
+            <div className="text-[10px] text-muted-foreground mb-2 uppercase tracking-wide">
               {selectedModeConfig?.label} Parameters
             </div>
             {renderParameterSliders()}
@@ -435,7 +435,7 @@ export function FloatingPerturbationPanel({
           </div>
           
           {perturbMode && (
-            <p className="text-[10px] text-center text-white/50">
+            <p className="text-[10px] text-center text-muted-foreground">
               Click on the field to apply
             </p>
           )}

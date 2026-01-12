@@ -96,20 +96,20 @@ export function FloatingPlaybackPanel({
       onMouseLeave={handleMouseUp}
       data-testid="floating-playback-panel"
     >
-      <div className="bg-gray-900/95 backdrop-blur-xl border border-white/15 rounded-xl shadow-2xl">
+      <div className="bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl">
         <div 
-          className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 cursor-move select-none"
+          className="flex items-center justify-between px-3 py-1.5 border-b border-border cursor-move select-none"
           onMouseDown={handleMouseDown}
         >
           <div className="flex items-center gap-1.5">
-            <GripVertical className="h-3 w-3 text-white/40" />
-            <span className="text-[10px] font-medium text-white/70 uppercase tracking-wide">Playback</span>
+            <GripVertical className="h-3 w-3 text-muted-foreground" />
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Playback</span>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="h-5 w-5 rounded-full hover:bg-white/10 text-white/50 hover:text-white"
+            className="h-5 w-5 rounded-full"
             data-testid="playback-close"
           >
             <X className="h-3 w-3" />
@@ -124,7 +124,7 @@ export function FloatingPlaybackPanel({
                   variant="ghost"
                   size="icon"
                   onClick={onReset}
-                  className="h-8 w-8 rounded-full hover:bg-white/10 text-white/70 hover:text-white"
+                  className="h-8 w-8 rounded-full"
                   data-testid="playback-reset"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
@@ -137,7 +137,7 @@ export function FloatingPlaybackPanel({
               variant="ghost"
               size="icon"
               onClick={handleJumpBack}
-              className="h-7 w-7 rounded-full hover:bg-white/10 text-white/50 hover:text-white"
+              className="h-7 w-7 rounded-full"
               data-testid="playback-jump-back"
             >
               <ChevronLeft className="h-3.5 w-3.5" />
@@ -149,7 +149,7 @@ export function FloatingPlaybackPanel({
                   variant="ghost"
                   size="icon"
                   onClick={onStepBackward}
-                  className="h-8 w-8 rounded-full hover:bg-white/10 text-white/70 hover:text-white"
+                  className="h-8 w-8 rounded-full"
                   data-testid="playback-step-back"
                 >
                   <SkipBack className="h-3.5 w-3.5" />
@@ -164,7 +164,7 @@ export function FloatingPlaybackPanel({
                   variant="ghost"
                   size="icon"
                   onClick={isRunning ? onPause : onPlay}
-                  className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white"
+                  className="h-10 w-10 rounded-full bg-accent"
                   data-testid="playback-play-pause"
                 >
                   {isRunning ? (
@@ -185,7 +185,7 @@ export function FloatingPlaybackPanel({
                   variant="ghost"
                   size="icon"
                   onClick={onStepForward}
-                  className="h-8 w-8 rounded-full hover:bg-white/10 text-white/70 hover:text-white"
+                  className="h-8 w-8 rounded-full"
                   data-testid="playback-step-forward"
                 >
                   <SkipForward className="h-3.5 w-3.5" />
@@ -198,7 +198,7 @@ export function FloatingPlaybackPanel({
               variant="ghost"
               size="icon"
               onClick={handleJumpForward}
-              className="h-7 w-7 rounded-full hover:bg-white/10 text-white/50 hover:text-white"
+              className="h-7 w-7 rounded-full"
               data-testid="playback-jump-forward"
             >
               <ChevronRight className="h-3.5 w-3.5" />
@@ -206,7 +206,7 @@ export function FloatingPlaybackPanel({
           </div>
 
           <div className="flex items-center gap-2 mt-2">
-            <span className="text-[10px] font-mono text-white/50 w-7 text-right">
+            <span className="text-[10px] font-mono text-muted-foreground w-7 text-right">
               {currentHistoryIndex + 1}
             </span>
             <div className="flex-1 min-w-[100px]">
@@ -220,13 +220,13 @@ export function FloatingPlaybackPanel({
                 data-testid="playback-scrubber"
               />
             </div>
-            <span className="text-[10px] font-mono text-white/50 w-7">
+            <span className="text-[10px] font-mono text-muted-foreground w-7">
               {historyLength}
             </span>
-            <div className="border-l border-white/10 pl-2 ml-1">
+            <div className="border-l border-border pl-2 ml-1">
               <div className="text-center">
-                <span className="text-xs font-mono text-white/80">{currentStep}</span>
-                <span className="text-[8px] text-white/40 ml-1">step</span>
+                <span className="text-xs font-mono text-foreground">{currentStep}</span>
+                <span className="text-[8px] text-muted-foreground ml-1">step</span>
               </div>
             </div>
           </div>

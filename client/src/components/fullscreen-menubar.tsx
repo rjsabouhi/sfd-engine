@@ -166,8 +166,10 @@ export function FullscreenMenuBar({
   const currentOverlayLabel = OVERLAY_OPTIONS.find(o => o.value === derivedType)?.label || "Layer";
 
   return (
-    <div className="flex items-center gap-1 px-2 py-1 bg-gray-900/95 border-b border-white/10">
-      <img src={sfdLogo} alt="SFD" className="w-6 h-6 rounded" />
+    <div className="relative flex items-center justify-center gap-1 px-2 py-1 bg-card/95 backdrop-blur-sm border-b border-border">
+      <div className="absolute left-2">
+        <img src={sfdLogo} alt="SFD" className="w-6 h-6 rounded" />
+      </div>
       
       <Tooltip>
         <TooltipTrigger asChild>
@@ -175,7 +177,7 @@ export function FullscreenMenuBar({
             variant="ghost"
             size="sm"
             onClick={onTogglePlaybackPanel}
-            className={`h-6 text-xs px-2 text-white/80 hover:text-white hover:bg-white/10 ${playbackPanelOpen ? 'bg-white/15 text-white' : ''}`}
+            className={`h-6 text-xs px-2 ${playbackPanelOpen ? 'bg-accent text-accent-foreground' : ''}`}
             data-testid="button-simulation-panel"
           >
             <Play className="h-3 w-3 mr-1" />
@@ -185,7 +187,7 @@ export function FullscreenMenuBar({
         <TooltipContent side="bottom" className="text-xs">Playback Controls</TooltipContent>
       </Tooltip>
 
-      <div className="w-px h-4 bg-white/10 mx-1" />
+      <div className="w-px h-4 bg-border mx-1" />
 
       <Tooltip>
         <TooltipTrigger asChild>
@@ -193,7 +195,7 @@ export function FullscreenMenuBar({
             variant="ghost"
             size="sm"
             onClick={() => onDiagnosticsChange(!diagnosticsVisible)}
-            className={`h-6 text-xs px-2 text-white/80 hover:text-white hover:bg-white/10 ${diagnosticsVisible ? 'bg-white/15 text-white' : ''}`}
+            className={`h-6 text-xs px-2 ${diagnosticsVisible ? 'bg-accent text-accent-foreground' : ''}`}
             data-testid="button-diagnostics"
           >
             <Gauge className="h-3 w-3 mr-1" />
@@ -209,7 +211,7 @@ export function FullscreenMenuBar({
             variant="ghost"
             size="sm"
             onClick={onTogglePerturbPanel}
-            className={`h-6 text-xs px-2 text-white/80 hover:text-white hover:bg-white/10 ${perturbPanelOpen ? 'bg-white/15 text-white' : ''}`}
+            className={`h-6 text-xs px-2 ${perturbPanelOpen ? 'bg-accent text-accent-foreground' : ''}`}
             data-testid="button-perturbation"
           >
             <Zap className="h-3 w-3 mr-1" />
@@ -221,14 +223,14 @@ export function FullscreenMenuBar({
 
       {showDualView && (
         <>
-          <div className="w-px h-4 bg-white/10 mx-1" />
+          <div className="w-px h-4 bg-border mx-1" />
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 text-xs px-2 text-white/80 hover:text-white hover:bg-white/10 gap-1"
+                className="h-6 text-xs px-2 gap-1"
                 data-testid="dropdown-projection-layer"
               >
                 <Layers className="h-3 w-3" />
@@ -236,7 +238,7 @@ export function FullscreenMenuBar({
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-gray-900 border-white/20 max-h-64 overflow-y-auto">
+            <DropdownMenuContent className="bg-popover border-border max-h-64 overflow-y-auto">
               <DropdownMenuRadioGroup value={derivedType} onValueChange={(v) => onDerivedTypeChange(v as OverlayType)}>
                 {OVERLAY_OPTIONS.map((option) => (
                   <DropdownMenuRadioItem key={option.value} value={option.value} className="text-xs">
@@ -248,7 +250,7 @@ export function FullscreenMenuBar({
           </DropdownMenu>
 
           <div className="flex items-center gap-2 px-2">
-            <span className="text-[10px] text-white/50">Blend</span>
+            <span className="text-[10px] text-muted-foreground">Blend</span>
             <Slider
               min={0}
               max={100}
@@ -262,20 +264,20 @@ export function FullscreenMenuBar({
               className="w-20"
               data-testid="slider-blend"
             />
-            <span className="text-[10px] text-white/50 w-6 text-right font-mono">{Math.round(blendOpacity * 100)}%</span>
+            <span className="text-[10px] text-muted-foreground w-6 text-right font-mono">{Math.round(blendOpacity * 100)}%</span>
           </div>
         </>
       )}
 
-      <div className="w-px h-4 bg-white/10 mx-1" />
+      <div className="w-px h-4 bg-border mx-1" />
       
       <Menubar className="border-0 bg-transparent h-7 p-0 space-x-0">
         <MenubarMenu>
-          <MenubarTrigger className="text-xs px-2 py-1 h-6 text-white/80 hover:text-white hover:bg-white/10 data-[state=open]:bg-white/15" data-testid="menu-parameters">
+          <MenubarTrigger className="text-xs px-2 py-1 h-6" data-testid="menu-parameters">
             Parameters
           </MenubarTrigger>
-          <MenubarContent className="bg-gray-900 border-white/20 min-w-[220px]">
-            <MenubarLabel className="text-[10px] text-white/50 uppercase tracking-wider">Structural Regimes</MenubarLabel>
+          <MenubarContent className="bg-popover border-border min-w-[220px]">
+            <MenubarLabel className="text-[10px] text-muted-foreground uppercase tracking-wider">Structural Regimes</MenubarLabel>
             {Object.entries(structuralPresets).map(([key, preset]) => (
               <MenubarItem 
                 key={key} 
@@ -286,14 +288,14 @@ export function FullscreenMenuBar({
                 {key.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
               </MenubarItem>
             ))}
-            <MenubarSeparator className="bg-white/10" />
-            <MenubarLabel className="text-[10px] text-white/50 uppercase tracking-wider">Visual Styles</MenubarLabel>
+            <MenubarSeparator className="bg-border" />
+            <MenubarLabel className="text-[10px] text-muted-foreground uppercase tracking-wider">Visual Styles</MenubarLabel>
             <MenubarSub>
               <MenubarSubTrigger className="text-xs">
                 <Palette className="h-3.5 w-3.5 mr-2" />
                 Visual Presets
               </MenubarSubTrigger>
-              <MenubarSubContent className="bg-gray-900 border-white/20 max-h-72 overflow-y-auto">
+              <MenubarSubContent className="bg-popover border-border max-h-72 overflow-y-auto">
                 {visualPresets.map((preset, index) => (
                   <MenubarItem 
                     key={preset.id} 
@@ -309,7 +311,7 @@ export function FullscreenMenuBar({
                 ))}
               </MenubarSubContent>
             </MenubarSub>
-            <MenubarSeparator className="bg-white/10" />
+            <MenubarSeparator className="bg-border" />
             <MenubarItem 
               onClick={() => onParamsChange(defaultParameters)}
               className="text-xs gap-2"
@@ -331,11 +333,11 @@ export function FullscreenMenuBar({
         </MenubarMenu>
 
         <MenubarMenu>
-          <MenubarTrigger className="text-xs px-2 py-1 h-6 text-white/80 hover:text-white hover:bg-white/10 data-[state=open]:bg-white/15" data-testid="menu-export">
+          <MenubarTrigger className="text-xs px-2 py-1 h-6" data-testid="menu-export">
             Export
           </MenubarTrigger>
-          <MenubarContent className="bg-gray-900 border-white/20 min-w-[200px]">
-            <MenubarLabel className="text-[10px] text-white/50 uppercase tracking-wider">Visual</MenubarLabel>
+          <MenubarContent className="bg-popover border-border min-w-[200px]">
+            <MenubarLabel className="text-[10px] text-muted-foreground uppercase tracking-wider">Visual</MenubarLabel>
             <MenubarItem onClick={onExportPNG} className="text-xs gap-2" data-testid="menu-export-png">
               <Image className="h-3.5 w-3.5" />
               PNG Snapshot
@@ -350,8 +352,8 @@ export function FullscreenMenuBar({
                 WebM Video
               </MenubarItem>
             )}
-            <MenubarSeparator className="bg-white/10" />
-            <MenubarLabel className="text-[10px] text-white/50 uppercase tracking-wider">Data</MenubarLabel>
+            <MenubarSeparator className="bg-border" />
+            <MenubarLabel className="text-[10px] text-muted-foreground uppercase tracking-wider">Data</MenubarLabel>
             <MenubarItem onClick={onExportJSON} className="text-xs gap-2" data-testid="menu-export-json">
               <FileJson className="h-3.5 w-3.5" />
               Settings JSON
@@ -398,7 +400,7 @@ export function FullscreenMenuBar({
                 Batch Spec
               </MenubarItem>
             )}
-            <MenubarSeparator className="bg-white/10" />
+            <MenubarSeparator className="bg-border" />
             {onExportArchive && (
               <MenubarItem onClick={onExportArchive} className="text-xs gap-2" data-testid="menu-export-archive">
                 <Package className="h-3.5 w-3.5" />
@@ -409,15 +411,15 @@ export function FullscreenMenuBar({
         </MenubarMenu>
 
         <MenubarMenu>
-          <MenubarTrigger className="text-xs px-2 py-1 h-6 text-white/80 hover:text-white hover:bg-white/10 data-[state=open]:bg-white/15" data-testid="menu-help">
+          <MenubarTrigger className="text-xs px-2 py-1 h-6" data-testid="menu-help">
             Help
           </MenubarTrigger>
-          <MenubarContent className="bg-gray-900 border-white/20">
+          <MenubarContent className="bg-popover border-border">
             <MenubarItem onClick={onShowIntro} className="text-xs gap-2" data-testid="menu-show-intro">
               <BookOpen className="h-3.5 w-3.5" />
               Show Introduction
             </MenubarItem>
-            <MenubarSeparator className="bg-white/10" />
+            <MenubarSeparator className="bg-border" />
             <MenubarItem onClick={() => setAboutOpen(true)} className="text-xs gap-2" data-testid="menu-about">
               <Info className="h-3.5 w-3.5" />
               About SFD Engine
@@ -426,21 +428,21 @@ export function FullscreenMenuBar({
         </MenubarMenu>
       </Menubar>
 
-      <div className="flex-1" />
-
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onToggleFullscreen}
-        className="h-6 px-2 text-xs text-white/70 hover:text-white hover:bg-white/10"
-        data-testid="button-exit-focus"
-      >
-        <Minimize2 className="h-3.5 w-3.5 mr-1" />
-        Exit Focus
-      </Button>
+      <div className="absolute right-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggleFullscreen}
+          className="h-6 px-2 text-xs"
+          data-testid="button-exit-focus"
+        >
+          <Minimize2 className="h-3.5 w-3.5 mr-1" />
+          Exit Focus
+        </Button>
+      </div>
 
       <Dialog open={aboutOpen} onOpenChange={setAboutOpen}>
-        <DialogContent className="max-w-lg bg-gray-900 border-white/20">
+        <DialogContent className="max-w-lg bg-card border-border">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <img src={sfdLogo} alt="SFD" className="w-8 h-8 rounded" />
