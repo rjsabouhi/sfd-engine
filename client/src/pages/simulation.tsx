@@ -1225,6 +1225,8 @@ export default function SimulationPage() {
           } else {
             // Enter focus mode and request browser fullscreen
             setFocusMode(true);
+            setBlendMode(true);
+            setBlendOpacity(0.5);
             document.documentElement.requestFullscreen?.().catch(() => {
               // Fullscreen may be denied, but focus mode still works
             });
@@ -1232,7 +1234,14 @@ export default function SimulationPage() {
           break;
         case "KeyF":
           if (!e.ctrlKey && !e.shiftKey && !e.metaKey) {
-            setFocusMode(prev => !prev);
+            setFocusMode(prev => {
+              if (!prev) {
+                // Entering focus mode - set blend to 50%
+                setBlendMode(true);
+                setBlendOpacity(0.5);
+              }
+              return !prev;
+            });
           }
           break;
       }
@@ -2483,7 +2492,7 @@ export default function SimulationPage() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => setFocusMode(true)} 
+                onClick={() => { setFocusMode(true); setBlendMode(true); setBlendOpacity(0.5); }} 
                 data-testid="button-focus-mode"
                 className="h-7 text-xs gap-1.5"
               >
