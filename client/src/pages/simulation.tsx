@@ -2274,18 +2274,24 @@ export default function SimulationPage() {
           playbackPanelOpen={playbackPanelOpen}
           onTogglePlaybackPanel={(rect) => {
             if (rect) setPlaybackAnchorRect(rect);
-            setPlaybackPanelOpen(!playbackPanelOpen);
+            const newOpen = !playbackPanelOpen;
+            setPlaybackPanelOpen(newOpen);
+            if (newOpen) bringPanelToFront('playback');
           }}
           perturbPanelOpen={perturbPanelOpen}
           onTogglePerturbPanel={(rect) => {
             if (rect) setPerturbAnchorRect(rect);
             const newOpen = !perturbPanelOpen;
             setPerturbPanelOpen(newOpen);
-            if (newOpen) setPerturbMode(true);
+            if (newOpen) {
+              setPerturbMode(true);
+              bringPanelToFront('perturbation');
+            }
           }}
           onDiagnosticsChangeWithRect={(visible, rect) => {
             if (rect) setDiagnosticsAnchorRect(rect);
             setDiagnosticsVisible(visible);
+            if (visible) bringPanelToFront('diagnostics');
           }}
         />
         
