@@ -1604,17 +1604,14 @@ export default function SimulationPage() {
                       e.preventDefault();
                       e.stopPropagation();
                       // Toggle behavior: if tapping already-selected regime, revert to default
+                      // Apply dynamically without reset to preserve event detection
                       if (selectedRegimeKey === regime.key) {
                         // Reverting to default params
                         setSelectedRegimeKey(null);
                         handleParamsChange(defaultParamsRef.current);
-                        // Reset field for smooth transition from base state
-                        handleReset();
                       } else if (structuralPresets[regime.key]) {
                         setSelectedRegimeKey(regime.key);
                         handleParamsChange(structuralPresets[regime.key]);
-                        // Reset field for smooth transition from base state (like initial load)
-                        handleReset();
                         // Only apply smart view config if user hasn't manually selected a layer
                         if (!hasUserSelectedOverlay) {
                           const smartConfig = getSmartViewConfig(regime.key);

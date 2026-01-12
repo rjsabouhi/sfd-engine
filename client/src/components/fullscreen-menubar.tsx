@@ -276,9 +276,9 @@ export function FullscreenMenuBar({
               setSelectedRegime(value);
               const preset = structuralPresets[value];
               if (preset) {
+                // Apply parameters dynamically without reset
+                // This allows event detection during regime transitions
                 onParamsChange(preset);
-                // Reset simulation so regime change is immediately visible
-                onReset();
               }
             }}
           >
