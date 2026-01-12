@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal, Circle, Square, Maximize2, ArrowRightLeft, Waves, Sparkles, Wind, X, MapPin } from "lucide-react";
+import { HelpCircle, Play, Pause, RotateCcw, Settings2, StepForward, StepBack, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Columns, BookOpen, Download, Map, Gauge, Zap, Crosshair, SkipForward, SkipBack, Save, Upload, Blend, Eye, Palette, Layers, PanelRightClose, PanelRightOpen, Clock, Activity, Share2, MoreVertical, SlidersHorizontal, Circle, Square, Maximize2, ArrowRightLeft, Waves, Sparkles, Wind, X } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -36,7 +36,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { SimulationParameters, SimulationState, FieldData, ProbeData, OperatorContributions, StructuralSignature, StructuralEvent, DerivedField, BasinMap, TrendMetrics, InspectorMark } from "@shared/schema";
+import type { SimulationParameters, SimulationState, FieldData, ProbeData, OperatorContributions, StructuralSignature, StructuralEvent, DerivedField, BasinMap, TrendMetrics } from "@shared/schema";
 import { defaultParameters, mobileParameters, structuralPresets } from "@shared/schema";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
 import { getModeLabels, generateInterpretationSentence, getInterpretationText } from "@/lib/interpretation-modes";
@@ -51,7 +51,6 @@ import { FullscreenMenuBar } from "@/components/fullscreen-menubar";
 import { FloatingPlaybackPanel } from "@/components/floating-playback-panel";
 import { FloatingPerturbationPanel } from "@/components/floating-perturbation-panel";
 import { PerturbationPanel } from "@/components/perturbation-panel";
-import { FieldInspectorPanel } from "@/components/field-inspector-panel";
 import { type PerturbationMode, DEFAULT_PARAMS } from "@/lib/perturbations/types";
 
 // Lightweight overlay canvas for mobile projection layers
@@ -258,8 +257,6 @@ export default function SimulationPage() {
   
   // New MVP feature states
   const [fieldInspectorEnabled, setFieldInspectorEnabled] = useState(false);
-  const [inspectorMarks, setInspectorMarks] = useState<InspectorMark[]>([]);
-  const [inspectorMarkMode, setInspectorMarkMode] = useState(false); // When true, clicks add marks
   const [perturbMode, setPerturbMode] = useState(false);
   const [selectedPerturbMode, setSelectedPerturbMode] = useState<PerturbationMode>('impulse');
   const [perturbParams, setPerturbParams] = useState<Record<string, any>>(DEFAULT_PARAMS.impulse);
@@ -606,34 +603,6 @@ export default function SimulationPage() {
       }
     }
   }, [derivedType]);
-  
-  // Inspector mark handlers - add/remove points for multi-point field inspection
-  const handleAddInspectorMark = useCallback((gridX: number, gridY: number) => {
-    const engine = engineRef.current;
-    if (!engine) return;
-    
-    const probe = engine.computeProbeData(gridX, gridY);
-    if (!probe) return;
-    
-    const mark: InspectorMark = {
-      id: `mark-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      gridX,
-      gridY,
-      step: state.step,
-      timestamp: Date.now(),
-      probe,
-    };
-    
-    setInspectorMarks(prev => [...prev, mark]);
-  }, [state.step]);
-  
-  const handleRemoveInspectorMark = useCallback((id: string) => {
-    setInspectorMarks(prev => prev.filter(m => m.id !== id));
-  }, []);
-  
-  const handleClearAllInspectorMarks = useCallback(() => {
-    setInspectorMarks([]);
-  }, []);
 
   // Mobile video recording handler - step-based (1 frame per simulation step)
   const handleStartRecording = useCallback(async () => {
@@ -1057,16 +1026,13 @@ export default function SimulationPage() {
     const engine = engineRef.current;
     if (!engine) return;
     
-    if (inspectorMarkMode) {
-      // Add a mark at this point
-      handleAddInspectorMark(x, y);
-    } else if (perturbMode) {
+    if (perturbMode) {
       // Use the new structured perturbation system
       engine.applyDisturbance(x, y, selectedPerturbMode, perturbParams);
     } else if (trajectoryProbeActive) {
       setTrajectoryProbePoint({ x, y });
     }
-  }, [inspectorMarkMode, perturbMode, trajectoryProbeActive, selectedPerturbMode, perturbParams, handleAddInspectorMark]);
+  }, [perturbMode, trajectoryProbeActive, selectedPerturbMode, perturbParams]);
 
   // Apply perturbation at a specific point with current mode and params
   const handleApplyPerturbation = useCallback((mode: PerturbationMode, params: Record<string, any>, x: number, y: number) => {
@@ -2444,18 +2410,6 @@ export default function SimulationPage() {
             />
           )}
           
-          {/* Multi-point Inspector Panel - visible when marking or when marks exist */}
-          {(inspectorMarkMode || inspectorMarks.length > 0) && (
-            <div className="absolute top-12 right-3 z-40 w-56">
-              <FieldInspectorPanel
-                marks={inspectorMarks}
-                onRemoveMark={handleRemoveInspectorMark}
-                onClearAll={handleClearAllInspectorMarks}
-                modeLabels={modeLabels}
-              />
-            </div>
-          )}
-          
           {state.isRunning && (
             <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded px-2 py-1">
               <span className="relative flex h-2 w-2">
@@ -2633,38 +2587,13 @@ export default function SimulationPage() {
                 Hover over the field to see local values
               </TooltipContent>
             </Tooltip>
-            {/* Mark Points */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => { 
-                    const newMode = !inspectorMarkMode;
-                    setInspectorMarkMode(newMode);
-                    if (newMode) {
-                      setPerturbMode(false);
-                      setTrajectoryProbeActive(false);
-                    }
-                  }}
-                  data-testid="button-mark-points"
-                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${inspectorMarkMode ? "bg-amber-500/30 text-amber-300 border border-amber-500/50" : ""}`}
-                >
-                  <MapPin className="h-3 w-3" />
-                  Mark Points
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="text-xs">
-                Click on field to mark inspection points
-              </TooltipContent>
-            </Tooltip>
             {/* Probe */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => { setTrajectoryProbeActive(!trajectoryProbeActive); if (!trajectoryProbeActive) { setPerturbMode(false); setInspectorMarkMode(false); } else { setTrajectoryProbePoint(null); } }}
+                  onClick={() => { setTrajectoryProbeActive(!trajectoryProbeActive); if (!trajectoryProbeActive) { setPerturbMode(false); } else { setTrajectoryProbePoint(null); } }}
                   data-testid="button-trajectory-probe"
                   className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${trajectoryProbeActive ? "bg-white/20 text-white" : ""}`}
                 >
@@ -2692,7 +2621,7 @@ export default function SimulationPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
                 <DropdownMenuItem 
-                  onClick={() => { setSelectedPerturbMode('impulse'); setPerturbMode(true); setTrajectoryProbeActive(false); setInspectorMarkMode(false); }}
+                  onClick={() => { setSelectedPerturbMode('impulse'); setPerturbMode(true); setTrajectoryProbeActive(false); }}
                   className={`text-xs gap-2 ${selectedPerturbMode === 'impulse' && perturbMode ? 'bg-accent' : ''}`}
                   data-testid="menu-perturb-impulse"
                 >
@@ -2700,7 +2629,7 @@ export default function SimulationPage() {
                   Impulse
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                  onClick={() => { setSelectedPerturbMode('shear'); setPerturbMode(true); setTrajectoryProbeActive(false); setInspectorMarkMode(false); }}
+                  onClick={() => { setSelectedPerturbMode('shear'); setPerturbMode(true); setTrajectoryProbeActive(false); }}
                   className={`text-xs gap-2 ${selectedPerturbMode === 'shear' && perturbMode ? 'bg-accent' : ''}`}
                   data-testid="menu-perturb-shear"
                 >
@@ -2708,7 +2637,7 @@ export default function SimulationPage() {
                   Shear
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                  onClick={() => { setSelectedPerturbMode('wave'); setPerturbMode(true); setTrajectoryProbeActive(false); setInspectorMarkMode(false); }}
+                  onClick={() => { setSelectedPerturbMode('wave'); setPerturbMode(true); setTrajectoryProbeActive(false); }}
                   className={`text-xs gap-2 ${selectedPerturbMode === 'wave' && perturbMode ? 'bg-accent' : ''}`}
                   data-testid="menu-perturb-wave"
                 >
@@ -2716,7 +2645,7 @@ export default function SimulationPage() {
                   Wave
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                  onClick={() => { setSelectedPerturbMode('vortex'); setPerturbMode(true); setTrajectoryProbeActive(false); setInspectorMarkMode(false); }}
+                  onClick={() => { setSelectedPerturbMode('vortex'); setPerturbMode(true); setTrajectoryProbeActive(false); }}
                   className={`text-xs gap-2 ${selectedPerturbMode === 'vortex' && perturbMode ? 'bg-accent' : ''}`}
                   data-testid="menu-perturb-vortex"
                 >
@@ -2724,7 +2653,7 @@ export default function SimulationPage() {
                   Vortex
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                  onClick={() => { setSelectedPerturbMode('fracture'); setPerturbMode(true); setTrajectoryProbeActive(false); setInspectorMarkMode(false); }}
+                  onClick={() => { setSelectedPerturbMode('fracture'); setPerturbMode(true); setTrajectoryProbeActive(false); }}
                   className={`text-xs gap-2 ${selectedPerturbMode === 'fracture' && perturbMode ? 'bg-accent' : ''}`}
                   data-testid="menu-perturb-fracture"
                 >
@@ -2732,7 +2661,7 @@ export default function SimulationPage() {
                   Fracture
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                  onClick={() => { setSelectedPerturbMode('drift'); setPerturbMode(true); setTrajectoryProbeActive(false); setInspectorMarkMode(false); }}
+                  onClick={() => { setSelectedPerturbMode('drift'); setPerturbMode(true); setTrajectoryProbeActive(false); }}
                   className={`text-xs gap-2 ${selectedPerturbMode === 'drift' && perturbMode ? 'bg-accent' : ''}`}
                   data-testid="menu-perturb-drift"
                 >
@@ -3021,18 +2950,6 @@ export default function SimulationPage() {
                   visible={probeVisible}
                   position={probePosition}
                 />
-              )}
-              
-              {/* Multi-point Inspector Panel (Dashboard view) - visible when marking or when marks exist */}
-              {(inspectorMarkMode || inspectorMarks.length > 0) && (
-                <div className="absolute top-12 right-3 z-40 w-56">
-                  <FieldInspectorPanel
-                    marks={inspectorMarks}
-                    onRemoveMark={handleRemoveInspectorMark}
-                    onClearAll={handleClearAllInspectorMarks}
-                    modeLabels={modeLabels}
-                  />
-                </div>
               )}
               
               {state.isRunning && (
