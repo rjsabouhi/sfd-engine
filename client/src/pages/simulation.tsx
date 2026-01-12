@@ -2494,11 +2494,11 @@ export default function SimulationPage() {
                 className="h-7 text-xs gap-1.5"
               >
                 <Maximize2 className="h-3.5 w-3.5" />
-                Focus Mode
+                Inspection Mode
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs">
-              Enter fullscreen focus mode (F)
+              Enter inspection mode (F)
             </TooltipContent>
           </Tooltip>
           <Button 
