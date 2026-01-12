@@ -372,18 +372,18 @@ export class SFDEngine {
       this.grid = new Float32Array(this.width * this.height);
       this.tempGrid = new Float32Array(this.width * this.height);
       this.initialize();
+      // initialize() already calls updateBasinMap() at the end
       this.notifyUpdate();
     } else if (modeChanged) {
       // Mode change requires reinitialization for proper field setup
       // (e.g., cosmic web needs special clustering seeds)
+      // initialize() will handle cache invalidation and basin map update
       this.initialize();
-      this.invalidateDerivedFieldCache();
-      this.updateBasinMap();
       this.notifyUpdate();
     } else if (significantChange) {
       // Significant parameter changes should invalidate caches
+      // But don't update basin map here - let simulation steps handle it
       this.invalidateDerivedFieldCache();
-      this.updateBasinMap();
       this.notifyUpdate();
     } else if (params.couplingRadius !== undefined) {
       // Radius change affects rendering, notify immediately
@@ -999,6 +999,30 @@ export class SFDEngine {
   private updateBasinMap(): void {
     // Use playback display grid when in playback mode, otherwise use live grid
     const sourceGrid = this.playbackDisplayGrid !== null ? this.playbackDisplayGrid : this.grid;
+    
+    // Safety guard: bail out early if grid is empty/uninitialized
+    // Check a few sample points - if all zero or nearly uniform, skip basin computation
+    let hasVariance = false;
+    const sampleSize = Math.min(100, sourceGrid.length);
+    const step = Math.floor(sourceGrid.length / sampleSize);
+    let minSample = Infinity, maxSample = -Infinity;
+    for (let i = 0; i < sourceGrid.length; i += step) {
+      const v = sourceGrid[i];
+      if (v < minSample) minSample = v;
+      if (v > maxSample) maxSample = v;
+    }
+    hasVariance = (maxSample - minSample) > 1e-10;
+    
+    if (!hasVariance) {
+      // Grid is uniform or empty - create trivial basin map
+      this.basinMap = {
+        labels: new Int32Array(this.width * this.height).fill(0),
+        count: 1,
+        width: this.width,
+        height: this.height,
+      };
+      return;
+    }
     
     const labels = new Int32Array(this.width * this.height);
     labels.fill(-1);
