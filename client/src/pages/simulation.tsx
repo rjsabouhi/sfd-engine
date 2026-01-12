@@ -278,6 +278,11 @@ export default function SimulationPage() {
   const [perturbAnchorRect, setPerturbAnchorRect] = useState<DOMRect | null>(null);
   const [diagnosticsAnchorRect, setDiagnosticsAnchorRect] = useState<DOMRect | null>(null);
   
+  // Lifted pinned positions for floating panels - persists across focus mode changes
+  const [playbackPinnedPos, setPlaybackPinnedPos] = useState<{ x: number; y: number } | null>(null);
+  const [perturbPinnedPos, setPerturbPinnedPos] = useState<{ x: number; y: number } | null>(null);
+  const [diagnosticsPinnedPos, setDiagnosticsPinnedPos] = useState<{ x: number; y: number } | null>(null);
+  
   // Bring a panel to front by moving it to end of order array
   const bringPanelToFront = (panel: 'playback' | 'perturbation' | 'diagnostics') => {
     setActivePanelOrder(prev => {
@@ -2437,6 +2442,8 @@ export default function SimulationPage() {
           zIndex={getPanelZIndex('playback')}
           onFocus={() => bringPanelToFront('playback')}
           anchorRect={playbackAnchorRect}
+          pinnedPosition={playbackPinnedPos}
+          onPinnedPositionChange={setPlaybackPinnedPos}
         />
         
         <FloatingPerturbationPanel
@@ -2455,6 +2462,8 @@ export default function SimulationPage() {
           onParamsChange={setPerturbParams}
           onResetField={handleReset}
           zIndex={getPanelZIndex('perturbation')}
+          pinnedPosition={perturbPinnedPos}
+          onPinnedPositionChange={setPerturbPinnedPos}
           onFocus={() => bringPanelToFront('perturbation')}
           anchorRect={perturbAnchorRect}
         />
@@ -2472,6 +2481,8 @@ export default function SimulationPage() {
           zIndex={getPanelZIndex('diagnostics')}
           onFocus={() => bringPanelToFront('diagnostics')}
           anchorRect={diagnosticsAnchorRect}
+          pinnedPosition={diagnosticsPinnedPos}
+          onPinnedPositionChange={setDiagnosticsPinnedPos}
         />
       </div>
     );
@@ -3056,6 +3067,8 @@ export default function SimulationPage() {
         colormap={colormap}
         zIndex={getPanelZIndex('diagnostics')}
         onFocus={() => bringPanelToFront('diagnostics')}
+        pinnedPosition={diagnosticsPinnedPos}
+        onPinnedPositionChange={setDiagnosticsPinnedPos}
       />
     </div>
   );
