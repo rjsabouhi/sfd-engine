@@ -361,13 +361,12 @@ export class SFDEngine {
     
     this.params = { ...this.params, ...params };
     
-    // Clear ring buffer on significant changes to prevent mixing old/new frames
-    if (significantChange) {
-      this.ringBuffer = [];
-      this.ringBufferIndex = 0;
-      this.currentPlaybackIndex = -1;
-      this.playbackDisplayGrid = null;
-      this.playbackDisplayStep = null;
+    // GLOBAL PLAYBACK: Never clear the ring buffer on parameter changes
+    // Instead, save a snapshot with an event marker so the timeline is preserved
+    // The user can scrub back to see what the simulation looked like before the change
+    if (significantChange && this.ringBuffer.length > 0) {
+      const eventType = modeChanged ? `mode:${this.params.mode}` : 'params_changed';
+      this.saveToRingBuffer(eventType);
     }
     
     if (needsResize) {
