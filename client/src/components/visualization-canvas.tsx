@@ -830,7 +830,7 @@ export function VisualizationCanvas({
                   boxShadow: '0 0 4px rgba(0,0,0,0.8)',
                 }}
               />
-              {/* Outer white ring for contrast */}
+              {/* Outer bright ring */}
               <div 
                 className="absolute"
                 style={{ 
@@ -839,11 +839,12 @@ export function VisualizationCanvas({
                   marginLeft: '-14px',
                   marginTop: '-14px',
                   borderRadius: '50%',
-                  border: '2px solid white',
-                  boxShadow: '0 0 8px rgba(0,0,0,0.8), inset 0 0 8px rgba(0,0,0,0.4)',
+                  border: `2px solid ${probe.color}`,
+                  boxShadow: `0 0 12px ${probe.color}, 0 0 20px ${probe.color}`,
+                  filter: 'brightness(1.5) saturate(1.2)',
                 }}
               />
-              {/* Inner colored ring */}
+              {/* Inner darker ring - transparent center */}
               <div 
                 className="absolute flex items-center justify-center"
                 style={{ 
@@ -853,15 +854,16 @@ export function VisualizationCanvas({
                   marginTop: '-11px',
                   borderRadius: '50%',
                   border: `3px solid ${probe.color}`,
-                  backgroundColor: 'rgba(0,0,0,0.7)',
-                  boxShadow: `0 0 12px ${probe.color}, 0 0 20px ${probe.color}66`,
+                  backgroundColor: 'transparent',
+                  filter: 'brightness(0.7) saturate(1.1)',
                 }}
               >
                 <span 
                   className="text-[10px] font-bold"
                   style={{ 
-                    color: 'white',
-                    textShadow: `0 0 4px ${probe.color}, 0 0 8px ${probe.color}`,
+                    color: probe.color,
+                    filter: 'brightness(1.5) saturate(1.2)',
+                    textShadow: `0 0 6px ${probe.color}, 0 0 10px ${probe.color}`,
                   }}
                 >
                   {probe.label.replace('P', '')}
