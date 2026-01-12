@@ -6,13 +6,11 @@ import {
   MenubarContent,
   MenubarItem,
   MenubarSeparator,
-  MenubarCheckboxItem,
   MenubarSub,
   MenubarSubTrigger,
   MenubarSubContent,
   MenubarRadioGroup,
   MenubarRadioItem,
-  MenubarShortcut,
   MenubarLabel,
 } from "@/components/ui/menubar";
 import {
@@ -21,26 +19,25 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Play,
-  Pause,
   RotateCcw,
-  StepForward,
-  StepBack,
-  Maximize2,
   Minimize2,
-  Eye,
-  Crosshair,
   Zap,
   Gauge,
   Palette,
   Layers,
-  Blend,
   Columns2,
   Download,
   Image,
@@ -49,11 +46,10 @@ import {
   FileSpreadsheet,
   FileCode,
   Package,
-  HelpCircle,
   BookOpen,
   Info,
-  Settings2,
   Sliders,
+  ChevronDown,
 } from "lucide-react";
 import type { SimulationParameters, SimulationState } from "@shared/schema";
 import { structuralPresets, defaultParameters } from "@shared/schema";
@@ -163,119 +159,129 @@ export function FullscreenMenuBar({
 }: FullscreenMenuBarProps) {
   const [aboutOpen, setAboutOpen] = useState(false);
 
+  const currentOverlayLabel = OVERLAY_OPTIONS.find(o => o.value === derivedType)?.label || "Layer";
+
   return (
-    <div className="flex items-center gap-2 px-2 py-1 bg-gray-900/95 border-b border-white/10">
+    <div className="flex items-center gap-1 px-2 py-1 bg-gray-900/95 border-b border-white/10">
       <img src={sfdLogo} alt="SFD" className="w-6 h-6 rounded" />
       
-      <Button
-          variant="ghost"
-          size="sm"
-          onClick={onTogglePlaybackPanel}
-          className={`h-6 text-xs px-2 text-white/80 hover:text-white hover:bg-white/10 ${playbackPanelOpen ? 'bg-white/15 text-white' : ''}`}
-          data-testid="button-simulation-panel"
-        >
-          <Play className="h-3 w-3 mr-1" />
-          Simulation
-        </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onTogglePlaybackPanel}
+            className={`h-6 text-xs px-2 text-white/80 hover:text-white hover:bg-white/10 ${playbackPanelOpen ? 'bg-white/15 text-white' : ''}`}
+            data-testid="button-simulation-panel"
+          >
+            <Play className="h-3 w-3 mr-1" />
+            Simulation
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="text-xs">Playback Controls</TooltipContent>
+      </Tooltip>
+
+      <div className="w-px h-4 bg-white/10 mx-1" />
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onDiagnosticsChange(!diagnosticsVisible)}
+            className={`h-6 text-xs px-2 text-white/80 hover:text-white hover:bg-white/10 ${diagnosticsVisible ? 'bg-white/15 text-white' : ''}`}
+            data-testid="button-diagnostics"
+          >
+            <Gauge className="h-3 w-3 mr-1" />
+            Diagnostics
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="text-xs">Toggle Diagnostics Panel</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onPerturbModeChange(!perturbMode)}
+            className={`h-6 text-xs px-2 text-white/80 hover:text-white hover:bg-white/10 ${perturbMode ? 'bg-white/15 text-white' : ''}`}
+            data-testid="button-perturbation"
+          >
+            <Zap className="h-3 w-3 mr-1" />
+            Perturb
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="text-xs">Toggle Perturbation Mode</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onShowDualViewChange(!showDualView)}
+            className={`h-6 text-xs px-2 text-white/80 hover:text-white hover:bg-white/10 ${showDualView ? 'bg-white/15 text-white' : ''}`}
+            data-testid="button-split-view"
+          >
+            <Columns2 className="h-3 w-3 mr-1" />
+            Split
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="text-xs">Toggle Split View</TooltipContent>
+      </Tooltip>
+
+      {showDualView && (
+        <>
+          <div className="w-px h-4 bg-white/10 mx-1" />
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 text-xs px-2 text-white/80 hover:text-white hover:bg-white/10 gap-1"
+                data-testid="dropdown-projection-layer"
+              >
+                <Layers className="h-3 w-3" />
+                <span className="max-w-[80px] truncate">{currentOverlayLabel}</span>
+                <ChevronDown className="h-3 w-3 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-gray-900 border-white/20 max-h-64 overflow-y-auto">
+              <DropdownMenuRadioGroup value={derivedType} onValueChange={(v) => onDerivedTypeChange(v as OverlayType)}>
+                {OVERLAY_OPTIONS.map((option) => (
+                  <DropdownMenuRadioItem key={option.value} value={option.value} className="text-xs">
+                    {option.label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <div className="flex items-center gap-2 px-2">
+            <span className="text-[10px] text-white/50">Blend</span>
+            <Slider
+              min={0}
+              max={100}
+              step={1}
+              value={[blendOpacity * 100]}
+              onValueChange={(v) => {
+                onBlendOpacityChange(v[0] / 100);
+                if (v[0] > 0 && !blendMode) onBlendModeChange(true);
+                if (v[0] === 0 && blendMode) onBlendModeChange(false);
+              }}
+              className="w-20"
+              data-testid="slider-blend"
+            />
+            <span className="text-[10px] text-white/50 w-6 text-right font-mono">{Math.round(blendOpacity * 100)}%</span>
+          </div>
+        </>
+      )}
+
+      <div className="w-px h-4 bg-white/10 mx-1" />
       
       <Menubar className="border-0 bg-transparent h-7 p-0 space-x-0">
-        {/* View Menu */}
-        <MenubarMenu>
-          <MenubarTrigger className="text-xs px-2 py-1 h-6 text-white/80 hover:text-white hover:bg-white/10 data-[state=open]:bg-white/15" data-testid="menu-view">
-            View
-          </MenubarTrigger>
-          <MenubarContent className="bg-gray-900 border-white/20 min-w-[200px]">
-            <MenubarCheckboxItem 
-              checked={fieldInspectorEnabled} 
-              onCheckedChange={onFieldInspectorChange}
-              className="text-xs gap-2"
-              data-testid="menu-inspector"
-            >
-              <Eye className="h-3.5 w-3.5 mr-1" />
-              Field Inspector
-            </MenubarCheckboxItem>
-            <MenubarCheckboxItem 
-              checked={trajectoryProbeActive} 
-              onCheckedChange={onTrajectoryProbeChange}
-              className="text-xs gap-2"
-              data-testid="menu-probe"
-            >
-              <Crosshair className="h-3.5 w-3.5 mr-1" />
-              Trajectory Probe
-            </MenubarCheckboxItem>
-            <MenubarCheckboxItem 
-              checked={perturbMode} 
-              onCheckedChange={onPerturbModeChange}
-              className="text-xs gap-2"
-              data-testid="menu-perturb"
-            >
-              <Zap className="h-3.5 w-3.5 mr-1" />
-              Perturbation Mode
-            </MenubarCheckboxItem>
-            <MenubarCheckboxItem 
-              checked={diagnosticsVisible} 
-              onCheckedChange={onDiagnosticsChange}
-              className="text-xs gap-2"
-              data-testid="menu-diagnostics"
-            >
-              <Gauge className="h-3.5 w-3.5 mr-1" />
-              Diagnostics Panel
-            </MenubarCheckboxItem>
-            <MenubarSeparator className="bg-white/10" />
-            <MenubarCheckboxItem 
-              checked={showDualView} 
-              onCheckedChange={onShowDualViewChange}
-              className="text-xs gap-2"
-              data-testid="menu-dual-view"
-            >
-              <Columns2 className="h-3.5 w-3.5 mr-1" />
-              Split View
-            </MenubarCheckboxItem>
-            <MenubarSeparator className="bg-white/10" />
-            <MenubarSub>
-              <MenubarSubTrigger className="text-xs gap-2">
-                <Palette className="h-3.5 w-3.5" />
-                Colormap
-              </MenubarSubTrigger>
-              <MenubarSubContent className="bg-gray-900 border-white/20">
-                <MenubarRadioGroup value={colormap} onValueChange={(v) => onColormapChange(v as "viridis" | "inferno" | "cividis")}>
-                  <MenubarRadioItem value="viridis" className="text-xs">Viridis</MenubarRadioItem>
-                  <MenubarRadioItem value="inferno" className="text-xs">Inferno</MenubarRadioItem>
-                  <MenubarRadioItem value="cividis" className="text-xs">Cividis</MenubarRadioItem>
-                </MenubarRadioGroup>
-              </MenubarSubContent>
-            </MenubarSub>
-            {showDualView && (
-              <>
-                <MenubarSub>
-                  <MenubarSubTrigger className="text-xs gap-2">
-                    <Layers className="h-3.5 w-3.5" />
-                    Projection Layer
-                  </MenubarSubTrigger>
-                  <MenubarSubContent className="bg-gray-900 border-white/20 max-h-64 overflow-y-auto">
-                    <MenubarRadioGroup value={derivedType} onValueChange={(v) => onDerivedTypeChange(v as OverlayType)}>
-                      {OVERLAY_OPTIONS.map((option) => (
-                        <MenubarRadioItem key={option.value} value={option.value} className="text-xs">
-                          {option.label}
-                        </MenubarRadioItem>
-                      ))}
-                    </MenubarRadioGroup>
-                  </MenubarSubContent>
-                </MenubarSub>
-                <MenubarCheckboxItem 
-                  checked={blendMode} 
-                  onCheckedChange={onBlendModeChange}
-                  className="text-xs gap-2"
-                >
-                  <Blend className="h-3.5 w-3.5 mr-1" />
-                  Blend Overlay
-                </MenubarCheckboxItem>
-              </>
-            )}
-          </MenubarContent>
-        </MenubarMenu>
-
-        {/* Parameters Menu */}
         <MenubarMenu>
           <MenubarTrigger className="text-xs px-2 py-1 h-6 text-white/80 hover:text-white hover:bg-white/10 data-[state=open]:bg-white/15" data-testid="menu-parameters">
             Parameters
@@ -336,7 +342,6 @@ export function FullscreenMenuBar({
           </MenubarContent>
         </MenubarMenu>
 
-        {/* Export Menu */}
         <MenubarMenu>
           <MenubarTrigger className="text-xs px-2 py-1 h-6 text-white/80 hover:text-white hover:bg-white/10 data-[state=open]:bg-white/15" data-testid="menu-export">
             Export
@@ -415,7 +420,6 @@ export function FullscreenMenuBar({
           </MenubarContent>
         </MenubarMenu>
 
-        {/* Help Menu */}
         <MenubarMenu>
           <MenubarTrigger className="text-xs px-2 py-1 h-6 text-white/80 hover:text-white hover:bg-white/10 data-[state=open]:bg-white/15" data-testid="menu-help">
             Help
