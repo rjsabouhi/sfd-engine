@@ -889,11 +889,11 @@ export function VisualizationCanvas({
                   e.preventDefault();
                   // Only act if not dragging
                   if (!draggingProbeRef.current) {
-                    // If this probe is currently selected (detail panel open), close it
-                    if (selectedProbeId === probe.id && onCloseProbeDetail) {
+                    // If detail panel is open, close it (don't delete)
+                    if (selectedProbeId && onCloseProbeDetail) {
                       onCloseProbeDetail();
                     } else {
-                      // Otherwise delete the probe
+                      // Detail panel is closed - delete the probe
                       onRemoveProbe?.(probe.id);
                     }
                   }
