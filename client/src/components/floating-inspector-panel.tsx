@@ -35,7 +35,6 @@ interface FloatingInspectorPanelProps {
   onFocus?: () => void;
   anchorRect?: DOMRect | null;
   savedProbes: SavedProbe[];
-  onAddProbe: (x: number, y: number) => void;
   onRemoveProbe: (id: string) => void;
   onSetBaseline: (id: string | null) => void;
   onSelectProbe: (probe: SavedProbe) => void;
@@ -55,7 +54,6 @@ export function FloatingInspectorPanel({
   onFocus,
   anchorRect,
   savedProbes,
-  onAddProbe,
   onRemoveProbe,
   onSetBaseline,
   onSelectProbe,
@@ -108,12 +106,6 @@ export function FloatingInspectorPanel({
     } else {
       setIsPinned(true);
       setPinnedPosition(positionRef.current);
-    }
-  };
-
-  const handleAddCurrentProbe = () => {
-    if (probeData) {
-      onAddProbe(probeData.x, probeData.y);
     }
   };
 
@@ -227,21 +219,6 @@ export function FloatingInspectorPanel({
           <div className="px-3 py-2 border-b border-white/10">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] text-neutral-500 uppercase tracking-wide">Current Hover</span>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleAddCurrentProbe}
-                    disabled={!probeData}
-                    className="h-5 w-5 rounded-full text-emerald-500 hover:text-emerald-400 disabled:opacity-30"
-                    data-testid="inspector-add-probe"
-                  >
-                    <Plus className="h-3 w-3" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-xs">Save This Location</TooltipContent>
-              </Tooltip>
             </div>
             
             {probeData ? (
@@ -278,9 +255,9 @@ export function FloatingInspectorPanel({
             
             {savedProbes.length === 0 ? (
               <div className="text-center py-4 bg-white/5 rounded">
-                <Plus className="h-5 w-5 text-neutral-600 mx-auto mb-1" />
+                <Target className="h-5 w-5 text-neutral-600 mx-auto mb-1" />
                 <p className="text-[9px] text-neutral-500">
-                  Hover and click + to save probes
+                  Click on field to save probes
                 </p>
               </div>
             ) : (

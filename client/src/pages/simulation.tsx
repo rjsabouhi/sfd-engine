@@ -2560,7 +2560,6 @@ export default function SimulationPage() {
           onFocus={() => bringPanelToFront('inspector')}
           anchorRect={inspectorAnchorRect}
           savedProbes={savedProbes}
-          onAddProbe={handleAddProbe}
           onRemoveProbe={handleRemoveProbe}
           onSetBaseline={handleSetProbeBaseline}
           onSelectProbe={handleSelectProbe}
