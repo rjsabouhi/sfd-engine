@@ -851,7 +851,7 @@ export function VisualizationCanvas({
                     marginLeft: '-12px',
                     marginTop: '-12px',
                     borderRadius: '50%',
-                    border: `2px solid ${probe.color}`,
+                    border: '5px solid white',
                     overflow: 'hidden',
                   }}
                 >
