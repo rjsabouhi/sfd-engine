@@ -261,7 +261,7 @@ export function FullscreenMenuBar({
                 data-testid="dropdown-regimes"
               >
                 <Compass className="h-3 w-3" />
-                Regimes
+                Structural Regimes
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
