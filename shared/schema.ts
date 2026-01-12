@@ -85,6 +85,16 @@ export interface ProbeData {
   basinId: number | null;
 }
 
+export interface SavedProbe {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+  color: string;
+  createdAtStep: number;
+  isBaseline: boolean;
+}
+
 export interface StructuralEvent {
   id: string;
   step: number;

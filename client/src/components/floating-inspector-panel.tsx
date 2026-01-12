@@ -5,12 +5,26 @@ import {
   GripVertical,
   Pin,
   Target,
-  Lock,
+  Plus,
+  Trash2,
+  Star,
+  MapPin,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState, useRef, useCallback, useEffect } from "react";
-import type { ProbeData } from "@shared/schema";
+import type { ProbeData, SavedProbe } from "@shared/schema";
 import type { ModeLabels } from "@/lib/interpretation-modes";
+
+const PROBE_COLORS = [
+  "#10b981", // emerald
+  "#f59e0b", // amber
+  "#3b82f6", // blue
+  "#ef4444", // red
+  "#8b5cf6", // violet
+  "#ec4899", // pink
+  "#06b6d4", // cyan
+  "#84cc16", // lime
+];
 
 interface FloatingInspectorPanelProps {
   isVisible: boolean;
@@ -20,9 +34,16 @@ interface FloatingInspectorPanelProps {
   zIndex?: number;
   onFocus?: () => void;
   anchorRect?: DOMRect | null;
+  savedProbes: SavedProbe[];
+  onAddProbe: (x: number, y: number) => void;
+  onRemoveProbe: (id: string) => void;
+  onSetBaseline: (id: string | null) => void;
+  onSelectProbe: (probe: SavedProbe) => void;
+  currentStep: number;
+  getProbeDataAt: (x: number, y: number) => ProbeData | null;
 }
 
-const PANEL_WIDTH = 220;
+const PANEL_WIDTH = 280;
 const GAP_FROM_MENUBAR = 8;
 
 export function FloatingInspectorPanel({
@@ -33,12 +54,18 @@ export function FloatingInspectorPanel({
   zIndex = 50,
   onFocus,
   anchorRect,
+  savedProbes,
+  onAddProbe,
+  onRemoveProbe,
+  onSetBaseline,
+  onSelectProbe,
+  currentStep,
+  getProbeDataAt,
 }: FloatingInspectorPanelProps) {
   const [isPinned, setIsPinned] = useState(false);
   const [pinnedPosition, setPinnedPosition] = useState<{ x: number; y: number } | null>(null);
   const [hasDragged, setHasDragged] = useState(false);
-  const [isLocked, setIsLocked] = useState(false);
-  const [lockedData, setLockedData] = useState<ProbeData | null>(null);
+  const [selectedProbeId, setSelectedProbeId] = useState<string | null>(null);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const positionRef = useRef({ x: 80, y: 50 });
@@ -71,8 +98,6 @@ export function FloatingInspectorPanel({
   useEffect(() => {
     if (!isVisible) {
       setHasDragged(false);
-      setIsLocked(false);
-      setLockedData(null);
     }
   }, [isVisible]);
 
@@ -86,13 +111,9 @@ export function FloatingInspectorPanel({
     }
   };
 
-  const handleLock = () => {
-    if (isLocked) {
-      setIsLocked(false);
-      setLockedData(null);
-    } else {
-      setIsLocked(true);
-      setLockedData(probeData);
+  const handleAddCurrentProbe = () => {
+    if (probeData) {
+      onAddProbe(probeData.x, probeData.y);
     }
   };
 
@@ -135,7 +156,15 @@ export function FloatingInspectorPanel({
 
   if (!isVisible) return null;
 
-  const displayData = isLocked ? lockedData : probeData;
+  const baselineProbe = savedProbes.find(p => p.isBaseline);
+  const baselineData = baselineProbe ? getProbeDataAt(baselineProbe.x, baselineProbe.y) : null;
+
+  const formatDelta = (current: number, baseline: number | undefined) => {
+    if (baseline === undefined) return null;
+    const delta = current - baseline;
+    const sign = delta >= 0 ? '+' : '';
+    return `${sign}${delta.toFixed(3)}`;
+  };
 
   return (
     <div 
@@ -148,11 +177,12 @@ export function FloatingInspectorPanel({
       <div 
         className="rounded-lg"
         style={{
-          backgroundColor: 'rgba(23, 23, 23, 0.90)',
+          backgroundColor: 'rgba(23, 23, 23, 0.95)',
           border: `1px solid ${isPinned ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
           boxShadow: isPinned ? '0 8px 32px rgba(251, 191, 36, 0.15)' : '0 8px 32px rgba(0, 0, 0, 0.5)',
           backdropFilter: 'blur(12px)',
           width: PANEL_WIDTH,
+          maxHeight: '70vh',
         }}
       >
         <div 
@@ -162,25 +192,9 @@ export function FloatingInspectorPanel({
           <div className="flex items-center gap-1.5">
             <GripVertical className="h-3 w-3 text-neutral-500" />
             <Eye className="h-3 w-3 text-emerald-400" />
-            <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Inspector</span>
+            <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Multi-Point Inspector</span>
           </div>
           <div className="flex items-center gap-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleLock}
-                  className={`h-5 w-5 rounded-full ${isLocked ? 'text-cyan-400' : 'text-neutral-500 hover:text-neutral-300'}`}
-                  data-testid="inspector-lock"
-                >
-                  <Lock className="h-3 w-3" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
-                {isLocked ? 'Unlock Values' : 'Lock Current Values'}
-              </TooltipContent>
-            </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -209,54 +223,166 @@ export function FloatingInspectorPanel({
           </div>
         </div>
         
-        <div className="px-3 py-2">
-          {displayData ? (
-            <>
-              <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-white/10">
-                <Target className="h-3 w-3 text-emerald-400" />
-                <span className="text-[10px] font-mono text-neutral-300">
-                  ({displayData.x}, {displayData.y})
-                </span>
-                {isLocked && (
-                  <span className="text-[9px] text-cyan-400 ml-auto uppercase tracking-wide">Locked</span>
-                )}
-              </div>
-              
-              <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[10px]">
-                <span className="text-neutral-500">Value</span>
-                <span className="font-mono text-right text-neutral-300">{displayData.value.toFixed(4)}</span>
-                
-                <span className="text-neutral-500">{modeLabels.operators.curvature.split(' ')[0]}</span>
-                <span className="font-mono text-right text-neutral-300">{displayData.curvature.toFixed(4)}</span>
-                
-                <span className="text-neutral-500">{modeLabels.operators.tension.split(' ')[0]}</span>
-                <span className="font-mono text-right text-neutral-300">{displayData.tension.toFixed(4)}</span>
-                
-                <span className="text-neutral-500">{modeLabels.operators.coupling.split(' ')[0]}</span>
-                <span className="font-mono text-right text-neutral-300">{displayData.coupling.toFixed(4)}</span>
-                
-                <span className="text-neutral-500">Gradient</span>
-                <span className="font-mono text-right text-neutral-300">{displayData.gradientMagnitude.toFixed(4)}</span>
-                
-                <span className="text-neutral-500">Variance</span>
-                <span className="font-mono text-right text-neutral-300">{displayData.neighborhoodVariance.toFixed(4)}</span>
-                
-                {displayData.basinId !== null && (
-                  <>
-                    <span className="text-neutral-500">Basin</span>
-                    <span className="font-mono text-right text-neutral-300">{displayData.basinId}</span>
-                  </>
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-4">
-              <Eye className="h-6 w-6 text-neutral-600 mx-auto mb-2" />
-              <p className="text-[10px] text-neutral-500">
-                Hover over the field to inspect values
-              </p>
+        <div className="overflow-y-auto" style={{ maxHeight: 'calc(70vh - 40px)' }}>
+          <div className="px-3 py-2 border-b border-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] text-neutral-500 uppercase tracking-wide">Current Hover</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleAddCurrentProbe}
+                    disabled={!probeData}
+                    className="h-5 w-5 rounded-full text-emerald-500 hover:text-emerald-400 disabled:opacity-30"
+                    data-testid="inspector-add-probe"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">Save This Location</TooltipContent>
+              </Tooltip>
             </div>
-          )}
+            
+            {probeData ? (
+              <div className="bg-white/5 rounded p-2">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Target className="h-3 w-3 text-emerald-400" />
+                  <span className="text-[10px] font-mono text-neutral-300">
+                    ({probeData.x}, {probeData.y})
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[9px]">
+                  <span className="text-neutral-500">Value</span>
+                  <span className="font-mono text-right text-neutral-300">{probeData.value.toFixed(4)}</span>
+                  <span className="text-neutral-500">{modeLabels.operators.curvature.split(' ')[0]}</span>
+                  <span className="font-mono text-right text-neutral-300">{probeData.curvature.toFixed(4)}</span>
+                  <span className="text-neutral-500">{modeLabels.operators.tension.split(' ')[0]}</span>
+                  <span className="font-mono text-right text-neutral-300">{probeData.tension.toFixed(4)}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-3">
+                <MapPin className="h-5 w-5 text-neutral-600 mx-auto mb-1" />
+                <p className="text-[9px] text-neutral-500">Hover over field to probe</p>
+              </div>
+            )}
+          </div>
+          
+          <div className="px-3 py-2">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] text-neutral-500 uppercase tracking-wide">
+                Saved Probes ({savedProbes.length})
+              </span>
+            </div>
+            
+            {savedProbes.length === 0 ? (
+              <div className="text-center py-4 bg-white/5 rounded">
+                <Plus className="h-5 w-5 text-neutral-600 mx-auto mb-1" />
+                <p className="text-[9px] text-neutral-500">
+                  Hover and click + to save probes
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                {savedProbes.map((probe) => {
+                  const liveData = getProbeDataAt(probe.x, probe.y);
+                  const isSelected = selectedProbeId === probe.id;
+                  
+                  return (
+                    <div
+                      key={probe.id}
+                      className={`rounded p-2 cursor-pointer transition-colors ${
+                        isSelected ? 'bg-white/15 ring-1 ring-white/20' : 'bg-white/5 hover:bg-white/10'
+                      }`}
+                      onClick={() => {
+                        setSelectedProbeId(isSelected ? null : probe.id);
+                        onSelectProbe(probe);
+                      }}
+                      data-testid={`saved-probe-${probe.id}`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <div 
+                            className="w-2.5 h-2.5 rounded-full" 
+                            style={{ backgroundColor: probe.color }}
+                          />
+                          <span className="text-[10px] font-medium text-neutral-300">{probe.label}</span>
+                          {probe.isBaseline && (
+                            <Star className="h-2.5 w-2.5 text-amber-400 fill-amber-400" />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-0.5">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onSetBaseline(probe.isBaseline ? null : probe.id);
+                                }}
+                                className={`h-4 w-4 rounded ${probe.isBaseline ? 'text-amber-400' : 'text-neutral-500 hover:text-amber-400'}`}
+                                data-testid={`probe-baseline-${probe.id}`}
+                              >
+                                <Star className="h-2.5 w-2.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="text-xs">
+                              {probe.isBaseline ? 'Remove Baseline' : 'Set as Baseline'}
+                            </TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onRemoveProbe(probe.id);
+                                }}
+                                className="h-4 w-4 rounded text-neutral-500 hover:text-red-400"
+                                data-testid={`probe-remove-${probe.id}`}
+                              >
+                                <Trash2 className="h-2.5 w-2.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="text-xs">Remove Probe</TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </div>
+                      
+                      <div className="text-[9px] font-mono text-neutral-500 mb-1">
+                        ({probe.x}, {probe.y}) • Step {probe.createdAtStep}
+                      </div>
+                      
+                      {liveData && (
+                        <div className="grid grid-cols-3 gap-1 text-[8px]">
+                          <div className="bg-black/30 rounded px-1 py-0.5">
+                            <span className="text-neutral-500 block">Val</span>
+                            <span className="text-neutral-300 font-mono">{liveData.value.toFixed(2)}</span>
+                            {baselineData && !probe.isBaseline && (
+                              <span className={`block font-mono ${liveData.value >= baselineData.value ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {formatDelta(liveData.value, baselineData.value)}
+                              </span>
+                            )}
+                          </div>
+                          <div className="bg-black/30 rounded px-1 py-0.5">
+                            <span className="text-neutral-500 block">Curv</span>
+                            <span className="text-neutral-300 font-mono">{liveData.curvature.toFixed(2)}</span>
+                          </div>
+                          <div className="bg-black/30 rounded px-1 py-0.5">
+                            <span className="text-neutral-500 block">Grad</span>
+                            <span className="text-neutral-300 font-mono">{liveData.gradientMagnitude.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

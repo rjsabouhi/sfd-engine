@@ -273,6 +273,7 @@ export default function SimulationPage() {
   const [playbackPanelOpen, setPlaybackPanelOpen] = useState(false); // Floating playback panel in focus mode
   const [perturbPanelOpen, setPerturbPanelOpen] = useState(false); // Floating perturbation panel in focus mode
   const [inspectorPanelOpen, setInspectorPanelOpen] = useState(false); // Floating inspector panel in focus mode
+  const [savedProbes, setSavedProbes] = useState<import("@shared/schema").SavedProbe[]>([]); // Multi-point probe storage
   const [activePanelOrder, setActivePanelOrder] = useState<('playback' | 'perturbation' | 'diagnostics' | 'inspector')[]>(['playback', 'perturbation', 'diagnostics', 'inspector']); // Z-index order for floating panels
   
   // Anchor rects for positioning floating panels under their menubar buttons
