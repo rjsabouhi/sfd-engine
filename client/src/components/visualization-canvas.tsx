@@ -831,7 +831,7 @@ export function VisualizationCanvas({
                     border: `2px solid ${probe.color}`,
                     overflow: 'hidden',
                     boxShadow: probe.isBaseline 
-                      ? `0 0 8px ${probe.color}, 0 0 16px ${probe.color}, 0 0 24px ${probe.color}80`
+                      ? '0 0 8px #fbbf24, 0 0 16px #fbbf24, 0 0 24px rgba(251, 191, 36, 0.5)'
                       : 'none',
                   }}
                 >
