@@ -258,7 +258,6 @@ export default function SimulationPage() {
   const [perturbMode, setPerturbMode] = useState(false);
   const [selectedPerturbMode, setSelectedPerturbMode] = useState<PerturbationMode>('impulse');
   const [perturbParams, setPerturbParams] = useState<Record<string, any>>(DEFAULT_PARAMS.impulse);
-  const [perturbControlsOpen, setPerturbControlsOpen] = useState(false);
   const [trajectoryProbeActive, setTrajectoryProbeActive] = useState(false);
   const [trajectoryProbePoint, setTrajectoryProbePoint] = useState<{ x: number; y: number } | null>(null);
   const [blendMode, setBlendMode] = useState(false);
@@ -2535,16 +2534,7 @@ export default function SimulationPage() {
                   <Wind className="h-3.5 w-3.5" />
                   Drift
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={() => setPerturbControlsOpen(true)}
-                  className="text-xs gap-2"
-                  data-testid="menu-perturb-controls"
-                >
-                  <SlidersHorizontal className="h-3.5 w-3.5" />
-                  Controls...
-                </DropdownMenuItem>
-              </DropdownMenuContent>
+                              </DropdownMenuContent>
             </DropdownMenu>
             {/* Diagnostics */}
             <Tooltip>
@@ -2847,6 +2837,18 @@ export default function SimulationPage() {
         </button>
         
         <aside className={`${metricsPanelCollapsed ? 'w-0 overflow-hidden' : 'w-[420px]'} flex-none border-l border-border bg-card flex flex-col overflow-hidden transition-all duration-300`}>
+          <div className="p-3 border-b border-border">
+            <PerturbationPanel
+              onApplyPerturbation={handleApplyPerturbation}
+              fieldWidth={isMobile ? 150 : 300}
+              fieldHeight={isMobile ? 150 : 300}
+              perturbMode={perturbMode}
+              onPerturbModeChange={setPerturbMode}
+              selectedMode={selectedPerturbMode}
+              onModeChange={setSelectedPerturbMode}
+              onParamsChange={setPerturbParams}
+            />
+          </div>
           <ControlPanel
                 params={params}
                 state={state}
@@ -2895,41 +2897,6 @@ export default function SimulationPage() {
         </aside>
       </div>
       
-      {/* Perturbation Controls Dialog */}
-      <Dialog open={perturbControlsOpen} onOpenChange={setPerturbControlsOpen}>
-        <DialogContent className="max-w-md bg-neutral-900/95 backdrop-blur-xl border-white/10">
-          <DialogHeader className="flex flex-row items-center justify-between">
-            <div>
-              <DialogTitle className="text-white">Perturbation Controls</DialogTitle>
-              <DialogDescription className="text-xs text-white/60">
-                Configure perturbation mode and parameters
-              </DialogDescription>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setPerturbControlsOpen(false)}
-              className="h-6 w-6 rounded-full hover:bg-white/10"
-              data-testid="button-close-perturb-controls"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </DialogHeader>
-          <div className="pt-2">
-            <PerturbationPanel
-              onApplyPerturbation={handleApplyPerturbation}
-              fieldWidth={isMobile ? 150 : 300}
-              fieldHeight={isMobile ? 150 : 300}
-              perturbMode={perturbMode}
-              onPerturbModeChange={(enabled) => { setPerturbMode(enabled); if (enabled) setTrajectoryProbeActive(false); }}
-              selectedMode={selectedPerturbMode}
-              onModeChange={setSelectedPerturbMode}
-              onParamsChange={setPerturbParams}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Floating Diagnostics Console - CTRL+SHIFT+D to toggle */}
       <FloatingDiagnostics
         engine={engineRef.current}
