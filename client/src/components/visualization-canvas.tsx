@@ -31,6 +31,7 @@ interface VisualizationCanvasProps {
   inspectorMode?: boolean;
   onAddProbe?: (x: number, y: number) => void;
   onRemoveProbe?: (id: string) => void;
+  onMoveProbe?: (id: string, x: number, y: number) => void;
 }
 
 // Temporal smoothing buffer for perceptual safety
@@ -162,9 +163,15 @@ export function VisualizationCanvas({
   inspectorMode = false,
   onAddProbe,
   onRemoveProbe,
+  onMoveProbe,
 }: VisualizationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
+  
+  // Probe dragging state
+  const draggingProbeRef = useRef<{ id: string; startX: number; startY: number } | null>(null);
+  const [draggedProbePos, setDraggedProbePos] = useState<{ id: string; x: number; y: number } | null>(null);
+  const lastDragPosRef = useRef<{ x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const [zoom, setZoom] = useState(1);
@@ -822,9 +829,14 @@ export function VisualizationCanvas({
             </div>
           )}
           {showProbeMarkers && field && savedProbes.map((probe) => {
+            // Use dragged position if this probe is being dragged
+            const isDragging = draggedProbePos?.id === probe.id;
+            const probeX = isDragging ? draggedProbePos.x : probe.x;
+            const probeY = isDragging ? draggedProbePos.y : probe.y;
+            
             // Calculate position accounting for zoom and pan
-            const baseX = (probe.x / field.width) * visualSize;
-            const baseY = (probe.y / field.height) * visualSize;
+            const baseX = (probeX / field.width) * visualSize;
+            const baseY = (probeY / field.height) * visualSize;
             // Apply zoom scaling from center and add pan offset
             const scaledX = (baseX - visualSize / 2) * zoom + visualSize / 2 + pan.x;
             const scaledY = (baseY - visualSize / 2) * zoom + visualSize / 2 + pan.y;
@@ -832,11 +844,12 @@ export function VisualizationCanvas({
             return (
               <div 
                 key={probe.id}
-                className="absolute cursor-pointer"
+                className="absolute"
                 style={{
                   left: `calc(50% - ${visualSize/2}px + ${scaledX}px)`,
                   top: `calc(50% - ${visualSize/2}px + ${scaledY}px)`,
-                  zIndex: 10,
+                  zIndex: isDragging ? 100 : 10,
+                  cursor: isDragging ? 'grabbing' : 'grab',
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -844,10 +857,60 @@ export function VisualizationCanvas({
                 onDoubleClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
-                  onRemoveProbe?.(probe.id);
+                  // Only delete if not dragging
+                  if (!draggingProbeRef.current) {
+                    onRemoveProbe?.(probe.id);
+                  }
                 }}
                 onMouseDown={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
+                  // Start dragging this probe
+                  const startPos = { x: e.clientX, y: e.clientY };
+                  draggingProbeRef.current = { id: probe.id, startX: e.clientX, startY: e.clientY };
+                  lastDragPosRef.current = { x: probe.x, y: probe.y };
+                  setDraggedProbePos({ id: probe.id, x: probe.x, y: probe.y });
+                  
+                  // Add global mouse move/up listeners for dragging
+                  const handleGlobalMouseMove = (moveE: MouseEvent) => {
+                    if (!draggingProbeRef.current || !canvasRef.current || !field) return;
+                    
+                    const canvas = canvasRef.current;
+                    const rect = canvas.getBoundingClientRect();
+                    const scaleX = field.width / rect.width;
+                    const scaleY = field.height / rect.height;
+                    
+                    // Convert mouse position to grid coordinates
+                    let newX = Math.floor((moveE.clientX - rect.left) * scaleX);
+                    let newY = Math.floor((moveE.clientY - rect.top) * scaleY);
+                    
+                    // Clamp to field bounds
+                    newX = Math.max(0, Math.min(field.width - 1, newX));
+                    newY = Math.max(0, Math.min(field.height - 1, newY));
+                    
+                    lastDragPosRef.current = { x: newX, y: newY };
+                    setDraggedProbePos({ id: draggingProbeRef.current.id, x: newX, y: newY });
+                  };
+                  
+                  const handleGlobalMouseUp = (upE: MouseEvent) => {
+                    if (draggingProbeRef.current && lastDragPosRef.current) {
+                      // Check if actually moved (more than 5px)
+                      const dx = Math.abs(upE.clientX - startPos.x);
+                      const dy = Math.abs(upE.clientY - startPos.y);
+                      if (dx > 5 || dy > 5) {
+                        // Moved - update probe position via callback
+                        onMoveProbe?.(draggingProbeRef.current.id, lastDragPosRef.current.x, lastDragPosRef.current.y);
+                      }
+                    }
+                    draggingProbeRef.current = null;
+                    lastDragPosRef.current = null;
+                    setDraggedProbePos(null);
+                    document.removeEventListener('mousemove', handleGlobalMouseMove);
+                    document.removeEventListener('mouseup', handleGlobalMouseUp);
+                  };
+                  
+                  document.addEventListener('mousemove', handleGlobalMouseMove);
+                  document.addEventListener('mouseup', handleGlobalMouseUp);
                 }}
                 data-testid={`probe-marker-${probe.id}`}
               >

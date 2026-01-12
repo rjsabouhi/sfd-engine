@@ -634,6 +634,17 @@ export default function SimulationPage() {
     setSavedProbes(prev => prev.filter(p => p.id !== id));
   }, []);
 
+  const handleMoveProbe = useCallback((id: string, x: number, y: number) => {
+    setSavedProbes(prev => prev.map(p => {
+      if (p.id === id) {
+        // Update probe position, recalculate baseline if needed
+        const snapshot = p.isBaseline ? engineRef.current?.computeProbeData(x, y) || null : p.baselineSnapshot;
+        return { ...p, x, y, baselineSnapshot: snapshot };
+      }
+      return p;
+    }));
+  }, []);
+
   const handleSetProbeBaseline = useCallback((id: string | null) => {
     setSavedProbes(prev => prev.map(p => {
       if (p.id === id) {
@@ -1456,6 +1467,7 @@ export default function SimulationPage() {
             inspectorMode={inspectorPanelOpen}
             onAddProbe={handleAddProbe}
             onRemoveProbe={handleRemoveProbe}
+            onMoveProbe={handleMoveProbe}
           />
         </div>
 
@@ -2432,6 +2444,7 @@ export default function SimulationPage() {
                       inspectorMode={inspectorPanelOpen}
                       onAddProbe={handleAddProbe}
                       onRemoveProbe={handleRemoveProbe}
+            onMoveProbe={handleMoveProbe}
                     />
                   </div>
                   <StructuralFieldFooter 
@@ -2479,6 +2492,7 @@ export default function SimulationPage() {
                   inspectorMode={inspectorPanelOpen}
                   onAddProbe={handleAddProbe}
                   onRemoveProbe={handleRemoveProbe}
+            onMoveProbe={handleMoveProbe}
                 />
               </div>
               <StructuralFieldFooter 
@@ -2976,6 +2990,7 @@ export default function SimulationPage() {
                           inspectorMode={inspectorPanelOpen}
                           onAddProbe={handleAddProbe}
                           onRemoveProbe={handleRemoveProbe}
+            onMoveProbe={handleMoveProbe}
                         />
                       </div>
                       <StructuralFieldFooter 
@@ -3023,6 +3038,7 @@ export default function SimulationPage() {
                       inspectorMode={inspectorPanelOpen}
                       onAddProbe={handleAddProbe}
                       onRemoveProbe={handleRemoveProbe}
+            onMoveProbe={handleMoveProbe}
                     />
                   </div>
                   <StructuralFieldFooter 
