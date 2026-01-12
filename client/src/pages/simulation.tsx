@@ -1435,6 +1435,10 @@ export default function SimulationPage() {
             overlayDerivedField={mobileLayerIndex >= 0 && mobileLayers[mobileLayerIndex]?.key !== "basins" ? derivedField : null}
             overlayBasinMap={mobileLayerIndex >= 0 && mobileLayers[mobileLayerIndex]?.key === "basins" ? basinMap : null}
             overlayOpacity={mobileLayerIndex >= 0 ? blendOpacity : 0}
+            savedProbes={savedProbes}
+            showProbeMarkers={inspectorPanelOpen}
+            inspectorMode={inspectorPanelOpen}
+            onAddProbe={handleAddProbe}
           />
         </div>
 
