@@ -33,6 +33,9 @@ interface VisualizationCanvasProps {
   onRemoveProbe?: (id: string) => void;
   onMoveProbe?: (id: string, x: number, y: number) => void;
   onSelectProbe?: (id: string) => void;
+  // Selected probe ID (for detail panel) - double-click on selected probe closes panel
+  selectedProbeId?: string | null;
+  onCloseProbeDetail?: () => void;
   // Cursor mode - controls interaction behavior
   cursorMode?: 'select' | 'pan' | 'probe';
 }
@@ -168,6 +171,8 @@ export function VisualizationCanvas({
   onRemoveProbe,
   onMoveProbe,
   onSelectProbe,
+  selectedProbeId,
+  onCloseProbeDetail,
   cursorMode = 'select',
 }: VisualizationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -882,9 +887,15 @@ export function VisualizationCanvas({
                 onDoubleClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
-                  // Only delete if not dragging
+                  // Only act if not dragging
                   if (!draggingProbeRef.current) {
-                    onRemoveProbe?.(probe.id);
+                    // If this probe is currently selected (detail panel open), close it
+                    if (selectedProbeId === probe.id && onCloseProbeDetail) {
+                      onCloseProbeDetail();
+                    } else {
+                      // Otherwise delete the probe
+                      onRemoveProbe?.(probe.id);
+                    }
                   }
                 }}
                 onMouseDown={(e) => {

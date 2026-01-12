@@ -1480,6 +1480,8 @@ export default function SimulationPage() {
             onRemoveProbe={handleRemoveProbe}
             onMoveProbe={handleMoveProbe}
             onSelectProbe={handleProbeMarkerClick}
+            selectedProbeId={probeDetailOpen ? selectedDetailProbeId : null}
+            onCloseProbeDetail={() => setProbeDetailOpen(false)}
           />
         </div>
 
@@ -2459,6 +2461,8 @@ export default function SimulationPage() {
                       onMoveProbe={handleMoveProbe}
                       onSelectProbe={handleProbeMarkerClick}
                       cursorMode={inspectorPanelOpen ? cursorMode : undefined}
+                      selectedProbeId={probeDetailOpen ? selectedDetailProbeId : null}
+                      onCloseProbeDetail={() => setProbeDetailOpen(false)}
                     />
                   </div>
                   <StructuralFieldFooter 
@@ -2509,6 +2513,8 @@ export default function SimulationPage() {
                   onMoveProbe={handleMoveProbe}
                   onSelectProbe={handleProbeMarkerClick}
                   cursorMode={inspectorPanelOpen ? cursorMode : undefined}
+                  selectedProbeId={probeDetailOpen ? selectedDetailProbeId : null}
+                  onCloseProbeDetail={() => setProbeDetailOpen(false)}
                 />
               </div>
               <StructuralFieldFooter 
@@ -3019,8 +3025,10 @@ export default function SimulationPage() {
                           inspectorMode={inspectorPanelOpen}
                           onAddProbe={handleAddProbe}
                           onRemoveProbe={handleRemoveProbe}
-            onMoveProbe={handleMoveProbe}
-            onSelectProbe={handleProbeMarkerClick}
+                          onMoveProbe={handleMoveProbe}
+                          onSelectProbe={handleProbeMarkerClick}
+                          selectedProbeId={probeDetailOpen ? selectedDetailProbeId : null}
+                          onCloseProbeDetail={() => setProbeDetailOpen(false)}
                         />
                       </div>
                       <StructuralFieldFooter 
@@ -3068,8 +3076,10 @@ export default function SimulationPage() {
                       inspectorMode={inspectorPanelOpen}
                       onAddProbe={handleAddProbe}
                       onRemoveProbe={handleRemoveProbe}
-            onMoveProbe={handleMoveProbe}
-            onSelectProbe={handleProbeMarkerClick}
+                      onMoveProbe={handleMoveProbe}
+                      onSelectProbe={handleProbeMarkerClick}
+                      selectedProbeId={probeDetailOpen ? selectedDetailProbeId : null}
+                      onCloseProbeDetail={() => setProbeDetailOpen(false)}
                     />
                   </div>
                   <StructuralFieldFooter 
