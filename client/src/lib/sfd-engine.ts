@@ -377,15 +377,24 @@ export class SFDEngine {
       // Mode change requires reinitialization for proper field setup
       // (e.g., cosmic web needs special clustering seeds)
       this.initialize();
+      this.invalidateDerivedFieldCache();
+      this.updateBasinMap();
+      this.notifyUpdate();
+    } else if (significantChange) {
+      // Significant parameter changes should invalidate caches
+      this.invalidateDerivedFieldCache();
+      this.updateBasinMap();
       this.notifyUpdate();
     } else if (params.couplingRadius !== undefined) {
       // Radius change affects rendering, notify immediately
+      this.invalidateDerivedFieldCache();
       this.notifyUpdate();
     } else if (params.wK !== undefined || params.wT !== undefined || 
-               params.wC !== undefined || params.wA !== undefined || params.wR !== undefined) {
-      // Weight parameter changes - just notify update for re-render
-      // Don't run steps automatically - let user control via play/pause
-      // Running steps on every slider change caused rapid uncontrolled simulation
+               params.wC !== undefined || params.wA !== undefined || params.wR !== undefined ||
+               params.curvatureGain !== undefined || params.attractorStrength !== undefined ||
+               params.couplingWeight !== undefined || params.redistributionRate !== undefined) {
+      // Weight parameter changes - invalidate cache and notify
+      this.invalidateDerivedFieldCache();
       this.notifyUpdate();
     }
   }
