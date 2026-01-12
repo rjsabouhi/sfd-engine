@@ -469,7 +469,7 @@ export function FloatingPerturbationPanel({
                   </div>
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent className="bg-neutral-900 border-white/10">
+              <SelectContent className="bg-neutral-900 border-white/10 z-[9999]">
                 {PERTURBATION_MODES.map(mode => (
                   <SelectItem key={mode.id} value={mode.id}>
                     <div className="flex items-center gap-2">
