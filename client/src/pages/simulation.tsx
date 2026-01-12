@@ -307,6 +307,7 @@ export default function SimulationPage() {
   const [perturbPinned, setPerturbPinnedState] = useState(() => getPanelState('perturbation'));
   const [inspectorPinned, setInspectorPinnedState] = useState(() => getPanelState('inspector'));
   const [diagnosticsPinned, setDiagnosticsPinnedState] = useState(() => getPanelState('diagnostics'));
+  const [probeDetailPinned, setProbeDetailPinnedState] = useState(() => getPanelState('probeDetail'));
   
   // Wrapper functions that update both store and local state
   const setPlaybackPinned = (state: { isPinned: boolean; position: { x: number; y: number } | null }) => {
@@ -324,6 +325,10 @@ export default function SimulationPage() {
   const setDiagnosticsPinned = (state: { isPinned: boolean; position: { x: number; y: number } | null }) => {
     setPanelPinned('diagnostics', state.isPinned, state.position);
     setDiagnosticsPinnedState(state);
+  };
+  const setProbeDetailPinned = (state: { isPinned: boolean; position: { x: number; y: number } | null }) => {
+    setPanelPinned('probeDetail', state.isPinned, state.position);
+    setProbeDetailPinnedState(state);
   };
   
   // Save panel open states before closing when exiting focus mode
@@ -358,6 +363,7 @@ export default function SimulationPage() {
       setPerturbPinnedState(getPanelState('perturbation'));
       setInspectorPinnedState(getPanelState('inspector'));
       setDiagnosticsPinnedState(getPanelState('diagnostics'));
+      setProbeDetailPinnedState(getPanelState('probeDetail'));
       
       // Restore which panels were open
       if (savedPanelOpenStateRef.current) {
@@ -2746,6 +2752,9 @@ export default function SimulationPage() {
             }
             return null;
           })()}
+          isPinned={probeDetailPinned.isPinned}
+          pinnedPosition={probeDetailPinned.position}
+          onPinnedChange={(isPinned, position) => setProbeDetailPinned({ isPinned, position })}
         />
       </div>
     );

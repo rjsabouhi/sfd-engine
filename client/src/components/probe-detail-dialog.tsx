@@ -26,6 +26,10 @@ interface ProbeDetailDialogProps {
   onFocus?: () => void;
   // Inspector panel rect for 25% max overlap constraint
   inspectorRect?: PanelRect | null;
+  // Lifted pinned state for persistence across view switches
+  isPinned?: boolean;
+  pinnedPosition?: { x: number; y: number } | null;
+  onPinnedChange?: (isPinned: boolean, position: { x: number; y: number } | null) => void;
 }
 
 export interface NeighborhoodData {
@@ -57,9 +61,16 @@ export function ProbeDetailDialog({
   zIndex = 60,
   onFocus,
   inspectorRect = null,
+  isPinned: isPinnedProp,
+  pinnedPosition: pinnedPositionProp,
+  onPinnedChange,
 }: ProbeDetailDialogProps) {
-  const [isPinned, setIsPinned] = useState(false);
-  const [pinnedPosition, setPinnedPosition] = useState<{ x: number; y: number } | null>(null);
+  // Use lifted state if provided, otherwise use local state
+  const [localIsPinned, setLocalIsPinned] = useState(false);
+  const [localPinnedPosition, setLocalPinnedPosition] = useState<{ x: number; y: number } | null>(null);
+  const isPinned = isPinnedProp !== undefined ? isPinnedProp : localIsPinned;
+  const pinnedPosition = pinnedPositionProp !== undefined ? pinnedPositionProp : localPinnedPosition;
+  
   const [size, setSize] = useState({ width: MIN_WIDTH, height: MIN_HEIGHT });
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -193,11 +204,19 @@ export function ProbeDetailDialog({
 
   const handlePin = () => {
     if (isPinned) {
-      setIsPinned(false);
-      setPinnedPosition(null);
+      if (onPinnedChange) {
+        onPinnedChange(false, null);
+      } else {
+        setLocalIsPinned(false);
+        setLocalPinnedPosition(null);
+      }
     } else {
-      setIsPinned(true);
-      setPinnedPosition(positionRef.current);
+      if (onPinnedChange) {
+        onPinnedChange(true, positionRef.current);
+      } else {
+        setLocalIsPinned(true);
+        setLocalPinnedPosition(positionRef.current);
+      }
     }
   };
 
@@ -240,9 +259,6 @@ export function ProbeDetailDialog({
         containerRef.current.style.left = `${newX}px`;
         containerRef.current.style.top = `${newY}px`;
         
-        if (isPinned) {
-          setPinnedPosition({ x: newX, y: newY });
-        }
       }
       
       if (isResizingRef.current) {
@@ -256,7 +272,13 @@ export function ProbeDetailDialog({
     };
 
     const handleMouseUp = () => {
-      isDraggingRef.current = false;
+      if (isDraggingRef.current) {
+        isDraggingRef.current = false;
+        // If pinned, update the pinned position to the new dragged location
+        if (isPinned && onPinnedChange) {
+          onPinnedChange(true, { x: positionRef.current.x, y: positionRef.current.y });
+        }
+      }
       isResizingRef.current = false;
     };
 
@@ -269,7 +291,7 @@ export function ProbeDetailDialog({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isOpen, isPinned, size.width]);
+  }, [isOpen, isPinned, onPinnedChange, size.width]);
 
   if (!isOpen || !probe) return null;
 
