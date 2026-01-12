@@ -50,6 +50,7 @@ import {
   Info,
   Sliders,
   ChevronDown,
+  Compass,
 } from "lucide-react";
 import type { SimulationParameters, SimulationState } from "@shared/schema";
 import { structuralPresets, defaultParameters } from "@shared/schema";
@@ -248,6 +249,41 @@ export function FullscreenMenuBar({
         </TooltipTrigger>
         <TooltipContent side="bottom" className="text-xs">Toggle Perturbation Mode</TooltipContent>
       </Tooltip>
+
+      <DropdownMenu>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 text-xs px-2 gap-1"
+                data-testid="dropdown-regimes"
+              >
+                <Compass className="h-3 w-3" />
+                Regimes
+                <ChevronDown className="h-3 w-3 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs">Structural Regimes</TooltipContent>
+        </Tooltip>
+        <DropdownMenuContent className="bg-popover border-border min-w-[180px]">
+          <DropdownMenuRadioGroup value="">
+            {Object.entries(structuralPresets).map(([key, preset]) => (
+              <DropdownMenuRadioItem 
+                key={key} 
+                value={key}
+                onClick={() => onParamsChange(preset)}
+                className="text-xs cursor-pointer"
+                data-testid={`regime-${key}`}
+              >
+                {key.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {showDualView && (
         <>
