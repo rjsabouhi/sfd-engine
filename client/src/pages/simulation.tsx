@@ -668,6 +668,16 @@ export default function SimulationPage() {
     bringPanelToFront('probedetail');
   }, []);
 
+  // Handler for clicking on probe markers - switches or opens detail panel
+  const handleProbeMarkerClick = useCallback((probeId: string) => {
+    setSelectedDetailProbeId(probeId);
+    // Open detail panel if not already open
+    if (!probeDetailOpen) {
+      setProbeDetailOpen(true);
+    }
+    bringPanelToFront('probedetail');
+  }, [probeDetailOpen]);
+
   const getNeighborhoodData = useCallback((x: number, y: number): NeighborhoodData | null => {
     return engineRef.current?.computeNeighborhoodData(x, y) || null;
   }, []);
@@ -1468,6 +1478,7 @@ export default function SimulationPage() {
             onAddProbe={handleAddProbe}
             onRemoveProbe={handleRemoveProbe}
             onMoveProbe={handleMoveProbe}
+            onSelectProbe={handleProbeMarkerClick}
           />
         </div>
 
@@ -2445,6 +2456,7 @@ export default function SimulationPage() {
                       onAddProbe={handleAddProbe}
                       onRemoveProbe={handleRemoveProbe}
             onMoveProbe={handleMoveProbe}
+            onSelectProbe={handleProbeMarkerClick}
                     />
                   </div>
                   <StructuralFieldFooter 
@@ -2493,6 +2505,7 @@ export default function SimulationPage() {
                   onAddProbe={handleAddProbe}
                   onRemoveProbe={handleRemoveProbe}
             onMoveProbe={handleMoveProbe}
+            onSelectProbe={handleProbeMarkerClick}
                 />
               </div>
               <StructuralFieldFooter 
@@ -2615,6 +2628,26 @@ export default function SimulationPage() {
           getNeighborhoodData={getNeighborhoodData}
           zIndex={getPanelZIndex('probedetail')}
           onFocus={() => bringPanelToFront('probedetail')}
+          otherPanelRects={(() => {
+            // Collect rects of other visible floating panels
+            const rects: { left: number; top: number; width: number; height: number }[] = [];
+            const panelSelectors = [
+              '[data-testid="floating-playback-panel"]',
+              '[data-testid="floating-perturbation-panel"]',
+              '[data-testid="floating-diagnostics"]',
+              '[data-testid="floating-inspector-panel"]',
+            ];
+            panelSelectors.forEach(selector => {
+              const el = document.querySelector(selector);
+              if (el) {
+                const rect = el.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0) {
+                  rects.push({ left: rect.left, top: rect.top, width: rect.width, height: rect.height });
+                }
+              }
+            });
+            return rects;
+          })()}
         />
       </div>
     );
@@ -2991,6 +3024,7 @@ export default function SimulationPage() {
                           onAddProbe={handleAddProbe}
                           onRemoveProbe={handleRemoveProbe}
             onMoveProbe={handleMoveProbe}
+            onSelectProbe={handleProbeMarkerClick}
                         />
                       </div>
                       <StructuralFieldFooter 
@@ -3039,6 +3073,7 @@ export default function SimulationPage() {
                       onAddProbe={handleAddProbe}
                       onRemoveProbe={handleRemoveProbe}
             onMoveProbe={handleMoveProbe}
+            onSelectProbe={handleProbeMarkerClick}
                     />
                   </div>
                   <StructuralFieldFooter 

@@ -6,6 +6,13 @@ import { Target, Trash2, Flag, MapPin, TrendingUp, TrendingDown, Minus, Compass,
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { SavedProbe, ProbeData } from "@shared/schema";
 
+interface PanelRect {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
 interface ProbeDetailDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,6 +24,8 @@ interface ProbeDetailDialogProps {
   getNeighborhoodData?: (x: number, y: number) => NeighborhoodData | null;
   zIndex?: number;
   onFocus?: () => void;
+  // Other panel rects for dynamic positioning to avoid overlaps
+  otherPanelRects?: PanelRect[];
 }
 
 export interface NeighborhoodData {
@@ -47,6 +56,7 @@ export function ProbeDetailDialog({
   getNeighborhoodData,
   zIndex = 60,
   onFocus,
+  otherPanelRects = [],
 }: ProbeDetailDialogProps) {
   const [isPinned, setIsPinned] = useState(false);
   const [pinnedPosition, setPinnedPosition] = useState<{ x: number; y: number } | null>(null);
@@ -60,16 +70,79 @@ export function ProbeDetailDialog({
   const resizeStartRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
   const hasPositionedRef = useRef(false);
 
+  // Helper to check if a rect overlaps with any panel
+  const checkOverlap = useCallback((x: number, y: number, w: number, h: number): boolean => {
+    for (const panel of otherPanelRects) {
+      const panelRight = panel.left + panel.width;
+      const panelBottom = panel.top + panel.height;
+      const myRight = x + w;
+      const myBottom = y + h;
+      
+      // Check for overlap
+      if (x < panelRight && myRight > panel.left && y < panelBottom && myBottom > panel.top) {
+        return true;
+      }
+    }
+    return false;
+  }, [otherPanelRects]);
+
+  // Find a position that doesn't overlap with other panels
+  const findClearPosition = useCallback((preferredX: number, preferredY: number, w: number, h: number): { x: number; y: number } => {
+    const padding = 20;
+    const headerHeight = 60;
+    
+    // Try preferred position first
+    if (!checkOverlap(preferredX, preferredY, w, h)) {
+      return { x: preferredX, y: preferredY };
+    }
+    
+    // Try positions in order: right side, left side, below, above
+    const candidatePositions = [
+      // Right side of screen
+      { x: window.innerWidth - w - padding, y: preferredY },
+      // Left side of screen
+      { x: padding, y: preferredY },
+      // Right side, lower
+      { x: window.innerWidth - w - padding, y: headerHeight + 100 },
+      // Left side, lower
+      { x: padding, y: headerHeight + 100 },
+      // Center but lower
+      { x: (window.innerWidth - w) / 2, y: window.innerHeight * 0.4 },
+      // Far right, middle height
+      { x: window.innerWidth - w - padding, y: window.innerHeight * 0.3 },
+    ];
+    
+    for (const pos of candidatePositions) {
+      const clampedX = Math.max(padding, Math.min(window.innerWidth - w - padding, pos.x));
+      const clampedY = Math.max(headerHeight, Math.min(window.innerHeight - h - padding, pos.y));
+      
+      if (!checkOverlap(clampedX, clampedY, w, h)) {
+        return { x: clampedX, y: clampedY };
+      }
+    }
+    
+    // Fallback: just use bottom right if all else fails
+    return { 
+      x: Math.max(padding, window.innerWidth - w - padding), 
+      y: Math.max(headerHeight, window.innerHeight - h - padding) 
+    };
+  }, [checkOverlap]);
+
   useEffect(() => {
     if (isOpen && containerRef.current && !hasPositionedRef.current) {
-      const x = Math.max(20, (window.innerWidth - size.width) / 2);
-      const y = Math.max(60, window.innerHeight * 0.15);
+      // Calculate preferred position (center-ish)
+      const preferredX = Math.max(20, (window.innerWidth - size.width) / 2);
+      const preferredY = Math.max(60, window.innerHeight * 0.15);
+      
+      // Find a position that doesn't overlap with other panels
+      const { x, y } = findClearPosition(preferredX, preferredY, size.width, size.height);
+      
       positionRef.current = { x, y };
       containerRef.current.style.left = `${x}px`;
       containerRef.current.style.top = `${y}px`;
       hasPositionedRef.current = true;
     }
-  }, [isOpen, size.width]);
+  }, [isOpen, size.width, size.height, findClearPosition]);
 
   useEffect(() => {
     if (!isOpen) {

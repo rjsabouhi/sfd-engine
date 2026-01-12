@@ -32,6 +32,7 @@ interface VisualizationCanvasProps {
   onAddProbe?: (x: number, y: number) => void;
   onRemoveProbe?: (id: string) => void;
   onMoveProbe?: (id: string, x: number, y: number) => void;
+  onSelectProbe?: (id: string) => void;
 }
 
 // Temporal smoothing buffer for perceptual safety
@@ -164,6 +165,7 @@ export function VisualizationCanvas({
   onAddProbe,
   onRemoveProbe,
   onMoveProbe,
+  onSelectProbe,
 }: VisualizationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -853,6 +855,8 @@ export function VisualizationCanvas({
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
+                  // Select this probe (switches detail panel to show this probe)
+                  onSelectProbe?.(probe.id);
                 }}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
