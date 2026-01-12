@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   Zap, 
   ArrowRightLeft, 
@@ -13,7 +14,8 @@ import {
   Wind,
   Target,
   X,
-  GripVertical
+  GripVertical,
+  Pin
 } from 'lucide-react';
 import { 
   PerturbationMode, 
@@ -75,26 +77,43 @@ export function FloatingPerturbationPanel({
   const [position, setPosition] = useState({ x: 80, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
   const [hasDragged, setHasDragged] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
+  const [pinnedPosition, setPinnedPosition] = useState<{ x: number; y: number } | null>(null);
   const dragRef = useRef<{ startX: number; startY: number; initialX: number; initialY: number } | null>(null);
 
   // Reposition when anchor rect is provided (on open)
   useEffect(() => {
-    if (anchorRect && isVisible && !hasDragged) {
-      const x = Math.max(8, Math.min(
-        anchorRect.left + anchorRect.width / 2 - PANEL_WIDTH / 2,
-        window.innerWidth - PANEL_WIDTH - 8
-      ));
-      const y = anchorRect.bottom + GAP_FROM_MENUBAR;
-      setPosition({ x, y });
+    if (isVisible) {
+      // If pinned, use pinned position
+      if (isPinned && pinnedPosition) {
+        setPosition(pinnedPosition);
+      } else if (anchorRect && !hasDragged) {
+        const x = Math.max(8, Math.min(
+          anchorRect.left + anchorRect.width / 2 - PANEL_WIDTH / 2,
+          window.innerWidth - PANEL_WIDTH - 8
+        ));
+        const y = anchorRect.bottom + GAP_FROM_MENUBAR;
+        setPosition({ x, y });
+      }
     }
-  }, [anchorRect, isVisible, hasDragged]);
+  }, [anchorRect, isVisible, hasDragged, isPinned, pinnedPosition]);
 
-  // Reset hasDragged when panel is closed
+  // Reset hasDragged when panel is closed (but keep pinned state)
   useEffect(() => {
     if (!isVisible) {
       setHasDragged(false);
     }
   }, [isVisible]);
+
+  const handlePin = () => {
+    if (isPinned) {
+      setIsPinned(false);
+      setPinnedPosition(null);
+    } else {
+      setIsPinned(true);
+      setPinnedPosition(position);
+    }
+  };
 
   const [impulseParams, setImpulseParams] = useState<ImpulseParams>(DEFAULT_PARAMS.impulse);
   const [shearParams, setShearParams] = useState<ShearParams>(DEFAULT_PARAMS.shear);
@@ -401,15 +420,33 @@ export function FloatingPerturbationPanel({
             <Zap className="h-3 w-3 text-yellow-400" />
             <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Perturbation</span>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="h-5 w-5 rounded-full text-neutral-500 hover:text-neutral-300"
-            data-testid="perturbation-close"
-          >
-            <X className="h-3 w-3" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handlePin}
+                  className={`h-5 w-5 rounded-full ${isPinned ? 'text-amber-400' : 'text-neutral-500 hover:text-neutral-300'}`}
+                  data-testid="perturbation-pin"
+                >
+                  <Pin className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                {isPinned ? 'Unpin Position' : 'Pin Position'}
+              </TooltipContent>
+            </Tooltip>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-5 w-5 rounded-full text-neutral-500 hover:text-neutral-300"
+              data-testid="perturbation-close"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
         
         <div className="p-3 space-y-3">

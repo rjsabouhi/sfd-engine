@@ -115,6 +115,7 @@ export function FloatingDiagnostics({
   const [compactView, setCompactView] = useState(false);
   
   const [isPinned, setIsPinned] = useState(false);
+  const [pinnedPosition, setPinnedPosition] = useState<{ x: number; y: number } | null>(null);
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 100, y: 80 });
   const [size, setSize] = useState({ width: 420, height: 520 });
@@ -130,22 +131,37 @@ export function FloatingDiagnostics({
 
   // Reposition when anchor rect is provided (on open)
   useEffect(() => {
-    if (anchorRect && isVisible && !hasDragged) {
-      const x = Math.max(8, Math.min(
-        anchorRect.left + anchorRect.width / 2 - DEFAULT_WIDTH / 2,
-        window.innerWidth - DEFAULT_WIDTH - 8
-      ));
-      const y = anchorRect.bottom + GAP_FROM_MENUBAR;
-      setPosition({ x, y });
+    if (isVisible) {
+      // If pinned, use pinned position
+      if (isPinned && pinnedPosition) {
+        setPosition(pinnedPosition);
+      } else if (anchorRect && !hasDragged) {
+        const x = Math.max(8, Math.min(
+          anchorRect.left + anchorRect.width / 2 - DEFAULT_WIDTH / 2,
+          window.innerWidth - DEFAULT_WIDTH - 8
+        ));
+        const y = anchorRect.bottom + GAP_FROM_MENUBAR;
+        setPosition({ x, y });
+      }
     }
-  }, [anchorRect, isVisible, hasDragged]);
+  }, [anchorRect, isVisible, hasDragged, isPinned, pinnedPosition]);
 
-  // Reset hasDragged when panel is closed
+  // Reset hasDragged when panel is closed (but keep pinned state)
   useEffect(() => {
     if (!isVisible) {
       setHasDragged(false);
     }
   }, [isVisible]);
+
+  const handleTogglePin = () => {
+    if (isPinned) {
+      setIsPinned(false);
+      setPinnedPosition(null);
+    } else {
+      setIsPinned(true);
+      setPinnedPosition(position);
+    }
+  };
 
   const updateDiagnostics = useCallback(() => {
     if (!engine || !isVisible || isMinimized) return;
@@ -334,7 +350,7 @@ export function FloatingDiagnostics({
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={() => setIsPinned(!isPinned)} 
+            onClick={handleTogglePin} 
             className={`h-6 w-6 ${isPinned ? 'text-amber-400' : 'text-neutral-500 hover:text-neutral-300'}`}
             data-testid="button-pin-diagnostics"
           >
