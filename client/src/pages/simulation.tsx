@@ -2520,61 +2520,23 @@ export default function SimulationPage() {
           </div>
         </div>
         
-        <div className="flex items-center gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => { setFocusMode(true); setBlendMode(true); setBlendOpacity(0.5); }} 
-                data-testid="button-focus-mode"
-                className="h-7 text-xs gap-1.5"
-              >
-                <Maximize2 className="h-3.5 w-3.5" />
-                Inspection Mode
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">
-              Enter inspection mode (F)
-            </TooltipContent>
-          </Tooltip>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => onboardingRef.current?.replay()} 
-            data-testid="button-show-intro"
-            className="h-7 text-xs"
-          >
-            Show Intro
-          </Button>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" data-testid="button-help" className="h-7 w-7">
-                <HelpCircle className="h-3.5 w-3.5" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>About Structural Field Dynamics</DialogTitle>
-                <DialogDescription className="pt-4 space-y-3 text-sm">
-                  <p>
-                    Structural Field Dynamics (SFD) is a geometric model of complex
-                    adaptive systems. This simulation demonstrates operator-driven
-                    field evolution on a 2D manifold.
-                  </p>
-                  <p><strong>The Five Operators:</strong></p>
-                  <ul className="list-disc pl-4 space-y-1">
-                    <li><strong>Curvature (K)</strong> — Responds to local curvature via discrete Laplacian</li>
-                    <li><strong>Gradient-Tension (T)</strong> — Drives tension waves based on gradient magnitude</li>
-                    <li><strong>Neighbor-Coupling (C)</strong> — Creates local clustering through Gaussian blur</li>
-                    <li><strong>Attractor-Formation (A)</strong> — Forms threshold-like basin structures</li>
-                    <li><strong>Global Redistribution (R)</strong> — Maintains coherence through mean-field shift</li>
-                  </ul>
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => { setFocusMode(true); setBlendMode(true); setBlendOpacity(0.5); }} 
+              data-testid="button-focus-mode"
+              className="h-7 text-xs gap-1.5"
+            >
+              <Maximize2 className="h-3.5 w-3.5" />
+              Inspection Mode
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs">
+            Enter inspection mode (F)
+          </TooltipContent>
+        </Tooltip>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
