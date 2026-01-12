@@ -543,12 +543,23 @@ export default function SimulationPage() {
       // Clear derived field when mode changes to prevent stale rendering
       if (newParams.mode !== undefined && newParams.mode !== prev.mode) {
         setDerivedField(null);
-        // Don't set basinMap to null - engine.getBasinMap() always returns valid map
       }
       engineRef.current?.setParams(newParams);
+      
+      // Always refresh basin map immediately after params change
+      // This ensures basins layer updates correctly when switching regimes
+      // The engine.getBasinMap() call is synchronous and always returns valid data
+      if (engineRef.current) {
+        setBasinMap(engineRef.current.getBasinMap());
+        // Also refresh derived field if not basins
+        if (derivedType !== "basins") {
+          setDerivedField(engineRef.current.computeDerivedField(derivedType as any));
+        }
+      }
+      
       return updated;
     });
-  }, []);
+  }, [derivedType]);
 
   const handlePlay = useCallback(() => {
     const engine = engineRef.current;
@@ -570,7 +581,14 @@ export default function SimulationPage() {
   const handleReset = useCallback(() => {
     clearTemporalBuffer();
     engineRef.current?.reset();
-  }, []);
+    // Immediately refresh basin map after reset to ensure basins layer displays correctly
+    if (engineRef.current) {
+      setBasinMap(engineRef.current.getBasinMap());
+      if (derivedType !== "basins") {
+        setDerivedField(engineRef.current.computeDerivedField(derivedType as any));
+      }
+    }
+  }, [derivedType]);
 
   // Mobile video recording handler - step-based (1 frame per simulation step)
   const handleStartRecording = useCallback(async () => {
