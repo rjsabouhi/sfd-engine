@@ -264,7 +264,7 @@ export function FloatingDiagnostics({
   return (
     <div
       ref={containerRef}
-      className={`fixed flex flex-col transition-all duration-200 ${isMinimized ? 'h-auto' : ''}`}
+      className={`fixed flex flex-col ${isMinimized ? 'h-auto' : ''}`}
       style={{
         left: position.x,
         top: position.y,
