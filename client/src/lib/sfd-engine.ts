@@ -1091,11 +1091,9 @@ export class SFDEngine {
   }
 
   getBasinMap(): BasinMap {
-    // Always return a valid basin map - compute if null
-    if (this.basinMap === null) {
-      this.updateBasinMap();
-    }
-    // updateBasinMap() guarantees basinMap is set (even if trivial)
+    // Always compute fresh basin map to ensure React sees changes during live simulation
+    // The updateBasinMap() call creates a new object each time, which React can detect
+    this.updateBasinMap();
     return this.basinMap!;
   }
 
