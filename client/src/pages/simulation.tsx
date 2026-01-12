@@ -317,6 +317,7 @@ export default function SimulationPage() {
   
   // Close all floating panels when exiting focus mode (switching to dashboard)
   // but preserve their pinned positions in the store
+  // Re-sync from store when returning to focus mode to get latest pinned positions
   useEffect(() => {
     if (!focusMode) {
       setPlaybackPanelOpen(false);
@@ -326,6 +327,12 @@ export default function SimulationPage() {
       setFieldInspectorEnabled(false);
       setDiagnosticsVisible(false);
       setProbeDetailOpen(false);
+    } else {
+      // Re-read pinned positions from store when returning to focusMode
+      setPlaybackPinnedState(getPanelState('playback'));
+      setPerturbPinnedState(getPanelState('perturbation'));
+      setInspectorPinnedState(getPanelState('inspector'));
+      setDiagnosticsPinnedState(getPanelState('diagnostics'));
     }
   }, [focusMode]);
   

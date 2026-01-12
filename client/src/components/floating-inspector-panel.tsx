@@ -183,7 +183,13 @@ export function FloatingInspectorPanel({
     };
 
     const handleMouseUp = () => {
-      isDraggingRef.current = false;
+      if (isDraggingRef.current) {
+        isDraggingRef.current = false;
+        // If pinned, update the pinned position to the new dragged location
+        if (isPinned && onPinnedChange) {
+          onPinnedChange(true, { x: positionRef.current.x, y: positionRef.current.y });
+        }
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -193,7 +199,7 @@ export function FloatingInspectorPanel({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, []);
+  }, [isPinned, onPinnedChange]);
 
   if (!isVisible) return null;
 

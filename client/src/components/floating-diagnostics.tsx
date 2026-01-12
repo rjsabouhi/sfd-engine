@@ -291,6 +291,12 @@ export function FloatingDiagnostics({
     e.preventDefault();
   }, [size]);
 
+  // Track pending position for mouseup callback
+  const pendingPositionRef = useRef(position);
+  useEffect(() => {
+    pendingPositionRef.current = position;
+  }, [position]);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDraggingRef.current) {
@@ -312,7 +318,13 @@ export function FloatingDiagnostics({
     };
 
     const handleMouseUp = () => {
-      isDraggingRef.current = false;
+      if (isDraggingRef.current) {
+        isDraggingRef.current = false;
+        // If pinned, update the pinned position to the new dragged location
+        if (isPinned && onPinnedChange) {
+          onPinnedChange(true, { x: pendingPositionRef.current.x, y: pendingPositionRef.current.y });
+        }
+      }
       isResizingRef.current = false;
     };
 
@@ -322,7 +334,7 @@ export function FloatingDiagnostics({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [size.width]);
+  }, [size.width, isPinned, onPinnedChange]);
 
   const handleRunDeterminism = useCallback(async () => {
     if (!engine) return;
