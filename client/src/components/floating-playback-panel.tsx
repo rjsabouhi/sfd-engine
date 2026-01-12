@@ -101,21 +101,21 @@ export function FloatingPlaybackPanel({
       onMouseDown={() => onFocus?.()}
       data-testid="floating-playback-panel"
     >
-      <div className="bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl">
+      <div className="bg-neutral-900/90 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl">
         <div 
-          className="flex items-center justify-between px-3 py-1.5 border-b border-border cursor-move select-none"
+          className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 cursor-move select-none"
           onMouseDown={handleMouseDown}
         >
           <div className="flex items-center gap-1.5">
-            <GripVertical className="h-3 w-3 text-muted-foreground" />
+            <GripVertical className="h-3 w-3 text-neutral-500" />
             <Play className="h-3 w-3 text-cyan-400" />
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Playback</span>
+            <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Playback</span>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="h-5 w-5 rounded-full"
+            className="h-5 w-5 rounded-full text-neutral-500 hover:text-neutral-300"
             data-testid="playback-close"
           >
             <X className="h-3 w-3" />
@@ -212,7 +212,7 @@ export function FloatingPlaybackPanel({
           </div>
 
           <div className="flex items-center gap-2 mt-2">
-            <span className="text-[10px] font-mono text-muted-foreground w-7 text-right">
+            <span className="text-[10px] font-mono text-neutral-500 w-7 text-right">
               {currentHistoryIndex + 1}
             </span>
             <div className="flex-1 min-w-[100px]">
@@ -226,13 +226,13 @@ export function FloatingPlaybackPanel({
                 data-testid="playback-scrubber"
               />
             </div>
-            <span className="text-[10px] font-mono text-muted-foreground w-7">
+            <span className="text-[10px] font-mono text-neutral-500 w-7">
               {historyLength}
             </span>
-            <div className="border-l border-border pl-2 ml-1">
+            <div className="border-l border-white/10 pl-2 ml-1">
               <div className="text-center">
-                <span className="text-xs font-mono text-foreground">{currentStep}</span>
-                <span className="text-[8px] text-muted-foreground ml-1">step</span>
+                <span className="text-xs font-mono text-neutral-200">{currentStep}</span>
+                <span className="text-[8px] text-neutral-500 ml-1">step</span>
               </div>
             </div>
           </div>

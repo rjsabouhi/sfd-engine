@@ -271,24 +271,24 @@ export function FloatingDiagnostics({
         width: isMinimized ? 280 : size.width,
         height: isMinimized ? 'auto' : size.height,
         zIndex: isPinned ? 9999 : zIndex,
-        backgroundColor: 'rgba(8, 8, 12, 0.94)',
-        border: `1px solid ${isPinned ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
+        backgroundColor: 'rgba(23, 23, 23, 0.90)',
+        border: `1px solid ${isPinned ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
         borderRadius: '8px',
         boxShadow: isPinned ? '0 8px 32px rgba(251, 191, 36, 0.15)' : '0 8px 32px rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(8px)',
+        backdropFilter: 'blur(12px)',
       }}
       onMouseDown={() => onFocus?.()}
       data-testid="floating-diagnostics"
     >
       {/* Header / Drag Handle */}
       <div 
-        className="flex items-center justify-between px-3 py-2 border-b border-white/8 cursor-move select-none shrink-0"
+        className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 cursor-move select-none shrink-0"
         onMouseDown={handleMouseDown}
       >
-        <div className="flex items-center gap-2">
-          <GripHorizontal className="h-3.5 w-3.5 text-neutral-500" />
-          <Gauge className="h-3.5 w-3.5 text-emerald-400" />
-          <span className="text-xs font-medium text-neutral-200">Diagnostics Console</span>
+        <div className="flex items-center gap-1.5">
+          <GripHorizontal className="h-3 w-3 text-neutral-500" />
+          <Gauge className="h-3 w-3 text-emerald-400" />
+          <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Diagnostics</span>
         </div>
         <div className="flex items-center gap-1" data-no-drag>
           <Button 
@@ -324,7 +324,7 @@ export function FloatingDiagnostics({
       {!isMinimized && (
         <>
           {/* Tab Bar */}
-          <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-white/5 shrink-0 overflow-x-auto">
+          <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-white/10 shrink-0 overflow-x-auto">
             {tabs.map(tab => (
               <button
                 key={tab.id}
