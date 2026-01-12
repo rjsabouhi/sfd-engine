@@ -100,6 +100,16 @@ Added comprehensive export capabilities for research use:
 - **Batch Spec (.json)**: Minimal parameter specification for automated testing
 - **Full Archive (.json)**: Comprehensive bundle with field, operators, events, metrics, config
 
+### Global Playback Architecture (January 2026)
+Complete simulation history preservation across all parameter and regime changes:
+- **FrameSnapshot Extended**: Each frame now stores full SimulationParameters alongside grid data
+- **History Persistence**: Ring buffer no longer clears on parameter/regime changes - timeline preserved
+- **Event Markers**: Snapshots include eventMarker field for tracking significant changes (mode changes, parameter shifts)
+- **Parameter Restoration**: When resuming from a historical frame, both grid AND parameters are restored
+- **UI State Sync**: React state syncs with restored params via getPlaybackParams() when committing from playback
+- **Explicit Reset**: Only reset() and resetToDefaults() clear history - parameter changes preserve timeline
+- Users can now scrub through entire simulation timeline including regime transitions
+
 ### Engine Enhancements
 - Ring buffer for temporal history (100 frames, ~36MB for 300x300 grid)
 - Operator contribution tracking per update step
