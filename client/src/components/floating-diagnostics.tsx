@@ -153,6 +153,8 @@ export function FloatingDiagnostics({
   const [internalsData, setInternalsData] = useState<DiagnosticInternalsData | null>(null);
   const [determinismReport, setDeterminismReport] = useState<DeterminismReport | null>(null);
   const [isRunningDeterminism, setIsRunningDeterminism] = useState(false);
+  const [determinismProgress, setDeterminismProgress] = useState(0);
+  const [determinismPhase, setDeterminismPhase] = useState("");
   const [frameHash, setFrameHash] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [autoScroll, setAutoScroll] = useState(true);
@@ -284,15 +286,23 @@ export function FloatingDiagnostics({
     };
   }, [size.width]);
 
-  const handleRunDeterminism = useCallback(() => {
+  const handleRunDeterminism = useCallback(async () => {
     if (!engine) return;
     setIsRunningDeterminism(true);
+    setDeterminismProgress(0);
+    setDeterminismPhase("Starting...");
     
-    setTimeout(() => {
-      const report = engine.runDeterminismCheck(100);
+    try {
+      const report = await engine.runDeterminismCheckAsync(100, (progress, phase) => {
+        setDeterminismProgress(progress);
+        setDeterminismPhase(phase);
+      });
       setDeterminismReport(report);
+    } finally {
       setIsRunningDeterminism(false);
-    }, 50);
+      setDeterminismProgress(0);
+      setDeterminismPhase("");
+    }
   }, [engine]);
 
   const handleExportDiagnostics = useCallback(() => {
@@ -502,10 +512,24 @@ export function FloatingDiagnostics({
                     className="w-full relative ring-1 ring-cyan-500/50 shadow-[0_0_12px_rgba(34,211,238,0.25)]"
                     data-testid="button-run-determinism"
                   >
-                    {isRunningDeterminism ? "Running..." : "Run Determinism Check (100 steps)"}
+                    {isRunningDeterminism ? `${determinismPhase} (${Math.round(determinismProgress * 100)}%)` : "Run Determinism Check (100 steps)"}
                   </Button>
                   
-                  {determinismReport && (
+                  {isRunningDeterminism && (
+                    <div className="mt-2 space-y-1">
+                      <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 transition-all duration-150"
+                          style={{ width: `${determinismProgress * 100}%` }}
+                        />
+                      </div>
+                      <div className="text-[10px] text-neutral-400 text-center">
+                        {determinismPhase} — Step {Math.round(determinismProgress * 200)} of 200
+                      </div>
+                    </div>
+                  )}
+                  
+                  {determinismReport && !isRunningDeterminism && (
                     <div className="mt-3 space-y-1 bg-black/30 rounded p-2.5 border border-white/10">
                       <StatRow 
                         label="Status" 

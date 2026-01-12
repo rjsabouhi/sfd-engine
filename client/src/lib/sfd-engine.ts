@@ -2429,6 +2429,71 @@ export class SFDEngine {
     };
   }
   
+  async runDeterminismCheckAsync(
+    stepsToRun: number = 100, 
+    onProgress?: (progress: number, phase: string) => void
+  ): Promise<DeterminismReport> {
+    const seed = Date.now();
+    const chunkSize = 10; // Steps per chunk to allow UI updates
+    
+    // Run 1
+    this.initialize(seed);
+    for (let i = 0; i < stepsToRun; i += chunkSize) {
+      const end = Math.min(i + chunkSize, stepsToRun);
+      for (let j = i; j < end; j++) {
+        this.updateStep();
+      }
+      onProgress?.((end / stepsToRun) * 0.5, "Run 1");
+      await new Promise(resolve => setTimeout(resolve, 0)); // Yield to UI
+    }
+    const run1Grid = new Float32Array(this.grid);
+    const run1Stats = this.computeStatistics();
+    const run1Hash = this.computeFrameHash();
+    
+    // Run 2
+    this.initialize(seed);
+    for (let i = 0; i < stepsToRun; i += chunkSize) {
+      const end = Math.min(i + chunkSize, stepsToRun);
+      for (let j = i; j < end; j++) {
+        this.updateStep();
+      }
+      onProgress?.(0.5 + (end / stepsToRun) * 0.5, "Run 2");
+      await new Promise(resolve => setTimeout(resolve, 0)); // Yield to UI
+    }
+    const run2Grid = new Float32Array(this.grid);
+    const run2Stats = this.computeStatistics();
+    
+    // Compare
+    let pixelDiff = 0;
+    let totalAbsDev = 0;
+    const diffGrid = new Float32Array(this.grid.length);
+    
+    for (let i = 0; i < run1Grid.length; i++) {
+      const diff = Math.abs(run1Grid[i] - run2Grid[i]);
+      diffGrid[i] = diff;
+      if (diff > 1e-10) pixelDiff++;
+      totalAbsDev += diff;
+    }
+    
+    const meanAbsoluteDeviation = totalAbsDev / this.grid.length;
+    const isDeterministic = pixelDiff === 0 && meanAbsoluteDeviation < 1e-10;
+    
+    // Restore to run2 state (deterministic result)
+    this.notifyUpdate();
+    
+    return {
+      seed,
+      stepsRun: stepsToRun,
+      finalHash: run1Hash,
+      run1FinalEnergy: run1Stats.energy,
+      run2FinalEnergy: run2Stats.energy,
+      pixelDifference: pixelDiff,
+      meanAbsoluteDeviation,
+      isDeterministic,
+      diffGrid: isDeterministic ? null : diffGrid,
+    };
+  }
+  
   exportDiagnosticData(): string {
     const solverData = this.getDiagnosticSolverData();
     const renderData = this.getDiagnosticRenderData();
