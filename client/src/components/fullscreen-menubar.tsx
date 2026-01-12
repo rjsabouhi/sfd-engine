@@ -349,66 +349,6 @@ export function FullscreenMenuBar({
       
       <Menubar className="border-0 bg-transparent h-7 p-0 space-x-0">
         <MenubarMenu>
-          <MenubarTrigger className="text-xs px-2 py-1 h-6" data-testid="menu-parameters">
-            Parameters
-          </MenubarTrigger>
-          <MenubarContent className="bg-popover border-border min-w-[220px] z-[200]">
-            <MenubarLabel className="text-[10px] text-muted-foreground uppercase tracking-wider">Structural Regimes</MenubarLabel>
-            {Object.entries(structuralPresets).map(([key, preset]) => (
-              <MenubarItem 
-                key={key} 
-                onClick={() => onParamsChange(preset)}
-                className="text-xs"
-                data-testid={`menu-preset-${key}`}
-              >
-                {key.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-              </MenubarItem>
-            ))}
-            <MenubarSeparator className="bg-border" />
-            <MenubarLabel className="text-[10px] text-muted-foreground uppercase tracking-wider">Visual Styles</MenubarLabel>
-            <MenubarSub>
-              <MenubarSubTrigger className="text-xs">
-                <Palette className="h-3.5 w-3.5 mr-2" />
-                Visual Presets
-              </MenubarSubTrigger>
-              <MenubarSubContent className="bg-popover border-border max-h-72 overflow-y-auto">
-                {visualPresets.map((preset, index) => (
-                  <MenubarItem 
-                    key={preset.id} 
-                    onClick={() => onVisualPresetApply(index)}
-                    className="text-xs gap-2"
-                  >
-                    <div 
-                      className="w-3 h-3 rounded-sm" 
-                      style={{ background: `linear-gradient(135deg, ${preset.previewColor1}, ${preset.previewColor2})` }}
-                    />
-                    {preset.label}
-                  </MenubarItem>
-                ))}
-              </MenubarSubContent>
-            </MenubarSub>
-            <MenubarSeparator className="bg-border" />
-            <MenubarItem 
-              onClick={() => onParamsChange(defaultParameters)}
-              className="text-xs gap-2"
-              data-testid="menu-reset-params"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              Reset to Defaults
-            </MenubarItem>
-            {onOpenParameterPanel && (
-              <MenubarItem 
-                onClick={onOpenParameterPanel}
-                className="text-xs gap-2"
-              >
-                <Sliders className="h-3.5 w-3.5" />
-                Open Parameter Panel...
-              </MenubarItem>
-            )}
-          </MenubarContent>
-        </MenubarMenu>
-
-        <MenubarMenu>
           <MenubarTrigger className="text-xs px-2 py-1 h-6" data-testid="menu-export">
             Export
           </MenubarTrigger>
