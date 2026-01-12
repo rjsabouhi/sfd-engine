@@ -2847,18 +2847,6 @@ export default function SimulationPage() {
         </button>
         
         <aside className={`${metricsPanelCollapsed ? 'w-0 overflow-hidden' : 'w-[420px]'} flex-none border-l border-border bg-card flex flex-col overflow-hidden transition-all duration-300`}>
-          <div className="p-3 border-b border-border">
-            <PerturbationPanel
-              onApplyPerturbation={handleApplyPerturbation}
-              fieldWidth={isMobile ? 150 : 300}
-              fieldHeight={isMobile ? 150 : 300}
-              perturbMode={perturbMode}
-              onPerturbModeChange={setPerturbMode}
-              selectedMode={selectedPerturbMode}
-              onModeChange={setSelectedPerturbMode}
-              onParamsChange={setPerturbParams}
-            />
-          </div>
           <ControlPanel
                 params={params}
                 state={state}
@@ -2911,7 +2899,12 @@ export default function SimulationPage() {
       <Dialog open={perturbControlsOpen} onOpenChange={setPerturbControlsOpen}>
         <DialogContent className="max-w-md bg-neutral-900/95 backdrop-blur-xl border-white/10">
           <DialogHeader className="flex flex-row items-center justify-between">
-            <DialogTitle className="text-white">Perturbation Controls</DialogTitle>
+            <div>
+              <DialogTitle className="text-white">Perturbation Controls</DialogTitle>
+              <DialogDescription className="text-xs text-white/60">
+                Configure perturbation mode and parameters
+              </DialogDescription>
+            </div>
             <Button 
               variant="ghost" 
               size="icon" 
