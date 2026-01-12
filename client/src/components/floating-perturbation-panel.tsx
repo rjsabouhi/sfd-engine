@@ -38,6 +38,7 @@ interface FloatingPerturbationPanelProps {
   selectedMode: PerturbationMode;
   onModeChange: (mode: PerturbationMode) => void;
   onParamsChange: (params: Record<string, any>) => void;
+  onResetField: () => void;
 }
 
 const ICONS: Record<PerturbationMode, React.ReactNode> = {
@@ -60,6 +61,7 @@ export function FloatingPerturbationPanel({
   selectedMode,
   onModeChange,
   onParamsChange,
+  onResetField,
 }: FloatingPerturbationPanelProps) {
   const [position, setPosition] = useState({ x: 80, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
@@ -436,18 +438,10 @@ export function FloatingPerturbationPanel({
             </Button>
             <Button
               variant="outline"
-              onClick={() => {
-                setImpulseParams(DEFAULT_PARAMS.impulse);
-                setShearParams(DEFAULT_PARAMS.shear);
-                setWaveParams(DEFAULT_PARAMS.wave);
-                setVortexParams(DEFAULT_PARAMS.vortex);
-                setFractureParams(DEFAULT_PARAMS.fracture);
-                setDriftParams(DEFAULT_PARAMS.drift);
-                onParamsChange(DEFAULT_PARAMS[selectedMode]);
-              }}
+              onClick={onResetField}
               className="h-7 text-xs px-2"
               size="sm"
-              data-testid="floating-reset-perturbation"
+              data-testid="floating-reset-field"
             >
               <RotateCcw className="h-3 w-3" />
             </Button>

@@ -2379,6 +2379,7 @@ export default function SimulationPage() {
           selectedMode={selectedPerturbMode}
           onModeChange={setSelectedPerturbMode}
           onParamsChange={setPerturbParams}
+          onResetField={handleReset}
         />
         
         <FloatingDiagnostics
