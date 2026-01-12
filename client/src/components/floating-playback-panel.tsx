@@ -31,6 +31,10 @@ interface FloatingPlaybackPanelProps {
   zIndex?: number;
   onFocus?: () => void;
   anchorRect?: DOMRect | null;
+  // Lifted pinned state for persistence across view switches
+  isPinned?: boolean;
+  pinnedPosition?: { x: number; y: number } | null;
+  onPinnedChange?: (isPinned: boolean, position: { x: number; y: number } | null) => void;
 }
 
 const PANEL_WIDTH = 260;
@@ -52,9 +56,15 @@ export function FloatingPlaybackPanel({
   zIndex = 50,
   onFocus,
   anchorRect,
+  isPinned: isPinnedProp,
+  pinnedPosition: pinnedPositionProp,
+  onPinnedChange,
 }: FloatingPlaybackPanelProps) {
-  const [isPinned, setIsPinned] = useState(false);
-  const [pinnedPosition, setPinnedPosition] = useState<{ x: number; y: number } | null>(null);
+  // Use lifted state if provided, otherwise use local state
+  const [localIsPinned, setLocalIsPinned] = useState(false);
+  const [localPinnedPosition, setLocalPinnedPosition] = useState<{ x: number; y: number } | null>(null);
+  const isPinned = isPinnedProp !== undefined ? isPinnedProp : localIsPinned;
+  const pinnedPosition = pinnedPositionProp !== undefined ? pinnedPositionProp : localPinnedPosition;
   const [hasDragged, setHasDragged] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -95,11 +105,19 @@ export function FloatingPlaybackPanel({
 
   const handlePin = () => {
     if (isPinned) {
-      setIsPinned(false);
-      setPinnedPosition(null);
+      if (onPinnedChange) {
+        onPinnedChange(false, null);
+      } else {
+        setLocalIsPinned(false);
+        setLocalPinnedPosition(null);
+      }
     } else {
-      setIsPinned(true);
-      setPinnedPosition(positionRef.current);
+      if (onPinnedChange) {
+        onPinnedChange(true, positionRef.current);
+      } else {
+        setLocalIsPinned(true);
+        setLocalPinnedPosition(positionRef.current);
+      }
     }
   };
 

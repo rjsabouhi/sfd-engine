@@ -289,6 +289,11 @@ export default function SimulationPage() {
   const [diagnosticsAnchorRect, setDiagnosticsAnchorRect] = useState<DOMRect | null>(null);
   const [inspectorAnchorRect, setInspectorAnchorRect] = useState<DOMRect | null>(null);
   
+  // Pinned state for floating panels - lifted up for persistence across view switches
+  const [playbackPinned, setPlaybackPinned] = useState<{ isPinned: boolean; position: { x: number; y: number } | null }>({ isPinned: false, position: null });
+  const [perturbPinned, setPerturbPinned] = useState<{ isPinned: boolean; position: { x: number; y: number } | null }>({ isPinned: false, position: null });
+  const [inspectorPinned, setInspectorPinned] = useState<{ isPinned: boolean; position: { x: number; y: number } | null }>({ isPinned: false, position: null });
+  
   // Bring a panel to front by moving it to end of order array
   const bringPanelToFront = (panel: 'playback' | 'perturbation' | 'diagnostics' | 'inspector' | 'probedetail') => {
     setActivePanelOrder(prev => {
@@ -2566,6 +2571,9 @@ export default function SimulationPage() {
           zIndex={getPanelZIndex('playback')}
           onFocus={() => bringPanelToFront('playback')}
           anchorRect={playbackAnchorRect}
+          isPinned={playbackPinned.isPinned}
+          pinnedPosition={playbackPinned.position}
+          onPinnedChange={(isPinned, position) => setPlaybackPinned({ isPinned, position })}
         />
         
         <FloatingPerturbationPanel
@@ -2586,6 +2594,9 @@ export default function SimulationPage() {
           zIndex={getPanelZIndex('perturbation')}
           onFocus={() => bringPanelToFront('perturbation')}
           anchorRect={perturbAnchorRect}
+          isPinned={perturbPinned.isPinned}
+          pinnedPosition={perturbPinned.position}
+          onPinnedChange={(isPinned, position) => setPerturbPinned({ isPinned, position })}
         />
         
         <FloatingDiagnostics
@@ -2623,6 +2634,9 @@ export default function SimulationPage() {
           getProbeDataAt={getProbeDataAt}
           cursorMode={cursorMode}
           onCursorModeChange={setCursorMode}
+          isPinned={inspectorPinned.isPinned}
+          pinnedPosition={inspectorPinned.position}
+          onPinnedChange={(isPinned, position) => setInspectorPinned({ isPinned, position })}
         />
         
         <ProbeDetailDialog

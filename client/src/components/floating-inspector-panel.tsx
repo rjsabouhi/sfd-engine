@@ -47,6 +47,10 @@ interface FloatingInspectorPanelProps {
   getProbeDataAt: (x: number, y: number) => ProbeData | null;
   cursorMode?: CursorMode;
   onCursorModeChange?: (mode: CursorMode) => void;
+  // Lifted pinned state for persistence across view switches
+  isPinned?: boolean;
+  pinnedPosition?: { x: number; y: number } | null;
+  onPinnedChange?: (isPinned: boolean, position: { x: number; y: number } | null) => void;
 }
 
 const PANEL_WIDTH = 280;
@@ -69,9 +73,15 @@ export function FloatingInspectorPanel({
   getProbeDataAt,
   cursorMode = 'select',
   onCursorModeChange,
+  isPinned: isPinnedProp,
+  pinnedPosition: pinnedPositionProp,
+  onPinnedChange,
 }: FloatingInspectorPanelProps) {
-  const [isPinned, setIsPinned] = useState(false);
-  const [pinnedPosition, setPinnedPosition] = useState<{ x: number; y: number } | null>(null);
+  // Use lifted state if provided, otherwise use local state
+  const [localIsPinned, setLocalIsPinned] = useState(false);
+  const [localPinnedPosition, setLocalPinnedPosition] = useState<{ x: number; y: number } | null>(null);
+  const isPinned = isPinnedProp !== undefined ? isPinnedProp : localIsPinned;
+  const pinnedPosition = pinnedPositionProp !== undefined ? pinnedPositionProp : localPinnedPosition;
   const [hasDragged, setHasDragged] = useState(false);
   const [selectedProbeId, setSelectedProbeId] = useState<string | null>(null);
   
@@ -111,11 +121,19 @@ export function FloatingInspectorPanel({
 
   const handlePin = () => {
     if (isPinned) {
-      setIsPinned(false);
-      setPinnedPosition(null);
+      if (onPinnedChange) {
+        onPinnedChange(false, null);
+      } else {
+        setLocalIsPinned(false);
+        setLocalPinnedPosition(null);
+      }
     } else {
-      setIsPinned(true);
-      setPinnedPosition(positionRef.current);
+      if (onPinnedChange) {
+        onPinnedChange(true, positionRef.current);
+      } else {
+        setLocalIsPinned(true);
+        setLocalPinnedPosition(positionRef.current);
+      }
     }
   };
 
