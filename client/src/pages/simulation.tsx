@@ -48,6 +48,7 @@ import { visualPresets, type VisualPreset } from "@/config/visual-presets";
 import { applyPreset, cancelPresetTransition } from "@/lib/apply-preset";
 import { WelcomeModal } from "@/components/welcome-modal";
 import { FullscreenMenuBar } from "@/components/fullscreen-menubar";
+import { FloatingPlaybackPanel } from "@/components/floating-playback-panel";
 import { PerturbationPanel } from "@/components/perturbation-panel";
 import { type PerturbationMode, DEFAULT_PARAMS } from "@/lib/perturbations/types";
 
@@ -2340,6 +2341,19 @@ export default function SimulationPage() {
             </div>
           )}
         </div>
+        
+        <FloatingPlaybackPanel
+          isRunning={state.isRunning}
+          currentStep={state.step}
+          historyLength={historyLength}
+          currentHistoryIndex={currentHistoryIndex}
+          onPlay={handlePlay}
+          onPause={handlePause}
+          onReset={handleReset}
+          onStepBackward={handleStepBackward}
+          onStepForward={handleStepForward}
+          onSeekFrame={handleSeekFrame}
+        />
         
         <FloatingDiagnostics
           engine={engineRef.current}
