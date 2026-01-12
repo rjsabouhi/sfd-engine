@@ -27,6 +27,9 @@ interface VisualizationCanvasProps {
   // Saved probe markers
   savedProbes?: SavedProbe[];
   showProbeMarkers?: boolean;
+  // Inspector mode - clicks add probes instead of perturbing
+  inspectorMode?: boolean;
+  onAddProbe?: (x: number, y: number) => void;
 }
 
 // Temporal smoothing buffer for perceptual safety
@@ -155,6 +158,8 @@ export function VisualizationCanvas({
   overlayOpacity = 0,
   savedProbes = [],
   showProbeMarkers = true,
+  inspectorMode = false,
+  onAddProbe,
 }: VisualizationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -569,7 +574,7 @@ export function VisualizationCanvas({
   }, []);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!field || !onClick || isPanning) return;
+    if (!field || isPanning) return;
     
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -582,13 +587,19 @@ export function VisualizationCanvas({
     const y = Math.floor((e.clientY - rect.top) * scaleY);
     
     if (x >= 0 && x < field.width && y >= 0 && y < field.height) {
-      onClick(x, y, e.shiftKey);
+      // In inspector mode, clicks add probes; otherwise delegate to onClick
+      if (inspectorMode && onAddProbe) {
+        onAddProbe(x, y);
+      } else if (onClick) {
+        onClick(x, y, e.shiftKey);
+      }
     }
-  }, [field, onClick, isPanning]);
+  }, [field, onClick, isPanning, inspectorMode, onAddProbe]);
 
   const zoomPercent = Math.round(zoom * 100);
   
   const getCursor = () => {
+    if (inspectorMode) return 'copy'; // Indicates adding a probe marker
     if (perturbMode) return 'cell';
     if (zoom > 1) return isPanning ? 'grabbing' : 'grab';
     return 'crosshair';

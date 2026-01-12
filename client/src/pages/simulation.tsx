@@ -2406,6 +2406,10 @@ export default function SimulationPage() {
                       perturbMode={perturbMode}
                       trajectoryProbePoint={trajectoryProbePoint}
                       perceptualSmoothing={perceptualSmoothing}
+                      savedProbes={savedProbes}
+                      showProbeMarkers={inspectorPanelOpen}
+                      inspectorMode={inspectorPanelOpen}
+                      onAddProbe={handleAddProbe}
                     />
                   </div>
                   <StructuralFieldFooter 
@@ -2450,6 +2454,8 @@ export default function SimulationPage() {
                   perceptualSmoothing={perceptualSmoothing}
                   savedProbes={savedProbes}
                   showProbeMarkers={inspectorPanelOpen}
+                  inspectorMode={inspectorPanelOpen}
+                  onAddProbe={handleAddProbe}
                 />
               </div>
               <StructuralFieldFooter 
@@ -2926,6 +2932,10 @@ export default function SimulationPage() {
                           perturbMode={perturbMode}
                           trajectoryProbePoint={trajectoryProbePoint}
                           perceptualSmoothing={perceptualSmoothing}
+                          savedProbes={savedProbes}
+                          showProbeMarkers={inspectorPanelOpen}
+                          inspectorMode={inspectorPanelOpen}
+                          onAddProbe={handleAddProbe}
                         />
                       </div>
                       <StructuralFieldFooter 
@@ -2968,6 +2978,10 @@ export default function SimulationPage() {
                       perturbMode={perturbMode}
                       trajectoryProbePoint={trajectoryProbePoint}
                       perceptualSmoothing={perceptualSmoothing}
+                      savedProbes={savedProbes}
+                      showProbeMarkers={inspectorPanelOpen}
+                      inspectorMode={inspectorPanelOpen}
+                      onAddProbe={handleAddProbe}
                     />
                   </div>
                   <StructuralFieldFooter 
