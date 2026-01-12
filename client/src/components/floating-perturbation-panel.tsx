@@ -410,7 +410,15 @@ export function FloatingPerturbationPanel({
       onMouseDown={() => onFocus?.()}
       data-testid="floating-perturbation-panel"
     >
-      <div className="bg-neutral-900/90 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl w-[260px]">
+      <div 
+        className="rounded-lg w-[260px]"
+        style={{
+          backgroundColor: 'rgba(23, 23, 23, 0.90)',
+          border: `1px solid ${isPinned ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+          boxShadow: isPinned ? '0 8px 32px rgba(251, 191, 36, 0.15)' : '0 8px 32px rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(12px)',
+        }}
+      >
         <div 
           className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 cursor-move select-none"
           onMouseDown={handleMouseDown}
