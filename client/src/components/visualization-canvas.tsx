@@ -807,31 +807,78 @@ export function VisualizationCanvas({
               }}
               data-testid={`probe-marker-${probe.id}`}
             >
+              {/* Crosshair lines */}
               <div 
-                className="flex items-center justify-center"
+                className="absolute"
+                style={{
+                  width: '24px',
+                  height: '2px',
+                  backgroundColor: 'white',
+                  left: '-12px',
+                  top: '-1px',
+                  boxShadow: '0 0 4px rgba(0,0,0,0.8)',
+                }}
+              />
+              <div 
+                className="absolute"
+                style={{
+                  width: '2px',
+                  height: '24px',
+                  backgroundColor: 'white',
+                  left: '-1px',
+                  top: '-12px',
+                  boxShadow: '0 0 4px rgba(0,0,0,0.8)',
+                }}
+              />
+              {/* Outer white ring for contrast */}
+              <div 
+                className="absolute"
                 style={{ 
-                  width: '16px',
-                  height: '16px',
-                  marginLeft: '-8px',
-                  marginTop: '-8px',
+                  width: '28px',
+                  height: '28px',
+                  marginLeft: '-14px',
+                  marginTop: '-14px',
                   borderRadius: '50%',
-                  border: `2px solid ${probe.color}`,
-                  backgroundColor: `${probe.color}33`,
-                  boxShadow: `0 0 8px ${probe.color}99`,
+                  border: '2px solid white',
+                  boxShadow: '0 0 8px rgba(0,0,0,0.8), inset 0 0 8px rgba(0,0,0,0.4)',
+                }}
+              />
+              {/* Inner colored ring */}
+              <div 
+                className="absolute flex items-center justify-center"
+                style={{ 
+                  width: '22px',
+                  height: '22px',
+                  marginLeft: '-11px',
+                  marginTop: '-11px',
+                  borderRadius: '50%',
+                  border: `3px solid ${probe.color}`,
+                  backgroundColor: 'rgba(0,0,0,0.7)',
+                  boxShadow: `0 0 12px ${probe.color}, 0 0 20px ${probe.color}66`,
                 }}
               >
                 <span 
-                  className="text-[8px] font-bold"
-                  style={{ color: probe.color }}
+                  className="text-[10px] font-bold"
+                  style={{ 
+                    color: 'white',
+                    textShadow: `0 0 4px ${probe.color}, 0 0 8px ${probe.color}`,
+                  }}
                 >
                   {probe.label.replace('P', '')}
                 </span>
               </div>
               {probe.isBaseline && (
                 <div 
-                  className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400"
-                  style={{ boxShadow: '0 0 4px rgba(251, 191, 36, 0.8)' }}
-                />
+                  className="absolute w-3 h-3 rounded-full bg-amber-400 flex items-center justify-center"
+                  style={{ 
+                    boxShadow: '0 0 6px rgba(251, 191, 36, 1), 0 0 12px rgba(251, 191, 36, 0.6)',
+                    top: '-16px',
+                    left: '4px',
+                    border: '1px solid white',
+                  }}
+                >
+                  <span className="text-[6px] font-bold text-black">B</span>
+                </div>
               )}
             </div>
           ))}
