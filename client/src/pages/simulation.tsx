@@ -2493,32 +2493,6 @@ export default function SimulationPage() {
         </div>
         
         <div className="flex items-center gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => { setFocusMode(true); setBlendMode(true); setBlendOpacity(0.5); }} 
-                data-testid="button-focus-mode"
-                className="h-7 text-xs gap-1.5"
-              >
-                <Maximize2 className="h-3.5 w-3.5" />
-                Inspection Mode
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">
-              Enter inspection mode (F)
-            </TooltipContent>
-          </Tooltip>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => onboardingRef.current?.replay()} 
-            data-testid="button-show-intro"
-            className="h-7 text-xs"
-          >
-            Show Intro
-          </Button>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" data-testid="button-help" className="h-7 w-7">
@@ -2546,6 +2520,32 @@ export default function SimulationPage() {
               </DialogHeader>
             </DialogContent>
           </Dialog>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => onboardingRef.current?.replay()} 
+            data-testid="button-show-intro"
+            className="h-7 text-xs"
+          >
+            Show Intro
+          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => { setFocusMode(true); setBlendMode(true); setBlendOpacity(0.5); }} 
+                data-testid="button-focus-mode"
+                className="h-7 text-xs gap-1.5"
+              >
+                <Maximize2 className="h-3.5 w-3.5" />
+                Inspection Mode
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              Enter inspection mode (F)
+            </TooltipContent>
+          </Tooltip>
         </div>
       </header>
 
