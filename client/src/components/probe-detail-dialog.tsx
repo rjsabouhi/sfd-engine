@@ -24,12 +24,17 @@ export interface NeighborhoodData {
   localMax: number;
   localMean: number;
   localStd: number;
-  gradientAngle: number; // in radians
+  gradientAngle: number;
   gradientMagnitude: number;
-  anisotropy: number; // ratio of major/minor gradient components
+  anisotropy: number;
 }
 
-const PANEL_WIDTH = 320;
+const DEFAULT_WIDTH = 300;
+const DEFAULT_HEIGHT = 420;
+const MIN_WIDTH = 260;
+const MAX_WIDTH = 500;
+const MIN_HEIGHT = 300;
+const MAX_HEIGHT = 600;
 
 export function ProbeDetailDialog({
   isOpen,
@@ -45,33 +50,33 @@ export function ProbeDetailDialog({
 }: ProbeDetailDialogProps) {
   const [isPinned, setIsPinned] = useState(false);
   const [pinnedPosition, setPinnedPosition] = useState<{ x: number; y: number } | null>(null);
+  const [size, setSize] = useState({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT });
   
   const containerRef = useRef<HTMLDivElement>(null);
   const positionRef = useRef({ x: 100, y: 100 });
   const isDraggingRef = useRef(false);
+  const isResizingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  const resizeStartRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
   const hasPositionedRef = useRef(false);
 
-  // Center panel on first open
   useEffect(() => {
     if (isOpen && containerRef.current && !hasPositionedRef.current) {
-      const x = Math.max(20, (window.innerWidth - PANEL_WIDTH) / 2);
+      const x = Math.max(20, (window.innerWidth - size.width) / 2);
       const y = Math.max(60, window.innerHeight * 0.15);
       positionRef.current = { x, y };
       containerRef.current.style.left = `${x}px`;
       containerRef.current.style.top = `${y}px`;
       hasPositionedRef.current = true;
     }
-  }, [isOpen]);
+  }, [isOpen, size.width]);
 
-  // Reset position flag when panel closes
   useEffect(() => {
     if (!isOpen) {
       hasPositionedRef.current = false;
     }
   }, [isOpen]);
 
-  // Apply pinned position
   useEffect(() => {
     if (isOpen && containerRef.current && isPinned && pinnedPosition) {
       positionRef.current = pinnedPosition;
@@ -102,33 +107,51 @@ export function ProbeDetailDialog({
     onFocus?.();
   }, [onFocus]);
 
+  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    isResizingRef.current = true;
+    resizeStartRef.current = { x: e.clientX, y: e.clientY, width: size.width, height: size.height };
+    e.stopPropagation();
+    e.preventDefault();
+    onFocus?.();
+  }, [size, onFocus]);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isDraggingRef.current || !containerRef.current) return;
+      if (isDraggingRef.current && containerRef.current) {
+        const deltaX = e.clientX - dragStartRef.current.x;
+        const deltaY = e.clientY - dragStartRef.current.y;
+        
+        const newX = Math.max(0, Math.min(
+          dragStartRef.current.posX + deltaX,
+          window.innerWidth - size.width
+        ));
+        const newY = Math.max(0, Math.min(
+          dragStartRef.current.posY + deltaY,
+          window.innerHeight - 100
+        ));
+        
+        positionRef.current = { x: newX, y: newY };
+        containerRef.current.style.left = `${newX}px`;
+        containerRef.current.style.top = `${newY}px`;
+        
+        if (isPinned) {
+          setPinnedPosition({ x: newX, y: newY });
+        }
+      }
       
-      const deltaX = e.clientX - dragStartRef.current.x;
-      const deltaY = e.clientY - dragStartRef.current.y;
-      
-      const newX = Math.max(0, Math.min(
-        dragStartRef.current.posX + deltaX,
-        window.innerWidth - PANEL_WIDTH
-      ));
-      const newY = Math.max(0, Math.min(
-        dragStartRef.current.posY + deltaY,
-        window.innerHeight - 100
-      ));
-      
-      positionRef.current = { x: newX, y: newY };
-      containerRef.current.style.left = `${newX}px`;
-      containerRef.current.style.top = `${newY}px`;
-      
-      if (isPinned) {
-        setPinnedPosition({ x: newX, y: newY });
+      if (isResizingRef.current) {
+        const dx = e.clientX - resizeStartRef.current.x;
+        const dy = e.clientY - resizeStartRef.current.y;
+        setSize({
+          width: Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, resizeStartRef.current.width + dx)),
+          height: Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, resizeStartRef.current.height + dy)),
+        });
       }
     };
 
     const handleMouseUp = () => {
       isDraggingRef.current = false;
+      isResizingRef.current = false;
     };
 
     if (isOpen) {
@@ -140,7 +163,7 @@ export function ProbeDetailDialog({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isOpen, isPinned]);
+  }, [isOpen, isPinned, size.width]);
 
   if (!isOpen || !probe) return null;
 
@@ -164,10 +187,10 @@ export function ProbeDetailDialog({
 
   const getTrendIcon = (current: number, baseline: number) => {
     const delta = current - baseline;
-    if (Math.abs(delta) < 0.0001) return <Minus className="h-3 w-3 text-neutral-500" />;
+    if (Math.abs(delta) < 0.0001) return <Minus className="h-2.5 w-2.5 text-neutral-500" />;
     return delta > 0 
-      ? <TrendingUp className="h-3 w-3 text-emerald-400" />
-      : <TrendingDown className="h-3 w-3 text-red-400" />;
+      ? <TrendingUp className="h-2.5 w-2.5 text-emerald-400" />
+      : <TrendingDown className="h-2.5 w-2.5 text-red-400" />;
   };
 
   const getGradientDirection = (angle: number) => {
@@ -187,236 +210,268 @@ export function ProbeDetailDialog({
   return (
     <div
       ref={containerRef}
-      className="fixed bg-gray-900/95 backdrop-blur-sm border border-white/10 rounded-lg shadow-xl select-none"
+      className="fixed select-none"
       style={{
-        width: PANEL_WIDTH,
-        zIndex,
         left: positionRef.current.x,
         top: positionRef.current.y,
-        maxHeight: 'calc(100vh - 120px)',
+        zIndex,
       }}
       onMouseDown={() => onFocus?.()}
       data-testid="probe-detail-panel"
     >
-      {/* Header - Draggable */}
       <div
-        className="flex items-center justify-between px-3 py-2 border-b border-white/10 cursor-move"
-        onMouseDown={handleMouseDown}
+        className="rounded-lg relative"
+        style={{
+          backgroundColor: 'rgba(23, 23, 23, 0.95)',
+          border: `1px solid ${isPinned ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+          boxShadow: isPinned ? '0 8px 32px rgba(251, 191, 36, 0.15)' : '0 8px 32px rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(12px)',
+          width: size.width,
+          height: size.height,
+        }}
       >
-        <div className="flex items-center gap-2">
-          <GripVertical className="h-4 w-4 text-neutral-500" />
-          <div 
-            className="w-6 h-6 rounded-full flex items-center justify-center border-2"
-            style={{ 
-              borderColor: probe.color,
-              backgroundColor: `${probe.color}22`,
-            }}
-          >
-            <span className="text-xs font-bold" style={{ color: probe.color }}>
-              {probe.label.replace('P', '')}
+        {/* Header - Draggable */}
+        <div
+          className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 cursor-move select-none"
+          onMouseDown={handleMouseDown}
+        >
+          <div className="flex items-center gap-1.5">
+            <GripVertical className="h-3 w-3 text-neutral-500" />
+            <div 
+              className="w-5 h-5 rounded-full flex items-center justify-center border"
+              style={{ 
+                borderColor: probe.color,
+                backgroundColor: `${probe.color}22`,
+              }}
+            >
+              <span className="text-[9px] font-bold" style={{ color: probe.color }}>
+                {probe.label.replace('P', '')}
+              </span>
+            </div>
+            <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">{probe.label} Detail</span>
+            {probe.isBaseline && (
+              <Badge variant="outline" className="bg-amber-500/20 text-amber-400 border-amber-500/50 text-[8px] px-1 py-0 h-4">
+                BASE
+              </Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handlePin}
+                  className={`h-5 w-5 rounded-full ${isPinned ? 'text-amber-400' : 'text-neutral-500 hover:text-neutral-300'}`}
+                  data-testid="probe-detail-pin"
+                >
+                  <Pin className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                {isPinned ? 'Unpin Position' : 'Pin Position'}
+              </TooltipContent>
+            </Tooltip>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-5 w-5 rounded-full text-neutral-500 hover:text-neutral-300"
+              data-testid="probe-detail-close"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Scrollable Content */}
+        <div 
+          className="overflow-y-auto px-3 py-2 space-y-2"
+          style={{ height: `calc(${size.height}px - 36px)` }}
+        >
+          {/* Position & Metadata */}
+          <div className="flex items-center justify-between text-[9px] text-neutral-500">
+            <span className="font-mono text-neutral-300">({probe.x}, {probe.y})</span>
+            <span className="flex items-center gap-1">
+              <MapPin className="h-2.5 w-2.5" />
+              Step {probe.createdAtStep} • {stepsSinceCreation} ago
             </span>
           </div>
-          <span className="text-sm font-semibold text-white">{probe.label}</span>
-          {probe.isBaseline && (
-            <Badge variant="outline" className="bg-amber-500/20 text-amber-400 border-amber-500/50 text-[9px] px-1 py-0">
-              BASELINE
-            </Badge>
-          )}
-        </div>
-        <div className="flex items-center gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={`h-6 w-6 ${isPinned ? 'text-cyan-400' : 'text-neutral-400 hover:text-white'}`}
-                onClick={handlePin}
-                data-testid="probe-detail-pin"
-              >
-                <Pin className="h-3 w-3" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              <p className="text-xs">{isPinned ? 'Unpin position' : 'Pin position'}</p>
-            </TooltipContent>
-          </Tooltip>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 text-neutral-400 hover:text-white"
-            onClick={onClose}
-            data-testid="probe-detail-close"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
 
-      {/* Scrollable Content */}
-      <div className="overflow-y-auto p-3 space-y-3" style={{ maxHeight: 'calc(100vh - 180px)' }}>
-        {/* Position & Metadata */}
-        <div className="flex items-center justify-between text-[11px] text-neutral-400">
-          <span className="font-mono">({probe.x}, {probe.y})</span>
-          <span className="flex items-center gap-1">
-            <MapPin className="h-3 w-3" />
-            Step {probe.createdAtStep} • {stepsSinceCreation} ago
-          </span>
-        </div>
+          <Separator className="bg-white/10" />
 
-        <Separator className="bg-white/10" />
-
-        {/* Live Values Section */}
-        <div>
-          <h4 className="text-[10px] uppercase tracking-wide text-neutral-500 mb-2">Current Values</h4>
-          {liveData ? (
-            <div className="grid grid-cols-2 gap-2">
-              <MetricCard 
-                label="Field Value" 
-                value={formatValue(liveData.value)} 
-                baseline={baselineData?.value}
-                formatDelta={formatDelta}
-                formatPercent={formatPercent}
-                getTrendIcon={getTrendIcon}
-              />
-              <MetricCard 
-                label="Curvature (κ)" 
-                value={formatValue(liveData.curvature)} 
-                baseline={baselineData?.curvature}
-                formatDelta={formatDelta}
-                formatPercent={formatPercent}
-                getTrendIcon={getTrendIcon}
-              />
-              <MetricCard 
-                label="Tension (τ)" 
-                value={formatValue(liveData.tension)} 
-                baseline={baselineData?.tension}
-                formatDelta={formatDelta}
-                formatPercent={formatPercent}
-                getTrendIcon={getTrendIcon}
-              />
-              <MetricCard 
-                label="Coupling (ψ)" 
-                value={formatValue(liveData.coupling)} 
-                baseline={baselineData?.coupling}
-                formatDelta={formatDelta}
-                formatPercent={formatPercent}
-                getTrendIcon={getTrendIcon}
-              />
-              <MetricCard 
-                label="Gradient |∇|" 
-                value={formatValue(liveData.gradientMagnitude)} 
-                baseline={baselineData?.gradientMagnitude}
-                formatDelta={formatDelta}
-                formatPercent={formatPercent}
-                getTrendIcon={getTrendIcon}
-              />
-              <MetricCard 
-                label="Variance (σ²)" 
-                value={formatValue(liveData.neighborhoodVariance)} 
-                baseline={baselineData?.neighborhoodVariance}
-                formatDelta={formatDelta}
-                formatPercent={formatPercent}
-                getTrendIcon={getTrendIcon}
-              />
-            </div>
-          ) : (
-            <p className="text-sm text-neutral-500 italic">No live data available</p>
-          )}
-        </div>
-
-        <Separator className="bg-white/10" />
-
-        {/* Neighborhood Analysis */}
-        <div>
-          <h4 className="text-[10px] uppercase tracking-wide text-neutral-500 mb-2">Neighborhood Analysis</h4>
-          {neighborhoodData ? (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-white/5 rounded p-2">
-                <span className="text-[9px] text-neutral-500 block">Local Range</span>
-                <span className="font-mono text-xs text-neutral-200">
-                  {formatValue(neighborhoodData.localMin, 2)} → {formatValue(neighborhoodData.localMax, 2)}
-                </span>
+          {/* Live Values Section */}
+          <div>
+            <span className="text-[10px] text-neutral-500 uppercase tracking-wide block mb-1.5">Current Values</span>
+            {liveData ? (
+              <div className="grid grid-cols-2 gap-1.5">
+                <MetricCard 
+                  label="Field Value" 
+                  value={formatValue(liveData.value)} 
+                  baseline={baselineData?.value}
+                  formatDelta={formatDelta}
+                  formatPercent={formatPercent}
+                  getTrendIcon={getTrendIcon}
+                />
+                <MetricCard 
+                  label="Curvature (κ)" 
+                  value={formatValue(liveData.curvature)} 
+                  baseline={baselineData?.curvature}
+                  formatDelta={formatDelta}
+                  formatPercent={formatPercent}
+                  getTrendIcon={getTrendIcon}
+                />
+                <MetricCard 
+                  label="Tension (τ)" 
+                  value={formatValue(liveData.tension)} 
+                  baseline={baselineData?.tension}
+                  formatDelta={formatDelta}
+                  formatPercent={formatPercent}
+                  getTrendIcon={getTrendIcon}
+                />
+                <MetricCard 
+                  label="Coupling (ψ)" 
+                  value={formatValue(liveData.coupling)} 
+                  baseline={baselineData?.coupling}
+                  formatDelta={formatDelta}
+                  formatPercent={formatPercent}
+                  getTrendIcon={getTrendIcon}
+                />
+                <MetricCard 
+                  label="Gradient |∇|" 
+                  value={formatValue(liveData.gradientMagnitude)} 
+                  baseline={baselineData?.gradientMagnitude}
+                  formatDelta={formatDelta}
+                  formatPercent={formatPercent}
+                  getTrendIcon={getTrendIcon}
+                />
+                <MetricCard 
+                  label="Variance (σ²)" 
+                  value={formatValue(liveData.neighborhoodVariance)} 
+                  baseline={baselineData?.neighborhoodVariance}
+                  formatDelta={formatDelta}
+                  formatPercent={formatPercent}
+                  getTrendIcon={getTrendIcon}
+                />
               </div>
-              <div className="bg-white/5 rounded p-2">
-                <span className="text-[9px] text-neutral-500 block">Local Mean ± Std</span>
-                <span className="font-mono text-xs text-neutral-200">
-                  {formatValue(neighborhoodData.localMean, 2)} ± {formatValue(neighborhoodData.localStd, 2)}
-                </span>
+            ) : (
+              <div className="bg-white/5 rounded p-2 text-center">
+                <p className="text-[9px] text-neutral-500 italic">No live data available</p>
               </div>
-              <div className="bg-white/5 rounded p-2 flex items-center gap-2">
-                <Compass className="h-3 w-3 text-cyan-400" />
-                <div>
-                  <span className="text-[9px] text-neutral-500 block">Gradient Dir</span>
-                  <span className="font-mono text-xs text-neutral-200">
-                    {getGradientDirection(neighborhoodData.gradientAngle)} ({(neighborhoodData.gradientAngle * 180 / Math.PI).toFixed(0)}°)
+            )}
+          </div>
+
+          <Separator className="bg-white/10" />
+
+          {/* Neighborhood Analysis */}
+          <div>
+            <span className="text-[10px] text-neutral-500 uppercase tracking-wide block mb-1.5">Neighborhood Analysis</span>
+            {neighborhoodData ? (
+              <div className="grid grid-cols-2 gap-1.5">
+                <div className="bg-white/5 rounded p-1.5">
+                  <span className="text-[8px] text-neutral-500 block">Local Range</span>
+                  <span className="font-mono text-[10px] text-neutral-300">
+                    {formatValue(neighborhoodData.localMin, 2)} → {formatValue(neighborhoodData.localMax, 2)}
+                  </span>
+                </div>
+                <div className="bg-white/5 rounded p-1.5">
+                  <span className="text-[8px] text-neutral-500 block">Mean ± Std</span>
+                  <span className="font-mono text-[10px] text-neutral-300">
+                    {formatValue(neighborhoodData.localMean, 2)} ± {formatValue(neighborhoodData.localStd, 2)}
+                  </span>
+                </div>
+                <div className="bg-white/5 rounded p-1.5 flex items-center gap-1.5">
+                  <Compass className="h-3 w-3 text-cyan-400" />
+                  <div>
+                    <span className="text-[8px] text-neutral-500 block">Gradient Dir</span>
+                    <span className="font-mono text-[10px] text-neutral-300">
+                      {getGradientDirection(neighborhoodData.gradientAngle)} ({(neighborhoodData.gradientAngle * 180 / Math.PI).toFixed(0)}°)
+                    </span>
+                  </div>
+                </div>
+                <div className="bg-white/5 rounded p-1.5">
+                  <span className="text-[8px] text-neutral-500 block">Anisotropy</span>
+                  <span className="font-mono text-[10px] text-neutral-300">
+                    {formatValue(neighborhoodData.anisotropy, 2)}
                   </span>
                 </div>
               </div>
-              <div className="bg-white/5 rounded p-2">
-                <span className="text-[9px] text-neutral-500 block">Anisotropy</span>
-                <span className="font-mono text-xs text-neutral-200">
-                  {formatValue(neighborhoodData.anisotropy, 2)}
-                </span>
+            ) : (
+              <div className="bg-white/5 rounded p-2 text-center">
+                <p className="text-[9px] text-neutral-500">Extended analysis available when running</p>
               </div>
-            </div>
-          ) : (
-            <div className="bg-white/5 rounded p-2 text-center">
-              <p className="text-[10px] text-neutral-500">
-                Extended analysis available when running
-              </p>
-            </div>
+            )}
+          </div>
+
+          {/* Basin Info */}
+          {liveData && liveData.basinId !== null && (
+            <>
+              <Separator className="bg-white/10" />
+              <div>
+                <span className="text-[10px] text-neutral-500 uppercase tracking-wide block mb-1.5">Basin Membership</span>
+                <div className="bg-white/5 rounded p-1.5 flex items-center gap-2">
+                  <Target className="h-3 w-3 text-purple-400" />
+                  <span className="font-mono text-[10px] text-neutral-300">
+                    Basin #{liveData.basinId}
+                  </span>
+                  {baselineData && baselineData.basinId !== liveData.basinId && (
+                    <Badge variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/50 text-[8px] ml-auto">
+                      from #{baselineData.basinId}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </>
           )}
+
+          <Separator className="bg-white/10" />
+
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onSetBaseline(probe.isBaseline ? null : probe.id)}
+              className={`flex-1 text-[10px] h-7 ${probe.isBaseline ? 'bg-amber-500/20 border-amber-500/50 text-amber-400' : 'border-white/20 text-neutral-300'}`}
+              data-testid="probe-detail-set-baseline"
+            >
+              <Flag className="h-3 w-3 mr-1" />
+              {probe.isBaseline ? 'Clear Baseline' : 'Set as Baseline'}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                onRemoveProbe(probe.id);
+                onClose();
+              }}
+              className="border-red-500/30 text-red-400 hover:bg-red-500/20 h-7"
+              data-testid="probe-detail-delete"
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
 
-        {/* Basin Info */}
-        {liveData && liveData.basinId !== null && (
-          <>
-            <Separator className="bg-white/10" />
-            <div>
-              <h4 className="text-[10px] uppercase tracking-wide text-neutral-500 mb-2">Basin Membership</h4>
-              <div className="bg-white/5 rounded p-2 flex items-center gap-2">
-                <Target className="h-3 w-3 text-purple-400" />
-                <span className="font-mono text-xs text-neutral-200">
-                  Basin #{liveData.basinId}
-                </span>
-                {baselineData && baselineData.basinId !== liveData.basinId && (
-                  <Badge variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/50 text-[8px] ml-auto">
-                    from #{baselineData.basinId}
-                  </Badge>
-                )}
-              </div>
-            </div>
-          </>
-        )}
-
-        <Separator className="bg-white/10" />
-
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              onSetBaseline(probe.isBaseline ? null : probe.id);
-            }}
-            className={`flex-1 text-xs h-8 ${probe.isBaseline ? 'bg-amber-500/20 border-amber-500/50 text-amber-400' : 'border-white/20 text-neutral-300'}`}
-            data-testid="probe-detail-set-baseline"
+        {/* Resize Handle */}
+        <div
+          className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize flex items-center justify-center"
+          onMouseDown={handleResizeMouseDown}
+          data-testid="probe-detail-resize"
+        >
+          <svg 
+            width="10" 
+            height="10" 
+            viewBox="0 0 10 10" 
+            className="text-neutral-500 hover:text-neutral-300"
           >
-            <Flag className="h-3 w-3 mr-1" />
-            {probe.isBaseline ? 'Clear Baseline' : 'Set as Baseline'}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              onRemoveProbe(probe.id);
-              onClose();
-            }}
-            className="border-red-500/30 text-red-400 hover:bg-red-500/20 h-8"
-            data-testid="probe-detail-delete"
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
+            <path 
+              d="M9 1L1 9M9 5L5 9M9 9L9 9" 
+              stroke="currentColor" 
+              strokeWidth="1.5" 
+              strokeLinecap="round"
+            />
+          </svg>
         </div>
       </div>
     </div>
@@ -437,18 +492,18 @@ function MetricCard({ label, value, baseline, formatDelta, formatPercent, getTre
   const hasBaseline = baseline !== undefined && baseline !== null;
 
   return (
-    <div className="bg-white/5 rounded p-2">
-      <span className="text-[9px] text-neutral-500 block">{label}</span>
+    <div className="bg-white/5 rounded p-1.5">
+      <span className="text-[8px] text-neutral-500 block">{label}</span>
       <div className="flex items-center justify-between">
-        <span className="font-mono text-xs text-neutral-200">{value}</span>
+        <span className="font-mono text-[10px] text-neutral-300">{value}</span>
         {hasBaseline && getTrendIcon(numValue, baseline)}
       </div>
       {hasBaseline && (
-        <div className="flex items-center gap-2 mt-1">
-          <span className={`text-[9px] font-mono ${numValue >= baseline ? 'text-emerald-400' : 'text-red-400'}`}>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <span className={`text-[8px] font-mono ${numValue >= baseline ? 'text-emerald-400' : 'text-red-400'}`}>
             {formatDelta(numValue, baseline)}
           </span>
-          <span className="text-[9px] text-neutral-500">
+          <span className="text-[8px] text-neutral-500">
             ({formatPercent(numValue, baseline)})
           </span>
         </div>
