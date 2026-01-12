@@ -86,36 +86,57 @@ export function FloatingInspectorPanel({
   const [selectedProbeId, setSelectedProbeId] = useState<string | null>(null);
   
   const containerRef = useRef<HTMLDivElement>(null);
-  const positionRef = useRef({ x: 80, y: 50 });
+  // Initialize positionRef with pinned position if available
+  const positionRef = useRef(pinnedPosition || { x: 80, y: 50 });
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+  // Track last anchorRect to avoid repositioning on same anchor
+  const lastAnchorRectRef = useRef<DOMRect | null>(null);
 
+  // Sync positionRef when pinnedPosition changes from parent
+  useEffect(() => {
+    if (isPinned && pinnedPosition) {
+      positionRef.current = pinnedPosition;
+    }
+  }, [isPinned, pinnedPosition]);
+
+  // Reposition when anchor rect is provided (on open) - but NEVER reposition pinned panels
   useEffect(() => {
     if (isVisible && containerRef.current) {
-      let newPos: { x: number; y: number } | null = null;
-      
+      // If pinned, always use pinned position and skip anchor logic entirely
       if (isPinned && pinnedPosition) {
-        newPos = pinnedPosition;
-      } else if (anchorRect && !hasDragged) {
-        const x = Math.max(8, Math.min(
-          anchorRect.left + anchorRect.width / 2 - PANEL_WIDTH / 2,
-          window.innerWidth - PANEL_WIDTH - 8
-        ));
-        const y = anchorRect.bottom + GAP_FROM_MENUBAR;
-        newPos = { x, y };
+        positionRef.current = pinnedPosition;
+        containerRef.current.style.left = `${pinnedPosition.x}px`;
+        containerRef.current.style.top = `${pinnedPosition.y}px`;
+        return;
       }
       
-      if (newPos) {
-        positionRef.current = newPos;
-        containerRef.current.style.left = `${newPos.x}px`;
-        containerRef.current.style.top = `${newPos.y}px`;
+      // Only reposition based on anchor if not dragged and anchor changed
+      if (anchorRect && !hasDragged) {
+        const anchorChanged = !lastAnchorRectRef.current || 
+          lastAnchorRectRef.current.left !== anchorRect.left ||
+          lastAnchorRectRef.current.top !== anchorRect.top;
+        
+        if (anchorChanged) {
+          lastAnchorRectRef.current = anchorRect;
+          const x = Math.max(8, Math.min(
+            anchorRect.left + anchorRect.width / 2 - PANEL_WIDTH / 2,
+            window.innerWidth - PANEL_WIDTH - 8
+          ));
+          const y = anchorRect.bottom + GAP_FROM_MENUBAR;
+          positionRef.current = { x, y };
+          containerRef.current.style.left = `${x}px`;
+          containerRef.current.style.top = `${y}px`;
+        }
       }
     }
   }, [anchorRect, isVisible, hasDragged, isPinned, pinnedPosition]);
 
+  // Reset hasDragged when panel is closed (but keep pinned state)
   useEffect(() => {
     if (!isVisible) {
       setHasDragged(false);
+      lastAnchorRectRef.current = null;
     }
   }, [isVisible]);
 
