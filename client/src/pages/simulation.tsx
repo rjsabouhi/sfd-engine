@@ -52,6 +52,7 @@ import { FloatingPlaybackPanel } from "@/components/floating-playback-panel";
 import { FloatingInspectorPanel } from "@/components/floating-inspector-panel";
 import { ProbeDetailDialog, type NeighborhoodData } from "@/components/probe-detail-dialog";
 import { FloatingPerturbationPanel } from "@/components/floating-perturbation-panel";
+import { FloatingExportDialog } from "@/components/floating-export-dialog";
 import { PerturbationPanel } from "@/components/perturbation-panel";
 import { type PerturbationMode, DEFAULT_PARAMS } from "@/lib/perturbations/types";
 import { getPanelState, setPanelPinned, type PanelKey } from "@/lib/panel-state-store";
@@ -279,10 +280,11 @@ export default function SimulationPage() {
   const [probeDetailOpen, setProbeDetailOpen] = useState(false); // Probe detail dialog
   const [selectedDetailProbeId, setSelectedDetailProbeId] = useState<string | null>(null);
   const [cursorMode] = useState<'select' | 'pan' | 'probe'>('probe'); // Cursor interaction mode - probe only
+  const [exportDialogOpen, setExportDialogOpen] = useState(false); // Floating export dialog in focus mode
   
   // Derive selected probe from savedProbes to keep it synchronized after mutations
   const selectedDetailProbe = savedProbes.find(p => p.id === selectedDetailProbeId) || null;
-  const [activePanelOrder, setActivePanelOrder] = useState<('playback' | 'perturbation' | 'diagnostics' | 'inspector' | 'probedetail')[]>(['playback', 'perturbation', 'diagnostics', 'inspector', 'probedetail']); // Z-index order for floating panels
+  const [activePanelOrder, setActivePanelOrder] = useState<('playback' | 'perturbation' | 'diagnostics' | 'inspector' | 'probedetail' | 'export')[]>(['playback', 'perturbation', 'diagnostics', 'inspector', 'probedetail', 'export']); // Z-index order for floating panels
   
   // Anchor rects for positioning floating panels under their menubar buttons
   const [playbackAnchorRect, setPlaybackAnchorRect] = useState<DOMRect | null>(null);
@@ -297,6 +299,7 @@ export default function SimulationPage() {
     inspector: boolean;
     diagnostics: boolean;
     probeDetail: boolean;
+    exportDialog: boolean;
     fieldInspectorEnabled: boolean;
     perturbMode: boolean;
   } | null>(null);
@@ -308,6 +311,7 @@ export default function SimulationPage() {
   const [inspectorPinned, setInspectorPinnedState] = useState(() => getPanelState('inspector'));
   const [diagnosticsPinned, setDiagnosticsPinnedState] = useState(() => getPanelState('diagnostics'));
   const [probeDetailPinned, setProbeDetailPinnedState] = useState(() => getPanelState('probeDetail'));
+  const [exportPinned, setExportPinnedState] = useState(() => getPanelState('export'));
   
   // Wrapper functions that update both store and local state
   const setPlaybackPinned = (state: { isPinned: boolean; position: { x: number; y: number } | null }) => {
@@ -330,6 +334,10 @@ export default function SimulationPage() {
     setPanelPinned('probeDetail', state.isPinned, state.position);
     setProbeDetailPinnedState(state);
   };
+  const setExportPinned = (state: { isPinned: boolean; position: { x: number; y: number } | null }) => {
+    setPanelPinned('export', state.isPinned, state.position);
+    setExportPinnedState(state);
+  };
   
   // Save panel open states before closing when exiting focus mode
   // Restore open states and pinned positions when returning to focus mode
@@ -346,6 +354,7 @@ export default function SimulationPage() {
         inspector: inspectorPanelOpen,
         diagnostics: diagnosticsVisible,
         probeDetail: probeDetailOpen,
+        exportDialog: exportDialogOpen,
         fieldInspectorEnabled: fieldInspectorEnabled,
         perturbMode: perturbMode,
       };
@@ -357,6 +366,7 @@ export default function SimulationPage() {
       setFieldInspectorEnabled(false);
       setDiagnosticsVisible(false);
       setProbeDetailOpen(false);
+      setExportDialogOpen(false);
     } else if (focusMode && !wasInFocusMode) {
       // Returning to focus mode - re-sync pinned positions from store
       setPlaybackPinnedState(getPanelState('playback'));
@@ -364,6 +374,7 @@ export default function SimulationPage() {
       setInspectorPinnedState(getPanelState('inspector'));
       setDiagnosticsPinnedState(getPanelState('diagnostics'));
       setProbeDetailPinnedState(getPanelState('probeDetail'));
+      setExportPinnedState(getPanelState('export'));
       
       // Restore which panels were open
       if (savedPanelOpenStateRef.current) {
@@ -373,14 +384,15 @@ export default function SimulationPage() {
         setInspectorPanelOpen(saved.inspector);
         setDiagnosticsVisible(saved.diagnostics);
         setProbeDetailOpen(saved.probeDetail);
+        setExportDialogOpen(saved.exportDialog);
         setFieldInspectorEnabled(saved.fieldInspectorEnabled);
         setPerturbMode(saved.perturbMode);
       }
     }
-  }, [focusMode]);
+  }, [focusMode, exportDialogOpen]);
   
   // Bring a panel to front by moving it to end of order array
-  const bringPanelToFront = (panel: 'playback' | 'perturbation' | 'diagnostics' | 'inspector' | 'probedetail') => {
+  const bringPanelToFront = (panel: 'playback' | 'perturbation' | 'diagnostics' | 'inspector' | 'probedetail' | 'export') => {
     setActivePanelOrder(prev => {
       const filtered = prev.filter(p => p !== panel);
       return [...filtered, panel];
@@ -388,7 +400,7 @@ export default function SimulationPage() {
   };
   
   // Get z-index for a panel based on its position in the order
-  const getPanelZIndex = (panel: 'playback' | 'perturbation' | 'diagnostics' | 'inspector' | 'probedetail') => {
+  const getPanelZIndex = (panel: 'playback' | 'perturbation' | 'diagnostics' | 'inspector' | 'probedetail' | 'export') => {
     const baseZ = 50;
     const index = activePanelOrder.indexOf(panel);
     return baseZ + index;
@@ -2525,6 +2537,8 @@ export default function SimulationPage() {
               setFieldInspectorEnabled(false);
             }
           }}
+          exportDialogOpen={exportDialogOpen}
+          onToggleExportDialog={() => setExportDialogOpen(!exportDialogOpen)}
         />
         
         <div className="flex-1 relative overflow-hidden">
@@ -2753,6 +2767,24 @@ export default function SimulationPage() {
           isPinned={probeDetailPinned.isPinned}
           pinnedPosition={probeDetailPinned.position}
           onPinnedChange={(isPinned, position) => setProbeDetailPinned({ isPinned, position })}
+        />
+        
+        <FloatingExportDialog
+          isOpen={exportDialogOpen}
+          onClose={() => setExportDialogOpen(false)}
+          zIndex={getPanelZIndex('export')}
+          onFocus={() => bringPanelToFront('export')}
+          engine={engineRef.current}
+          canvasRef={canvasRef}
+          colormap={colormap}
+          regime={selectedRegimeKey || 'default'}
+          interpretationMode={interpretationMode}
+          events={events}
+          savedProbes={savedProbes}
+          getProbeDataAt={getProbeDataAt}
+          isPinned={exportPinned.isPinned}
+          pinnedPosition={exportPinned.position}
+          onPinnedChange={(isPinned, position) => setExportPinned({ isPinned, position })}
         />
       </div>
     );

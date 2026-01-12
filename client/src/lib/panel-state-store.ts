@@ -9,6 +9,7 @@ type PanelStateStore = {
   inspector: PinnedState;
   diagnostics: PinnedState;
   probeDetail: PinnedState;
+  export: PinnedState;
 };
 
 const defaultState: PinnedState = { isPinned: false, position: null };
@@ -19,6 +20,7 @@ const store: PanelStateStore = {
   inspector: { ...defaultState },
   diagnostics: { ...defaultState },
   probeDetail: { ...defaultState },
+  export: { ...defaultState },
 };
 
 export type PanelKey = keyof PanelStateStore;
@@ -53,6 +55,7 @@ export function getAllPanelStates(): PanelStateStore {
     inspector: cloneState(store.inspector),
     diagnostics: cloneState(store.diagnostics),
     probeDetail: cloneState(store.probeDetail),
+    export: cloneState(store.export),
   };
 }
 

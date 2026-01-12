@@ -1,0 +1,621 @@
+import { Button } from "@/components/ui/button";
+import {
+  X,
+  Download,
+  Image,
+  Video,
+  FileJson,
+  FileText,
+  Database,
+  Target,
+  Activity,
+  Settings,
+  Package,
+  Loader2,
+  Check,
+  Camera,
+  Film,
+  BarChart3,
+  Layers,
+  Code,
+  Archive,
+  Share2,
+  Pin,
+  GripVertical,
+} from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useToast } from "@/hooks/use-toast";
+import type { SFDEngine } from "@/lib/sfd-engine";
+import type { StructuralEvent, SavedProbe } from "@shared/schema";
+import {
+  exportPNGSnapshot,
+  exportMobileShareSnapshot,
+  saveConfiguration,
+  exportSimulationData,
+  exportMetricsLog,
+  exportSettingsJSON,
+  exportEventLog,
+  exportNumPyArray,
+  exportBatchSpec,
+  exportOperatorContributions,
+  exportPythonScript,
+  exportLayersSeparate,
+  exportFullArchive,
+  exportVideoWebM,
+} from "@/lib/export-utils";
+
+type ExportCategory = 'visual' | 'data' | 'probes' | 'technical';
+
+interface ExportOption {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  format: string;
+  category: ExportCategory;
+  action: () => Promise<boolean>;
+  requires?: string;
+}
+
+interface FloatingExportDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  zIndex?: number;
+  onFocus?: () => void;
+  engine: SFDEngine | null;
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  basinCanvasRef?: React.RefObject<HTMLCanvasElement | null>;
+  colormap: "inferno" | "viridis" | "cividis";
+  regime: string;
+  interpretationMode: string;
+  events: StructuralEvent[];
+  savedProbes: SavedProbe[];
+  getProbeDataAt: (x: number, y: number) => import("@shared/schema").ProbeData | null;
+  isPinned?: boolean;
+  pinnedPosition?: { x: number; y: number } | null;
+  onPinnedChange?: (isPinned: boolean, position: { x: number; y: number } | null) => void;
+}
+
+const CATEGORY_INFO: Record<ExportCategory, { label: string; icon: React.ReactNode; color: string }> = {
+  visual: { label: 'Visual', icon: <Image className="h-4 w-4" />, color: 'text-blue-400' },
+  data: { label: 'Data', icon: <Database className="h-4 w-4" />, color: 'text-green-400' },
+  probes: { label: 'Probes', icon: <Target className="h-4 w-4" />, color: 'text-purple-400' },
+  technical: { label: 'Technical', icon: <Code className="h-4 w-4" />, color: 'text-orange-400' },
+};
+
+export function FloatingExportDialog({
+  isOpen,
+  onClose,
+  zIndex = 100,
+  onFocus,
+  engine,
+  canvasRef,
+  basinCanvasRef,
+  colormap,
+  regime,
+  interpretationMode,
+  events,
+  savedProbes,
+  getProbeDataAt,
+  isPinned: isPinnedProp,
+  pinnedPosition: pinnedPositionProp,
+  onPinnedChange,
+}: FloatingExportDialogProps) {
+  const { toast } = useToast();
+  const [selectedCategory, setSelectedCategory] = useState<ExportCategory>('visual');
+  const [loadingExport, setLoadingExport] = useState<string | null>(null);
+  const [completedExports, setCompletedExports] = useState<Set<string>>(new Set());
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Use lifted state if provided, otherwise use local state
+  const [localIsPinned, setLocalIsPinned] = useState(false);
+  const [localPinnedPosition, setLocalPinnedPosition] = useState<{ x: number; y: number } | null>(null);
+  const isPinned = isPinnedProp !== undefined ? isPinnedProp : localIsPinned;
+  const pinnedPosition = pinnedPositionProp !== undefined ? pinnedPositionProp : localPinnedPosition;
+  
+  const positionRef = useRef(pinnedPosition || { x: 100, y: 100 });
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+
+  // Sync positionRef when pinnedPosition changes from parent
+  useEffect(() => {
+    if (isPinned && pinnedPosition) {
+      positionRef.current = pinnedPosition;
+    }
+  }, [isPinned, pinnedPosition]);
+
+  const handlePin = useCallback(() => {
+    const newPinned = !isPinned;
+    const newPosition = newPinned ? positionRef.current : null;
+    if (onPinnedChange) {
+      onPinnedChange(newPinned, newPosition);
+    } else {
+      setLocalIsPinned(newPinned);
+      setLocalPinnedPosition(newPosition);
+    }
+  }, [isPinned, onPinnedChange]);
+
+  const exportProbesCSV = useCallback(async (): Promise<boolean> => {
+    if (savedProbes.length === 0) return false;
+    
+    const headers = ['id', 'x', 'y', 'color', 'value', 'curvature', 'tension', 'hasBaseline', 'baselineValue', 'delta'];
+    const rows = savedProbes.map(probe => {
+      const liveData = getProbeDataAt(probe.x, probe.y);
+      const baselineVal = probe.baselineSnapshot?.value ?? '';
+      const delta = probe.baselineSnapshot && liveData ? (liveData.value - probe.baselineSnapshot.value).toFixed(6) : '';
+      return [
+        probe.id,
+        probe.x,
+        probe.y,
+        probe.color,
+        liveData?.value.toFixed(6) ?? '',
+        liveData?.curvature.toFixed(6) ?? '',
+        liveData?.tension.toFixed(6) ?? '',
+        probe.isBaseline ? 'yes' : 'no',
+        baselineVal,
+        delta,
+      ].join(',');
+    });
+    
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sfd-probes-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    return true;
+  }, [savedProbes, getProbeDataAt]);
+
+  const exportProbesJSON = useCallback(async (): Promise<boolean> => {
+    if (savedProbes.length === 0) return false;
+    
+    const probesWithLiveData = savedProbes.map(probe => {
+      const liveData = getProbeDataAt(probe.x, probe.y);
+      return {
+        ...probe,
+        liveData,
+        delta: probe.baselineSnapshot && liveData ? {
+          value: liveData.value - probe.baselineSnapshot.value,
+          curvature: liveData.curvature - probe.baselineSnapshot.curvature,
+          tension: liveData.tension - probe.baselineSnapshot.tension,
+        } : null,
+      };
+    });
+    
+    const json = JSON.stringify({ probes: probesWithLiveData, exportedAt: new Date().toISOString() }, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sfd-probes-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    return true;
+  }, [savedProbes, getProbeDataAt]);
+
+  const getState = useCallback(() => engine?.getState(), [engine]);
+
+  const exportOptions: ExportOption[] = [
+    {
+      id: 'snapshot',
+      name: 'Field Snapshot',
+      description: 'Current field visualization as an image',
+      icon: <Camera className="h-5 w-5" />,
+      format: 'PNG',
+      category: 'visual',
+      action: async () => exportPNGSnapshot(canvasRef.current),
+    },
+    {
+      id: 'share-card',
+      name: 'Share Card',
+      description: 'Branded image with regime info for sharing',
+      icon: <Share2 className="h-5 w-5" />,
+      format: 'PNG',
+      category: 'visual',
+      action: async () => {
+        const state = getState();
+        if (!state) return false;
+        const metrics = engine?.getMetricsHistory();
+        const latestMetrics = metrics && metrics.length > 0 ? metrics[metrics.length - 1] : null;
+        return exportMobileShareSnapshot(canvasRef.current, {
+          regime,
+          stability: state.variance < 0.05 ? 'Stable' : state.variance < 0.15 ? 'Active' : 'Chaotic',
+          curvature: latestMetrics?.curvature ?? 0,
+          energy: state.energy,
+          overlayCanvas: basinCanvasRef?.current,
+          overlayOpacity: 0.3,
+        });
+      },
+    },
+    {
+      id: 'video',
+      name: 'Playback Video',
+      description: 'Animated video of simulation history',
+      icon: <Film className="h-5 w-5" />,
+      format: 'WebM',
+      category: 'visual',
+      requires: 'playback history',
+      action: async () => {
+        if (!engine || !canvasRef.current) return false;
+        return exportVideoWebM(engine, canvasRef.current, colormap);
+      },
+    },
+    {
+      id: 'layers',
+      name: 'Field Layers',
+      description: 'Separate images for each derived field',
+      icon: <Layers className="h-5 w-5" />,
+      format: 'JSON + PNGs',
+      category: 'visual',
+      action: async () => {
+        if (!engine) return false;
+        return exportLayersSeparate(engine, "png");
+      },
+    },
+    {
+      id: 'sim-data',
+      name: 'Simulation Data',
+      description: 'Complete field data with all frame history',
+      icon: <Database className="h-5 w-5" />,
+      format: 'CSV',
+      category: 'data',
+      action: async () => {
+        if (!engine) return false;
+        return exportSimulationData(engine);
+      },
+    },
+    {
+      id: 'metrics',
+      name: 'Metrics Log',
+      description: 'Time series of energy, variance, and curvature',
+      icon: <BarChart3 className="h-5 w-5" />,
+      format: 'CSV',
+      category: 'data',
+      action: async () => {
+        if (!engine) return false;
+        return exportMetricsLog(engine);
+      },
+    },
+    {
+      id: 'events',
+      name: 'Event Log',
+      description: 'Record of detected structural events',
+      icon: <Activity className="h-5 w-5" />,
+      format: 'JSON',
+      category: 'data',
+      action: async () => exportEventLog(events),
+    },
+    {
+      id: 'operators',
+      name: 'Operator Contributions',
+      description: 'How each operator influenced the field',
+      icon: <BarChart3 className="h-5 w-5" />,
+      format: 'JSON',
+      category: 'data',
+      action: async () => {
+        if (!engine) return false;
+        return exportOperatorContributions(engine);
+      },
+    },
+    {
+      id: 'probes-csv',
+      name: 'Probe Data (Spreadsheet)',
+      description: 'All saved probes with current values',
+      icon: <Target className="h-5 w-5" />,
+      format: 'CSV',
+      category: 'probes',
+      requires: 'saved probes',
+      action: exportProbesCSV,
+    },
+    {
+      id: 'probes-json',
+      name: 'Probe Data (Detailed)',
+      description: 'Full probe data including baselines',
+      icon: <Target className="h-5 w-5" />,
+      format: 'JSON',
+      category: 'probes',
+      requires: 'saved probes',
+      action: exportProbesJSON,
+    },
+    {
+      id: 'settings',
+      name: 'Settings',
+      description: 'Current parameters and configuration',
+      icon: <Settings className="h-5 w-5" />,
+      format: 'JSON',
+      category: 'technical',
+      action: async () => {
+        if (!engine) return false;
+        return exportSettingsJSON(engine);
+      },
+    },
+    {
+      id: 'numpy',
+      name: 'NumPy Array',
+      description: 'Field data for Python/scientific analysis',
+      icon: <Code className="h-5 w-5" />,
+      format: '.npy',
+      category: 'technical',
+      action: async () => {
+        if (!engine) return false;
+        return exportNumPyArray(engine);
+      },
+    },
+    {
+      id: 'python',
+      name: 'Python Script',
+      description: 'Reconstruction script with visualization code',
+      icon: <FileText className="h-5 w-5" />,
+      format: '.py',
+      category: 'technical',
+      action: async () => {
+        if (!engine) return false;
+        return exportPythonScript(engine);
+      },
+    },
+    {
+      id: 'batch',
+      name: 'Batch Spec',
+      description: 'Minimal config for automated testing',
+      icon: <FileJson className="h-5 w-5" />,
+      format: 'JSON',
+      category: 'technical',
+      action: async () => {
+        if (!engine) return false;
+        return exportBatchSpec(engine);
+      },
+    },
+    {
+      id: 'archive',
+      name: 'Full Archive',
+      description: 'Everything: field, operators, events, config',
+      icon: <Archive className="h-5 w-5" />,
+      format: 'JSON',
+      category: 'technical',
+      action: async () => {
+        if (!engine) return false;
+        return exportFullArchive(engine, events, colormap);
+      },
+    },
+  ];
+
+  const handleExport = async (option: ExportOption) => {
+    setLoadingExport(option.id);
+    try {
+      const success = await option.action();
+      if (success) {
+        setCompletedExports(prev => new Set(Array.from(prev).concat(option.id)));
+        toast({
+          title: "Export Complete",
+          description: `${option.name} saved successfully`,
+        });
+        setTimeout(() => {
+          setCompletedExports(prev => {
+            const next = new Set(prev);
+            next.delete(option.id);
+            return next;
+          });
+        }, 2000);
+      } else {
+        toast({
+          title: "Export Failed",
+          description: option.requires ? `Requires ${option.requires}` : "Could not generate export",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Export Error",
+        description: String(err),
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingExport(null);
+    }
+  };
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    // Bring panel to front when dragging starts
+    onFocus?.();
+    if ((e.target as HTMLElement).closest('button')) return;
+    isDraggingRef.current = true;
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      posX: positionRef.current.x,
+      posY: positionRef.current.y,
+    };
+    e.preventDefault();
+  }, [onFocus]);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current || !containerRef.current) return;
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+      const newX = Math.max(0, Math.min(window.innerWidth - 400, dragStartRef.current.posX + dx));
+      const newY = Math.max(0, Math.min(window.innerHeight - 300, dragStartRef.current.posY + dy));
+      positionRef.current = { x: newX, y: newY };
+      containerRef.current.style.left = `${newX}px`;
+      containerRef.current.style.top = `${newY}px`;
+    };
+
+    const handleMouseUp = () => {
+      if (isDraggingRef.current) {
+        isDraggingRef.current = false;
+        // If pinned, update the pinned position to the new dragged location
+        if (isPinned && onPinnedChange) {
+          onPinnedChange(true, { x: positionRef.current.x, y: positionRef.current.y });
+        }
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isOpen, isPinned, onPinnedChange]);
+
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      // If pinned, use the pinned position
+      if (isPinned && pinnedPosition) {
+        positionRef.current = pinnedPosition;
+        containerRef.current.style.left = `${pinnedPosition.x}px`;
+        containerRef.current.style.top = `${pinnedPosition.y}px`;
+        return;
+      }
+      // Otherwise center the dialog
+      const x = Math.max(50, (window.innerWidth - 500) / 2);
+      const y = Math.max(50, (window.innerHeight - 400) / 2);
+      positionRef.current = { x, y };
+      containerRef.current.style.left = `${x}px`;
+      containerRef.current.style.top = `${y}px`;
+    }
+  }, [isOpen, isPinned, pinnedPosition]);
+
+  if (!isOpen) return null;
+
+  const filteredOptions = exportOptions.filter(opt => opt.category === selectedCategory);
+
+  return (
+    <div
+      ref={containerRef}
+      className="fixed"
+      style={{ left: positionRef.current.x, top: positionRef.current.y, zIndex }}
+      onMouseDown={() => onFocus?.()}
+      data-testid="floating-export-dialog"
+    >
+      <div
+        className="rounded-lg overflow-hidden"
+        style={{
+          backgroundColor: 'rgba(23, 23, 23, 0.95)',
+          border: `1px solid ${isPinned ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+          boxShadow: isPinned ? '0 8px 32px rgba(251, 191, 36, 0.15)' : '0 8px 32px rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(12px)',
+          width: 480,
+        }}
+      >
+        <div
+          className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 cursor-move select-none"
+          onMouseDown={handleMouseDown}
+        >
+          <div className="flex items-center gap-1.5">
+            <GripVertical className="h-3 w-3 text-neutral-500" />
+            <Download className="h-3 w-3 text-cyan-400" />
+            <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">Export</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handlePin}
+                  className={`h-5 w-5 rounded-full ${isPinned ? 'text-amber-400' : 'text-neutral-500 hover:text-neutral-300'}`}
+                  data-testid="export-pin"
+                >
+                  <Pin className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                {isPinned ? 'Unpin Position' : 'Pin Position'}
+              </TooltipContent>
+            </Tooltip>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-5 w-5 rounded-full text-neutral-500 hover:text-neutral-300"
+              data-testid="export-dialog-close"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex">
+          <div className="w-28 border-r border-white/10 p-2 space-y-1">
+            {(Object.keys(CATEGORY_INFO) as ExportCategory[]).map(cat => {
+              const info = CATEGORY_INFO[cat];
+              const isSelected = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left text-xs transition-colors ${
+                    isSelected
+                      ? 'bg-white/10 text-white'
+                      : 'text-neutral-400 hover:text-neutral-200 hover:bg-white/5'
+                  }`}
+                  data-testid={`export-category-${cat}`}
+                >
+                  <span className={isSelected ? info.color : ''}>{info.icon}</span>
+                  <span>{info.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex-1 p-3 max-h-[360px] overflow-y-auto">
+            <div className="grid gap-2">
+              {filteredOptions.map(option => {
+                const isLoading = loadingExport === option.id;
+                const isCompleted = completedExports.has(option.id);
+                const isDisabled = isLoading || (option.requires === 'saved probes' && savedProbes.length === 0);
+                
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => !isDisabled && handleExport(option)}
+                    disabled={isDisabled}
+                    className={`flex items-start gap-3 p-3 rounded-lg text-left transition-all ${
+                      isDisabled
+                        ? 'opacity-50 cursor-not-allowed bg-white/5'
+                        : 'bg-white/5 hover:bg-white/10 cursor-pointer'
+                    }`}
+                    data-testid={`export-option-${option.id}`}
+                  >
+                    <div className={`shrink-0 p-2 rounded-lg ${CATEGORY_INFO[option.category].color} bg-white/5`}>
+                      {isLoading ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : isCompleted ? (
+                        <Check className="h-5 w-5 text-green-400" />
+                      ) : (
+                        option.icon
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-neutral-200">{option.name}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-neutral-400">
+                          {option.format}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-neutral-500 mt-0.5 leading-snug">
+                        {option.description}
+                      </p>
+                      {option.requires && (
+                        <p className="text-[10px] text-amber-500/70 mt-1">
+                          Requires: {option.requires}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

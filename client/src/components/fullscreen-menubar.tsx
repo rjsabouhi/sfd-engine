@@ -113,6 +113,8 @@ interface FullscreenMenuBarProps {
   onDiagnosticsChangeWithRect?: (visible: boolean, rect?: DOMRect) => void;
   inspectorPanelOpen?: boolean;
   onToggleInspectorPanel?: (rect?: DOMRect) => void;
+  exportDialogOpen?: boolean;
+  onToggleExportDialog?: () => void;
 }
 
 export function FullscreenMenuBar({
@@ -168,6 +170,8 @@ export function FullscreenMenuBar({
   onDiagnosticsChangeWithRect,
   inspectorPanelOpen,
   onToggleInspectorPanel,
+  exportDialogOpen,
+  onToggleExportDialog,
 }: FullscreenMenuBarProps) {
   const [aboutOpen, setAboutOpen] = useState(false);
   const [selectedRegime, setSelectedRegime] = useState<string>("");
@@ -277,6 +281,24 @@ export function FullscreenMenuBar({
           </Button>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="text-xs">Toggle Perturbation Mode</TooltipContent>
+      </Tooltip>
+
+      <div className="w-px h-4 bg-border mx-1" />
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleExportDialog}
+            className={`h-6 text-xs px-2 ${exportDialogOpen ? 'bg-accent text-accent-foreground' : ''}`}
+            data-testid="button-export-dialog"
+          >
+            <Download className="h-3 w-3 mr-1" />
+            Export
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="text-xs">Export Options</TooltipContent>
       </Tooltip>
 
       <DropdownMenu>
