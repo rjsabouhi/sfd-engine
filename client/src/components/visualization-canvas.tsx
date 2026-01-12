@@ -30,6 +30,7 @@ interface VisualizationCanvasProps {
   // Inspector mode - clicks add probes instead of perturbing
   inspectorMode?: boolean;
   onAddProbe?: (x: number, y: number) => void;
+  onRemoveProbe?: (id: string) => void;
 }
 
 // Temporal smoothing buffer for perceptual safety
@@ -160,6 +161,7 @@ export function VisualizationCanvas({
   showProbeMarkers = true,
   inspectorMode = false,
   onAddProbe,
+  onRemoveProbe,
 }: VisualizationCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -795,63 +797,74 @@ export function VisualizationCanvas({
               />
             </div>
           )}
-          {showProbeMarkers && field && savedProbes.map((probe) => (
-            <div 
-              key={probe.id}
-              className="absolute pointer-events-none"
-              style={{
-                left: `calc(50% - ${visualSize/2}px + ${(probe.x / field.width) * visualSize}px + ${pan.x}px)`,
-                top: `calc(50% - ${visualSize/2}px + ${(probe.y / field.height) * visualSize}px + ${pan.y}px)`,
-                transform: `scale(${zoom})`,
-                transformOrigin: 'center center',
-              }}
-              data-testid={`probe-marker-${probe.id}`}
-            >
-              {/* Single ring with number - matching mobile button style */}
+          {showProbeMarkers && field && savedProbes.map((probe) => {
+            // Calculate position accounting for zoom and pan
+            const baseX = (probe.x / field.width) * visualSize;
+            const baseY = (probe.y / field.height) * visualSize;
+            // Apply zoom scaling from center and add pan offset
+            const scaledX = (baseX - visualSize / 2) * zoom + visualSize / 2 + pan.x;
+            const scaledY = (baseY - visualSize / 2) * zoom + visualSize / 2 + pan.y;
+            
+            return (
               <div 
-                className="absolute"
-                style={{ 
-                  width: '24px',
-                  height: '24px',
-                  marginLeft: '-12px',
-                  marginTop: '-12px',
-                  borderRadius: '50%',
-                  border: `2px solid ${probe.color}`,
-                  overflow: 'hidden',
+                key={probe.id}
+                className="absolute cursor-pointer"
+                style={{
+                  left: `calc(50% - ${visualSize/2}px + ${scaledX}px)`,
+                  top: `calc(50% - ${visualSize/2}px + ${scaledY}px)`,
                 }}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  onRemoveProbe?.(probe.id);
+                }}
+                data-testid={`probe-marker-${probe.id}`}
               >
-                {/* Darker shade background */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    backgroundColor: probe.color,
-                    filter: 'brightness(0.35) saturate(0.7)',
-                  }}
-                />
-                {/* Number text */}
-                <span 
-                  className="absolute inset-0 flex items-center justify-center text-[11px] font-medium"
-                  style={{ color: probe.color }}
-                >
-                  {probe.label.replace('P', '')}
-                </span>
-              </div>
-              {probe.isBaseline && (
+                {/* Single ring with number - matching mobile button style */}
                 <div 
-                  className="absolute w-3 h-3 rounded-full bg-amber-400 flex items-center justify-center"
+                  className="absolute"
                   style={{ 
-                    boxShadow: '0 0 6px rgba(251, 191, 36, 1), 0 0 12px rgba(251, 191, 36, 0.6)',
-                    top: '-16px',
-                    left: '4px',
-                    border: '1px solid white',
+                    width: '24px',
+                    height: '24px',
+                    marginLeft: '-12px',
+                    marginTop: '-12px',
+                    borderRadius: '50%',
+                    border: `2px solid ${probe.color}`,
+                    overflow: 'hidden',
                   }}
                 >
-                  <span className="text-[6px] font-bold text-black">B</span>
+                  {/* Darker shade background */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      backgroundColor: probe.color,
+                      filter: 'brightness(0.35) saturate(0.7)',
+                    }}
+                  />
+                  {/* Number text */}
+                  <span 
+                    className="absolute inset-0 flex items-center justify-center text-[11px] font-medium"
+                    style={{ color: probe.color }}
+                  >
+                    {probe.label.replace('P', '')}
+                  </span>
                 </div>
-              )}
-            </div>
-          ))}
+                {probe.isBaseline && (
+                  <div 
+                    className="absolute w-3 h-3 rounded-full bg-amber-400 flex items-center justify-center"
+                    style={{ 
+                      boxShadow: '0 0 6px rgba(251, 191, 36, 1), 0 0 12px rgba(251, 191, 36, 0.6)',
+                      top: '-16px',
+                      left: '4px',
+                      border: '1px solid white',
+                    }}
+                  >
+                    <span className="text-[6px] font-bold text-black">B</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
           {zoom > 1 && (
             <div className="absolute bottom-2 left-2 bg-background/80 text-xs px-2 py-1 rounded text-muted-foreground" data-testid="zoom-indicator">
               {zoomPercent}% (double-click to reset)

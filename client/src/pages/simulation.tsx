@@ -1455,6 +1455,7 @@ export default function SimulationPage() {
             showProbeMarkers={inspectorPanelOpen}
             inspectorMode={inspectorPanelOpen}
             onAddProbe={handleAddProbe}
+            onRemoveProbe={handleRemoveProbe}
           />
         </div>
 
@@ -2430,6 +2431,7 @@ export default function SimulationPage() {
                       showProbeMarkers={inspectorPanelOpen}
                       inspectorMode={inspectorPanelOpen}
                       onAddProbe={handleAddProbe}
+                      onRemoveProbe={handleRemoveProbe}
                     />
                   </div>
                   <StructuralFieldFooter 
@@ -2476,6 +2478,7 @@ export default function SimulationPage() {
                   showProbeMarkers={inspectorPanelOpen}
                   inspectorMode={inspectorPanelOpen}
                   onAddProbe={handleAddProbe}
+                  onRemoveProbe={handleRemoveProbe}
                 />
               </div>
               <StructuralFieldFooter 
@@ -2972,6 +2975,7 @@ export default function SimulationPage() {
                           showProbeMarkers={inspectorPanelOpen}
                           inspectorMode={inspectorPanelOpen}
                           onAddProbe={handleAddProbe}
+                          onRemoveProbe={handleRemoveProbe}
                         />
                       </div>
                       <StructuralFieldFooter 
@@ -3018,6 +3022,7 @@ export default function SimulationPage() {
                       showProbeMarkers={inspectorPanelOpen}
                       inspectorMode={inspectorPanelOpen}
                       onAddProbe={handleAddProbe}
+                      onRemoveProbe={handleRemoveProbe}
                     />
                   </div>
                   <StructuralFieldFooter 
