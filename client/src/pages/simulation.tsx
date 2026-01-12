@@ -444,6 +444,10 @@ export default function SimulationPage() {
         setState(newState);
         setField(newField);
         
+        // Always sync playback mode immediately - critical for proper step-back behavior
+        // after regime changes or other events that clear playback state
+        setIsPlaybackMode(inPlayback);
+        
         // Always update these during playback, otherwise throttle
         if (inPlayback || frameCount % 3 === 0) {
           setOperatorContributions(engine.getOperatorContributions());
@@ -452,7 +456,6 @@ export default function SimulationPage() {
           setTrendMetrics(engine.getTrendMetrics());
           setHistoryLength(engine.getHistoryLength());
           setCurrentHistoryIndex(engine.getCurrentHistoryIndex());
-          setIsPlaybackMode(inPlayback);
         }
         
         // Always update dual view fields during playback
