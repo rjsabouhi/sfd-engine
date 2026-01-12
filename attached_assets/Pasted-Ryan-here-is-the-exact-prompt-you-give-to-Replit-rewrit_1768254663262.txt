@@ -1,0 +1,198 @@
+Ryan — here is the exact prompt you give to Replit, rewritten to be precise, implementable, aligned with your UI aesthetic, and incorporating only the optimal structural changes I recommended.
+
+I preserved your visual layout exactly as you like it.
+I reorganized logic, safety, grouping, and modes — not aesthetics.
+
+This prompt is ready to paste directly into Replit.
+
+⸻
+
+✅ THE EXACT PROMPT TO GIVE TO REPLIT
+
+(copy/paste this)
+
+⸻
+
+PROMPT FOR REPLIT AGENT
+
+I need you to upgrade the Export Panel in the SFD Engine while keeping the current visual design and aesthetic exactly as it is. DO NOT redesign the styling, spacing, or panel look. This task is strictly about logic, grouping, safety tiers, and interaction flow.
+
+Here is what I need built:
+
+⸻
+
+1. REORGANIZE EXPORT OPTIONS INTO THREE CLEAR GROUPS
+
+Maintain the existing tabs (“Visual”, “Data”, “Probes”, “Technical”),
+but reorganize the content internally as follows:
+
+⸻
+
+A. VISUAL (no changes to styling)
+
+These are always available and completely safe for public sharing.
+	•	Field Snapshot (PNG)
+	•	Share Card (PNG)
+	•	Playback Video (MP4/WebM)
+	•	Add a small note: “Long histories available only in Advanced Mode.”
+	•	Field Layers (PNG only)
+	•	PNG export only — JSON goes in Advanced Mode (see below)
+
+All buttons, icons, and visual layout remain exactly as they are.
+
+⸻
+
+B. DATA (add new grouping logic)
+
+This tab exports field values only in summary form unless Advanced Mode is on.
+
+Default (safe mode):
+	•	Metrics Summary (CSV/JSON)
+	•	Basin Info (CSV/JSON)
+	•	Stability summary
+	•	Regime metadata (non-sensitive)
+
+Advanced Mode only:
+	•	Full-resolution field matrices
+	•	Multiframe history dumps
+	•	Any data arrays > 128×128 resolution
+
+Advanced Mode must be toggled manually (see section 4).
+
+⸻
+
+C. PROBES (keep layout, add rules)
+
+Safe Mode:
+	•	Export current probe values
+	•	Export saved probe sets
+	•	Export probe metadata only
+(no full-frame numerical matrices)
+
+Advanced Mode:
+	•	Export full probe histories
+	•	Export per-step calculus objects (curvature/tension history)
+
+⸻
+
+D. TECHNICAL (lock behind Advanced Mode)
+
+This category MUST NOT export by default.
+
+Only show Technical exports when Advanced Mode is enabled.
+These include:
+	•	Solver internals
+	•	Operator kernels
+	•	Step integrator settings
+	•	Constraint-layer coefficients
+	•	Random seeds
+	•	Full simulation config bundle
+	•	Any structural mapping tables
+
+If Advanced Mode is off, this whole tab is disabled and semi-transparent with a tooltip:
+“Technical exports require Advanced Mode.”
+
+⸻
+
+2. IMPLEMENT AN “ADVANCED MODE” TOGGLE
+
+Place a small toggle switch at the bottom of the Export Panel:
+
+[ ] Advanced Mode  
+(Unlocks export of numerical matrices, histories, and solver internals)
+
+Rules:
+	•	When OFF → Only export globally-safe artifacts
+	•	When ON → Enable numerical, reconstructable, or algorithm-adjacent exports
+
+Do NOT allow Advanced Mode to persist across reloads.
+It should default back to OFF every session.
+
+⸻
+
+3. DO NOT CHANGE THE VISUAL DESIGN
+
+This part is important:
+	•	Keep the styling EXACTLY as is
+	•	Same panel size
+	•	Same icons
+	•	Same alignment
+	•	Same layout structure
+
+Only modify internal grouping and conditional logic.
+
+⸻
+
+4. KEEP ALL EXISTING EXPORT BUTTONS EXACTLY WHERE THEY ARE
+
+If an export option is moved to Advanced Mode:
+	•	Leave the button in the same visual spot
+	•	But disable it when Advanced Mode is off
+	•	Use a consistent disabled-state style (grayed-out + tooltip)
+
+⸻
+
+5. ADD SAFETY TOOLTIP BEHAVIORS
+
+For any disabled button under Advanced Mode, add a tooltip:
+
+“Enable Advanced Mode to export numerical data.”
+
+For playback video in normal mode, add tooltip:
+
+“Full-length history export requires Advanced Mode.”
+
+⸻
+
+6. NO BACKEND CHANGES TO ACTUAL EXPORT IMPLEMENTATION
+
+This prompt is about UI logic, not rewriting the export engines.
+
+Where needed, conditionally route JSON/array exports through the Advanced Mode flag.
+
+⸻
+
+7. VERIFY BEFORE BUILDING
+
+Before building, restate the plan to me concisely to confirm:
+	•	Tab structure unchanged
+	•	Visual design unchanged
+	•	Advanced Mode toggle added
+	•	Safe exports always available
+	•	Sensitive exports locked unless Advanced Mode is enabled
+
+After confirmation, implement the changes.
+
+⸻
+
+END OF PROMPT
+
+⸻
+
+⭐ Why this prompt is optimal
+
+It achieves the following simultaneously:
+
+✔ keeps your aesthetics untouched
+
+✔ gives you clear safe vs advanced export levels
+
+✔ respects your desire for broad shareability
+
+✔ prevents leakage of your underlying operators
+
+✔ aligns with ML-lab expectations for safe tooling
+
+✔ future-proofs the engine before you go public Tuesday
+
+And it’s written in a format Replit can execute exactly as-is without interpretation errors.
+
+⸻
+
+If you want, I can also generate:
+	•	a “Lab Mode” export preset (for OpenAI/Anthropic internal reviewers)
+	•	a watermark system for exported images
+	•	a one-click data-for-arXiv export bundle
+	•	or a GitHub-ready spec sheet describing the export architecture
+
+Just say the word.
