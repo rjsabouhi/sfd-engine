@@ -165,6 +165,7 @@ export function FullscreenMenuBar({
   onDiagnosticsChangeWithRect,
 }: FullscreenMenuBarProps) {
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [selectedRegime, setSelectedRegime] = useState<string>("");
   
   const playbackButtonRef = useRef<HTMLButtonElement>(null);
   const diagnosticsButtonRef = useRef<HTMLButtonElement>(null);
@@ -269,12 +270,20 @@ export function FullscreenMenuBar({
           <TooltipContent side="bottom" className="text-xs">Structural Regimes</TooltipContent>
         </Tooltip>
         <DropdownMenuContent className="bg-popover border-border min-w-[180px]">
-          <DropdownMenuRadioGroup value="">
-            {Object.entries(structuralPresets).map(([key, preset]) => (
+          <DropdownMenuRadioGroup 
+            value={selectedRegime}
+            onValueChange={(value) => {
+              setSelectedRegime(value);
+              const preset = structuralPresets[value];
+              if (preset) {
+                onParamsChange(preset);
+              }
+            }}
+          >
+            {Object.entries(structuralPresets).map(([key]) => (
               <DropdownMenuRadioItem 
                 key={key} 
                 value={key}
-                onClick={() => onParamsChange(preset)}
                 className="text-xs cursor-pointer"
                 data-testid={`regime-${key}`}
               >
