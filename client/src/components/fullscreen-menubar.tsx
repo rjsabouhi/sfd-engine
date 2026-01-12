@@ -108,6 +108,8 @@ interface FullscreenMenuBarProps {
   onExportWebM?: () => void;
   onShowIntro: () => void;
   onOpenParameterPanel?: () => void;
+  playbackPanelOpen?: boolean;
+  onTogglePlaybackPanel?: () => void;
 }
 
 export function FullscreenMenuBar({
@@ -156,6 +158,8 @@ export function FullscreenMenuBar({
   onExportWebM,
   onShowIntro,
   onOpenParameterPanel,
+  playbackPanelOpen,
+  onTogglePlaybackPanel,
 }: FullscreenMenuBarProps) {
   const [aboutOpen, setAboutOpen] = useState(false);
 
@@ -163,48 +167,18 @@ export function FullscreenMenuBar({
     <div className="flex items-center gap-2 px-2 py-1 bg-gray-900/95 border-b border-white/10">
       <img src={sfdLogo} alt="SFD" className="w-6 h-6 rounded" />
       
+      <Button
+          variant="ghost"
+          size="sm"
+          onClick={onTogglePlaybackPanel}
+          className={`h-6 text-xs px-2 text-white/80 hover:text-white hover:bg-white/10 ${playbackPanelOpen ? 'bg-white/15 text-white' : ''}`}
+          data-testid="button-simulation-panel"
+        >
+          <Play className="h-3 w-3 mr-1" />
+          Simulation
+        </Button>
+      
       <Menubar className="border-0 bg-transparent h-7 p-0 space-x-0">
-        {/* Simulation Menu */}
-        <MenubarMenu>
-          <MenubarTrigger className="text-xs px-2 py-1 h-6 text-white/80 hover:text-white hover:bg-white/10 data-[state=open]:bg-white/15" data-testid="menu-simulation">
-            Simulation
-          </MenubarTrigger>
-          <MenubarContent className="bg-gray-900 border-white/20">
-            {state.isRunning ? (
-              <MenubarItem onClick={onPause} className="text-xs gap-2" data-testid="menu-pause">
-                <Pause className="h-3.5 w-3.5" />
-                Pause
-                <MenubarShortcut>Space</MenubarShortcut>
-              </MenubarItem>
-            ) : (
-              <MenubarItem onClick={onPlay} className="text-xs gap-2" data-testid="menu-play">
-                <Play className="h-3.5 w-3.5" />
-                Run
-                <MenubarShortcut>Space</MenubarShortcut>
-              </MenubarItem>
-            )}
-            <MenubarItem onClick={onStep} className="text-xs gap-2" data-testid="menu-step">
-              <StepForward className="h-3.5 w-3.5" />
-              Step Forward
-            </MenubarItem>
-            <MenubarItem onClick={onStepBackward} className="text-xs gap-2" data-testid="menu-step-back">
-              <StepBack className="h-3.5 w-3.5" />
-              Step Backward
-            </MenubarItem>
-            <MenubarSeparator className="bg-white/10" />
-            <MenubarItem onClick={onReset} className="text-xs gap-2" data-testid="menu-reset">
-              <RotateCcw className="h-3.5 w-3.5" />
-              Reset Field
-            </MenubarItem>
-            <MenubarSeparator className="bg-white/10" />
-            <MenubarItem onClick={onToggleFullscreen} className="text-xs gap-2" data-testid="menu-exit-fullscreen">
-              <Minimize2 className="h-3.5 w-3.5" />
-              Exit Focus Mode
-              <MenubarShortcut>Esc</MenubarShortcut>
-            </MenubarItem>
-          </MenubarContent>
-        </MenubarMenu>
-
         {/* View Menu */}
         <MenubarMenu>
           <MenubarTrigger className="text-xs px-2 py-1 h-6 text-white/80 hover:text-white hover:bg-white/10 data-[state=open]:bg-white/15" data-testid="menu-view">

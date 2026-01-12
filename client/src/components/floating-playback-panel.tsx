@@ -8,10 +8,14 @@ import {
   RotateCcw,
   ChevronLeft,
   ChevronRight,
+  X,
+  GripVertical,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useState, useRef, useCallback } from "react";
 
 interface FloatingPlaybackPanelProps {
+  isVisible: boolean;
   isRunning: boolean;
   currentStep: number;
   historyLength: number;
@@ -22,9 +26,11 @@ interface FloatingPlaybackPanelProps {
   onStepBackward: () => void;
   onStepForward: () => void;
   onSeekFrame: (index: number) => void;
+  onClose: () => void;
 }
 
 export function FloatingPlaybackPanel({
+  isVisible,
   isRunning,
   currentStep,
   historyLength,
@@ -35,7 +41,38 @@ export function FloatingPlaybackPanel({
   onStepBackward,
   onStepForward,
   onSeekFrame,
+  onClose,
 }: FloatingPlaybackPanelProps) {
+  const [position, setPosition] = useState({ x: 80, y: 50 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef<{ startX: number; startY: number; initialX: number; initialY: number } | null>(null);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initialX: position.x,
+      initialY: position.y,
+    };
+  }, [position]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging || !dragRef.current) return;
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+    setPosition({
+      x: dragRef.current.initialX + dx,
+      y: dragRef.current.initialY + dy,
+    });
+  }, [isDragging]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+    dragRef.current = null;
+  }, []);
+
   const handleSliderChange = (value: number[]) => {
     onSeekFrame(value[0]);
   };
@@ -48,116 +85,131 @@ export function FloatingPlaybackPanel({
     onSeekFrame(Math.min(historyLength - 1, currentHistoryIndex + 10));
   };
 
+  if (!isVisible) return null;
+
   return (
     <div 
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2"
+      className="fixed z-50"
+      style={{ left: position.x, top: position.y }}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
       data-testid="floating-playback-panel"
     >
-      <div className="bg-gray-900/95 backdrop-blur-xl border border-white/15 rounded-2xl px-4 py-3 shadow-2xl">
-        <div className="flex items-center gap-3">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onReset}
-                className="h-9 w-9 rounded-full hover:bg-white/10 text-white/70 hover:text-white"
-                data-testid="playback-reset"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="text-xs">Reset</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleJumpBack}
-                className="h-8 w-8 rounded-full hover:bg-white/10 text-white/60 hover:text-white"
-                data-testid="playback-jump-back"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="text-xs">Jump -10</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onStepBackward}
-                className="h-9 w-9 rounded-full hover:bg-white/10 text-white/70 hover:text-white"
-                data-testid="playback-step-back"
-              >
-                <SkipBack className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="text-xs">Step Back</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={isRunning ? onPause : onPlay}
-                className="h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white"
-                data-testid="playback-play-pause"
-              >
-                {isRunning ? (
-                  <Pause className="h-5 w-5" />
-                ) : (
-                  <Play className="h-5 w-5 ml-0.5" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="text-xs">
-              {isRunning ? "Pause (Space)" : "Play (Space)"}
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onStepForward}
-                className="h-9 w-9 rounded-full hover:bg-white/10 text-white/70 hover:text-white"
-                data-testid="playback-step-forward"
-              >
-                <SkipForward className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="text-xs">Step Forward</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleJumpForward}
-                className="h-8 w-8 rounded-full hover:bg-white/10 text-white/60 hover:text-white"
-                data-testid="playback-jump-forward"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="text-xs">Jump +10</TooltipContent>
-          </Tooltip>
-
-          <div className="w-px h-6 bg-white/20 mx-1" />
-
+      <div className="bg-gray-900/95 backdrop-blur-xl border border-white/15 rounded-xl shadow-2xl">
+        <div 
+          className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 cursor-move select-none"
+          onMouseDown={handleMouseDown}
+        >
+          <div className="flex items-center gap-1.5">
+            <GripVertical className="h-3 w-3 text-white/40" />
+            <span className="text-[10px] font-medium text-white/70 uppercase tracking-wide">Playback</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="h-5 w-5 rounded-full hover:bg-white/10 text-white/50 hover:text-white"
+            data-testid="playback-close"
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        </div>
+        
+        <div className="px-3 py-2">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono text-white/50 w-8 text-right">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onReset}
+                  className="h-8 w-8 rounded-full hover:bg-white/10 text-white/70 hover:text-white"
+                  data-testid="playback-reset"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Reset</TooltipContent>
+            </Tooltip>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleJumpBack}
+              className="h-7 w-7 rounded-full hover:bg-white/10 text-white/50 hover:text-white"
+              data-testid="playback-jump-back"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </Button>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onStepBackward}
+                  className="h-8 w-8 rounded-full hover:bg-white/10 text-white/70 hover:text-white"
+                  data-testid="playback-step-back"
+                >
+                  <SkipBack className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Step Back</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={isRunning ? onPause : onPlay}
+                  className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white"
+                  data-testid="playback-play-pause"
+                >
+                  {isRunning ? (
+                    <Pause className="h-4 w-4" />
+                  ) : (
+                    <Play className="h-4 w-4 ml-0.5" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                {isRunning ? "Pause (Space)" : "Play (Space)"}
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onStepForward}
+                  className="h-8 w-8 rounded-full hover:bg-white/10 text-white/70 hover:text-white"
+                  data-testid="playback-step-forward"
+                >
+                  <SkipForward className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Step Forward</TooltipContent>
+            </Tooltip>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleJumpForward}
+              className="h-7 w-7 rounded-full hover:bg-white/10 text-white/50 hover:text-white"
+              data-testid="playback-jump-forward"
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-2 mt-2">
+            <span className="text-[10px] font-mono text-white/50 w-7 text-right">
               {currentHistoryIndex + 1}
             </span>
-            <div className="w-32">
+            <div className="flex-1 min-w-[100px]">
               <Slider
                 min={0}
                 max={Math.max(0, historyLength - 1)}
@@ -168,16 +220,15 @@ export function FloatingPlaybackPanel({
                 data-testid="playback-scrubber"
               />
             </div>
-            <span className="text-[10px] font-mono text-white/50 w-8">
+            <span className="text-[10px] font-mono text-white/50 w-7">
               {historyLength}
             </span>
-          </div>
-
-          <div className="w-px h-6 bg-white/20 mx-1" />
-
-          <div className="flex flex-col items-center">
-            <span className="text-xs font-mono text-white/80">{currentStep}</span>
-            <span className="text-[8px] text-white/40 uppercase tracking-wide">Step</span>
+            <div className="border-l border-white/10 pl-2 ml-1">
+              <div className="text-center">
+                <span className="text-xs font-mono text-white/80">{currentStep}</span>
+                <span className="text-[8px] text-white/40 ml-1">step</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

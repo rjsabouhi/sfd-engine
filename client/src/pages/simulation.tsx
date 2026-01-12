@@ -268,6 +268,7 @@ export default function SimulationPage() {
   const [perceptualSmoothing, setPerceptualSmoothing] = useState(true); // Perceptual Safety Layer
   const [metricsPanelCollapsed, setMetricsPanelCollapsed] = useState(false);
   const [focusMode, setFocusMode] = useState(false); // Fullscreen/focus mode with menubar
+  const [playbackPanelOpen, setPlaybackPanelOpen] = useState(false); // Floating playback panel in focus mode
   const configInputRef = useRef<HTMLInputElement>(null);
   
   // Mobile touch interaction states
@@ -2247,6 +2248,8 @@ export default function SimulationPage() {
           onExportWebM={handleExportWebM}
           onShowIntro={() => onboardingRef.current?.replay()}
           onOpenParameterPanel={() => setFocusMode(false)}
+          playbackPanelOpen={playbackPanelOpen}
+          onTogglePlaybackPanel={() => setPlaybackPanelOpen(!playbackPanelOpen)}
         />
         
         <div className="flex-1 relative overflow-hidden">
@@ -2343,6 +2346,7 @@ export default function SimulationPage() {
         </div>
         
         <FloatingPlaybackPanel
+          isVisible={playbackPanelOpen}
           isRunning={state.isRunning}
           currentStep={state.step}
           historyLength={historyLength}
@@ -2353,6 +2357,7 @@ export default function SimulationPage() {
           onStepBackward={handleStepBackward}
           onStepForward={handleStepForward}
           onSeekFrame={handleSeekFrame}
+          onClose={() => setPlaybackPanelOpen(false)}
         />
         
         <FloatingDiagnostics
