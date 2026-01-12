@@ -134,20 +134,33 @@ export function FloatingPerturbationPanel({
     };
   }, [position]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDragging || !dragRef.current) return;
-    const dx = e.clientX - dragRef.current.startX;
-    const dy = e.clientY - dragRef.current.startY;
-    setPosition({
-      x: dragRef.current.initialX + dx,
-      y: dragRef.current.initialY + dy,
-    });
-  }, [isDragging]);
+  // Use window-level event listeners for smooth dragging
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging || !dragRef.current) return;
+      const dx = e.clientX - dragRef.current.startX;
+      const dy = e.clientY - dragRef.current.startY;
+      setPosition({
+        x: dragRef.current.initialX + dx,
+        y: dragRef.current.initialY + dy,
+      });
+    };
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-    dragRef.current = null;
-  }, []);
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      dragRef.current = null;
+    };
+
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
 
   const updateImpulseParams = (update: Partial<ImpulseParams>) => {
     const newParams = { ...impulseParams, ...update };
@@ -404,9 +417,6 @@ export function FloatingPerturbationPanel({
     <div 
       className="fixed"
       style={{ left: position.x, top: position.y, zIndex }}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
       onMouseDown={() => onFocus?.()}
       data-testid="floating-perturbation-panel"
     >
