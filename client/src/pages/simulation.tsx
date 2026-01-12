@@ -543,7 +543,7 @@ export default function SimulationPage() {
       // Clear derived field when mode changes to prevent stale rendering
       if (newParams.mode !== undefined && newParams.mode !== prev.mode) {
         setDerivedField(null);
-        setBasinMap(null);
+        // Don't set basinMap to null - engine.getBasinMap() always returns valid map
       }
       engineRef.current?.setParams(newParams);
       return updated;

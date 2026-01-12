@@ -1090,8 +1090,13 @@ export class SFDEngine {
     };
   }
 
-  getBasinMap(): BasinMap | null {
-    return this.basinMap;
+  getBasinMap(): BasinMap {
+    // Always return a valid basin map - compute if null
+    if (this.basinMap === null) {
+      this.updateBasinMap();
+    }
+    // updateBasinMap() guarantees basinMap is set (even if trivial)
+    return this.basinMap!;
   }
 
   computeProbeData(x: number, y: number): ProbeData | null {
