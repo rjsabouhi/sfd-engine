@@ -315,7 +315,7 @@ export function FloatingDiagnostics({
         top: position.y,
         width: isMinimized ? 280 : size.width,
         height: isMinimized ? 'auto' : size.height,
-        zIndex: isPinned ? 9999 : zIndex,
+        zIndex: zIndex,
         backgroundColor: 'rgba(23, 23, 23, 0.90)',
         border: `1px solid ${isPinned ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
         borderRadius: '8px',
