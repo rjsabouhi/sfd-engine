@@ -231,6 +231,23 @@ export function FullscreenMenuBar({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
+            ref={inspectorButtonRef}
+            variant="ghost"
+            size="sm"
+            onClick={handleToggleInspector}
+            className={`h-6 text-xs px-2 ${inspectorPanelOpen ? 'bg-accent text-accent-foreground' : ''}`}
+            data-testid="button-field-inspector-inspection"
+          >
+            <Eye className="h-3 w-3 mr-1" />
+            Inspector
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="text-xs">Toggle Inspector Panel</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
             ref={diagnosticsButtonRef}
             variant="ghost"
             size="sm"
@@ -260,23 +277,6 @@ export function FullscreenMenuBar({
           </Button>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="text-xs">Toggle Perturbation Mode</TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            ref={inspectorButtonRef}
-            variant="ghost"
-            size="sm"
-            onClick={handleToggleInspector}
-            className={`h-6 text-xs px-2 ${inspectorPanelOpen ? 'bg-accent text-accent-foreground' : ''}`}
-            data-testid="button-field-inspector-inspection"
-          >
-            <Eye className="h-3 w-3 mr-1" />
-            Inspector
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className="text-xs">Toggle Inspector Panel</TooltipContent>
       </Tooltip>
 
       <DropdownMenu>
