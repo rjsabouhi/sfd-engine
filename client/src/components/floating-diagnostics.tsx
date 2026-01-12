@@ -39,6 +39,9 @@ interface FloatingDiagnosticsProps {
   zIndex?: number;
   onFocus?: () => void;
   anchorRect?: DOMRect | null;
+  isPinned?: boolean;
+  pinnedPosition?: { x: number; y: number } | null;
+  onPinnedChange?: (isPinned: boolean, position: { x: number; y: number } | null) => void;
 }
 
 const DEFAULT_WIDTH = 420;
@@ -146,6 +149,9 @@ export function FloatingDiagnostics({
   zIndex = 100,
   onFocus,
   anchorRect,
+  isPinned: isPinnedProp,
+  pinnedPosition: pinnedPositionProp,
+  onPinnedChange,
 }: FloatingDiagnosticsProps) {
   const [activeTab, setActiveTab] = useState<"solver" | "check" | "render" | "internals" | "events" | "advanced">("solver");
   const [solverData, setSolverData] = useState<DiagnosticSolverData | null>(null);
@@ -160,12 +166,17 @@ export function FloatingDiagnostics({
   const [autoScroll, setAutoScroll] = useState(true);
   const [compactView, setCompactView] = useState(false);
   
-  const [isPinned, setIsPinned] = useState(false);
-  const [pinnedPosition, setPinnedPosition] = useState<{ x: number; y: number } | null>(null);
+  // Use lifted state if provided, otherwise use local state
+  const [localIsPinned, setLocalIsPinned] = useState(false);
+  const [localPinnedPosition, setLocalPinnedPosition] = useState<{ x: number; y: number } | null>(null);
+  const isPinned = isPinnedProp !== undefined ? isPinnedProp : localIsPinned;
+  const pinnedPosition = pinnedPositionProp !== undefined ? pinnedPositionProp : localPinnedPosition;
+  
   const [isMinimized, setIsMinimized] = useState(false);
-  const [position, setPosition] = useState({ x: 100, y: 80 });
+  const [position, setPosition] = useState(pinnedPosition || { x: 100, y: 80 });
   const [size, setSize] = useState({ width: 420, height: 520 });
   const [hasDragged, setHasDragged] = useState(false);
+  const lastAnchorRectRef = useRef<DOMRect | null>(null);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const eventLogRef = useRef<HTMLDivElement>(null);
@@ -175,19 +186,37 @@ export function FloatingDiagnostics({
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   const resizeStartRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
 
-  // Reposition when anchor rect is provided (on open)
+  // Sync position when pinnedPosition changes from parent
+  useEffect(() => {
+    if (isPinned && pinnedPosition) {
+      setPosition(pinnedPosition);
+    }
+  }, [isPinned, pinnedPosition]);
+
+  // Reposition when anchor rect is provided (on open) - but NEVER reposition pinned panels
   useEffect(() => {
     if (isVisible) {
-      // If pinned, use pinned position
+      // If pinned, always use pinned position and skip anchor logic entirely
       if (isPinned && pinnedPosition) {
         setPosition(pinnedPosition);
-      } else if (anchorRect && !hasDragged) {
-        const x = Math.max(8, Math.min(
-          anchorRect.left + anchorRect.width / 2 - DEFAULT_WIDTH / 2,
-          window.innerWidth - DEFAULT_WIDTH - 8
-        ));
-        const y = anchorRect.bottom + GAP_FROM_MENUBAR;
-        setPosition({ x, y });
+        return;
+      }
+      
+      // Only reposition based on anchor if not dragged and anchor changed
+      if (anchorRect && !hasDragged) {
+        const anchorChanged = !lastAnchorRectRef.current || 
+          lastAnchorRectRef.current.left !== anchorRect.left ||
+          lastAnchorRectRef.current.top !== anchorRect.top;
+        
+        if (anchorChanged) {
+          lastAnchorRectRef.current = anchorRect;
+          const x = Math.max(8, Math.min(
+            anchorRect.left + anchorRect.width / 2 - DEFAULT_WIDTH / 2,
+            window.innerWidth - DEFAULT_WIDTH - 8
+          ));
+          const y = anchorRect.bottom + GAP_FROM_MENUBAR;
+          setPosition({ x, y });
+        }
       }
     }
   }, [anchorRect, isVisible, hasDragged, isPinned, pinnedPosition]);
@@ -196,16 +225,25 @@ export function FloatingDiagnostics({
   useEffect(() => {
     if (!isVisible) {
       setHasDragged(false);
+      lastAnchorRectRef.current = null;
     }
   }, [isVisible]);
 
   const handleTogglePin = () => {
     if (isPinned) {
-      setIsPinned(false);
-      setPinnedPosition(null);
+      if (onPinnedChange) {
+        onPinnedChange(false, null);
+      } else {
+        setLocalIsPinned(false);
+        setLocalPinnedPosition(null);
+      }
     } else {
-      setIsPinned(true);
-      setPinnedPosition(position);
+      if (onPinnedChange) {
+        onPinnedChange(true, position);
+      } else {
+        setLocalIsPinned(true);
+        setLocalPinnedPosition(position);
+      }
     }
   };
 

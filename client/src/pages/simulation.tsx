@@ -54,6 +54,7 @@ import { ProbeDetailDialog, type NeighborhoodData } from "@/components/probe-det
 import { FloatingPerturbationPanel } from "@/components/floating-perturbation-panel";
 import { PerturbationPanel } from "@/components/perturbation-panel";
 import { type PerturbationMode, DEFAULT_PARAMS } from "@/lib/perturbations/types";
+import { getPanelState, setPanelPinned, type PanelKey } from "@/lib/panel-state-store";
 
 // Lightweight overlay canvas for mobile projection layers
 const PLASMA_COLORS = [
@@ -289,10 +290,44 @@ export default function SimulationPage() {
   const [diagnosticsAnchorRect, setDiagnosticsAnchorRect] = useState<DOMRect | null>(null);
   const [inspectorAnchorRect, setInspectorAnchorRect] = useState<DOMRect | null>(null);
   
-  // Pinned state for floating panels - lifted up for persistence across view switches
-  const [playbackPinned, setPlaybackPinned] = useState<{ isPinned: boolean; position: { x: number; y: number } | null }>({ isPinned: false, position: null });
-  const [perturbPinned, setPerturbPinned] = useState<{ isPinned: boolean; position: { x: number; y: number } | null }>({ isPinned: false, position: null });
-  const [inspectorPinned, setInspectorPinned] = useState<{ isPinned: boolean; position: { x: number; y: number } | null }>({ isPinned: false, position: null });
+  // Pinned state for floating panels - using module-level store for persistence
+  // We use local state that syncs with the store to trigger re-renders
+  const [playbackPinned, setPlaybackPinnedState] = useState(() => getPanelState('playback'));
+  const [perturbPinned, setPerturbPinnedState] = useState(() => getPanelState('perturbation'));
+  const [inspectorPinned, setInspectorPinnedState] = useState(() => getPanelState('inspector'));
+  const [diagnosticsPinned, setDiagnosticsPinnedState] = useState(() => getPanelState('diagnostics'));
+  
+  // Wrapper functions that update both store and local state
+  const setPlaybackPinned = (state: { isPinned: boolean; position: { x: number; y: number } | null }) => {
+    setPanelPinned('playback', state.isPinned, state.position);
+    setPlaybackPinnedState(state);
+  };
+  const setPerturbPinned = (state: { isPinned: boolean; position: { x: number; y: number } | null }) => {
+    setPanelPinned('perturbation', state.isPinned, state.position);
+    setPerturbPinnedState(state);
+  };
+  const setInspectorPinned = (state: { isPinned: boolean; position: { x: number; y: number } | null }) => {
+    setPanelPinned('inspector', state.isPinned, state.position);
+    setInspectorPinnedState(state);
+  };
+  const setDiagnosticsPinned = (state: { isPinned: boolean; position: { x: number; y: number } | null }) => {
+    setPanelPinned('diagnostics', state.isPinned, state.position);
+    setDiagnosticsPinnedState(state);
+  };
+  
+  // Close all floating panels when exiting focus mode (switching to dashboard)
+  // but preserve their pinned positions in the store
+  useEffect(() => {
+    if (!focusMode) {
+      setPlaybackPanelOpen(false);
+      setPerturbPanelOpen(false);
+      setPerturbMode(false);
+      setInspectorPanelOpen(false);
+      setFieldInspectorEnabled(false);
+      setDiagnosticsVisible(false);
+      setProbeDetailOpen(false);
+    }
+  }, [focusMode]);
   
   // Bring a panel to front by moving it to end of order array
   const bringPanelToFront = (panel: 'playback' | 'perturbation' | 'diagnostics' | 'inspector' | 'probedetail') => {
@@ -2612,6 +2647,9 @@ export default function SimulationPage() {
           zIndex={getPanelZIndex('diagnostics')}
           onFocus={() => bringPanelToFront('diagnostics')}
           anchorRect={diagnosticsAnchorRect}
+          isPinned={diagnosticsPinned.isPinned}
+          pinnedPosition={diagnosticsPinned.position}
+          onPinnedChange={(isPinned, position) => setDiagnosticsPinned({ isPinned, position })}
         />
         
         <FloatingInspectorPanel
