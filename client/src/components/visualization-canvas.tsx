@@ -176,6 +176,10 @@ export function VisualizationCanvas({
   const lastTouchDistRef = useRef<number | null>(null);
   const lastTouchCenterRef = useRef<{ x: number; y: number } | null>(null);
   
+  // Track if user dragged (to prevent click after drag)
+  const mouseDownPosRef = useRef<{ x: number; y: number } | null>(null);
+  const didDragRef = useRef(false);
+  
   // Colormap transition state
   const colormapTransitionRef = useRef<ColormapTransition | null>(null);
   const prevColormapRef = useRef<"inferno" | "viridis" | "cividis">(colormap);
@@ -453,6 +457,10 @@ export function VisualizationCanvas({
   }, [zoom, pan, field]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    // Track mouse down position to detect drags
+    mouseDownPosRef.current = { x: e.clientX, y: e.clientY };
+    didDragRef.current = false;
+    
     if (zoom > 1 && e.button === 0) {
       setIsPanning(true);
       setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
@@ -460,6 +468,15 @@ export function VisualizationCanvas({
   }, [zoom, pan]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    // Detect drag: if mouse moved more than 5px from mousedown position, it's a drag
+    if (mouseDownPosRef.current) {
+      const dx = e.clientX - mouseDownPosRef.current.x;
+      const dy = e.clientY - mouseDownPosRef.current.y;
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        didDragRef.current = true;
+      }
+    }
+    
     if (isPanning) {
       const newPanX = e.clientX - panStart.x;
       const newPanY = e.clientY - panStart.y;
@@ -488,10 +505,13 @@ export function VisualizationCanvas({
 
   const handleMouseUp = useCallback(() => {
     setIsPanning(false);
+    mouseDownPosRef.current = null;
   }, []);
 
   const handleMouseLeave = useCallback(() => {
     setIsPanning(false);
+    mouseDownPosRef.current = null;
+    didDragRef.current = false;
     onHoverEnd?.();
   }, [onHoverEnd]);
 
@@ -576,7 +596,11 @@ export function VisualizationCanvas({
   }, []);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!field || isPanning) return;
+    // Skip if user was dragging/panning
+    if (!field || isPanning || didDragRef.current) {
+      didDragRef.current = false;
+      return;
+    }
     
     const canvas = canvasRef.current;
     if (!canvas) return;
