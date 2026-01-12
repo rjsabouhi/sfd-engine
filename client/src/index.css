@@ -422,3 +422,19 @@
     transform: translateY(0);
   }
 }
+
+/* Radiating wave for baseline probes */
+@keyframes radiateWave {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.probe-radiate-wave {
+  animation: radiateWave 1.5s ease-out infinite;
+}
