@@ -51,7 +51,6 @@ import {
   Sliders,
   ChevronDown,
   Compass,
-  Crosshair,
 } from "lucide-react";
 import type { SimulationParameters, SimulationState } from "@shared/schema";
 import { structuralPresets, defaultParameters } from "@shared/schema";
@@ -346,24 +345,7 @@ export function FullscreenMenuBar({
         </>
       )}
 
-      <div className="absolute right-2 flex items-center gap-1">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant={fieldInspectorEnabled ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => onFieldInspectorChange(!fieldInspectorEnabled)}
-              className="h-6 px-2 text-xs"
-              data-testid="button-toggle-inspector"
-            >
-              <Crosshair className="h-3.5 w-3.5 mr-1" />
-              Inspector
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-xs">
-            Toggle field inspector (hover to probe field values)
-          </TooltipContent>
-        </Tooltip>
+      <div className="absolute right-2">
         <Button
           variant="ghost"
           size="sm"

@@ -39,8 +39,6 @@ interface FloatingDiagnosticsProps {
   zIndex?: number;
   onFocus?: () => void;
   anchorRect?: DOMRect | null;
-  pinnedPosition?: { x: number; y: number } | null;
-  onPinnedPositionChange?: (pos: { x: number; y: number } | null) => void;
 }
 
 const DEFAULT_WIDTH = 420;
@@ -148,8 +146,6 @@ export function FloatingDiagnostics({
   zIndex = 100,
   onFocus,
   anchorRect,
-  pinnedPosition: externalPinnedPosition,
-  onPinnedPositionChange,
 }: FloatingDiagnosticsProps) {
   const [activeTab, setActiveTab] = useState<"solver" | "check" | "render" | "internals" | "events" | "advanced">("solver");
   const [solverData, setSolverData] = useState<DiagnosticSolverData | null>(null);
@@ -164,11 +160,8 @@ export function FloatingDiagnostics({
   const [autoScroll, setAutoScroll] = useState(true);
   const [compactView, setCompactView] = useState(false);
   
-  // Use external pinned position if provided (lifted state), otherwise manage locally
-  const [localPinnedPosition, setLocalPinnedPosition] = useState<{ x: number; y: number } | null>(null);
-  const pinnedPosition = externalPinnedPosition !== undefined ? externalPinnedPosition : localPinnedPosition;
-  const setPinnedPosition = onPinnedPositionChange || setLocalPinnedPosition;
-  const isPinned = pinnedPosition !== null;
+  const [isPinned, setIsPinned] = useState(false);
+  const [pinnedPosition, setPinnedPosition] = useState<{ x: number; y: number } | null>(null);
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 100, y: 80 });
   const [size, setSize] = useState({ width: 420, height: 520 });
@@ -208,8 +201,10 @@ export function FloatingDiagnostics({
 
   const handleTogglePin = () => {
     if (isPinned) {
+      setIsPinned(false);
       setPinnedPosition(null);
     } else {
+      setIsPinned(true);
       setPinnedPosition(position);
     }
   };

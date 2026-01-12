@@ -278,11 +278,6 @@ export default function SimulationPage() {
   const [perturbAnchorRect, setPerturbAnchorRect] = useState<DOMRect | null>(null);
   const [diagnosticsAnchorRect, setDiagnosticsAnchorRect] = useState<DOMRect | null>(null);
   
-  // Lifted pinned positions for floating panels - persists across focus mode changes
-  const [playbackPinnedPos, setPlaybackPinnedPos] = useState<{ x: number; y: number } | null>(null);
-  const [perturbPinnedPos, setPerturbPinnedPos] = useState<{ x: number; y: number } | null>(null);
-  const [diagnosticsPinnedPos, setDiagnosticsPinnedPos] = useState<{ x: number; y: number } | null>(null);
-  
   // Bring a panel to front by moving it to end of order array
   const bringPanelToFront = (panel: 'playback' | 'perturbation' | 'diagnostics') => {
     setActivePanelOrder(prev => {
@@ -2442,8 +2437,6 @@ export default function SimulationPage() {
           zIndex={getPanelZIndex('playback')}
           onFocus={() => bringPanelToFront('playback')}
           anchorRect={playbackAnchorRect}
-          pinnedPosition={playbackPinnedPos}
-          onPinnedPositionChange={setPlaybackPinnedPos}
         />
         
         <FloatingPerturbationPanel
@@ -2462,8 +2455,6 @@ export default function SimulationPage() {
           onParamsChange={setPerturbParams}
           onResetField={handleReset}
           zIndex={getPanelZIndex('perturbation')}
-          pinnedPosition={perturbPinnedPos}
-          onPinnedPositionChange={setPerturbPinnedPos}
           onFocus={() => bringPanelToFront('perturbation')}
           anchorRect={perturbAnchorRect}
         />
@@ -2481,8 +2472,6 @@ export default function SimulationPage() {
           zIndex={getPanelZIndex('diagnostics')}
           onFocus={() => bringPanelToFront('diagnostics')}
           anchorRect={diagnosticsAnchorRect}
-          pinnedPosition={diagnosticsPinnedPos}
-          onPinnedPositionChange={setDiagnosticsPinnedPos}
         />
       </div>
     );
@@ -2504,6 +2493,32 @@ export default function SimulationPage() {
         </div>
         
         <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => { setFocusMode(true); setBlendMode(true); setBlendOpacity(0.5); }} 
+                data-testid="button-focus-mode"
+                className="h-7 text-xs gap-1.5"
+              >
+                <Maximize2 className="h-3.5 w-3.5" />
+                Inspection Mode
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              Enter inspection mode (F)
+            </TooltipContent>
+          </Tooltip>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => onboardingRef.current?.replay()} 
+            data-testid="button-show-intro"
+            className="h-7 text-xs"
+          >
+            Show Intro
+          </Button>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" data-testid="button-help" className="h-7 w-7">
@@ -2531,49 +2546,6 @@ export default function SimulationPage() {
               </DialogHeader>
             </DialogContent>
           </Dialog>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => onboardingRef.current?.replay()} 
-            data-testid="button-show-intro"
-            className="h-7 text-xs"
-          >
-            Show Intro
-          </Button>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant={fieldInspectorEnabled ? "secondary" : "ghost"}
-                size="sm" 
-                onClick={() => setFieldInspectorEnabled(!fieldInspectorEnabled)} 
-                data-testid="button-header-inspector"
-                className="h-7 text-xs gap-1.5"
-              >
-                <Crosshair className="h-3.5 w-3.5" />
-                Inspector
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">
-              Toggle field inspector (hover to probe values)
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => { setFocusMode(true); setBlendMode(true); setBlendOpacity(0.5); }} 
-                data-testid="button-focus-mode"
-                className="h-7 text-xs gap-1.5"
-              >
-                <Maximize2 className="h-3.5 w-3.5" />
-                Inspection Mode
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">
-              Enter inspection mode (F)
-            </TooltipContent>
-          </Tooltip>
         </div>
       </header>
 
@@ -3084,8 +3056,6 @@ export default function SimulationPage() {
         colormap={colormap}
         zIndex={getPanelZIndex('diagnostics')}
         onFocus={() => bringPanelToFront('diagnostics')}
-        pinnedPosition={diagnosticsPinnedPos}
-        onPinnedPositionChange={setDiagnosticsPinnedPos}
       />
     </div>
   );
