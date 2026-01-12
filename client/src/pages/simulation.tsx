@@ -273,6 +273,11 @@ export default function SimulationPage() {
   const [perturbPanelOpen, setPerturbPanelOpen] = useState(false); // Floating perturbation panel in focus mode
   const [activePanelOrder, setActivePanelOrder] = useState<('playback' | 'perturbation' | 'diagnostics')[]>(['playback', 'perturbation', 'diagnostics']); // Z-index order for floating panels
   
+  // Anchor rects for positioning floating panels under their menubar buttons
+  const [playbackAnchorRect, setPlaybackAnchorRect] = useState<DOMRect | null>(null);
+  const [perturbAnchorRect, setPerturbAnchorRect] = useState<DOMRect | null>(null);
+  const [diagnosticsAnchorRect, setDiagnosticsAnchorRect] = useState<DOMRect | null>(null);
+  
   // Bring a panel to front by moving it to end of order array
   const bringPanelToFront = (panel: 'playback' | 'perturbation' | 'diagnostics') => {
     setActivePanelOrder(prev => {
@@ -2267,12 +2272,20 @@ export default function SimulationPage() {
           onShowIntro={() => onboardingRef.current?.replay()}
           onOpenParameterPanel={() => setFocusMode(false)}
           playbackPanelOpen={playbackPanelOpen}
-          onTogglePlaybackPanel={() => setPlaybackPanelOpen(!playbackPanelOpen)}
+          onTogglePlaybackPanel={(rect) => {
+            if (rect) setPlaybackAnchorRect(rect);
+            setPlaybackPanelOpen(!playbackPanelOpen);
+          }}
           perturbPanelOpen={perturbPanelOpen}
-          onTogglePerturbPanel={() => {
+          onTogglePerturbPanel={(rect) => {
+            if (rect) setPerturbAnchorRect(rect);
             const newOpen = !perturbPanelOpen;
             setPerturbPanelOpen(newOpen);
             if (newOpen) setPerturbMode(true);
+          }}
+          onDiagnosticsChangeWithRect={(visible, rect) => {
+            if (rect) setDiagnosticsAnchorRect(rect);
+            setDiagnosticsVisible(visible);
           }}
         />
         
@@ -2384,6 +2397,7 @@ export default function SimulationPage() {
           onClose={() => setPlaybackPanelOpen(false)}
           zIndex={getPanelZIndex('playback')}
           onFocus={() => bringPanelToFront('playback')}
+          anchorRect={playbackAnchorRect}
         />
         
         <FloatingPerturbationPanel
@@ -2403,6 +2417,7 @@ export default function SimulationPage() {
           onResetField={handleReset}
           zIndex={getPanelZIndex('perturbation')}
           onFocus={() => bringPanelToFront('perturbation')}
+          anchorRect={perturbAnchorRect}
         />
         
         <FloatingDiagnostics
@@ -2417,6 +2432,7 @@ export default function SimulationPage() {
           colormap={colormap}
           zIndex={getPanelZIndex('diagnostics')}
           onFocus={() => bringPanelToFront('diagnostics')}
+          anchorRect={diagnosticsAnchorRect}
         />
       </div>
     );

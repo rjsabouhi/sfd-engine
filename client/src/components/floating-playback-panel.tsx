@@ -12,7 +12,7 @@ import {
   GripVertical,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 interface FloatingPlaybackPanelProps {
   isVisible: boolean;
@@ -29,7 +29,11 @@ interface FloatingPlaybackPanelProps {
   onClose: () => void;
   zIndex?: number;
   onFocus?: () => void;
+  anchorRect?: DOMRect | null;
 }
+
+const PANEL_WIDTH = 260;
+const GAP_FROM_MENUBAR = 8;
 
 export function FloatingPlaybackPanel({
   isVisible,
@@ -46,14 +50,36 @@ export function FloatingPlaybackPanel({
   onClose,
   zIndex = 50,
   onFocus,
+  anchorRect,
 }: FloatingPlaybackPanelProps) {
   const [position, setPosition] = useState({ x: 80, y: 50 });
   const [isDragging, setIsDragging] = useState(false);
+  const [hasDragged, setHasDragged] = useState(false);
   const dragRef = useRef<{ startX: number; startY: number; initialX: number; initialY: number } | null>(null);
+
+  // Reposition when anchor rect is provided (on open)
+  useEffect(() => {
+    if (anchorRect && isVisible && !hasDragged) {
+      const x = Math.max(8, Math.min(
+        anchorRect.left + anchorRect.width / 2 - PANEL_WIDTH / 2,
+        window.innerWidth - PANEL_WIDTH - 8
+      ));
+      const y = anchorRect.bottom + GAP_FROM_MENUBAR;
+      setPosition({ x, y });
+    }
+  }, [anchorRect, isVisible, hasDragged]);
+
+  // Reset hasDragged when panel is closed
+  useEffect(() => {
+    if (!isVisible) {
+      setHasDragged(false);
+    }
+  }, [isVisible]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setIsDragging(true);
+    setHasDragged(true);
     dragRef.current = {
       startX: e.clientX,
       startY: e.clientY,

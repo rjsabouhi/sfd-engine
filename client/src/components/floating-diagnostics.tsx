@@ -38,7 +38,11 @@ interface FloatingDiagnosticsProps {
   colormap: string;
   zIndex?: number;
   onFocus?: () => void;
+  anchorRect?: DOMRect | null;
 }
+
+const DEFAULT_WIDTH = 420;
+const GAP_FROM_MENUBAR = 8;
 
 function Sparkline({ data, width = 140, height = 28, color = "#10b981" }: { data: number[]; width?: number; height?: number; color?: string }) {
   if (data.length < 2) return <div className="h-7 bg-white/5 rounded" style={{ width }} />;
@@ -97,6 +101,7 @@ export function FloatingDiagnostics({
   colormap,
   zIndex = 100,
   onFocus,
+  anchorRect,
 }: FloatingDiagnosticsProps) {
   const [activeTab, setActiveTab] = useState<"solver" | "check" | "render" | "internals" | "events" | "advanced">("solver");
   const [solverData, setSolverData] = useState<DiagnosticSolverData | null>(null);
@@ -113,6 +118,7 @@ export function FloatingDiagnostics({
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 100, y: 80 });
   const [size, setSize] = useState({ width: 420, height: 520 });
+  const [hasDragged, setHasDragged] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const eventLogRef = useRef<HTMLDivElement>(null);
@@ -121,6 +127,25 @@ export function FloatingDiagnostics({
   const isResizingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
   const resizeStartRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
+
+  // Reposition when anchor rect is provided (on open)
+  useEffect(() => {
+    if (anchorRect && isVisible && !hasDragged) {
+      const x = Math.max(8, Math.min(
+        anchorRect.left + anchorRect.width / 2 - DEFAULT_WIDTH / 2,
+        window.innerWidth - DEFAULT_WIDTH - 8
+      ));
+      const y = anchorRect.bottom + GAP_FROM_MENUBAR;
+      setPosition({ x, y });
+    }
+  }, [anchorRect, isVisible, hasDragged]);
+
+  // Reset hasDragged when panel is closed
+  useEffect(() => {
+    if (!isVisible) {
+      setHasDragged(false);
+    }
+  }, [isVisible]);
 
   const updateDiagnostics = useCallback(() => {
     if (!engine || !isVisible || isMinimized) return;
@@ -154,6 +179,7 @@ export function FloatingDiagnostics({
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('[data-no-drag]')) return;
     isDraggingRef.current = true;
+    setHasDragged(true);
     dragStartRef.current = { x: e.clientX, y: e.clientY, posX: position.x, posY: position.y };
     e.preventDefault();
   }, [position]);

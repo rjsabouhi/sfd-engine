@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import {
   Menubar,
   MenubarMenu,
@@ -105,9 +105,10 @@ interface FullscreenMenuBarProps {
   onShowIntro: () => void;
   onOpenParameterPanel?: () => void;
   playbackPanelOpen?: boolean;
-  onTogglePlaybackPanel?: () => void;
+  onTogglePlaybackPanel?: (rect?: DOMRect) => void;
   perturbPanelOpen?: boolean;
-  onTogglePerturbPanel?: () => void;
+  onTogglePerturbPanel?: (rect?: DOMRect) => void;
+  onDiagnosticsChangeWithRect?: (visible: boolean, rect?: DOMRect) => void;
 }
 
 export function FullscreenMenuBar({
@@ -160,8 +161,32 @@ export function FullscreenMenuBar({
   onTogglePlaybackPanel,
   perturbPanelOpen,
   onTogglePerturbPanel,
+  onDiagnosticsChangeWithRect,
 }: FullscreenMenuBarProps) {
   const [aboutOpen, setAboutOpen] = useState(false);
+  
+  const playbackButtonRef = useRef<HTMLButtonElement>(null);
+  const diagnosticsButtonRef = useRef<HTMLButtonElement>(null);
+  const perturbButtonRef = useRef<HTMLButtonElement>(null);
+  
+  const handleTogglePlayback = useCallback(() => {
+    const rect = playbackButtonRef.current?.getBoundingClientRect();
+    onTogglePlaybackPanel?.(rect);
+  }, [onTogglePlaybackPanel]);
+  
+  const handleToggleDiagnostics = useCallback(() => {
+    const rect = diagnosticsButtonRef.current?.getBoundingClientRect();
+    if (onDiagnosticsChangeWithRect) {
+      onDiagnosticsChangeWithRect(!diagnosticsVisible, rect);
+    } else {
+      onDiagnosticsChange(!diagnosticsVisible);
+    }
+  }, [diagnosticsVisible, onDiagnosticsChange, onDiagnosticsChangeWithRect]);
+  
+  const handleTogglePerturb = useCallback(() => {
+    const rect = perturbButtonRef.current?.getBoundingClientRect();
+    onTogglePerturbPanel?.(rect);
+  }, [onTogglePerturbPanel]);
 
   const currentOverlayLabel = OVERLAY_OPTIONS.find(o => o.value === derivedType)?.label || "Layer";
 
@@ -174,9 +199,10 @@ export function FullscreenMenuBar({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
+            ref={playbackButtonRef}
             variant="ghost"
             size="sm"
-            onClick={onTogglePlaybackPanel}
+            onClick={handleTogglePlayback}
             className={`h-6 text-xs px-2 ${playbackPanelOpen ? 'bg-accent text-accent-foreground' : ''}`}
             data-testid="button-simulation-panel"
           >
@@ -192,9 +218,10 @@ export function FullscreenMenuBar({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
+            ref={diagnosticsButtonRef}
             variant="ghost"
             size="sm"
-            onClick={() => onDiagnosticsChange(!diagnosticsVisible)}
+            onClick={handleToggleDiagnostics}
             className={`h-6 text-xs px-2 ${diagnosticsVisible ? 'bg-accent text-accent-foreground' : ''}`}
             data-testid="button-diagnostics"
           >
@@ -208,9 +235,10 @@ export function FullscreenMenuBar({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
+            ref={perturbButtonRef}
             variant="ghost"
             size="sm"
-            onClick={onTogglePerturbPanel}
+            onClick={handleTogglePerturb}
             className={`h-6 text-xs px-2 ${perturbPanelOpen ? 'bg-accent text-accent-foreground' : ''}`}
             data-testid="button-perturbation"
           >
