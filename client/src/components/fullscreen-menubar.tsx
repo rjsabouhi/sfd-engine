@@ -277,6 +277,8 @@ export function FullscreenMenuBar({
               const preset = structuralPresets[value];
               if (preset) {
                 onParamsChange(preset);
+                // Reset simulation so regime change is immediately visible
+                onReset();
               }
             }}
           >
