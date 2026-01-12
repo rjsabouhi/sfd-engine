@@ -279,10 +279,13 @@ export class SFDEngine {
       }
     }
     this.step = 0;
-    this.ringBuffer = [];
-    this.ringBufferIndex = 0;
+    // GLOBAL PLAYBACK: Do NOT clear ring buffer on field reinit
+    // History is preserved across mode/param changes
+    // Only clear playback display state (we're now in live mode with fresh field)
     this.currentPlaybackIndex = -1;
     this.playbackDisplayStep = null;
+    this.playbackDisplayGrid = null;
+    this.playbackDisplayParams = null;
     this.structuralEvents = [];
     this.lastVariance = 0;
     this.lastBasinCount = 0;
@@ -315,6 +318,12 @@ export class SFDEngine {
     this.updateBasinMap();
   }
   
+  // Explicitly clear history buffer (called only by reset/resetToDefaults)
+  private clearHistory(): void {
+    this.ringBuffer = [];
+    this.ringBufferIndex = 0;
+  }
+  
   private resetReactiveEvents(): void {
     this.reactiveEvents = {
       varianceSpike: false,
@@ -329,25 +338,21 @@ export class SFDEngine {
 
   reset(): void {
     // Reinitialize the field with current parameters (keeps current preset/mode)
-    this.currentPlaybackIndex = -1;
-    this.playbackDisplayGrid = null;
-    this.playbackDisplayStep = null;
-    this.playbackDisplayParams = null;
+    // Also clears history since this is an explicit user reset
+    this.clearHistory();
     this.initialize();
     this.notifyUpdate();
   }
   
   resetToDefaults(): void {
     // Reset parameters to absolute defaults (including mode)
+    // Also clears history since this is an explicit user reset
     this.params = { ...defaultParameters };
     this.width = this.params.gridSize;
     this.height = this.params.gridSize;
     this.grid = new Float32Array(this.width * this.height);
     this.tempGrid = new Float32Array(this.width * this.height);
-    this.currentPlaybackIndex = -1;
-    this.playbackDisplayGrid = null;
-    this.playbackDisplayStep = null;
-    this.playbackDisplayParams = null;
+    this.clearHistory();
     this.initialize();
     this.notifyUpdate();
   }
