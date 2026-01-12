@@ -86,33 +86,27 @@ export function ProbeDetailDialog({
     return false;
   }, [otherPanelRects]);
 
-  // Find a position that doesn't overlap with other panels
+  // Find a position that doesn't overlap with other panels - prefer slight offsets
   const findClearPosition = useCallback((preferredX: number, preferredY: number, w: number, h: number): { x: number; y: number } => {
     const padding = 20;
     const headerHeight = 60;
+    const nudgeAmount = 40; // Small offset to avoid overlap
     
     // Try preferred position first
     if (!checkOverlap(preferredX, preferredY, w, h)) {
       return { x: preferredX, y: preferredY };
     }
     
-    // Try positions in order: right side, left side, below, above
-    const candidatePositions = [
-      // Right side of screen
-      { x: window.innerWidth - w - padding, y: preferredY },
-      // Left side of screen
-      { x: padding, y: preferredY },
-      // Right side, lower
-      { x: window.innerWidth - w - padding, y: headerHeight + 100 },
-      // Left side, lower
-      { x: padding, y: headerHeight + 100 },
-      // Center but lower
-      { x: (window.innerWidth - w) / 2, y: window.innerHeight * 0.4 },
-      // Far right, middle height
-      { x: window.innerWidth - w - padding, y: window.innerHeight * 0.3 },
+    // Try small nudges first (just offset slightly from blocking panels)
+    const smallNudges = [
+      { x: preferredX + nudgeAmount, y: preferredY }, // Nudge right
+      { x: preferredX - nudgeAmount, y: preferredY }, // Nudge left
+      { x: preferredX, y: preferredY + nudgeAmount }, // Nudge down
+      { x: preferredX + nudgeAmount, y: preferredY + nudgeAmount }, // Nudge right+down
+      { x: preferredX - nudgeAmount, y: preferredY + nudgeAmount }, // Nudge left+down
     ];
     
-    for (const pos of candidatePositions) {
+    for (const pos of smallNudges) {
       const clampedX = Math.max(padding, Math.min(window.innerWidth - w - padding, pos.x));
       const clampedY = Math.max(headerHeight, Math.min(window.innerHeight - h - padding, pos.y));
       
@@ -121,10 +115,26 @@ export function ProbeDetailDialog({
       }
     }
     
-    // Fallback: just use bottom right if all else fails
+    // Try slightly larger offsets if small nudges don't work
+    const mediumOffsets = [
+      { x: preferredX + 100, y: preferredY },
+      { x: preferredX - 100, y: preferredY },
+      { x: preferredX, y: preferredY + 80 },
+    ];
+    
+    for (const pos of mediumOffsets) {
+      const clampedX = Math.max(padding, Math.min(window.innerWidth - w - padding, pos.x));
+      const clampedY = Math.max(headerHeight, Math.min(window.innerHeight - h - padding, pos.y));
+      
+      if (!checkOverlap(clampedX, clampedY, w, h)) {
+        return { x: clampedX, y: clampedY };
+      }
+    }
+    
+    // Fallback: position at preferred spot anyway (overlapping is better than far away)
     return { 
-      x: Math.max(padding, window.innerWidth - w - padding), 
-      y: Math.max(headerHeight, window.innerHeight - h - padding) 
+      x: Math.max(padding, Math.min(window.innerWidth - w - padding, preferredX)), 
+      y: Math.max(headerHeight, Math.min(window.innerHeight - h - padding, preferredY)) 
     };
   }, [checkOverlap]);
 
