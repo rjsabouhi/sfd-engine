@@ -49,6 +49,7 @@ import { applyPreset, cancelPresetTransition } from "@/lib/apply-preset";
 import { WelcomeModal } from "@/components/welcome-modal";
 import { FullscreenMenuBar } from "@/components/fullscreen-menubar";
 import { FloatingPlaybackPanel } from "@/components/floating-playback-panel";
+import { FloatingPerturbationPanel } from "@/components/floating-perturbation-panel";
 import { PerturbationPanel } from "@/components/perturbation-panel";
 import { type PerturbationMode, DEFAULT_PARAMS } from "@/lib/perturbations/types";
 
@@ -269,6 +270,7 @@ export default function SimulationPage() {
   const [metricsPanelCollapsed, setMetricsPanelCollapsed] = useState(false);
   const [focusMode, setFocusMode] = useState(false); // Fullscreen/focus mode with menubar
   const [playbackPanelOpen, setPlaybackPanelOpen] = useState(false); // Floating playback panel in focus mode
+  const [perturbPanelOpen, setPerturbPanelOpen] = useState(false); // Floating perturbation panel in focus mode
   const configInputRef = useRef<HTMLInputElement>(null);
   
   // Mobile touch interaction states
@@ -2250,6 +2252,8 @@ export default function SimulationPage() {
           onOpenParameterPanel={() => setFocusMode(false)}
           playbackPanelOpen={playbackPanelOpen}
           onTogglePlaybackPanel={() => setPlaybackPanelOpen(!playbackPanelOpen)}
+          perturbPanelOpen={perturbPanelOpen}
+          onTogglePerturbPanel={() => setPerturbPanelOpen(!perturbPanelOpen)}
         />
         
         <div className="flex-1 relative overflow-hidden">
@@ -2358,6 +2362,19 @@ export default function SimulationPage() {
           onStepForward={handleStepForward}
           onSeekFrame={handleSeekFrame}
           onClose={() => setPlaybackPanelOpen(false)}
+        />
+        
+        <FloatingPerturbationPanel
+          isVisible={perturbPanelOpen}
+          onClose={() => setPerturbPanelOpen(false)}
+          onApplyPerturbation={handleApplyPerturbation}
+          fieldWidth={field?.width || 300}
+          fieldHeight={field?.height || 300}
+          perturbMode={perturbMode}
+          onPerturbModeChange={setPerturbMode}
+          selectedMode={selectedPerturbMode}
+          onModeChange={setSelectedPerturbMode}
+          onParamsChange={setPerturbParams}
         />
         
         <FloatingDiagnostics

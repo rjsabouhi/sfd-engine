@@ -106,6 +106,8 @@ interface FullscreenMenuBarProps {
   onOpenParameterPanel?: () => void;
   playbackPanelOpen?: boolean;
   onTogglePlaybackPanel?: () => void;
+  perturbPanelOpen?: boolean;
+  onTogglePerturbPanel?: () => void;
 }
 
 export function FullscreenMenuBar({
@@ -156,6 +158,8 @@ export function FullscreenMenuBar({
   onOpenParameterPanel,
   playbackPanelOpen,
   onTogglePlaybackPanel,
+  perturbPanelOpen,
+  onTogglePerturbPanel,
 }: FullscreenMenuBarProps) {
   const [aboutOpen, setAboutOpen] = useState(false);
 
@@ -204,8 +208,8 @@ export function FullscreenMenuBar({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onPerturbModeChange(!perturbMode)}
-            className={`h-6 text-xs px-2 text-white/80 hover:text-white hover:bg-white/10 ${perturbMode ? 'bg-white/15 text-white' : ''}`}
+            onClick={onTogglePerturbPanel}
+            className={`h-6 text-xs px-2 text-white/80 hover:text-white hover:bg-white/10 ${perturbPanelOpen ? 'bg-white/15 text-white' : ''}`}
             data-testid="button-perturbation"
           >
             <Zap className="h-3 w-3 mr-1" />
