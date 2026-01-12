@@ -50,7 +50,7 @@ export function ProbeDetailDialog({
 }: ProbeDetailDialogProps) {
   const [isPinned, setIsPinned] = useState(false);
   const [pinnedPosition, setPinnedPosition] = useState<{ x: number; y: number } | null>(null);
-  const [size, setSize] = useState({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT });
+  const [size, setSize] = useState({ width: MIN_WIDTH, height: MIN_HEIGHT });
   
   const containerRef = useRef<HTMLDivElement>(null);
   const positionRef = useRef({ x: 100, y: 100 });
