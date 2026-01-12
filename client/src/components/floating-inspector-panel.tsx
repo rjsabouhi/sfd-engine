@@ -277,8 +277,8 @@ export function FloatingInspectorPanel({
                       onClick={() => {
                         setSelectedProbeId(isSelected ? null : probe.id);
                         onSelectProbe(probe);
+                        onOpenProbeDetail(probe);
                       }}
-                      onDoubleClick={() => onOpenProbeDetail(probe)}
                       data-testid={`saved-probe-${probe.id}`}
                     >
                       <div className="flex items-center justify-between mb-1">
