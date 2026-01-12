@@ -830,6 +830,9 @@ export function VisualizationCanvas({
                     borderRadius: '50%',
                     border: `2px solid ${probe.color}`,
                     overflow: 'hidden',
+                    boxShadow: probe.isBaseline 
+                      ? `0 0 8px ${probe.color}, 0 0 16px ${probe.color}, 0 0 24px ${probe.color}80`
+                      : 'none',
                   }}
                 >
                   {/* Darker shade background */}
@@ -849,19 +852,6 @@ export function VisualizationCanvas({
                     {probe.label.replace('P', '')}
                   </span>
                 </div>
-                {probe.isBaseline && (
-                  <div 
-                    className="absolute w-3 h-3 rounded-full bg-amber-400 flex items-center justify-center"
-                    style={{ 
-                      boxShadow: '0 0 6px rgba(251, 191, 36, 1), 0 0 12px rgba(251, 191, 36, 0.6)',
-                      top: '-16px',
-                      left: '4px',
-                      border: '1px solid white',
-                    }}
-                  >
-                    <span className="text-[6px] font-bold text-black">B</span>
-                  </div>
-                )}
               </div>
             );
           })}
