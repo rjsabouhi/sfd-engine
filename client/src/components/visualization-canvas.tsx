@@ -827,6 +827,39 @@ export function VisualizationCanvas({
                 }}
                 data-testid={`probe-marker-${probe.id}`}
               >
+                {/* Radiating waves for baseline probes */}
+                {probe.isBaseline && (
+                  <>
+                    {[0, 1, 2].map((i) => (
+                      <div
+                        key={i}
+                        className="absolute rounded-full"
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          marginLeft: '-12px',
+                          marginTop: '-12px',
+                          border: '2px solid #fbbf24',
+                          animation: `radiateWave 2s ease-out infinite`,
+                          animationDelay: `${i * 0.6}s`,
+                          opacity: 0,
+                        }}
+                      />
+                    ))}
+                    <style>{`
+                      @keyframes radiateWave {
+                        0% {
+                          transform: scale(1);
+                          opacity: 0.7;
+                        }
+                        100% {
+                          transform: scale(2.5);
+                          opacity: 0;
+                        }
+                      }
+                    `}</style>
+                  </>
+                )}
                 {/* Single ring with number - matching mobile button style */}
                 <div 
                   className="absolute"
@@ -838,9 +871,6 @@ export function VisualizationCanvas({
                     borderRadius: '50%',
                     border: `2px solid ${probe.color}`,
                     overflow: 'hidden',
-                    boxShadow: probe.isBaseline 
-                      ? '0 0 8px #fbbf24, 0 0 16px #fbbf24, 0 0 24px rgba(251, 191, 36, 0.5)'
-                      : 'none',
                   }}
                 >
                   {/* Darker shade background */}
