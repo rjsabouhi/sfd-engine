@@ -809,7 +809,7 @@ export function VisualizationCanvas({
             >
               {/* Single ring with number - matching mobile button style */}
               <div 
-                className="absolute flex items-center justify-center"
+                className="absolute"
                 style={{ 
                   width: '24px',
                   height: '24px',
@@ -817,11 +817,21 @@ export function VisualizationCanvas({
                   marginTop: '-12px',
                   borderRadius: '50%',
                   border: `2px solid ${probe.color}`,
-                  backgroundColor: '#1a1a1a',
+                  overflow: 'hidden',
                 }}
               >
+                {/* Darker shade background */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    backgroundColor: probe.color,
+                    filter: 'brightness(0.35) saturate(0.7)',
+                  }}
+                />
+                {/* Number text */}
                 <span 
-                  className="text-[11px] font-medium"
+                  className="absolute inset-0 flex items-center justify-center text-[11px] font-medium"
                   style={{ color: probe.color }}
                 >
                   {probe.label.replace('P', '')}
