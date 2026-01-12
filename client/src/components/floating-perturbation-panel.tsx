@@ -39,6 +39,8 @@ interface FloatingPerturbationPanelProps {
   onModeChange: (mode: PerturbationMode) => void;
   onParamsChange: (params: Record<string, any>) => void;
   onResetField: () => void;
+  zIndex?: number;
+  onFocus?: () => void;
 }
 
 const ICONS: Record<PerturbationMode, React.ReactNode> = {
@@ -62,6 +64,8 @@ export function FloatingPerturbationPanel({
   onModeChange,
   onParamsChange,
   onResetField,
+  zIndex = 50,
+  onFocus,
 }: FloatingPerturbationPanelProps) {
   const [position, setPosition] = useState({ x: 80, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
@@ -353,11 +357,12 @@ export function FloatingPerturbationPanel({
 
   return (
     <div 
-      className="fixed z-50"
-      style={{ left: position.x, top: position.y }}
+      className="fixed"
+      style={{ left: position.x, top: position.y, zIndex }}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onMouseDown={() => onFocus?.()}
       data-testid="floating-perturbation-panel"
     >
       <div className="bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl w-[260px]">

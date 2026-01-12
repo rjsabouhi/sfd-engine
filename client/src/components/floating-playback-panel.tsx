@@ -27,6 +27,8 @@ interface FloatingPlaybackPanelProps {
   onStepForward: () => void;
   onSeekFrame: (index: number) => void;
   onClose: () => void;
+  zIndex?: number;
+  onFocus?: () => void;
 }
 
 export function FloatingPlaybackPanel({
@@ -42,6 +44,8 @@ export function FloatingPlaybackPanel({
   onStepForward,
   onSeekFrame,
   onClose,
+  zIndex = 50,
+  onFocus,
 }: FloatingPlaybackPanelProps) {
   const [position, setPosition] = useState({ x: 80, y: 50 });
   const [isDragging, setIsDragging] = useState(false);
@@ -89,11 +93,12 @@ export function FloatingPlaybackPanel({
 
   return (
     <div 
-      className="fixed z-50"
-      style={{ left: position.x, top: position.y }}
+      className="fixed"
+      style={{ left: position.x, top: position.y, zIndex }}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onMouseDown={() => onFocus?.()}
       data-testid="floating-playback-panel"
     >
       <div className="bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl">

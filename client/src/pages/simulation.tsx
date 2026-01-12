@@ -271,6 +271,22 @@ export default function SimulationPage() {
   const [focusMode, setFocusMode] = useState(false); // Fullscreen/focus mode with menubar
   const [playbackPanelOpen, setPlaybackPanelOpen] = useState(false); // Floating playback panel in focus mode
   const [perturbPanelOpen, setPerturbPanelOpen] = useState(false); // Floating perturbation panel in focus mode
+  const [activePanelOrder, setActivePanelOrder] = useState<('playback' | 'perturbation' | 'diagnostics')[]>(['playback', 'perturbation', 'diagnostics']); // Z-index order for floating panels
+  
+  // Bring a panel to front by moving it to end of order array
+  const bringPanelToFront = (panel: 'playback' | 'perturbation' | 'diagnostics') => {
+    setActivePanelOrder(prev => {
+      const filtered = prev.filter(p => p !== panel);
+      return [...filtered, panel];
+    });
+  };
+  
+  // Get z-index for a panel based on its position in the order
+  const getPanelZIndex = (panel: 'playback' | 'perturbation' | 'diagnostics') => {
+    const baseZ = 50;
+    const index = activePanelOrder.indexOf(panel);
+    return baseZ + index;
+  };
   const configInputRef = useRef<HTMLInputElement>(null);
   
   // Mobile touch interaction states
@@ -2366,6 +2382,8 @@ export default function SimulationPage() {
           onStepForward={handleStepForward}
           onSeekFrame={handleSeekFrame}
           onClose={() => setPlaybackPanelOpen(false)}
+          zIndex={getPanelZIndex('playback')}
+          onFocus={() => bringPanelToFront('playback')}
         />
         
         <FloatingPerturbationPanel
@@ -2383,6 +2401,8 @@ export default function SimulationPage() {
           onModeChange={setSelectedPerturbMode}
           onParamsChange={setPerturbParams}
           onResetField={handleReset}
+          zIndex={getPanelZIndex('perturbation')}
+          onFocus={() => bringPanelToFront('perturbation')}
         />
         
         <FloatingDiagnostics
@@ -2394,6 +2414,8 @@ export default function SimulationPage() {
           currentHistoryIndex={currentHistoryIndex}
           historyLength={historyLength}
           colormap={colormap}
+          zIndex={getPanelZIndex('diagnostics')}
+          onFocus={() => bringPanelToFront('diagnostics')}
         />
       </div>
     );
@@ -2975,6 +2997,8 @@ export default function SimulationPage() {
         currentHistoryIndex={currentHistoryIndex}
         historyLength={historyLength}
         colormap={colormap}
+        zIndex={getPanelZIndex('diagnostics')}
+        onFocus={() => bringPanelToFront('diagnostics')}
       />
     </div>
   );

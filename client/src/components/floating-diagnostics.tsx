@@ -34,6 +34,8 @@ interface FloatingDiagnosticsProps {
   currentHistoryIndex: number;
   historyLength: number;
   colormap: string;
+  zIndex?: number;
+  onFocus?: () => void;
 }
 
 function Sparkline({ data, width = 140, height = 28, color = "#10b981" }: { data: number[]; width?: number; height?: number; color?: string }) {
@@ -90,6 +92,8 @@ export function FloatingDiagnostics({
   currentHistoryIndex,
   historyLength,
   colormap,
+  zIndex = 100,
+  onFocus,
 }: FloatingDiagnosticsProps) {
   const [activeTab, setActiveTab] = useState<"solver" | "check" | "render" | "internals" | "events" | "advanced">("solver");
   const [solverData, setSolverData] = useState<DiagnosticSolverData | null>(null);
@@ -266,13 +270,14 @@ export function FloatingDiagnostics({
         top: position.y,
         width: isMinimized ? 280 : size.width,
         height: isMinimized ? 'auto' : size.height,
-        zIndex: isPinned ? 9999 : 100,
+        zIndex: isPinned ? 9999 : zIndex,
         backgroundColor: 'rgba(8, 8, 12, 0.94)',
         border: `1px solid ${isPinned ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
         borderRadius: '8px',
         boxShadow: isPinned ? '0 8px 32px rgba(251, 191, 36, 0.15)' : '0 8px 32px rgba(0, 0, 0, 0.5)',
         backdropFilter: 'blur(8px)',
       }}
+      onMouseDown={() => onFocus?.()}
       data-testid="floating-diagnostics"
     >
       {/* Header / Drag Handle */}
