@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info, Activity, TrendingUp, AlertTriangle, RefreshCw, Wind, Anchor, Repeat, Eye } from "lucide-react";
+import { Activity, TrendingUp, AlertTriangle, RefreshCw, Wind, Anchor, Repeat, Eye } from "lucide-react";
 import { LANGUAGE, type RegimeKey, type InterpretationMode } from "@/lib/language";
 
 interface RegimeDisplayProps {
@@ -58,17 +58,16 @@ export function RegimeDisplay({ regime, mode, compact = false, showWatchFor = tr
   
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-xs text-muted-foreground">{LANGUAGE.UI.REGIME_SELECTOR}</span>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Info className="h-3 w-3 text-muted-foreground cursor-help" />
-          </TooltipTrigger>
-          <TooltipContent side="left" className="max-w-[250px]">
-            <p className="text-xs">A regime is a behavioral archetype of the field. It defines how patterns arise, stabilize, or dissolve.</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex items-center gap-2 cursor-help">
+            <span className="text-xs text-muted-foreground">{LANGUAGE.UI.REGIME_SELECTOR}</span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="left" className="max-w-[250px]">
+          <p className="text-xs">A regime is a behavioral archetype of the field. It defines how patterns arise, stabilize, or dissolve.</p>
+        </TooltipContent>
+      </Tooltip>
       
       <div className="flex items-start gap-2">
         <Badge variant={variant} className="gap-1.5 shrink-0">
@@ -215,17 +214,16 @@ export function LegacyRegimeDisplay({ regime, mode, compact = false }: { regime:
   
   return (
     <div className="space-y-1.5">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-xs text-muted-foreground">Dynamic Regime</span>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Info className="h-3 w-3 text-muted-foreground cursor-help" />
-          </TooltipTrigger>
-          <TooltipContent side="left" className="max-w-[250px]">
-            <p className="text-xs">The current dynamic state of the field based on metric analysis.</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex items-center gap-2 cursor-help">
+            <span className="text-xs text-muted-foreground">Dynamic Regime</span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="left" className="max-w-[250px]">
+          <p className="text-xs">The current dynamic state of the field based on metric analysis.</p>
+        </TooltipContent>
+      </Tooltip>
       <div className="flex items-center gap-2">
         <span className={`h-2.5 w-2.5 rounded-full ${dotColor} shrink-0`} />
         <Badge variant={variant} className="gap-1.5 shrink-0">

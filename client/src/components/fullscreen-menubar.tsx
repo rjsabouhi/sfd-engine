@@ -47,7 +47,6 @@ import {
   FileCode,
   Package,
   BookOpen,
-  Info,
   Sliders,
   ChevronDown,
   Compass,
