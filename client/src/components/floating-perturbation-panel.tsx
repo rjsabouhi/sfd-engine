@@ -531,12 +531,19 @@ export function FloatingPerturbationPanel({
               </SelectTrigger>
               <SelectContent className="bg-neutral-900 border-white/10 z-[9999]">
                 {PERTURBATION_MODES.map(mode => (
-                  <SelectItem key={mode.id} value={mode.id}>
-                    <div className="flex items-center gap-2">
-                      {ICONS[mode.id]}
-                      <span>{mode.label}</span>
-                    </div>
-                  </SelectItem>
+                  <Tooltip key={mode.id}>
+                    <TooltipTrigger asChild>
+                      <SelectItem value={mode.id}>
+                        <div className="flex items-center gap-2">
+                          {ICONS[mode.id]}
+                          <span>{mode.label}</span>
+                        </div>
+                      </SelectItem>
+                    </TooltipTrigger>
+                    <TooltipContent side="left" className="text-xs max-w-[200px]">
+                      {mode.description}
+                    </TooltipContent>
+                  </Tooltip>
                 ))}
               </SelectContent>
             </Select>
