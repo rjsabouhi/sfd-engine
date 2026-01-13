@@ -240,7 +240,7 @@ export function ControlPanel({
             <Collapsible open={playbackOpen} onOpenChange={setPlaybackOpen}>
               <CollapsibleTrigger asChild>
                 <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-playback">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Temporal Playback</span>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Playback</span>
                   {playbackOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
                 </button>
               </CollapsibleTrigger>
