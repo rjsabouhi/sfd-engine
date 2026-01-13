@@ -2815,7 +2815,10 @@ export default function SimulationPage() {
         <div className="flex items-center gap-3">
           <img src={sfdLogo} alt="SFD Engine" className="w-7 h-7 rounded-md" />
           <div>
-            <h1 className="text-sm font-semibold leading-tight" data-testid="text-title">SFD Engine</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-sm font-semibold leading-tight" data-testid="text-title">SFD Engine</h1>
+              <span className="text-[10px] text-muted-foreground font-medium">v 1.0</span>
+            </div>
             <p className="text-xs text-muted-foreground">Structural Field Explorer</p>
           </div>
         </div>
