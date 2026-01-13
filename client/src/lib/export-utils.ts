@@ -43,9 +43,21 @@ async function downloadBlob(blob: Blob, filename: string): Promise<void> {
     const { url } = await response.json();
     console.log("[Export] Server URL:", url);
     
-    // Open download URL in new window (escapes iframe sandbox)
-    window.open(url, "_blank");
-    console.log("[Export] Download initiated via server");
+    // Create a full URL and use anchor with target _top to escape iframe
+    const fullUrl = window.location.origin + url;
+    const a = document.createElement("a");
+    a.href = fullUrl;
+    a.download = filename;
+    a.target = "_top"; // Escape iframe sandbox
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    
+    setTimeout(() => {
+      if (a.parentNode) document.body.removeChild(a);
+    }, 1000);
+    
+    console.log("[Export] Download initiated via server anchor");
     
   } catch (error) {
     console.error("[Export] Server upload failed, trying direct download:", error);
