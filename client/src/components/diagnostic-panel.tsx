@@ -131,7 +131,7 @@ export function DiagnosticPanel({
   
   const [solverOpen, setSolverOpen] = useState(true);
   const [energyOpen, setEnergyOpen] = useState(true);
-  const [varianceOpen, setVarianceOpen] = useState(false);
+  const [varianceOpen, setVarianceOpen] = useState(true);
   
   const eventLogRef = useRef<HTMLDivElement>(null);
   const updateIntervalRef = useRef<number | null>(null);
