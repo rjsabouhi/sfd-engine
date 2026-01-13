@@ -14,27 +14,38 @@ function getTimestamp(): string {
   return Date.now().toString();
 }
 
-function downloadBlob(blob: Blob, filename: string): void {
+async function downloadBlob(blob: Blob, filename: string): Promise<void> {
   console.log("[Export] Starting download:", filename, "size:", blob.size);
   
   const url = URL.createObjectURL(blob);
+  
+  // Check if we're in an iframe (Replit preview sandbox blocks downloads)
+  const isInIframe = window.top !== window;
+  
+  if (isInIframe) {
+    // In iframe: open blob URL in new window to escape sandbox
+    console.log("[Export] Iframe detected, opening in new window");
+    const newWindow = window.open(url, "_blank");
+    if (newWindow) {
+      // Set a timeout to revoke the URL after window loads
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      return;
+    }
+    // If popup blocked, try the anchor method anyway
+    console.log("[Export] Popup blocked, trying anchor method");
+  }
+  
+  // Standard download approach for non-iframe or popup-blocked scenarios
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
-  
-  // Make anchor briefly visible to ensure browser processes it
-  a.style.position = "fixed";
-  a.style.left = "-9999px";
-  a.style.top = "-9999px";
+  a.style.display = "none";
   document.body.appendChild(a);
   
-  // Force a reflow before clicking
-  a.offsetHeight;
-  
-  console.log("[Export] Triggering download click");
+  console.log("[Export] Triggering download via anchor click");
   a.click();
   
-  // Cleanup after delay
+  // Cleanup
   setTimeout(() => {
     if (a.parentNode) {
       document.body.removeChild(a);
