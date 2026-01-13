@@ -312,12 +312,12 @@ export function FullscreenMenuBar({
                 data-testid="dropdown-regimes"
               >
                 <Compass className="h-3 w-3" />
-                Structural Regimes
+                Regimes
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-xs">Structural Regimes</TooltipContent>
+          <TooltipContent side="bottom" className="text-xs">Regimes</TooltipContent>
         </Tooltip>
         <DropdownMenuContent className="bg-popover border-border min-w-[180px] z-[200]">
           <DropdownMenuRadioGroup 
@@ -359,7 +359,7 @@ export function FullscreenMenuBar({
                 data-testid="dropdown-projection-layer"
               >
                 <Layers className="h-3 w-3" />
-                <span>Constraint Layer</span>
+                <span>Layers</span>
                 <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
