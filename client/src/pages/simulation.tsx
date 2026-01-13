@@ -267,7 +267,7 @@ export default function SimulationPage() {
   const [showPerturbControls, setShowPerturbControls] = useState(false); // Shows perturbation panel in sidebar when Controls... clicked
   const [trajectoryProbeActive, setTrajectoryProbeActive] = useState(false);
   const [trajectoryProbePoint, setTrajectoryProbePoint] = useState<{ x: number; y: number } | null>(null);
-  const [blendMode, setBlendMode] = useState(false);
+  const [blendMode, setBlendMode] = useState(true);
   const [blendOpacity, setBlendOpacity] = useState(0.52);
   const [canvasTransform, setCanvasTransform] = useState<{ zoom: number; panX: number; panY: number }>({ zoom: 1, panX: 0, panY: 0 });
   const [perceptualSmoothing, setPerceptualSmoothing] = useState(true); // Perceptual Safety Layer
