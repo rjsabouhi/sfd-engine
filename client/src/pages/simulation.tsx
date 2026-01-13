@@ -380,7 +380,7 @@ export default function SimulationPage() {
         fieldInspectorEnabled: fieldInspectorEnabled,
         perturbMode: perturbMode,
       };
-      // Close all panels
+      // Close inspection-mode-only panels (export dialog is available in both modes)
       setPlaybackPanelOpen(false);
       setPerturbPanelOpen(false);
       setPerturbMode(false);
@@ -388,7 +388,7 @@ export default function SimulationPage() {
       setFieldInspectorEnabled(false);
       setDiagnosticsVisible(false);
       setProbeDetailOpen(false);
-      setExportDialogOpen(false);
+      // Note: exportDialogOpen is NOT closed here since it's shared between dashboard and inspection mode
     } else if (focusMode && !wasInFocusMode) {
       // Returning to focus mode - re-sync pinned positions from store
       setPlaybackPinnedState(getPanelState('playback'));
@@ -411,7 +411,7 @@ export default function SimulationPage() {
         setPerturbMode(saved.perturbMode);
       }
     }
-  }, [focusMode, exportDialogOpen]);
+  }, [focusMode]);
   
   // Bring a panel to front by moving it to end of order array
   const bringPanelToFront = (panel: 'playback' | 'perturbation' | 'diagnostics' | 'inspector' | 'probedetail' | 'export') => {
@@ -422,8 +422,10 @@ export default function SimulationPage() {
   };
   
   // Get z-index for a panel based on its position in the order
+  // Base z-index of 80 ensures floating panels stay above shadcn/radix components (z-50)
+  // while remaining below fullscreen modals/sheets (which create new stacking contexts)
   const getPanelZIndex = (panel: 'playback' | 'perturbation' | 'diagnostics' | 'inspector' | 'probedetail' | 'export') => {
-    const baseZ = 50;
+    const baseZ = 80;
     const index = activePanelOrder.indexOf(panel);
     return baseZ + index;
   };
@@ -3419,6 +3421,25 @@ export default function SimulationPage() {
               />
         </ResizablePanel>
       </ResizablePanelGroup>
+      
+      {/* Floating Export Dialog - shared between dashboard and inspection mode */}
+      <FloatingExportDialog
+        isOpen={exportDialogOpen}
+        onClose={() => setExportDialogOpen(false)}
+        zIndex={getPanelZIndex('export')}
+        onFocus={() => bringPanelToFront('export')}
+        engine={engineRef.current}
+        canvasRef={canvasRef}
+        colormap={colormap}
+        regime={selectedRegimeKey || 'default'}
+        interpretationMode={interpretationMode}
+        events={events}
+        savedProbes={savedProbes}
+        getProbeDataAt={getProbeDataAt}
+        isPinned={exportPinned.isPinned}
+        pinnedPosition={exportPinned.position}
+        onPinnedChange={(isPinned, position) => setExportPinned({ isPinned, position })}
+      />
       
       {/* Floating Diagnostics Console - CTRL+SHIFT+D to toggle - only visible in focusMode */}
       <FloatingDiagnostics
