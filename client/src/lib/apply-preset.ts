@@ -198,6 +198,3 @@ export function cancelPresetTransition() {
   activeTransition.onComplete = null;
 }
 
-export function isTransitionActive(): boolean {
-  return activeTransition.animationFrame !== null;
-}

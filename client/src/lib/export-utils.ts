@@ -15,21 +15,14 @@ function getTimestamp(): string {
 }
 
 async function downloadBlob(blob: Blob, filename: string): Promise<void> {
-  console.log("[Export] Starting download:", filename, "size:", blob.size);
-  
   try {
-    // Convert blob to base64 for server upload
     const arrayBuffer = await blob.arrayBuffer();
     const base64 = btoa(
       new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
     );
     
-    // Determine MIME type
     const mimeType = blob.type || "application/octet-stream";
     
-    console.log("[Export] Uploading to server...");
-    
-    // Upload to server
     const response = await fetch("/api/exports", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -41,14 +34,12 @@ async function downloadBlob(blob: Blob, filename: string): Promise<void> {
     }
     
     const { url } = await response.json();
-    console.log("[Export] Server URL:", url);
     
-    // Create a full URL and use anchor with target _top to escape iframe
     const fullUrl = window.location.origin + url;
     const a = document.createElement("a");
     a.href = fullUrl;
     a.download = filename;
-    a.target = "_top"; // Escape iframe sandbox
+    a.target = "_top";
     a.style.display = "none";
     document.body.appendChild(a);
     a.click();
@@ -57,12 +48,7 @@ async function downloadBlob(blob: Blob, filename: string): Promise<void> {
       if (a.parentNode) document.body.removeChild(a);
     }, 1000);
     
-    console.log("[Export] Download initiated via server anchor");
-    
-  } catch (error) {
-    console.error("[Export] Server upload failed, trying direct download:", error);
-    
-    // Fallback to direct download (may fail in iframe)
+  } catch (_error) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -79,25 +65,19 @@ async function downloadBlob(blob: Blob, filename: string): Promise<void> {
 }
 
 export async function exportPNGSnapshot(canvas: HTMLCanvasElement | null): Promise<boolean> {
-  console.log("[Export PNG] Called with canvas:", canvas);
   if (!canvas) {
-    console.error("[Export PNG] No canvas provided!");
     return false;
   }
   try {
-    console.log("[Export PNG] Creating blob from canvas...");
     const blob = await new Promise<Blob | null>((resolve) => {
       canvas.toBlob((b) => resolve(b), "image/png");
     });
-    console.log("[Export PNG] Blob created:", blob?.size);
     if (!blob) {
-      console.error("[Export PNG] Blob creation failed!");
       return false;
     }
     downloadBlob(blob, `sfd-snapshot-${getTimestamp()}.png`);
     return true;
-  } catch (e) {
-    console.error("[Export PNG] Error:", e);
+  } catch (_e) {
     return false;
   }
 }
@@ -1270,7 +1250,6 @@ export async function startLiveRecordingFrameBased(
   compositeCanvas.height = canvas.height;
   const compositeCtx = compositeCanvas.getContext("2d");
   
-  console.log("[Recording] Starting step-based capture, targeting", totalFrames, "frames, overlay:", !!overlayCanvas);
   
   // Function to capture a single frame - called externally on each simulation step
   const captureFrame = () => {
@@ -1308,15 +1287,14 @@ export async function startLiveRecordingFrameBased(
       if (frameIndex >= totalFrames) {
         finishRecording();
       }
-    } catch (e) {
-      console.error("[Recording] Frame capture error:", e);
+    } catch (_e) {
+      // Frame capture error, silently skip
     }
   };
   
   const finishRecording = async () => {
     isActive = false;
     
-    console.log("[Recording] Captured", capturedFrames.length, "frames, creating GIF...");
     
     if (capturedFrames.length === 0) {
       onError?.("No frames were captured");
@@ -1346,18 +1324,14 @@ export async function startLiveRecordingFrameBased(
       
       const gifData = await Promise.race([gifPromise, timeoutPromise]);
       const gifBlob = new Blob([gifData], { type: "image/gif" });
-      console.log("[Recording] GIF created, size:", gifBlob.size);
       onComplete?.(gifBlob);
-    } catch (e) {
-      console.error("[Recording] Failed to create GIF:", e);
-      // Fall back to returning last frame as PNG instead
+    } catch (_e) {
       try {
         const lastFrame = capturedFrames[capturedFrames.length - 1];
         const response = await fetch(lastFrame);
         const blob = await response.blob();
-        console.log("[Recording] Falling back to PNG, size:", blob.size);
         onComplete?.(blob);
-      } catch (e2) {
+      } catch (_e2) {
         onError?.("Failed to create animation");
       }
     }
@@ -1587,7 +1561,6 @@ export async function startLiveRecording(
   onError?: (error: string) => void,
   overlayCanvas?: HTMLCanvasElement | null
 ): Promise<RecordingController & { captureFrame: () => void }> {
-  console.log("[Recording] Using step-based recording,", totalFrames, "frames");
   return startLiveRecordingFrameBased(canvas, totalFrames, onProgress, onComplete, onError, overlayCanvas);
 }
 

@@ -253,10 +253,6 @@ export function getInterpretationText(
   }
 }
 
-export function getDefaultModeLabels(): ModeLabels {
-  return interpretationModes["intuitive"];
-}
-
 export function getModeLabels(mode: InterpretationMode): ModeLabels {
   return interpretationModes[mode] || interpretationModes["intuitive"];
 }

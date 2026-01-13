@@ -460,7 +460,6 @@ export default function SimulationPage() {
       }
       // Create new URL and show dialog
       const url = URL.createObjectURL(recordedVideoBlob);
-      console.log("[Preview] Created new URL:", url, "for blob size:", recordedVideoBlob.size);
       setPreviewUrl(url);
       setShowVideoDialog(true);
       return () => {
@@ -782,9 +781,8 @@ export default function SimulationPage() {
     }));
   }, []);
 
-  const handleSelectProbe = useCallback((probe: import("@shared/schema").SavedProbe) => {
+  const handleSelectProbe = useCallback((_probe: import("@shared/schema").SavedProbe) => {
     // Could add future functionality like centering view on probe
-    console.log(`Selected probe ${probe.label} at (${probe.x}, ${probe.y})`);
   }, []);
 
   const handleOpenProbeDetail = useCallback((probe: import("@shared/schema").SavedProbe) => {
@@ -815,7 +813,6 @@ export default function SimulationPage() {
   const handleStartRecording = useCallback(async () => {
     const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
     if (!canvas) {
-      console.error("[Recording] Canvas not found");
       return;
     }
     
@@ -873,7 +870,6 @@ export default function SimulationPage() {
           engineRef.current.stop();
         }
         
-        console.error("Recording error:", error);
         setRecordingError(error);
         setShowVideoDialog(true);
       },
@@ -891,10 +887,8 @@ export default function SimulationPage() {
 
   const handleSaveVideo = useCallback(async () => {
     if (!recordedVideoBlob) {
-      console.log("[Save] No blob to save");
       return;
     }
-    console.log("[Save] Saving blob:", recordedVideoBlob.type, recordedVideoBlob.size);
     const isGif = recordedVideoBlob.type.includes("gif");
     const extension = isGif ? "gif" : recordedVideoBlob.type.includes("mp4") ? "mp4" : "webm";
     const filename = `sfd-simulation-${Date.now()}.${extension}`;
@@ -915,9 +909,8 @@ export default function SimulationPage() {
           setRecordedVideoBlob(null);
           return;
         }
-      } catch (err) {
-        // User cancelled - that's fine, keep dialog open
-        console.log("[Save] Share cancelled:", err);
+      } catch (_err) {
+        // User cancelled - keep dialog open
         return;
       }
     }
@@ -953,9 +946,8 @@ export default function SimulationPage() {
         });
         setShowVideoDialog(false);
         setRecordedVideoBlob(null);
-      } catch (err) {
+      } catch (_err) {
         // User cancelled or share failed - keep dialog open
-        console.log("Share cancelled or failed:", err);
       }
     } else {
       // Fallback to save if share not available
@@ -1070,11 +1062,8 @@ export default function SimulationPage() {
   }, [events]);
 
   const handleExportPNG = useCallback(async () => {
-    console.log("[handleExportPNG] Called");
     const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
-    console.log("[handleExportPNG] Canvas found:", canvas);
-    const result = await exportPNGSnapshot(canvas);
-    console.log("[handleExportPNG] Result:", result);
+    await exportPNGSnapshot(canvas);
   }, []);
 
   const handleExportJSON = useCallback(async () => {
