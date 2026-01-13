@@ -23,10 +23,8 @@ export function TemporalControls({
   onSeek,
   onExitPlayback,
 }: TemporalControlsProps) {
-  if (historyLength === 0) {
-    return null;
-  }
-
+  const hasHistory = historyLength > 0;
+  
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
@@ -34,7 +32,7 @@ export function TemporalControls({
           variant="outline"
           size="icon"
           onClick={onStepBackward}
-          disabled={isRunning || currentIndex <= 0}
+          disabled={!hasHistory || isRunning || currentIndex <= 0}
           data-testid="button-step-backward"
         >
           <SkipBack className="h-4 w-4" />
@@ -42,12 +40,12 @@ export function TemporalControls({
         
         <div className="flex-1 px-2">
           <Slider
-            value={[currentIndex]}
+            value={[hasHistory ? currentIndex : 0]}
             min={0}
             max={Math.max(0, historyLength - 1)}
             step={1}
             onValueChange={([v]) => onSeek(v)}
-            disabled={isRunning}
+            disabled={!hasHistory || isRunning}
             data-testid="slider-timeline"
           />
         </div>
@@ -56,7 +54,7 @@ export function TemporalControls({
           variant="outline"
           size="icon"
           onClick={onStepForward}
-          disabled={isRunning || currentIndex >= historyLength - 1}
+          disabled={!hasHistory || isRunning || currentIndex >= historyLength - 1}
           data-testid="button-step-forward"
         >
           <SkipForward className="h-4 w-4" />
@@ -64,7 +62,7 @@ export function TemporalControls({
       </div>
       
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>Frame {currentIndex + 1} / {historyLength}</span>
+        <span>Frame {hasHistory ? currentIndex + 1 : 0} / {hasHistory ? historyLength : 0}</span>
         {isPlaybackMode && (
           <Button
             variant="ghost"
