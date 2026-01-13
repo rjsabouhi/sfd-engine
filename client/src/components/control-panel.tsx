@@ -249,123 +249,82 @@ export function ControlPanel({
           })}
         </TabsList>
 
+        {/* Persistent Playback Controls - Always Visible */}
+        <div className="shrink-0 border-b border-border/50 bg-muted/10 px-2 py-1.5 space-y-1.5" data-testid="persistent-playback-controls">
+          {/* Main controls row */}
+          <div className="flex items-center gap-1">
+            {state.isRunning ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="persistent-button-pause">
+                    <Pause className="h-3.5 w-3.5 mr-1" />
+                    Pause
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">Pause the simulation</TooltipContent>
+              </Tooltip>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    onClick={onPlay} 
+                    variant="secondary" 
+                    className="flex-1 relative ring-1 ring-cyan-500/50 shadow-[0_0_8px_rgba(34,211,238,0.2)]" 
+                    size="sm" 
+                    data-testid="persistent-button-play"
+                  >
+                    <Play className="h-3.5 w-3.5 mr-1" />
+                    Run
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">Start running the simulation</TooltipContent>
+              </Tooltip>
+            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={onStep} variant="outline" size="icon" data-testid="persistent-button-step">
+                  <StepForward className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">Step forward one frame</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={onReset} variant="outline" size="icon" data-testid="persistent-button-reset">
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">Reset simulation</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => onShowDualViewChange(!showDualView)}
+                  data-testid="persistent-button-dual-view"
+                >
+                  <Columns2 className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">Toggle dual view</TooltipContent>
+            </Tooltip>
+          </div>
+          {/* Timeline scrubber */}
+          <TemporalControls
+            historyLength={historyLength}
+            currentIndex={currentHistoryIndex}
+            isPlaybackMode={isPlaybackMode}
+            isRunning={state.isRunning}
+            onStepBackward={onStepBackward}
+            onStepForward={onStepForward}
+            onSeek={onSeekFrame}
+            onExitPlayback={onExitPlayback}
+          />
+        </div>
+
         <div className="flex-1 overflow-y-auto">
           <TabsContent value="home" className="m-0 p-2 space-y-2">
-            {/* Controls Section */}
-            <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-controls">
-              <Collapsible open={homeControlsOpen} onOpenChange={setHomeControlsOpen}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <CollapsibleTrigger asChild>
-                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-home-controls">
-                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                          <Play className="h-3 w-3" />
-                          Controls
-                        </span>
-                        {homeControlsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                      </button>
-                    </CollapsibleTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent side="left" className="text-xs max-w-[200px]">
-                    Playback controls for running, pausing, and stepping through the simulation
-                  </TooltipContent>
-                </Tooltip>
-                <CollapsibleContent className="pt-2 space-y-2">
-                  <div className="flex items-center gap-1">
-                    {state.isRunning ? (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="home-button-pause">
-                            <Pause className="h-3.5 w-3.5 mr-1" />
-                            Pause
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="text-xs">Pause the simulation</TooltipContent>
-                      </Tooltip>
-                    ) : (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            onClick={onPlay} 
-                            variant="secondary" 
-                            className="flex-1 relative ring-1 ring-cyan-500/50 shadow-[0_0_8px_rgba(34,211,238,0.2)]" 
-                            size="sm" 
-                            data-testid="home-button-play"
-                          >
-                            <Play className="h-3.5 w-3.5 mr-1" />
-                            Run Simulation
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="text-xs">Start running the simulation</TooltipContent>
-                      </Tooltip>
-                    )}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => onShowDualViewChange(!showDualView)}
-                          data-testid="home-button-dual-view"
-                        >
-                          <Columns2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="text-xs max-w-[200px]">Toggle side-by-side field comparison</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button onClick={onReset} variant="outline" size="icon" data-testid="home-button-reset">
-                          <RotateCcw className="h-3.5 w-3.5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="text-xs max-w-[200px]">Reset simulation to initial state</TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <TemporalControls
-                    historyLength={historyLength}
-                    currentIndex={currentHistoryIndex}
-                    isPlaybackMode={isPlaybackMode}
-                    isRunning={state.isRunning}
-                    onStepBackward={onStepBackward}
-                    onStepForward={onStepForward}
-                    onSeek={onSeekFrame}
-                    onExitPlayback={onExitPlayback}
-                  />
-                  <div className="grid grid-cols-3 gap-1 text-xs">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-step">
-                          <div className="text-[10px] text-muted-foreground">Step</div>
-                          <div className="font-mono tabular-nums">{state.step}</div>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="text-xs max-w-[200px]">Current simulation step count</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-status">
-                          <div className="text-[10px] text-muted-foreground">Status</div>
-                          <div className={state.isRunning ? "text-green-500" : "text-yellow-500"}>
-                            {state.isRunning ? "Running" : "Paused"}
-                          </div>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="text-xs max-w-[200px]">Whether the simulation is running or paused</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-history">
-                          <div className="text-[10px] text-muted-foreground">History</div>
-                          <div className="font-mono tabular-nums">{historyLength}</div>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="text-xs max-w-[200px]">Number of frames stored in timeline buffer</TooltipContent>
-                    </Tooltip>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-
             {/* Params Section */}
             <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-params">
               <Collapsible open={homeParamsOpen} onOpenChange={setHomeParamsOpen}>

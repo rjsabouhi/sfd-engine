@@ -288,29 +288,6 @@ export function FloatingExportDialog({
       onViewChange: setSnapshotView,
     },
     {
-      id: 'share-card',
-      name: 'Share Card',
-      description: 'Branded image with regime info',
-      icon: <Share2 className="h-5 w-5" />,
-      format: 'PNG',
-      category: 'visual',
-      action: async () => {
-        const state = getState();
-        if (!state) return false;
-        const metrics = engine?.getMetricsHistory();
-        const latestMetrics = metrics && metrics.length > 0 ? metrics[metrics.length - 1] : null;
-        return exportMobileShareSnapshot(getCanvas(), {
-          regime,
-          stability: state.variance < 0.05 ? 'Stable' : state.variance < 0.15 ? 'Active' : 'Chaotic',
-          curvature: latestMetrics?.curvature ?? 0,
-          energy: state.energy,
-          overlayCanvas: getOverlayCanvas(),
-          overlayOpacity: 0.3,
-          forceDownload: true,
-        });
-      },
-    },
-    {
       id: 'layers',
       name: 'Field Layers',
       description: 'All layers in a single contact sheet',
