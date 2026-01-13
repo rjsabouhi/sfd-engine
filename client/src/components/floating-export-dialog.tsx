@@ -3,7 +3,6 @@ import {
   X,
   Download,
   Image,
-  Video,
   FileJson,
   FileText,
   Database,
@@ -14,7 +13,6 @@ import {
   Loader2,
   Check,
   Camera,
-  Film,
   BarChart3,
   Layers,
   Code,
@@ -48,9 +46,6 @@ import {
   exportLayersSeparate,
   exportLayersAsZip,
   exportFullArchive,
-  exportVideoWebM,
-  exportVideoWebMDual,
-  exportVideoWebMProjection,
   type DerivedFieldType,
 } from "@/lib/export-utils";
 
@@ -128,7 +123,6 @@ export function FloatingExportDialog({
   const [completedExports, setCompletedExports] = useState<Set<string>>(new Set());
   const [advancedMode, setAdvancedMode] = useState(false);
   const [snapshotView, setSnapshotView] = useState<ExportViewType>('main');
-  const [videoView, setVideoView] = useState<ExportViewType>('main');
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Use lifted state if provided, otherwise use local state
@@ -261,24 +255,6 @@ export function FloatingExportDialog({
     }
   }, [getCanvas, getDerivedCanvas, toast]);
 
-  const exportVideoWithView = useCallback(async (view: ExportViewType): Promise<boolean> => {
-    const canvas = getCanvas();
-    if (!engine || !canvas) return false;
-    if (view === 'main') {
-      return exportVideoWebM(engine, canvas, colormap);
-    } else if (view === 'projection') {
-      // Use the new projection video export that renders main field with blended overlay
-      return exportVideoWebMProjection(engine, derivedType, colormap, blendOpacity);
-    } else {
-      const derivedCanvas = getDerivedCanvas();
-      if (!derivedCanvas) {
-        toast({ title: "Projection view not available", description: "Please open the projection view first", variant: "destructive" });
-        return false;
-      }
-      return exportVideoWebMDual(engine, canvas, derivedCanvas, colormap, blendOpacity, 10, undefined, derivedType);
-    }
-  }, [engine, colormap, blendOpacity, derivedType, getCanvas, getDerivedCanvas, toast]);
-
   const exportOptions: ExportOption[] = [
     // === VISUAL (Safe for sharing) ===
     {
@@ -333,22 +309,6 @@ export function FloatingExportDialog({
           forceDownload: true,
         });
       },
-    },
-    {
-      id: 'video',
-      name: 'Playback Video',
-      description: `Export ${viewLabels[videoView]} animation`,
-      icon: <Film className="h-5 w-5" />,
-      format: 'WebM',
-      category: 'visual',
-      requires: 'playback history',
-      advancedNote: 'Full-length history export requires Advanced Mode',
-      action: async () => {
-        return exportVideoWithView(videoView);
-      },
-      hasViewSelector: true,
-      viewType: videoView,
-      onViewChange: setVideoView,
     },
     {
       id: 'layers',
@@ -752,9 +712,7 @@ export function FloatingExportDialog({
                             onClick={async (e) => {
                               e.stopPropagation();
                               setLoadingExport(option.id);
-                              const success = option.id === 'snapshot' 
-                                ? await exportSnapshotWithView('main')
-                                : await exportVideoWithView('main');
+                              const success = await exportSnapshotWithView('main');
                               setLoadingExport(null);
                               if (success) {
                                 setCompletedExports(prev => new Set(Array.from(prev).concat(option.id)));
@@ -769,9 +727,7 @@ export function FloatingExportDialog({
                             onClick={async (e) => {
                               e.stopPropagation();
                               setLoadingExport(option.id);
-                              const success = option.id === 'snapshot' 
-                                ? await exportSnapshotWithView('projection')
-                                : await exportVideoWithView('projection');
+                              const success = await exportSnapshotWithView('projection');
                               setLoadingExport(null);
                               if (success) {
                                 setCompletedExports(prev => new Set(Array.from(prev).concat(option.id)));
@@ -786,9 +742,7 @@ export function FloatingExportDialog({
                             onClick={async (e) => {
                               e.stopPropagation();
                               setLoadingExport(option.id);
-                              const success = option.id === 'snapshot' 
-                                ? await exportSnapshotWithView('sideBySide')
-                                : await exportVideoWithView('sideBySide');
+                              const success = await exportSnapshotWithView('sideBySide');
                               setLoadingExport(null);
                               if (success) {
                                 setCompletedExports(prev => new Set(Array.from(prev).concat(option.id)));
