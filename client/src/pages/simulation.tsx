@@ -271,7 +271,20 @@ export default function SimulationPage() {
   const [blendOpacity, setBlendOpacity] = useState(0.5);
   const [canvasTransform, setCanvasTransform] = useState<{ zoom: number; panX: number; panY: number }>({ zoom: 1, panX: 0, panY: 0 });
   const [perceptualSmoothing, setPerceptualSmoothing] = useState(true); // Perceptual Safety Layer
-  const [metricsPanelCollapsed, setMetricsPanelCollapsed] = useState(false);
+  const [metricsPanelSize, setMetricsPanelSize] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sfd-metrics-panel-size');
+      if (saved) {
+        const value = parseFloat(saved);
+        // Guard against NaN and clamp to valid bounds (15-75%)
+        if (!Number.isFinite(value)) return 30;
+        return Math.max(15, Math.min(75, value));
+      }
+      return 30;
+    } catch {
+      return 30;
+    }
+  }); // Default 30% for metrics panel, persisted to localStorage
   const [focusMode, setFocusMode] = useState(false); // Fullscreen/focus mode with menubar
   const [playbackPanelOpen, setPlaybackPanelOpen] = useState(false); // Floating playback panel in focus mode
   const [perturbPanelOpen, setPerturbPanelOpen] = useState(false); // Floating perturbation panel in focus mode
@@ -2825,15 +2838,19 @@ export default function SimulationPage() {
         </Tooltip>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        <main className="relative bg-gray-950 flex-1 min-w-0 flex flex-col">
-          {/* Tools Row - at top (horizontally scrollable) */}
+      <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden" onLayout={(sizes) => {
+        const newSize = sizes[1];
+        setMetricsPanelSize(newSize);
+        try { localStorage.setItem('sfd-metrics-panel-size', String(newSize)); } catch {}
+      }}>
+        <ResizablePanel defaultSize={100 - metricsPanelSize} minSize={25} className="relative bg-gray-950 min-w-0 flex flex-col">
+          {/* Tools Row - at top (horizontally scrollable, compact when metrics expanded) */}
           <div className="relative shrink-0 border-b border-white/10 bg-gray-950">
             {/* Left fade indicator */}
             <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-gray-950 to-transparent pointer-events-none z-10" />
             {/* Right fade indicator */}
             <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-gray-950 to-transparent pointer-events-none z-10" />
-            <div className={`flex items-center gap-1.5 px-6 py-1.5 overflow-x-auto scrollbar-thin flex-nowrap ${!showDualView ? 'justify-center' : ''}`}>
+            <div className={`flex items-center gap-1 px-4 py-1 overflow-x-auto scrollbar-thin flex-nowrap ${!showDualView ? 'justify-center' : ''} ${metricsPanelSize > 40 ? 'gap-0.5 px-2' : 'gap-1.5 px-6 py-1.5'}`}>
             {/* Inspector */}
             <Tooltip>
               <TooltipTrigger asChild>
@@ -3163,28 +3180,30 @@ export default function SimulationPage() {
             </div>
           </div>
           
-          {/* Unified Dual-Pane Header Ribbon */}
-          <div className="flex items-stretch border-b border-border shrink-0">
-            {/* Left Pane Header: Structural Field */}
-            <div className={`flex items-center justify-center gap-2 px-3 py-2 flex-1 ${showDualView ? 'border-r border-border' : ''}`}>
-              <div className="text-center">
-                <h4 className="text-xs font-medium">Structural Field</h4>
-                <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation</p>
-              </div>
-            </div>
-            
-            {/* Right Pane Header: Projection View (only shown in dual view) */}
-            {showDualView && (
-              <div className="flex items-center justify-center gap-2 px-3 py-2 flex-1">
+          {/* Unified Dual-Pane Header Ribbon - only show horizontally when not in stacked mode */}
+          {!(showDualView && metricsPanelSize > 40) && (
+            <div className="flex items-stretch border-b border-border shrink-0">
+              {/* Left Pane Header: Structural Field */}
+              <div className={`flex items-center justify-center gap-2 px-3 py-2 flex-1 ${showDualView ? 'border-r border-border' : ''}`}>
                 <div className="text-center">
-                  <h4 className="text-xs font-medium">Projection View</h4>
-                  <p className="text-[10px] text-muted-foreground truncate">
-                    {OVERLAY_OPTIONS.find(o => o.value === derivedType)?.tooltip || "Select a projection mode"}
-                  </p>
+                  <h4 className="text-xs font-medium">Structural Field</h4>
+                  <p className="text-[10px] text-muted-foreground whitespace-nowrap">Primary field representation</p>
                 </div>
               </div>
-            )}
-          </div>
+              
+              {/* Right Pane Header: Projection View (only shown in dual view) */}
+              {showDualView && (
+                <div className="flex items-center justify-center gap-2 px-3 py-2 flex-1">
+                  <div className="text-center">
+                    <h4 className="text-xs font-medium">Projection View</h4>
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      {OVERLAY_OPTIONS.find(o => o.value === derivedType)?.tooltip || "Select a projection mode"}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Trajectory Probe Metrics (shown when probe is active and point is set) */}
           {trajectoryProbeActive && trajectoryProbePoint && probeData && (
@@ -3206,7 +3225,7 @@ export default function SimulationPage() {
           
           <div className="flex-1 relative">
               {showDualView ? (
-                <ResizablePanelGroup direction="horizontal" className="h-full">
+                <ResizablePanelGroup direction={metricsPanelSize > 40 ? "vertical" : "horizontal"} className="h-full">
                   <ResizablePanel defaultSize={50} minSize={25} className="overflow-hidden">
                     <div className="h-full min-h-0 flex flex-col bg-background overflow-hidden">
                       <div className="relative flex-1 min-h-0 flex items-center justify-center bg-gray-950 overflow-hidden">
@@ -3314,19 +3333,11 @@ export default function SimulationPage() {
                 </div>
               )}
               </div>
-            </main>
+            </ResizablePanel>
         
-        {/* Metrics Panel Toggle Button - subtle edge handle */}
-        <button
-          onClick={() => setMetricsPanelCollapsed(!metricsPanelCollapsed)}
-          className="group flex-none w-3 flex items-center justify-center border-l border-border hover:bg-white/5 transition-colors cursor-pointer"
-          data-testid="button-toggle-metrics-panel"
-          title={metricsPanelCollapsed ? "Expand metrics panel" : "Collapse metrics panel"}
-        >
-          <div className="w-0.5 h-8 rounded-full bg-white/10 group-hover:bg-white/30 transition-colors" />
-        </button>
+        <ResizableHandle withHandle />
         
-        <aside className={`${metricsPanelCollapsed ? 'w-0 overflow-hidden' : 'w-[420px]'} flex-none border-l border-border bg-card flex flex-col overflow-hidden transition-all duration-300`}>
+        <ResizablePanel defaultSize={metricsPanelSize} minSize={15} maxSize={75} className="border-l border-border bg-card flex flex-col overflow-hidden">
           {showPerturbControls && (
             <div className="p-3 border-b border-border">
               <div className="flex items-center justify-between mb-2">
@@ -3398,8 +3409,8 @@ export default function SimulationPage() {
                 isExporting={isExporting}
                 onSmartViewApply={handleSmartViewApply}
               />
-        </aside>
-      </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
       
       {/* Floating Diagnostics Console - CTRL+SHIFT+D to toggle - only visible in focusMode */}
       <FloatingDiagnostics
