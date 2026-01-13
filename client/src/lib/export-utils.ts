@@ -17,41 +17,53 @@ function getTimestamp(): string {
 async function downloadBlob(blob: Blob, filename: string): Promise<void> {
   console.log("[Export] Starting download:", filename, "size:", blob.size);
   
-  const url = URL.createObjectURL(blob);
-  
-  // Check if we're in an iframe (Replit preview sandbox blocks downloads)
-  const isInIframe = window.top !== window;
-  
-  if (isInIframe) {
-    // In iframe: open blob URL in new window to escape sandbox
-    console.log("[Export] Iframe detected, opening in new window");
-    const newWindow = window.open(url, "_blank");
-    if (newWindow) {
-      // Set a timeout to revoke the URL after window loads
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-      return;
+  try {
+    // Convert blob to base64 for server upload
+    const arrayBuffer = await blob.arrayBuffer();
+    const base64 = btoa(
+      new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+    );
+    
+    // Determine MIME type
+    const mimeType = blob.type || "application/octet-stream";
+    
+    console.log("[Export] Uploading to server...");
+    
+    // Upload to server
+    const response = await fetch("/api/exports", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: base64, filename, mimeType }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}`);
     }
-    // If popup blocked, try the anchor method anyway
-    console.log("[Export] Popup blocked, trying anchor method");
+    
+    const { url } = await response.json();
+    console.log("[Export] Server URL:", url);
+    
+    // Open download URL in new window (escapes iframe sandbox)
+    window.open(url, "_blank");
+    console.log("[Export] Download initiated via server");
+    
+  } catch (error) {
+    console.error("[Export] Server upload failed, trying direct download:", error);
+    
+    // Fallback to direct download (may fail in iframe)
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    
+    setTimeout(() => {
+      if (a.parentNode) document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 5000);
   }
-  
-  // Standard download approach for non-iframe or popup-blocked scenarios
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.style.display = "none";
-  document.body.appendChild(a);
-  
-  console.log("[Export] Triggering download via anchor click");
-  a.click();
-  
-  // Cleanup
-  setTimeout(() => {
-    if (a.parentNode) {
-      document.body.removeChild(a);
-    }
-    URL.revokeObjectURL(url);
-  }, 5000);
 }
 
 export async function exportPNGSnapshot(canvas: HTMLCanvasElement | null): Promise<boolean> {
