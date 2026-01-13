@@ -21,12 +21,22 @@ function downloadBlob(blob: Blob, filename: string): void {
   a.download = filename;
   a.style.display = "none";
   document.body.appendChild(a);
-  a.click();
-  // Defer URL revocation to allow browser to complete download
+  
+  // Use MouseEvent for more reliable click triggering across browsers
+  const clickEvent = new MouseEvent("click", {
+    view: window,
+    bubbles: true,
+    cancelable: true,
+  });
+  a.dispatchEvent(clickEvent);
+  
+  // Defer cleanup to allow browser to complete download
   setTimeout(() => {
-    document.body.removeChild(a);
+    if (a.parentNode) {
+      document.body.removeChild(a);
+    }
     URL.revokeObjectURL(url);
-  }, 1000);
+  }, 5000);
 }
 
 export async function exportPNGSnapshot(canvas: HTMLCanvasElement | null): Promise<boolean> {
