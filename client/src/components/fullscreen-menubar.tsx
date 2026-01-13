@@ -209,9 +209,8 @@ export function FullscreenMenuBar({
 
   return (
     <div className="relative flex items-center justify-center gap-1 px-2 py-1 bg-sidebar border-b border-sidebar-border">
-      <div className="absolute left-2 flex items-center gap-1.5">
+      <div className="absolute left-2">
         <img src={sfdLogo} alt="SFD" className="w-6 h-6 rounded" />
-        <span className="text-[10px] italic text-muted-foreground">v1.0</span>
       </div>
       
       {/* === TOOLS GROUP === */}
