@@ -146,10 +146,10 @@ export function ControlPanel({
   onSmartViewApply,
 }: ControlPanelProps) {
   const [coreParamsOpen, setCoreParamsOpen] = useState(true);
-  const [weightsOpen, setWeightsOpen] = useState(false);
-  const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [metricsOpen, setMetricsOpen] = useState(false);
-  const [interpretationOpen, setInterpretationOpen] = useState(false);
+  const [weightsOpen, setWeightsOpen] = useState(true);
+  const [advancedOpen, setAdvancedOpen] = useState(true);
+  const [metricsOpen, setMetricsOpen] = useState(true);
+  const [interpretationOpen, setInterpretationOpen] = useState(true);
   const [playbackOpen, setPlaybackOpen] = useState(true);
   const [regimeOpen, setRegimeOpen] = useState(true);
   const [operatorOpen, setOperatorOpen] = useState(true);
