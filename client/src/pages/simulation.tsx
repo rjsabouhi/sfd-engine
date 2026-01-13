@@ -2987,6 +2987,70 @@ export default function SimulationPage() {
                 Change field colormap
               </TooltipContent>
             </Tooltip>
+            {/* Regime Presets */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center">
+                  <Select 
+                    value={selectedRegimeKey || "default"} 
+                    onValueChange={(value) => {
+                      if (value === "default") {
+                        setSelectedRegimeKey(null);
+                      } else if (structuralPresets[value]) {
+                        setSelectedRegimeKey(value);
+                        setParams(prev => ({ ...prev, ...structuralPresets[value] }));
+                        const smartConfig = getSmartViewConfig(value);
+                        if (smartConfig) {
+                          setDerivedType(smartConfig.defaultLayer);
+                          setBlendOpacity(smartConfig.defaultBlend);
+                          setHasUserSelectedOverlay(true);
+                          if (smartConfig.enableBlend) {
+                            setBlendMode(true);
+                          }
+                        }
+                      }
+                    }}
+                  >
+                    <SelectTrigger 
+                      className="h-6 w-32 text-[10px] bg-transparent border-none text-white/70 hover:text-white hover:bg-white/10 focus:ring-0 focus:ring-offset-0 gap-1" 
+                      data-testid="select-regime-header"
+                    >
+                      <Activity className="h-3 w-3 shrink-0" />
+                      <span>{selectedRegimeKey ? ({
+                        "uniform-field": "Uniform",
+                        "high-curvature": "High-Curve",
+                        "multi-basin": "Multi-Basin",
+                        "near-critical": "Near-Crit",
+                        "transition-edge": "Trans-Edge",
+                        "entropic-dispersion": "Entropic",
+                        "post-cooling": "Post-Cool",
+                        "quasicrystal": "Quasi-Crystal",
+                        "criticality-cascade": "Crit-Cascade",
+                        "fractal-corridor": "Fractal",
+                        "cosmic-web": "Cosmic Web",
+                      }[selectedRegimeKey] || selectedRegimeKey) : "Regime"}</span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">Default</SelectItem>
+                      <SelectItem value="uniform-field">Uniform Field</SelectItem>
+                      <SelectItem value="high-curvature">High-Curvature</SelectItem>
+                      <SelectItem value="multi-basin">Multi-Basin</SelectItem>
+                      <SelectItem value="near-critical">Near-Critical</SelectItem>
+                      <SelectItem value="transition-edge">Transition Edge</SelectItem>
+                      <SelectItem value="entropic-dispersion">Entropic Dispersion</SelectItem>
+                      <SelectItem value="post-cooling">Post-Cooling</SelectItem>
+                      <SelectItem value="quasicrystal">Quasi-Crystal</SelectItem>
+                      <SelectItem value="criticality-cascade">Criticality Cascade</SelectItem>
+                      <SelectItem value="fractal-corridor">Fractal Corridor</SelectItem>
+                      <SelectItem value="cosmic-web">Cosmic Web</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">
+                Select a structural regime preset
+              </TooltipContent>
+            </Tooltip>
             {/* Layers and Blend - only visible in dual view mode */}
             {showDualView && (
               <>
