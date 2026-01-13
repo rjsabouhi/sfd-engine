@@ -90,21 +90,28 @@ export async function exportPNGSnapshotDual(
     return false;
   }
   try {
-    const gap = 20;
-    const maxHeight = Math.max(mainCanvas.height, projectionCanvas.height);
-    const totalWidth = mainCanvas.width + projectionCanvas.width + gap;
+    const gap = 16;
+    const padding = 16;
+    // Use main canvas size as the reference, scale projection to match
+    const size = Math.max(mainCanvas.width, mainCanvas.height);
+    const totalWidth = size * 2 + gap + padding * 2;
+    const totalHeight = size + padding * 2;
     
     const exportCanvas = document.createElement("canvas");
     exportCanvas.width = totalWidth;
-    exportCanvas.height = maxHeight;
+    exportCanvas.height = totalHeight;
     const ctx = exportCanvas.getContext("2d");
     if (!ctx) return false;
     
+    // Dark background
     ctx.fillStyle = "#0a0a0f";
-    ctx.fillRect(0, 0, totalWidth, maxHeight);
+    ctx.fillRect(0, 0, totalWidth, totalHeight);
     
-    ctx.drawImage(mainCanvas, 0, (maxHeight - mainCanvas.height) / 2);
-    ctx.drawImage(projectionCanvas, mainCanvas.width + gap, (maxHeight - projectionCanvas.height) / 2);
+    // Draw main canvas (left side) - scale to fit
+    ctx.drawImage(mainCanvas, 0, 0, mainCanvas.width, mainCanvas.height, padding, padding, size, size);
+    
+    // Draw projection canvas (right side) - scale to same size
+    ctx.drawImage(projectionCanvas, 0, 0, projectionCanvas.width, projectionCanvas.height, padding + size + gap, padding, size, size);
     
     const blob = await new Promise<Blob | null>((resolve) => {
       exportCanvas.toBlob((b) => resolve(b), "image/png");
