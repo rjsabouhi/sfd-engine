@@ -18,41 +18,29 @@ function downloadBlob(blob: Blob, filename: string): void {
   console.log("[Export] Starting download:", filename, "size:", blob.size);
   
   const url = URL.createObjectURL(blob);
-  
-  // Try using window.open as fallback for iframe environments
-  const newWindow = window.open(url, "_blank");
-  if (newWindow) {
-    console.log("[Export] Opened in new window");
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
-    return;
-  }
-  
-  // Fallback to anchor element download
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
-  a.style.display = "none";
-  a.target = "_blank";
-  a.rel = "noopener noreferrer";
+  
+  // Make anchor briefly visible to ensure browser processes it
+  a.style.position = "fixed";
+  a.style.left = "-9999px";
+  a.style.top = "-9999px";
   document.body.appendChild(a);
   
-  console.log("[Export] Attempting anchor click download");
+  // Force a reflow before clicking
+  a.offsetHeight;
   
-  // Use MouseEvent for more reliable click triggering across browsers
-  const clickEvent = new MouseEvent("click", {
-    view: window,
-    bubbles: true,
-    cancelable: true,
-  });
-  a.dispatchEvent(clickEvent);
+  console.log("[Export] Triggering download click");
+  a.click();
   
-  // Defer cleanup to allow browser to complete download
+  // Cleanup after delay
   setTimeout(() => {
     if (a.parentNode) {
       document.body.removeChild(a);
     }
     URL.revokeObjectURL(url);
-  }, 10000);
+  }, 5000);
 }
 
 export async function exportPNGSnapshot(canvas: HTMLCanvasElement | null): Promise<boolean> {
