@@ -571,7 +571,7 @@ export function FloatingExportDialog({
         return;
       }
       // Otherwise center the dialog
-      const x = Math.max(50, (window.innerWidth - 500) / 2);
+      const x = Math.max(50, (window.innerWidth - 560) / 2);
       const y = Math.max(50, (window.innerHeight - 400) / 2);
       positionRef.current = { x, y };
       containerRef.current.style.left = `${x}px`;
@@ -593,7 +593,7 @@ export function FloatingExportDialog({
     >
       <div
         className={`rounded-lg overflow-hidden bg-sidebar/95 backdrop-blur-md ${isPinned ? 'border border-amber-500/30 shadow-[0_8px_32px_rgba(251,191,36,0.15)]' : 'border border-sidebar-border shadow-lg'}`}
-        style={{ width: 480 }}
+        style={{ width: 540 }}
       >
         <div
           className="flex items-center justify-between px-3 py-1.5 border-b border-sidebar-border cursor-move select-none"
@@ -671,7 +671,7 @@ export function FloatingExportDialog({
             })}
           </div>
 
-          <div className="flex-1 p-3 max-h-[360px] overflow-y-auto">
+          <div className="flex-1 p-3 max-h-[420px] overflow-y-auto">
             <div className="grid gap-2">
               {filteredOptions.map(option => {
                 const isLoading = loadingExport === option.id;
@@ -729,13 +729,13 @@ export function FloatingExportDialog({
                               </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start" className="min-w-[140px]">
-                              <DropdownMenuItem onClick={() => option.onViewChange?.('main')} className="text-xs">
+                              <DropdownMenuItem onSelect={() => option.onViewChange?.('main')} className="text-xs">
                                 Main Field
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => option.onViewChange?.('projection')} className="text-xs">
+                              <DropdownMenuItem onSelect={() => option.onViewChange?.('projection')} className="text-xs">
                                 Projection
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => option.onViewChange?.('sideBySide')} className="text-xs">
+                              <DropdownMenuItem onSelect={() => option.onViewChange?.('sideBySide')} className="text-xs">
                                 Side by Side
                               </DropdownMenuItem>
                             </DropdownMenuContent>
