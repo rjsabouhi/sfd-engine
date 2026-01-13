@@ -298,14 +298,6 @@ export function ControlPanel({
             )}
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button onClick={onStep} variant="outline" size="icon" data-testid="persistent-button-step">
-                  <StepForward className="h-3.5 w-3.5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="text-xs">Step forward one frame</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
                 <Button onClick={onReset} variant="outline" size="icon" data-testid="persistent-button-reset">
                   <RotateCcw className="h-3.5 w-3.5" />
                 </Button>
