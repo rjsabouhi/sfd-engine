@@ -268,7 +268,7 @@ export default function SimulationPage() {
   const [trajectoryProbeActive, setTrajectoryProbeActive] = useState(false);
   const [trajectoryProbePoint, setTrajectoryProbePoint] = useState<{ x: number; y: number } | null>(null);
   const [blendMode, setBlendMode] = useState(false);
-  const [blendOpacity, setBlendOpacity] = useState(0.5);
+  const [blendOpacity, setBlendOpacity] = useState(0.52);
   const [canvasTransform, setCanvasTransform] = useState<{ zoom: number; panX: number; panY: number }>({ zoom: 1, panX: 0, panY: 0 });
   const [perceptualSmoothing, setPerceptualSmoothing] = useState(true); // Perceptual Safety Layer
   const [metricsPanelSize, setMetricsPanelSize] = useState(() => {
@@ -1314,8 +1314,8 @@ export default function SimulationPage() {
         const progress = Math.min(elapsed / duration, 1);
         const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
         
-        // Tween blend to 0.5 (default)
-        setBlendOpacity(startBlend + (0.5 - startBlend) * eased);
+        // Tween blend to 0.52 (default)
+        setBlendOpacity(startBlend + (0.52 - startBlend) * eased);
         
         // Tween curvature back to default
         const newCurvature = startCurvature + (defaultCurvature - startCurvature) * eased;
@@ -1447,7 +1447,7 @@ export default function SimulationPage() {
             // Enter focus mode and request browser fullscreen
             setFocusMode(true);
             setBlendMode(true);
-            setBlendOpacity(0.5);
+            setBlendOpacity(0.52);
             document.documentElement.requestFullscreen?.().catch(() => {
               // Fullscreen may be denied, but focus mode still works
             });
@@ -1459,7 +1459,7 @@ export default function SimulationPage() {
               if (!prev) {
                 // Entering focus mode - set blend to 50%
                 setBlendMode(true);
-                setBlendOpacity(0.5);
+                setBlendOpacity(0.52);
               }
               return !prev;
             });
@@ -2833,7 +2833,7 @@ export default function SimulationPage() {
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={() => { setFocusMode(true); setBlendMode(true); setBlendOpacity(0.5); }} 
+              onClick={() => { setFocusMode(true); setBlendMode(true); setBlendOpacity(0.52); }} 
               data-testid="button-focus-mode"
               className="h-7 text-xs gap-1.5"
             >
