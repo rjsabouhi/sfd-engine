@@ -69,7 +69,7 @@ interface FloatingExportDialogProps {
   zIndex?: number;
   onFocus?: () => void;
   engine: SFDEngine | null;
-  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  canvasRef?: React.RefObject<HTMLCanvasElement | null>;
   basinCanvasRef?: React.RefObject<HTMLCanvasElement | null>;
   colormap: "inferno" | "viridis" | "cividis";
   regime: string;
@@ -204,6 +204,15 @@ export function FloatingExportDialog({
 
   const getState = useCallback(() => engine?.getState(), [engine]);
 
+  // Helper to get canvas from DOM - more reliable than ref passing
+  const getCanvas = useCallback(() => {
+    return document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement | null;
+  }, []);
+  
+  const getOverlayCanvas = useCallback(() => {
+    return document.querySelector('[data-testid="canvas-overlay"]') as HTMLCanvasElement | null;
+  }, []);
+
   const exportOptions: ExportOption[] = [
     // === VISUAL (Safe for sharing) ===
     {
@@ -213,7 +222,7 @@ export function FloatingExportDialog({
       icon: <Camera className="h-5 w-5" />,
       format: 'PNG',
       category: 'visual',
-      action: async () => exportPNGSnapshot(canvasRef.current),
+      action: async () => exportPNGSnapshot(getCanvas()),
     },
     {
       id: 'share-card',
@@ -227,12 +236,12 @@ export function FloatingExportDialog({
         if (!state) return false;
         const metrics = engine?.getMetricsHistory();
         const latestMetrics = metrics && metrics.length > 0 ? metrics[metrics.length - 1] : null;
-        return exportMobileShareSnapshot(canvasRef.current, {
+        return exportMobileShareSnapshot(getCanvas(), {
           regime,
           stability: state.variance < 0.05 ? 'Stable' : state.variance < 0.15 ? 'Active' : 'Chaotic',
           curvature: latestMetrics?.curvature ?? 0,
           energy: state.energy,
-          overlayCanvas: basinCanvasRef?.current,
+          overlayCanvas: getOverlayCanvas(),
           overlayOpacity: 0.3,
         });
       },
@@ -247,8 +256,9 @@ export function FloatingExportDialog({
       requires: 'playback history',
       advancedNote: 'Full-length history export requires Advanced Mode',
       action: async () => {
-        if (!engine || !canvasRef.current) return false;
-        return exportVideoWebM(engine, canvasRef.current, colormap);
+        const canvas = getCanvas();
+        if (!engine || !canvas) return false;
+        return exportVideoWebM(engine, canvas, colormap);
       },
     },
     {
