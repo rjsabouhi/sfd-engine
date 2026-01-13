@@ -1,0 +1,84 @@
+You are preparing this project for public release to the machine learning,
+complexity science, and computational modeling communities. Generate all
+standard high-quality open-source release documents with optimized clarity,
+professional formatting, and maximum adoption potential.
+
+Please create or update the following files in the project root:
+
+1. README.md  
+   - Title: “Structural Field Dynamics (SFD) Engine”
+   - Purpose: Provide a clean, rigorous introduction that positions the tool as
+     a computational framework for visualizing emergent structure in complex 
+     adaptive systems.
+   - Include sections:
+       • Abstract  
+       • Key features  
+       • What the system does  
+       • What the system is NOT (not a physics engine, not a predictive model)  
+       • Conceptual overview  
+       • Mathematical structure (moderate depth—operators, regimes, metrics)  
+       • Export system explanation  
+       • Installation and usage (Replit + local Python reconstruction examples)  
+       • Example workflow  
+       • Citation instructions  
+       • Version notes  
+
+   Tone: professional, grounded, and neutral; no hype, no overreach, no ontology claims.
+
+2. LICENSE  
+   - Use Apache License 2.0.
+   - Ensure formatting matches standard Apache 2.0 template exactly.
+
+3. CONTRIBUTING.md  
+   - Provide guidelines for researchers and developers:
+       • How to submit issues  
+       • How to propose features  
+       • Code style expectations  
+       • Testing guidelines  
+       • Branch naming and PR conventions  
+
+4. CODE_OF_CONDUCT.md  
+   - Use the Contributor Covenant v2.1.
+   - Ensure the reporting instructions reference a placeholder email:
+       contact@example.com (the user will update later).
+
+5. CITATION.cff  
+   - Create proper academic citation metadata:
+       • title: “Structural Field Dynamics (SFD) Engine”
+       • authors: Ryan Sabouhi
+       • year: 2026
+       • version: 1.0.0
+       • doi: leave blank or placeholder
+       • type: software  
+
+   Ensure GitHub can auto-generate citation previews.
+
+6. RELEASE_NOTES.md  
+   - Provide clear version notes for v1.0.0:
+       • Overview  
+       • Core features  
+       • Export capabilities  
+       • Known limitations  
+       • Roadmap for future versions  
+
+7. Create SFD_PRIMER.md  
+   - A one-page technical overview (“primer”) explaining:
+       • The conceptual motivation behind the system  
+       • A high-level explanation of local-rule dynamics → global patterns  
+       • Why this framework is useful for researchers  
+       • How to interpret visualizations  
+       • Limitations and safe-use guidelines  
+       • How to integrate SFD outputs into external workflows  
+
+   This document must be formatted so the user can easily export it to PDF.
+
+Additional instructions:
+- Ensure all documents use clean Markdown formatting, proper headers, and no 
+  broken links.
+- Ensure the README automatically links to LICENSE, CONTRIBUTING.md, the Primer,
+  and Release Notes.
+- Ensure consistency of terminology across documents.
+- After generating all files, output a summary of what was created and any 
+  recommended next steps for packaging, tagging, or publishing the release.
+
+When ready, proceed to generate all files and integrate them into the project.
