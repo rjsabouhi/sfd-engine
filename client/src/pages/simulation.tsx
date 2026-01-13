@@ -2831,23 +2831,42 @@ export default function SimulationPage() {
           </div>
         </div>
         
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => { setFocusMode(true); setBlendMode(true); setBlendOpacity(0.52); }} 
-              data-testid="button-focus-mode"
-              className="h-7 text-xs gap-1.5"
-            >
-              <Maximize2 className="h-3.5 w-3.5" />
-              Inspection Mode
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-xs">
-            Enter inspection mode (F)
-          </TooltipContent>
-        </Tooltip>
+        <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setExportDialogOpen(true)} 
+                data-testid="button-header-export"
+                className="h-7 text-xs gap-1.5"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Export
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              Export snapshots, data, and settings
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => { setFocusMode(true); setBlendMode(true); setBlendOpacity(0.52); }} 
+                data-testid="button-focus-mode"
+                className="h-7 text-xs gap-1.5"
+              >
+                <Maximize2 className="h-3.5 w-3.5" />
+                Inspection Mode
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              Enter inspection mode (F)
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </header>
 
       <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden" onLayout={(sizes) => {
