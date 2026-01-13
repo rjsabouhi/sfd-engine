@@ -370,9 +370,16 @@ export function FullscreenMenuBar({
             <DropdownMenuContent className="bg-popover border-border max-h-64 overflow-y-auto z-[200]">
               <DropdownMenuRadioGroup value={derivedType} onValueChange={(v) => onDerivedTypeChange(v as OverlayType)}>
                 {OVERLAY_OPTIONS.map((option) => (
-                  <DropdownMenuRadioItem key={option.value} value={option.value} className="text-xs">
-                    {option.label}
-                  </DropdownMenuRadioItem>
+                  <Tooltip key={option.value}>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuRadioItem value={option.value} className="text-xs">
+                        {option.label}
+                      </DropdownMenuRadioItem>
+                    </TooltipTrigger>
+                    <TooltipContent side="left" className="text-xs max-w-[200px]">
+                      {option.tooltip}
+                    </TooltipContent>
+                  </Tooltip>
                 ))}
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
