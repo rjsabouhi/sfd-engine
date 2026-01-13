@@ -19,18 +19,28 @@ function downloadBlob(blob: Blob, filename: string): void {
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
+  a.style.display = "none";
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  // Defer URL revocation to allow browser to complete download
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 1000);
 }
 
 export async function exportPNGSnapshot(canvas: HTMLCanvasElement | null): Promise<boolean> {
   if (!canvas) return false;
-  const url = canvas.toDataURL("image/png");
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `sfd-snapshot-${getTimestamp()}.png`;
-  a.click();
-  return true;
+  try {
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((b) => resolve(b), "image/png");
+    });
+    if (!blob) return false;
+    downloadBlob(blob, `sfd-snapshot-${getTimestamp()}.png`);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export interface MobileShareOptions {
@@ -895,7 +905,23 @@ export async function exportLayersSeparate(
     const blob = new Blob([json], { type: "application/json" });
     downloadBlob(blob, `sfd-layers-${getTimestamp()}.json`);
   } else {
-    // Export as separate PNG files
+    // Viridis colormap for better visualization
+    const viridisColors = [[68,1,84],[72,36,117],[65,68,135],[53,95,141],[42,120,142],[33,144,140],[34,167,132],[68,190,112],[122,209,81],[189,222,38],[253,231,37]];
+    
+    const interpolateViridis = (t: number): [number, number, number] => {
+      const idx = t * (viridisColors.length - 1);
+      const i = Math.floor(idx);
+      const f = idx - i;
+      const c1 = viridisColors[Math.min(i, viridisColors.length - 1)];
+      const c2 = viridisColors[Math.min(i + 1, viridisColors.length - 1)];
+      return [
+        Math.round(c1[0] + f * (c2[0] - c1[0])),
+        Math.round(c1[1] + f * (c2[1] - c1[1])),
+        Math.round(c1[2] + f * (c2[2] - c1[2]))
+      ];
+    };
+    
+    // Export as separate PNG files with colormap
     const exportLayerAsPNG = async (data: Float32Array, name: string) => {
       const canvas = document.createElement("canvas");
       canvas.width = width;
@@ -912,20 +938,21 @@ export async function exportLayersSeparate(
       
       for (let i = 0; i < data.length; i++) {
         const t = (data[i] - min) / range;
-        const v = Math.floor(t * 255);
+        const [r, g, b] = interpolateViridis(t);
         const pi = i * 4;
-        imageData.data[pi] = v;
-        imageData.data[pi + 1] = v;
-        imageData.data[pi + 2] = v;
+        imageData.data[pi] = r;
+        imageData.data[pi + 1] = g;
+        imageData.data[pi + 2] = b;
         imageData.data[pi + 3] = 255;
       }
       
       ctx.putImageData(imageData, 0, 0);
-      const url = canvas.toDataURL("image/png");
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `sfd-layer-${name}-${getTimestamp()}.png`;
-      a.click();
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((b) => resolve(b), "image/png");
+      });
+      if (blob) {
+        downloadBlob(blob, `sfd-layer-${name}-${getTimestamp()}.png`);
+      }
     };
     
     await exportLayerAsPNG(grid, "primary");
