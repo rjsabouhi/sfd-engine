@@ -8,6 +8,7 @@ import { HoverProbe } from "@/components/hover-probe";
 import { DualFieldView, OVERLAY_OPTIONS, type OverlayType } from "@/components/dual-field-view";
 import { OnboardingModal, type OnboardingModalRef } from "@/components/onboarding-modal";
 import { FloatingDiagnostics } from "@/components/floating-diagnostics";
+import { StructuralFieldFooter } from "@/components/field-footer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -2568,6 +2569,11 @@ export default function SimulationPage() {
                       onCloseProbeDetail={() => setProbeDetailOpen(false)}
                     />
                   </div>
+                  <StructuralFieldFooter 
+                    probeData={probeData} 
+                    basinMap={basinMap} 
+                    isHovering={probeVisible} 
+                  />
                 </div>
               </ResizablePanel>
               <ResizableHandle withHandle />
@@ -2615,6 +2621,11 @@ export default function SimulationPage() {
                   onCloseProbeDetail={() => setProbeDetailOpen(false)}
                 />
               </div>
+              <StructuralFieldFooter 
+                probeData={probeData} 
+                basinMap={basinMap} 
+                isHovering={probeVisible} 
+              />
             </div>
           )}
           
@@ -3155,6 +3166,11 @@ export default function SimulationPage() {
                           onCloseProbeDetail={() => setProbeDetailOpen(false)}
                         />
                       </div>
+                      <StructuralFieldFooter 
+                        probeData={probeData} 
+                        basinMap={basinMap} 
+                        isHovering={probeVisible} 
+                      />
                     </div>
                   </ResizablePanel>
                   <ResizableHandle withHandle />
@@ -3201,6 +3217,11 @@ export default function SimulationPage() {
                       onCloseProbeDetail={() => setProbeDetailOpen(false)}
                     />
                   </div>
+                  <StructuralFieldFooter 
+                    probeData={probeData} 
+                    basinMap={basinMap} 
+                    isHovering={probeVisible} 
+                  />
                 </div>
               )}
               
