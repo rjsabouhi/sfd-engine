@@ -2914,18 +2914,23 @@ export default function SimulationPage() {
             </Tooltip>
             {/* Perturb Dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  data-testid="button-perturb-dropdown"
-                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${perturbMode ? "bg-white/20 text-white" : ""}`}
-                >
-                  <Zap className="h-3 w-3" />
-                  Perturb
-                  <ChevronDown className="h-2.5 w-2.5 ml-0.5" />
-                </Button>
-              </DropdownMenuTrigger>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      data-testid="button-perturb-dropdown"
+                      className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${perturbMode ? "bg-white/20 text-white" : ""}`}
+                    >
+                      <Zap className="h-3 w-3" />
+                      Perturb
+                      <ChevronDown className="h-2.5 w-2.5 ml-0.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">Apply perturbations to the field - click to select type</TooltipContent>
+              </Tooltip>
               <DropdownMenuContent align="start" className="w-48">
                 <DropdownMenuItem 
                   onClick={() => { setSelectedPerturbMode('impulse'); setPerturbMode(true); setTrajectoryProbeActive(false); }}
