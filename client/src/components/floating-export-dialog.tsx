@@ -28,11 +28,12 @@ import {
   ChevronDown,
 } from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -728,28 +729,19 @@ export function FloatingExportDialog({
                       {option.hasViewSelector && option.onViewChange && (
                         <div className="flex items-center gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>
                           <span className="text-[10px] text-neutral-500">View:</span>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <span 
-                                className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-white/10 text-neutral-300 hover:bg-white/15 cursor-pointer"
-                                tabIndex={0}
-                              >
-                                {viewLabels[option.viewType || 'main']}
-                                <ChevronDown className="h-3 w-3" />
-                              </span>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="min-w-[140px]">
-                              <DropdownMenuItem onSelect={() => option.onViewChange?.('main')} className="text-xs">
-                                Main Field
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={() => option.onViewChange?.('projection')} className="text-xs">
-                                Projection
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={() => option.onViewChange?.('sideBySide')} className="text-xs">
-                                Side by Side
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <Select
+                            value={option.viewType || 'main'}
+                            onValueChange={(value) => option.onViewChange?.(value as ExportViewType)}
+                          >
+                            <SelectTrigger className="h-6 w-[110px] text-[10px] bg-white/10 border-0">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="main" className="text-xs">Main Field</SelectItem>
+                              <SelectItem value="projection" className="text-xs">Projection</SelectItem>
+                              <SelectItem value="sideBySide" className="text-xs">Side by Side</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       )}
                       {option.requires && !needsAdvanced && (
