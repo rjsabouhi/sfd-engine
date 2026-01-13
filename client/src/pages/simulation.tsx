@@ -3225,7 +3225,11 @@ export default function SimulationPage() {
           
           <div className="flex-1 relative">
               {showDualView ? (
-                <ResizablePanelGroup direction={metricsPanelSize > 40 ? "vertical" : "horizontal"} className="h-full">
+                <ResizablePanelGroup 
+                  key={metricsPanelSize > 40 ? "vertical" : "horizontal"}
+                  direction={metricsPanelSize > 40 ? "vertical" : "horizontal"} 
+                  className="h-full"
+                >
                   <ResizablePanel defaultSize={50} minSize={25} className="overflow-hidden">
                     <div className="h-full min-h-0 flex flex-col bg-background overflow-hidden">
                       <div className="relative flex-1 min-h-0 flex items-center justify-center bg-gray-950 overflow-hidden">
