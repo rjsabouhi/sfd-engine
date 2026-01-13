@@ -375,18 +375,7 @@ export function FullscreenMenuBar({
 
       <div className="w-px h-4 bg-border mx-1" />
 
-      {/* === Dashboard + Export === */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onToggleFullscreen}
-        className="h-6 px-2 text-xs"
-        data-testid="button-exit-focus"
-      >
-        <Minimize2 className="h-3.5 w-3.5 mr-1" />
-        Dashboard
-      </Button>
-
+      {/* === Export + Dashboard === */}
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -402,6 +391,17 @@ export function FullscreenMenuBar({
         </TooltipTrigger>
         <TooltipContent side="bottom" className="text-xs">Export Options</TooltipContent>
       </Tooltip>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onToggleFullscreen}
+        className="h-6 px-2 text-xs"
+        data-testid="button-exit-focus"
+      >
+        <Minimize2 className="h-3.5 w-3.5 mr-1" />
+        Dashboard
+      </Button>
 
       <Dialog open={aboutOpen} onOpenChange={setAboutOpen}>
         <DialogContent className="max-w-lg bg-card border-border">
