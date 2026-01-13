@@ -1,7 +1,6 @@
 import { useRef, useEffect, useCallback, useState, useMemo } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ProjectionViewFooter } from "@/components/field-footer";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Blend } from "lucide-react";
@@ -516,16 +515,6 @@ export function DualFieldView({
           </div>
         )}
       </div>
-      
-      <ProjectionViewFooter
-        layerType={derivedType}
-        probeData={probeData || null}
-        derivedValue={derivedValue}
-        basinMap={basinMap}
-        isHovering={hoverPos !== null}
-        x={hoverPos?.x ?? 0}
-        y={hoverPos?.y ?? 0}
-      />
     </div>
   );
 }
