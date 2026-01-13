@@ -685,20 +685,69 @@ export function ControlPanel({
           <TabsContent value="notebook" className="m-0 p-2 space-y-2">
             <div className="border border-border/50 rounded-md p-2 bg-muted/20">
               <Collapsible open={notebookParamsOpen} onOpenChange={setNotebookParamsOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-params">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Current Parameters</span>
-                    {notebookParamsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </button>
-                </CollapsibleTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-params">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Current Parameters</span>
+                        {notebookParamsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </button>
+                    </CollapsibleTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Active simulation parameters controlling field behavior
+                  </TooltipContent>
+                </Tooltip>
                 <CollapsibleContent className="pt-2">
                   <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-background/50 p-2 rounded">
-                    <div>dt = {params.dt.toFixed(3)}</div>
-                    <div>K = {params.curvatureGain.toFixed(2)}</div>
-                    <div>C = {params.couplingWeight.toFixed(2)}</div>
-                    <div>A = {params.attractorStrength.toFixed(2)}</div>
-                    <div>R = {params.redistributionRate.toFixed(2)}</div>
-                    <div>Grid: {params.gridSize}x{params.gridSize}</div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">dt = {params.dt.toFixed(3)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="left" className="text-xs max-w-[180px]">
+                        Time step size - smaller values give smoother but slower evolution
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">K = {params.curvatureGain.toFixed(2)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="left" className="text-xs max-w-[180px]">
+                        Curvature gain - amplifies curvature-driven flow
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">C = {params.couplingWeight.toFixed(2)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="left" className="text-xs max-w-[180px]">
+                        Coupling weight - strength of neighbor interactions
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">A = {params.attractorStrength.toFixed(2)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="left" className="text-xs max-w-[180px]">
+                        Attractor strength - pull toward stable fixed points
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">R = {params.redistributionRate.toFixed(2)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="left" className="text-xs max-w-[180px]">
+                        Redistribution rate - energy spreading across the field
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">Grid: {params.gridSize}x{params.gridSize}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="left" className="text-xs max-w-[180px]">
+                        Grid resolution - number of cells in each dimension
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -706,35 +755,81 @@ export function ControlPanel({
             
             <div className="border border-border/50 rounded-md p-2 bg-muted/20">
               <Collapsible open={notebookEquationOpen} onOpenChange={setNotebookEquationOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-equation">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Field Equation</span>
-                    {notebookEquationOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </button>
-                </CollapsibleTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-equation">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Field Equation</span>
+                        {notebookEquationOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </button>
+                    </CollapsibleTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[220px]">
+                    The differential equation governing field evolution over time
+                  </TooltipContent>
+                </Tooltip>
                 <CollapsibleContent className="pt-2">
-                  <code className="text-xs block bg-background/50 p-2 rounded font-mono">
-                    dF/dt = wK*K(F) + wT*T(F) + wC*C(F) + wA*A(F) + wR*R(F)
-                  </code>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <code className="text-xs block bg-background/50 p-2 rounded font-mono cursor-help">
+                        dF/dt = wK*K(F) + wT*T(F) + wC*C(F) + wA*A(F) + wR*R(F)
+                      </code>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs max-w-[280px]">
+                      Field rate of change equals weighted sum of operators: K=Curvature, T=Tension, C=Coupling, A=Attractor, R=Redistribution
+                    </TooltipContent>
+                  </Tooltip>
                 </CollapsibleContent>
               </Collapsible>
             </div>
 
             <div className="border border-border/50 rounded-md p-2 bg-muted/20">
               <Collapsible open={notebookWeightsOpen} onOpenChange={setNotebookWeightsOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-weights">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Operator Weights</span>
-                    {notebookWeightsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </button>
-                </CollapsibleTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-weights">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Operator Weights</span>
+                        {notebookWeightsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </button>
+                    </CollapsibleTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Multipliers controlling each operator's contribution to field evolution
+                  </TooltipContent>
+                </Tooltip>
                 <CollapsibleContent className="pt-2">
                   <div className="grid grid-cols-5 gap-1 text-xs font-mono bg-background/50 p-2 rounded text-center">
-                    <div>wK={params.wK.toFixed(1)}</div>
-                    <div>wT={params.wT.toFixed(1)}</div>
-                    <div>wC={params.wC.toFixed(1)}</div>
-                    <div>wA={params.wA.toFixed(1)}</div>
-                    <div>wR={params.wR.toFixed(1)}</div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">wK={params.wK.toFixed(1)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="text-xs">Curvature weight</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">wT={params.wT.toFixed(1)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="text-xs">Tension weight</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">wC={params.wC.toFixed(1)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="text-xs">Coupling weight</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">wA={params.wA.toFixed(1)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="text-xs">Attractor weight</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">wR={params.wR.toFixed(1)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="text-xs">Redistribution weight</TooltipContent>
+                    </Tooltip>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
