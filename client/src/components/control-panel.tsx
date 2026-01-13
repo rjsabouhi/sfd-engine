@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Sliders, Activity, Settings2, BookOpen, Download, Columns2 } from "lucide-react";
+import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Sliders, Activity, Settings2, BookOpen, Download, Columns2, Home, Image, FileJson, Video } from "lucide-react";
 import type { SimulationParameters, SimulationState, OperatorContributions, StructuralSignature, StructuralEvent, TrendMetrics } from "@shared/schema";
 import { defaultParameters } from "@shared/schema";
 import { TemporalControls } from "./temporal-controls";
@@ -170,8 +170,12 @@ export function ControlPanel({
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <Tabs defaultValue="controls" className="flex-1 flex flex-col overflow-hidden">
+      <Tabs defaultValue="home" className="flex-1 flex flex-col overflow-hidden">
         <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent px-1 h-9 shrink-0 flex-wrap">
+          <TabsTrigger value="home" className="text-xs gap-1 px-2">
+            <Home className="h-3 w-3" />
+            Home
+          </TabsTrigger>
           <TabsTrigger value="controls" className="text-xs gap-1 px-2">
             <Play className="h-3 w-3" />
             Controls
@@ -195,6 +199,160 @@ export function ControlPanel({
         </TabsList>
 
         <div className="flex-1 overflow-y-auto">
+          <TabsContent value="home" className="m-0 p-2 space-y-2">
+            {/* Unified Dashboard - All sections at a glance */}
+            
+            {/* Controls Section */}
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-controls">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                  <Play className="h-3 w-3" />
+                  Controls
+                </span>
+                <div className="flex items-center gap-1">
+                  {state.isRunning ? (
+                    <Button onClick={onPause} variant="ghost" size="icon" data-testid="home-button-pause">
+                      <Pause className="h-3.5 w-3.5" />
+                    </Button>
+                  ) : (
+                    <Button onClick={onPlay} variant="ghost" size="icon" data-testid="home-button-play">
+                      <Play className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                  <Button onClick={onReset} variant="ghost" size="icon" data-testid="home-button-reset">
+                    <RotateCcw className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-1 text-xs">
+                <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-step">
+                  <div className="text-[10px] text-muted-foreground">Step</div>
+                  <div className="font-mono tabular-nums">{state.step}</div>
+                </div>
+                <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-status">
+                  <div className="text-[10px] text-muted-foreground">Status</div>
+                  <div className={state.isRunning ? "text-green-500" : "text-yellow-500"}>
+                    {state.isRunning ? "Running" : "Paused"}
+                  </div>
+                </div>
+                <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-history">
+                  <div className="text-[10px] text-muted-foreground">History</div>
+                  <div className="font-mono tabular-nums">{historyLength}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Params Section */}
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-params">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                  <Sliders className="h-3 w-3" />
+                  Parameters
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-1 text-xs font-mono">
+                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-dt">
+                  <span className="text-muted-foreground">dt:</span> {params.dt.toFixed(2)}
+                </div>
+                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-k">
+                  <span className="text-muted-foreground">K:</span> {params.curvatureGain.toFixed(1)}
+                </div>
+                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-c">
+                  <span className="text-muted-foreground">C:</span> {params.couplingWeight.toFixed(2)}
+                </div>
+                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-a">
+                  <span className="text-muted-foreground">A:</span> {params.attractorStrength.toFixed(1)}
+                </div>
+                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-r">
+                  <span className="text-muted-foreground">R:</span> {params.redistributionRate.toFixed(2)}
+                </div>
+                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-grid">
+                  <span className="text-muted-foreground">Grid:</span> {params.gridSize}
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-1 text-xs font-mono mt-1">
+                <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wk">wK={params.wK.toFixed(1)}</div>
+                <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wt">wT={params.wT.toFixed(1)}</div>
+                <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wc">wC={params.wC.toFixed(1)}</div>
+                <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wa">wA={params.wA.toFixed(1)}</div>
+                <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wr">wR={params.wR.toFixed(1)}</div>
+              </div>
+            </div>
+
+            {/* Analysis Section */}
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-analysis">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                  <Activity className="h-3 w-3" />
+                  Analysis
+                </span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary" data-testid="home-regime-badge">
+                  {currentRegime.replace(/_/g, ' ')}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-1 text-xs">
+                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-energy">
+                  <span className="text-muted-foreground">Energy:</span>{" "}
+                  <span className="font-mono tabular-nums">{state.energy.toFixed(3)}</span>
+                </div>
+                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-variance">
+                  <span className="text-muted-foreground">Variance:</span>{" "}
+                  <span className="font-mono tabular-nums">{state.variance.toFixed(4)}</span>
+                </div>
+                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-basins">
+                  <span className="text-muted-foreground">Basins:</span>{" "}
+                  <span className="font-mono tabular-nums">{state.basinCount}</span>
+                </div>
+                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-events">
+                  <span className="text-muted-foreground">Events:</span>{" "}
+                  <span className="font-mono tabular-nums">{events.length}</span>
+                </div>
+              </div>
+              <div className="mt-1.5">
+                <OperatorSensitivity contributions={operatorContributions} modeLabels={modeLabels} compact />
+              </div>
+            </div>
+
+            {/* Notebook Section */}
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-notebook">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                  <BookOpen className="h-3 w-3" />
+                  Notebook
+                </span>
+              </div>
+              <code className="text-[10px] block bg-background/50 p-1.5 rounded font-mono text-muted-foreground" data-testid="home-equation">
+                dF/dt = wK*K(F) + wT*T(F) + wC*C(F) + wA*A(F) + wR*R(F)
+              </code>
+            </div>
+
+            {/* Export Section */}
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-export">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                  <Download className="h-3 w-3" />
+                  Quick Export
+                </span>
+              </div>
+              <div className="flex gap-1">
+                <Button size="sm" variant="ghost" className="flex-1 text-xs" onClick={onExportPNG} data-testid="home-button-export-png">
+                  <Image className="h-3 w-3 mr-1" />
+                  PNG
+                </Button>
+                <Button size="sm" variant="ghost" className="flex-1 text-xs" onClick={onExportJSON} data-testid="home-button-export-json">
+                  <FileJson className="h-3 w-3 mr-1" />
+                  JSON
+                </Button>
+                {onExportWebM && (
+                  <Button size="sm" variant="ghost" className="flex-1 text-xs" onClick={onExportWebM} disabled={isExporting} data-testid="home-button-export-webm">
+                    <Video className="h-3 w-3 mr-1" />
+                    Video
+                  </Button>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
           <TabsContent value="controls" className="m-0 p-3 space-y-4">
             <Collapsible open={playbackOpen} onOpenChange={setPlaybackOpen}>
               <CollapsibleTrigger asChild>
