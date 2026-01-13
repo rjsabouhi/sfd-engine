@@ -56,15 +56,25 @@ function downloadBlob(blob: Blob, filename: string): void {
 }
 
 export async function exportPNGSnapshot(canvas: HTMLCanvasElement | null): Promise<boolean> {
-  if (!canvas) return false;
+  console.log("[Export PNG] Called with canvas:", canvas);
+  if (!canvas) {
+    console.error("[Export PNG] No canvas provided!");
+    return false;
+  }
   try {
+    console.log("[Export PNG] Creating blob from canvas...");
     const blob = await new Promise<Blob | null>((resolve) => {
       canvas.toBlob((b) => resolve(b), "image/png");
     });
-    if (!blob) return false;
+    console.log("[Export PNG] Blob created:", blob?.size);
+    if (!blob) {
+      console.error("[Export PNG] Blob creation failed!");
+      return false;
+    }
     downloadBlob(blob, `sfd-snapshot-${getTimestamp()}.png`);
     return true;
-  } catch {
+  } catch (e) {
+    console.error("[Export PNG] Error:", e);
     return false;
   }
 }

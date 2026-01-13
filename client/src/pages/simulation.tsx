@@ -1070,8 +1070,11 @@ export default function SimulationPage() {
   }, [events]);
 
   const handleExportPNG = useCallback(async () => {
+    console.log("[handleExportPNG] Called");
     const canvas = document.querySelector('[data-testid="canvas-visualization"]') as HTMLCanvasElement;
-    await exportPNGSnapshot(canvas);
+    console.log("[handleExportPNG] Canvas found:", canvas);
+    const result = await exportPNGSnapshot(canvas);
+    console.log("[handleExportPNG] Result:", result);
   }, []);
 
   const handleExportJSON = useCallback(async () => {
