@@ -730,10 +730,13 @@ export function FloatingExportDialog({
                           <span className="text-[10px] text-neutral-500">View:</span>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <button className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-white/10 text-neutral-300 hover:bg-white/15">
+                              <span 
+                                className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-white/10 text-neutral-300 hover:bg-white/15 cursor-pointer"
+                                tabIndex={0}
+                              >
                                 {viewLabels[option.viewType || 'main']}
                                 <ChevronDown className="h-3 w-3" />
-                              </button>
+                              </span>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start" className="min-w-[140px]">
                               <DropdownMenuItem onSelect={() => option.onViewChange?.('main')} className="text-xs">
