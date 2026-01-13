@@ -182,6 +182,8 @@ export function ControlPanel({
   const layerFactor = isLayeredMode 
     ? Math.min(1, (STACK_START - panelWidth) / (STACK_START - STACK_FULL))
     : 0;
+  // Max offset per tab limited to ensure minimum 20px visible per tab
+  const maxOffsetPerTab = 12;
   
   const tabs = [
     { value: "home", label: "Home", icon: Home },
@@ -212,7 +214,8 @@ export function ControlPanel({
         >
           {tabs.map((tab, index) => {
             const Icon = tab.icon;
-            const offset = isLayeredMode ? -16 * layerFactor * index : 0;
+            // Limit offset so each tab remains at least partially visible
+            const offset = isLayeredMode ? -Math.min(maxOffsetPerTab, 16 * layerFactor) : 0;
             const zIndex = isLayeredMode ? tabs.length - index : undefined;
             
             return (

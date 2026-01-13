@@ -277,8 +277,16 @@ export default function SimulationPage() {
       if (saved) {
         const value = parseFloat(saved);
         // Guard against NaN and clamp to valid bounds (15-75%)
-        if (!Number.isFinite(value)) return 50;
-        return Math.max(15, Math.min(75, value));
+        if (!Number.isFinite(value)) {
+          localStorage.setItem('sfd-metrics-panel-size', '50');
+          return 50;
+        }
+        const clamped = Math.max(15, Math.min(75, value));
+        // Persist corrected value if it was out of bounds
+        if (clamped !== value) {
+          localStorage.setItem('sfd-metrics-panel-size', String(clamped));
+        }
+        return clamped;
       }
       return 50;
     } catch {
