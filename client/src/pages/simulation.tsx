@@ -277,14 +277,14 @@ export default function SimulationPage() {
       if (saved) {
         const value = parseFloat(saved);
         // Guard against NaN and clamp to valid bounds (15-75%)
-        if (!Number.isFinite(value)) return 40;
+        if (!Number.isFinite(value)) return 45;
         return Math.max(15, Math.min(75, value));
       }
-      return 40;
+      return 45;
     } catch {
-      return 40;
+      return 45;
     }
-  }); // Default 40% for metrics panel so Export tab is visible, persisted to localStorage
+  }); // Default 45% for metrics panel so Export tab is visible, persisted to localStorage
   const [focusMode, setFocusMode] = useState(false); // Fullscreen/focus mode with menubar
   const [playbackPanelOpen, setPlaybackPanelOpen] = useState(false); // Floating playback panel in focus mode
   const [perturbPanelOpen, setPerturbPanelOpen] = useState(false); // Floating perturbation panel in focus mode
