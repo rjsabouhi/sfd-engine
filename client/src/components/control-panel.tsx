@@ -209,7 +209,7 @@ export function ControlPanel({
       <Tabs defaultValue="home" className="flex-1 flex flex-col overflow-hidden">
         <TabsList 
           className={`w-full justify-start rounded-none border-b border-border bg-transparent px-1 shrink-0 ${
-            isLayeredMode ? 'relative h-10 overflow-visible' : 'h-9 flex-wrap'
+            isLayeredMode ? 'relative h-10 overflow-visible' : 'h-9 flex-nowrap overflow-x-auto gap-0.5'
           }`}
         >
           {tabs.map((tab, index) => {

@@ -276,24 +276,24 @@ export default function SimulationPage() {
       const saved = localStorage.getItem('sfd-metrics-panel-size');
       if (saved) {
         const value = parseFloat(saved);
-        // Guard against NaN and clamp to valid bounds (50-75%) - minimum 50% to show all tabs
+        // Guard against NaN and clamp to valid bounds (30-48%) - narrower panel for side-by-side canvases
         if (!Number.isFinite(value)) {
-          localStorage.setItem('sfd-metrics-panel-size', '50');
-          return 50;
+          localStorage.setItem('sfd-metrics-panel-size', '34');
+          return 34;
         }
-        // Enforce minimum 50% so Export tab is always visible
-        const clamped = Math.max(50, Math.min(75, value));
+        // Enforce 30% min, 48% max so canvases display side-by-side
+        const clamped = Math.max(30, Math.min(48, value));
         // Persist corrected value if it was out of bounds
         if (clamped !== value) {
           localStorage.setItem('sfd-metrics-panel-size', String(clamped));
         }
         return clamped;
       }
-      return 50;
+      return 34;
     } catch {
-      return 50;
+      return 34;
     }
-  }); // Default 50% for metrics panel so Export tab is visible, persisted to localStorage
+  }); // Default 34% for metrics panel, narrower to keep canvases side-by-side
   const [focusMode, setFocusMode] = useState(false); // Fullscreen/focus mode with menubar
   const [playbackPanelOpen, setPlaybackPanelOpen] = useState(false); // Floating playback panel in focus mode
   const [perturbPanelOpen, setPerturbPanelOpen] = useState(false); // Floating perturbation panel in focus mode
@@ -2855,7 +2855,7 @@ export default function SimulationPage() {
         setMetricsPanelSize(newSize);
         try { localStorage.setItem('sfd-metrics-panel-size', String(newSize)); } catch {}
       }}>
-        <ResizablePanel defaultSize={100 - metricsPanelSize} minSize={25} maxSize={50} className="relative bg-gray-950 min-w-0 flex flex-col">
+        <ResizablePanel defaultSize={100 - metricsPanelSize} minSize={52} maxSize={70} className="relative bg-gray-950 min-w-0 flex flex-col">
           {/* Tools Row - at top (horizontally scrollable, compact when metrics expanded) */}
           <div className="relative shrink-0 border-b border-white/10 bg-gray-950">
             {/* Left fade indicator */}
@@ -3334,7 +3334,7 @@ export default function SimulationPage() {
         
         <ResizableHandle withHandle />
         
-        <ResizablePanel defaultSize={metricsPanelSize} minSize={50} maxSize={75} className="border-l border-border bg-card flex flex-col overflow-hidden">
+        <ResizablePanel defaultSize={metricsPanelSize} minSize={30} maxSize={48} className="border-l border-border bg-card flex flex-col overflow-hidden">
           {showPerturbControls && (
             <div className="p-3 border-b border-border">
               <div className="flex items-center justify-between mb-2">
