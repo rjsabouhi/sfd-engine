@@ -620,12 +620,19 @@ export function ControlPanel({
           <TabsContent value="analysis" className="m-0 p-2 space-y-2">
             <div className="border border-border/50 rounded-md p-2 bg-muted/20">
               <Collapsible open={regimeOpen} onOpenChange={setRegimeOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-regime">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Regime</span>
-                    {regimeOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </button>
-                </CollapsibleTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-regime">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Regime</span>
+                        {regimeOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </button>
+                    </CollapsibleTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Current system state classification based on field dynamics (stability, chaos, criticality)
+                  </TooltipContent>
+                </Tooltip>
                 <CollapsibleContent className="pt-2">
                   <LegacyRegimeDisplay regime={currentRegime} mode={languageMode} />
                 </CollapsibleContent>
@@ -634,12 +641,19 @@ export function ControlPanel({
 
             <div className="border border-border/50 rounded-md p-2 bg-muted/20">
               <Collapsible open={operatorOpen} onOpenChange={setOperatorOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-operator">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Operator Contributions</span>
-                    {operatorOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </button>
-                </CollapsibleTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-operator">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Operator Contributions</span>
+                        {operatorOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </button>
+                    </CollapsibleTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Real-time breakdown of each operator's influence on the field evolution
+                  </TooltipContent>
+                </Tooltip>
                 <CollapsibleContent className="pt-2">
                   <OperatorSensitivity contributions={operatorContributions} modeLabels={modeLabels} />
                 </CollapsibleContent>
@@ -648,12 +662,19 @@ export function ControlPanel({
 
             <div className="border border-border/50 rounded-md p-2 bg-muted/20">
               <Collapsible open={eventLogOpen} onOpenChange={setEventLogOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-event-log">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Event Log ({events.length})</span>
-                    {eventLogOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </button>
-                </CollapsibleTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-event-log">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Event Log ({events.length})</span>
+                        {eventLogOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </button>
+                    </CollapsibleTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Chronological record of detected structural events (variance spikes, basin changes, phase transitions)
+                  </TooltipContent>
+                </Tooltip>
                 <CollapsibleContent className="pt-2">
                   <EventLog events={events} onClear={onClearEvents} onExport={onExportEvents} />
                 </CollapsibleContent>
