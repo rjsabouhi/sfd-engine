@@ -217,7 +217,7 @@ export function ControlPanel({
   );
 
   return (
-    <div ref={panelRef} className="flex flex-col h-full overflow-hidden">
+    <div ref={panelRef} className="flex flex-col h-full overflow-hidden select-none cursor-default">
       <Tabs defaultValue="home" className="flex-1 flex flex-col overflow-hidden">
         <TabsList 
           className={`w-full justify-start rounded-none border-b border-border bg-transparent px-1 shrink-0 ${

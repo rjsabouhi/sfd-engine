@@ -210,7 +210,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
   const driftState = getDriftState();
   
   return (
-    <div className="space-y-3" data-testid="panel-structural-signature">
+    <div className="space-y-3 select-none cursor-default" data-testid="panel-structural-signature">
       {/* Trend-Based Core Metrics */}
       <div className="space-y-2">
         {/* Energy Trend */}
