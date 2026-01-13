@@ -27,13 +27,6 @@ import {
   ToggleRight,
   ChevronDown,
 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -240,6 +233,49 @@ export function FloatingExportDialog({
     projection: 'Projection',
     sideBySide: 'Side by Side',
   };
+
+  // Direct export handlers that bypass state
+  const exportSnapshotWithView = useCallback(async (view: ExportViewType): Promise<boolean> => {
+    if (view === 'main') {
+      return exportPNGSnapshot(getCanvas());
+    } else if (view === 'projection') {
+      const derivedCanvas = getDerivedCanvas();
+      if (!derivedCanvas) {
+        toast({ title: "Projection view not available", description: "Please open the projection view first", variant: "destructive" });
+        return false;
+      }
+      return exportPNGSnapshot(derivedCanvas);
+    } else {
+      const derivedCanvas = getDerivedCanvas();
+      if (!derivedCanvas) {
+        toast({ title: "Projection view not available", description: "Please open the projection view first", variant: "destructive" });
+        return false;
+      }
+      return exportPNGSnapshotDual(getCanvas(), derivedCanvas);
+    }
+  }, [getCanvas, getDerivedCanvas, toast]);
+
+  const exportVideoWithView = useCallback(async (view: ExportViewType): Promise<boolean> => {
+    const canvas = getCanvas();
+    if (!engine || !canvas) return false;
+    if (view === 'main') {
+      return exportVideoWebM(engine, canvas, colormap);
+    } else if (view === 'projection') {
+      const derivedCanvas = getDerivedCanvas();
+      if (!derivedCanvas) {
+        toast({ title: "Projection view not available", description: "Please open the projection view first", variant: "destructive" });
+        return false;
+      }
+      return exportVideoWebM(engine, derivedCanvas, colormap);
+    } else {
+      const derivedCanvas = getDerivedCanvas();
+      if (!derivedCanvas) {
+        toast({ title: "Projection view not available", description: "Please open the projection view first", variant: "destructive" });
+        return false;
+      }
+      return exportVideoWebMDual(engine, canvas, derivedCanvas, colormap);
+    }
+  }, [engine, colormap, getCanvas, getDerivedCanvas, toast]);
 
   const exportOptions: ExportOption[] = [
     // === VISUAL (Safe for sharing) ===
@@ -726,22 +762,59 @@ export function FloatingExportDialog({
                       <p className="text-[11px] text-neutral-500 mt-0.5 leading-snug">
                         {option.description}
                       </p>
-                      {option.hasViewSelector && option.onViewChange && (
-                        <div className="flex items-center gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>
-                          <span className="text-[10px] text-neutral-500">View:</span>
-                          <Select
-                            value={option.viewType || 'main'}
-                            onValueChange={(value) => option.onViewChange?.(value as ExportViewType)}
+                      {option.hasViewSelector && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              setLoadingExport(option.id);
+                              const success = option.id === 'snapshot' 
+                                ? await exportSnapshotWithView('main')
+                                : await exportVideoWithView('main');
+                              setLoadingExport(null);
+                              if (success) {
+                                setCompletedExports(prev => new Set(Array.from(prev).concat(option.id)));
+                                toast({ title: "Export complete", description: `${option.name} (Main Field) exported successfully` });
+                              }
+                            }}
+                            className="text-[10px] px-2 py-1 rounded bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 transition-colors"
                           >
-                            <SelectTrigger className="h-6 w-[110px] text-[10px] bg-white/10 border-0">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="main" className="text-xs">Main Field</SelectItem>
-                              <SelectItem value="projection" className="text-xs">Projection</SelectItem>
-                              <SelectItem value="sideBySide" className="text-xs">Side by Side</SelectItem>
-                            </SelectContent>
-                          </Select>
+                            Main Field
+                          </button>
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              setLoadingExport(option.id);
+                              const success = option.id === 'snapshot' 
+                                ? await exportSnapshotWithView('projection')
+                                : await exportVideoWithView('projection');
+                              setLoadingExport(null);
+                              if (success) {
+                                setCompletedExports(prev => new Set(Array.from(prev).concat(option.id)));
+                                toast({ title: "Export complete", description: `${option.name} (Projection) exported successfully` });
+                              }
+                            }}
+                            className="text-[10px] px-2 py-1 rounded bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 transition-colors"
+                          >
+                            Projection
+                          </button>
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              setLoadingExport(option.id);
+                              const success = option.id === 'snapshot' 
+                                ? await exportSnapshotWithView('sideBySide')
+                                : await exportVideoWithView('sideBySide');
+                              setLoadingExport(null);
+                              if (success) {
+                                setCompletedExports(prev => new Set(Array.from(prev).concat(option.id)));
+                                toast({ title: "Export complete", description: `${option.name} (Side by Side) exported successfully` });
+                              }
+                            }}
+                            className="text-[10px] px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 transition-colors"
+                          >
+                            Side by Side
+                          </button>
                         </div>
                       )}
                       {option.requires && !needsAdvanced && (
