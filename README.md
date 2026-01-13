@@ -5,140 +5,142 @@ A computational framework for visualizing emergent structure in complex adaptive
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](RELEASE_NOTES.md)
 
+---
+
 ## Abstract
 
-The Structural Field Dynamics (SFD) Engine is an interactive visualization tool that demonstrates how local computational rules give rise to global geometric patterns. By applying configurable differential operators to a 2D scalar field, the system reveals emergent phenomena including attractor basins, phase transitions, and self-organizing structures.
+The Structural Field Dynamics (SFD) Engine is an interactive visualization tool that demonstrates how local computational rules can produce coherent global patterns. It renders real-time 2D manifold simulations featuring curvature-driven flows, attractor basins, and emergent geometric structures.
 
-This tool is designed for researchers and educators in complexity science, computational modeling, and machine learning who wish to explore how simple local dynamics can produce rich global behavior.
+This framework provides researchers and practitioners with a sandbox for exploring parameter spaces, observing regime transitions, and developing intuitions about structure formation in dynamical systems.
+
+---
 
 ## Key Features
 
-- **Real-time 2D field visualization** with smooth animation and multiple colormaps
-- **Configurable operator system** controlling diffusion, curvature flow, tension, coupling, and noise
-- **Automatic regime detection** classifying system state (equilibrium, oscillatory, chaotic, etc.)
-- **Multi-probe inspection** for detailed local field analysis with neighborhood statistics
-- **Temporal playback** with 100-frame history buffer and timeline scrubbing
-- **Dual-field view** showing derived quantities (curvature, gradient, tension, variance)
-- **Research-grade export suite** including PNG, WebM, CSV, NumPy, and Python reconstruction scripts
-- **Mobile-optimized interface** with touch controls and video recording
-- **Diagnostic tools** for determinism testing and solver analysis
+- **Real-time field evolution** with configurable operator weights
+- **Multiple visualization modes** including primary field, curvature, gradient, tension, and variance maps
+- **Regime detection** with automatic classification of system states
+- **Temporal playback** with 100-frame ring buffer history
+- **Multi-point probe system** for detailed field inspection
+- **Comprehensive export suite** supporting PNG, WebM, CSV, NumPy, and Python reconstruction scripts
+- **Preset configurations** for common dynamical regimes
+- **Mobile-optimized interface** with touch controls
+
+---
 
 ## What This System Does
 
-The SFD Engine simulates the evolution of a scalar field under the influence of multiple differential operators:
+The SFD Engine:
 
-1. **Diffusion** - Smooths the field by averaging neighboring values
-2. **Curvature flow** - Drives evolution based on local surface curvature
-3. **Tension** - Pulls field values toward their local neighborhood
-4. **Coupling** - Creates nonlinear feedback between field values
-5. **Noise** - Introduces controlled stochastic perturbations
+- Visualizes how local update rules produce global spatial patterns
+- Provides interactive parameter adjustment with immediate visual feedback
+- Tracks and displays key metrics: field energy, variance, basin count, and curvature
+- Detects and logs structural events (variance spikes, basin merges, boundary fractures)
+- Enables systematic exploration of parameter spaces through preset regimes
+- Exports simulation data in formats suitable for further analysis
 
-Users can adjust operator strengths in real-time and observe how the field evolves, transitions between regimes, and forms stable or chaotic patterns.
+---
 
 ## What This System Is NOT
 
-- **Not a physics simulation** - The operators are abstract mathematical constructs, not models of physical forces
-- **Not a predictive model** - The system does not forecast real-world phenomena
-- **Not a neural network** - While useful for studying emergence, this is not machine learning
-- **Not making ontological claims** - The terminology (energy, tension, etc.) is metaphorical, not literal
+To set appropriate expectations:
+
+- **Not a physics simulator** — The operators do not correspond to specific physical laws
+- **Not a predictive model** — Results describe emergent behavior within the defined rules, not real-world forecasts
+- **Not validated against empirical data** — This is a computational exploration tool, not a scientific instrument
+- **Not making ontological claims** — The terminology (fields, attractors, basins) is descriptive, not asserting these structures exist in nature
+
+---
 
 ## Conceptual Overview
 
-The SFD Engine explores a fundamental question in complexity science: how do simple local rules produce complex global patterns?
+The engine operates on a discrete 2D grid where each cell holds a scalar field value. At each simulation step, five operators contribute to field evolution:
 
-The simulation maintains a 2D grid of scalar values. At each timestep, every cell updates based on:
-- Its current value
-- The values of its neighbors (toroidal boundary conditions)
-- The weighted contribution of each operator
+1. **Diffusion** — Smooths local variations, promoting spatial coherence
+2. **Curvature** — Enhances or suppresses regions based on local surface geometry
+3. **Tension** — Resists deviation from neighboring values
+4. **Coupling** — Introduces nonlinear feedback based on field magnitude
+5. **Noise** — Adds stochastic perturbations to prevent stagnation
 
-This local-to-global dynamic produces emergent phenomena including:
-- **Basin formation** - Regions that converge to distinct attractors
-- **Phase transitions** - Sudden shifts between qualitatively different states
-- **Self-organization** - Spontaneous pattern formation from random initial conditions
-- **Criticality** - Edge-of-chaos dynamics with scale-free correlations
+The relative weights of these operators determine the system's behavior, producing distinct dynamical regimes ranging from stable equilibria to chaotic evolution.
+
+---
 
 ## Mathematical Structure
 
-### Field Representation
+### Field Update Rule
 
-The field `u(x, y, t)` is discretized on an N×N grid with periodic boundary conditions.
+At each timestep, the field $\phi$ evolves according to:
 
-### Update Equation
+$$\phi_{t+1} = \phi_t + \Delta t \sum_i w_i \cdot O_i(\phi_t)$$
 
-At each timestep, the field evolves according to:
+where $O_i$ are the operators and $w_i$ their respective weights.
 
-```
-u(t+1) = u(t) + dt × [α₁L(u) + α₂K(u) + α₃T(u) + α₄C(u) + α₅η]
-```
+### Operators
 
-Where:
-- `L(u)` - Laplacian operator (diffusion)
-- `K(u)` - Mean curvature operator
-- `T(u)` - Tension operator
-- `C(u)` - Nonlinear coupling operator
-- `η` - Noise term (seedable PRNG)
-- `α₁...α₅` - Operator weights (user-configurable)
+| Operator | Definition | Effect |
+|----------|------------|--------|
+| Diffusion | $\nabla^2 \phi$ (discrete Laplacian) | Spatial smoothing |
+| Curvature | Mean curvature of $\phi$ as height field | Geometric flow |
+| Tension | $-\phi + \langle\phi\rangle_{neighbors}$ | Local averaging |
+| Coupling | $\tanh(\phi) \cdot |\nabla\phi|$ | Nonlinear feedback |
+| Noise | $\mathcal{N}(0, \sigma^2)$ | Stochastic perturbation |
 
-### Metrics
+### Detected Regimes
 
-The system computes several diagnostic quantities:
+The system automatically classifies behavior into regimes based on metrics:
 
-| Metric | Description |
-|--------|-------------|
-| Field Gradient (FG) | Mean gradient magnitude across the field |
-| Curvature Complexity (CC) | Variance of local curvature values |
-| Tension Index (TI) | Measure of field smoothness |
-| Total Energy (TE) | Sum of squared field values |
-| Regime Index (RI) | Categorical classification of system state |
-| Stability Rating (SR) | Quantified stability based on variance trends |
+- **Ground State** — Minimal variance, single basin
+- **Crystalline** — Low variance, multiple stable basins
+- **Wave-Locked** — Moderate variance with oscillatory character
+- **Turbulent Mixing** — High variance, frequent basin changes
+- **Critical** — Sensitivity to perturbations, complex basin structure
+- **Chaotic** — Very high variance with rapid unpredictable changes
 
-### Regime Classification
+### Key Metrics
 
-The system automatically detects eight distinct regimes:
+- **Field Energy**: $E = \sum_{i,j} \phi_{i,j}^2$
+- **Variance**: $\sigma^2 = \text{Var}(\phi)$
+- **Basin Count**: Number of distinct attractor basins via gradient descent
+- **Curvature Range**: Min/max of discrete mean curvature
 
-1. **Equilibrium** - Stable, low-variance state
-2. **Near-Critical** - Edge of transition with high sensitivity
-3. **Oscillatory** - Periodic fluctuations
-4. **Chaotic** - High variance with rapid change
-5. **Transitional** - Between stable states
-6. **Deep Attractor** - Strong basin convergence
-7. **Boundary Dynamics** - Active at basin edges
-8. **Emergent Structure** - Self-organizing patterns
+---
 
 ## Export System
 
-The SFD Engine provides comprehensive export capabilities:
+The engine provides comprehensive export capabilities:
 
 ### Visual Exports
-- **PNG Snapshot** - Current field state as image (main, projection, or side-by-side)
-- **WebM Video** - Animated playback of simulation history
-- **Field Layers** - Contact sheet of all derived field visualizations
+- **PNG Snapshot** — Current field state as image
+- **WebM Video** — Playback history as video
+- **Field Layers** — Contact sheet of all derived fields
 
 ### Data Exports
-- **CSV** - Simulation data in tabular format
-- **Metrics Log** - Time series of computed metrics
-- **Settings JSON** - Complete parameter configuration
-- **Event Log** - Structural events with timestamps
+- **Metrics Summary** — CSV of tracked metrics over time
+- **Settings JSON** — Current parameter configuration
+- **Event Log** — Chronological record of structural events
 
-### Research Exports
-- **NumPy Array (.npy)** - Binary field data for Python analysis
-- **Python Script (.py)** - Auto-generated reconstruction code with matplotlib
-- **Batch Spec** - Minimal parameters for automated testing
-- **Full Archive** - Complete bundle with field, events, metrics, and config
+### Technical Exports (Advanced Mode)
+- **NumPy Array** — Raw field data as `.npy` file
+- **Python Script** — Reconstruction script with matplotlib visualization
+- **Batch Spec** — Minimal parameters for automated runs
+- **Full Archive** — Complete simulation state bundle
+
+---
 
 ## Installation and Usage
 
 ### Running on Replit
 
-1. Fork this repository on Replit
-2. Click "Run" to start the application
-3. Open the webview to interact with the simulation
+1. Open the project in Replit
+2. Click "Run" — the application starts automatically
+3. Access the visualization at the provided URL
 
 ### Local Development
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/sfd-engine.git
+git clone <repository-url>
 cd sfd-engine
 
 # Install dependencies
@@ -148,30 +150,38 @@ npm install
 npm run dev
 ```
 
-### Using Exported Data in Python
+The application will be available at `http://localhost:5000`.
+
+### Python Reconstruction
+
+Exported `.npy` files can be loaded in Python:
 
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Load exported field data
-field = np.load('sfd-field.npy')
+# Load exported field
+field = np.load('sfd-numpy-export.npy')
 
 # Visualize
 plt.imshow(field, cmap='inferno')
 plt.colorbar(label='Field Value')
-plt.title('SFD Field State')
+plt.title('SFD Field Reconstruction')
 plt.show()
 ```
 
+---
+
 ## Example Workflow
 
-1. **Start the simulation** - The field initializes with gentle random perturbations
-2. **Adjust parameters** - Use the control panel to modify operator strengths
-3. **Observe regime transitions** - Watch as the system moves between states
-4. **Place probes** - Click on the field to save inspection points
-5. **Review history** - Use temporal controls to scrub through past states
-6. **Export results** - Save snapshots, videos, or data for further analysis
+1. **Select a regime preset** from the Home tab to configure operators
+2. **Observe the field evolution** in the main canvas
+3. **Adjust parameters** in the Controls tab to explore variations
+4. **Use the timeline** to scrub through simulation history
+5. **Place probes** to inspect local field values
+6. **Export data** for external analysis or publication
+
+---
 
 ## Citation
 
@@ -183,30 +193,32 @@ If you use the SFD Engine in your research, please cite:
   title = {Structural Field Dynamics (SFD) Engine},
   year = {2026},
   version = {1.0.0},
-  url = {https://github.com/yourusername/sfd-engine}
+  url = {https://github.com/username/sfd-engine}
 }
 ```
 
 See [CITATION.cff](CITATION.cff) for machine-readable citation metadata.
 
+---
+
 ## Documentation
 
-- [SFD Primer](SFD_PRIMER.md) - Technical overview and interpretation guide
-- [Release Notes](RELEASE_NOTES.md) - Version history and changelog
-- [Contributing](CONTRIBUTING.md) - Guidelines for contributors
-- [Code of Conduct](CODE_OF_CONDUCT.md) - Community standards
-- [License](LICENSE) - Apache License 2.0
+- [Technical Primer](SFD_PRIMER.md) — Conceptual overview and interpretation guide
+- [Release Notes](RELEASE_NOTES.md) — Version history and changelog
+- [Contributing Guide](CONTRIBUTING.md) — How to contribute
+- [Code of Conduct](CODE_OF_CONDUCT.md) — Community guidelines
+- [License](LICENSE) — Apache License 2.0
+
+---
 
 ## Version
 
-**v1.0.0** - Initial public release
+**v1.0.0** — Initial public release
 
 See [RELEASE_NOTES.md](RELEASE_NOTES.md) for detailed version information.
 
+---
+
 ## License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-Built with React, TypeScript, and Tailwind CSS. Visualization powered by HTML5 Canvas.
+This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.

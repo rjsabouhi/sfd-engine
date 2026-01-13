@@ -1,148 +1,157 @@
-# Contributing to SFD Engine
+# Contributing to the SFD Engine
 
-Thank you for your interest in contributing to the Structural Field Dynamics (SFD) Engine. This document provides guidelines for researchers and developers who wish to contribute.
+Thank you for your interest in contributing to the Structural Field Dynamics Engine. This document provides guidelines for researchers and developers who wish to contribute.
+
+---
 
 ## Table of Contents
 
 - [Getting Started](#getting-started)
-- [How to Submit Issues](#how-to-submit-issues)
-- [How to Propose Features](#how-to-propose-features)
-- [Code Style Expectations](#code-style-expectations)
+- [Submitting Issues](#submitting-issues)
+- [Proposing Features](#proposing-features)
+- [Code Contributions](#code-contributions)
+- [Code Style](#code-style)
 - [Testing Guidelines](#testing-guidelines)
-- [Branch Naming and PR Conventions](#branch-naming-and-pr-conventions)
-- [Review Process](#review-process)
+- [Pull Request Process](#pull-request-process)
+
+---
 
 ## Getting Started
 
-1. **Fork the repository** on GitHub
-2. **Clone your fork** locally:
-   ```bash
-   git clone https://github.com/your-username/sfd-engine.git
-   cd sfd-engine
-   ```
-3. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-4. **Create a branch** for your work (see [Branch Naming](#branch-naming-and-pr-conventions))
-5. **Make your changes** following the guidelines below
-6. **Submit a pull request**
+1. Fork the repository
+2. Clone your fork locally
+3. Install dependencies with `npm install`
+4. Create a new branch for your work
+5. Make your changes
+6. Submit a pull request
 
-## How to Submit Issues
+---
 
-We use GitHub Issues to track bugs, feature requests, and questions.
+## Submitting Issues
+
+When reporting bugs or problems:
 
 ### Bug Reports
 
-When reporting a bug, please include:
+Please include:
 
-- **Title**: Clear, concise description of the issue
-- **Environment**: Browser, OS, screen size (if relevant)
-- **Steps to Reproduce**: Numbered list of actions to trigger the bug
-- **Expected Behavior**: What should happen
-- **Actual Behavior**: What actually happens
-- **Screenshots/Videos**: If applicable
-- **Console Errors**: Any JavaScript errors from browser developer tools
+- **Clear title** describing the issue
+- **Steps to reproduce** the problem
+- **Expected behavior** vs. actual behavior
+- **Environment details** (browser, OS, screen size)
+- **Screenshots or recordings** if applicable
+- **Console errors** if any appear
 
-Example:
+### Example Bug Report
+
 ```
-Title: Field visualization freezes when switching colormaps rapidly
+Title: Field visualization freezes when changing colormap
 
-Environment: Chrome 120, Windows 11, 1920x1080
-
-Steps to Reproduce:
+Steps to reproduce:
 1. Start simulation
-2. Rapidly click through colormap options (5+ times in 2 seconds)
-3. Observe field display
+2. Let it run for ~30 seconds
+3. Change colormap from Inferno to Viridis
 
 Expected: Colormap changes smoothly
-Actual: Canvas stops updating, simulation continues in background
+Actual: Canvas freezes, requires page refresh
 
-Console: No errors
+Environment: Chrome 120, macOS 14.2, 1920x1080
+Console: No errors visible
 ```
 
-### Documentation Issues
+---
 
-For documentation problems, please specify:
-- Which document contains the issue
-- The specific section or line
-- What correction is needed
+## Proposing Features
 
-## How to Propose Features
+Before proposing a new feature:
 
-Feature proposals should include:
+1. **Search existing issues** to avoid duplicates
+2. **Consider the scope** — Does it align with the project's purpose?
+3. **Think about implementation** — Is it technically feasible?
 
-1. **Problem Statement**: What problem does this solve?
-2. **Proposed Solution**: How would this feature work?
-3. **Alternatives Considered**: Other approaches you evaluated
-4. **Use Cases**: Who would benefit and how?
-5. **Implementation Notes**: Any technical considerations (optional)
+### Feature Proposal Template
 
-For significant features, consider opening a discussion before submitting a detailed proposal.
+```
+Title: [Feature] Brief description
 
-### Feature Categories
+## Problem
+What problem does this solve?
 
-- **Visualization**: New rendering modes, colormaps, overlays
-- **Analysis**: New metrics, detection algorithms, export formats
-- **Interface**: UI/UX improvements, accessibility enhancements
-- **Performance**: Optimization, memory management
-- **Research**: New operators, regime classifications, mathematical extensions
+## Proposed Solution
+How would this work?
 
-## Code Style Expectations
+## Alternatives Considered
+What other approaches did you consider?
 
-### TypeScript/JavaScript
+## Additional Context
+Any relevant background, mockups, or references
+```
 
-- Use TypeScript for all new code
-- Follow existing patterns in the codebase
-- Use meaningful variable and function names
-- Document complex algorithms with comments
-- Prefer `const` over `let`; avoid `var`
-- Use async/await over raw promises when possible
+---
+
+## Code Contributions
+
+### Branch Naming
+
+Use descriptive branch names:
+
+- `feature/` — New features (e.g., `feature/probe-history-export`)
+- `fix/` — Bug fixes (e.g., `fix/colormap-freeze`)
+- `docs/` — Documentation updates (e.g., `docs/api-reference`)
+- `refactor/` — Code refactoring (e.g., `refactor/engine-state-management`)
+
+### Commit Messages
+
+Write clear, descriptive commit messages:
+
+```
+Good:
+- "Add basin boundary overlay toggle"
+- "Fix memory leak in ring buffer cleanup"
+- "Update operator documentation with formulas"
+
+Avoid:
+- "Fixed stuff"
+- "WIP"
+- "Changes"
+```
+
+---
+
+## Code Style
+
+### TypeScript
+
+- Use strict TypeScript — no `any` types without justification
+- Define interfaces for complex objects
+- Use meaningful variable names
+- Add JSDoc comments for public functions
 
 ```typescript
-// Good
-const computeFieldGradient = (field: Float32Array, width: number): number => {
+/**
+ * Computes the discrete Laplacian of the field at position (x, y)
+ * using a 5-point stencil with toroidal boundary conditions.
+ */
+function computeLaplacian(field: Float32Array, x: number, y: number, width: number): number {
   // Implementation
-};
-
-// Avoid
-var grad = function(f, w) {
-  // Implementation
-};
+}
 ```
 
 ### React Components
 
 - Use functional components with hooks
-- Keep components focused on a single responsibility
-- Extract complex logic into custom hooks or utility functions
-- Use TypeScript interfaces for props
+- Keep components focused on single responsibilities
+- Extract reusable logic into custom hooks
+- Use semantic prop names
 
-```typescript
-interface ProbeDisplayProps {
-  position: { x: number; y: number };
-  value: number;
-  isActive: boolean;
-}
+### CSS/Tailwind
 
-export function ProbeDisplay({ position, value, isActive }: ProbeDisplayProps) {
-  // Component implementation
-}
-```
-
-### CSS/Styling
-
-- Use Tailwind CSS utility classes
-- Follow the design system in `design_guidelines.md`
+- Follow the existing design system in `design_guidelines.md`
+- Use CSS variables for colors (defined in `index.css`)
+- Prefer Tailwind utility classes over custom CSS
 - Maintain dark mode compatibility
-- Ensure responsive behavior
 
-### File Organization
-
-- Place components in `client/src/components/`
-- Place utility functions in `client/src/lib/`
-- Place page components in `client/src/pages/`
-- Keep related code close together
+---
 
 ## Testing Guidelines
 
@@ -150,114 +159,78 @@ export function ProbeDisplay({ position, value, isActive }: ProbeDisplayProps) {
 
 Before submitting a PR, verify:
 
-1. **Basic functionality**: Simulation starts, runs, and can be paused
-2. **Parameter controls**: All sliders and inputs work correctly
-3. **Visual rendering**: Field displays correctly with different colormaps
-4. **Export functions**: At least one export from each category works
-5. **Responsive design**: UI works on both desktop and mobile viewports
-6. **Dark mode**: All elements render correctly in dark theme
+1. **Core functionality** — Simulation runs correctly
+2. **Parameter changes** — All sliders and controls work
+3. **Export functions** — Exports produce valid files
+4. **Responsive design** — Works on desktop and mobile
+5. **Browser compatibility** — Test in Chrome, Firefox, Safari
 
-### Determinism Testing
+### Areas Requiring Special Attention
 
-For changes to the simulation engine:
+- **Ring buffer operations** — Memory management is critical
+- **Canvas rendering** — Performance impacts user experience
+- **Export functions** — File formats must be valid
+- **State management** — Avoid race conditions
 
-1. Enable diagnostic mode (Ctrl+Shift+D)
-2. Run consistency checker with a fixed seed
-3. Verify frame hashes match across runs
+### Performance Considerations
 
-### Performance Testing
+- Profile any changes to the simulation loop
+- Avoid allocations in hot paths
+- Test with large grid sizes (500x500)
+- Monitor memory usage over extended sessions
 
-For rendering or computation changes:
+---
 
-1. Check FPS counter in diagnostic panel
-2. Verify no memory leaks over extended runs
-3. Test with maximum grid size (if applicable)
+## Pull Request Process
 
-## Branch Naming and PR Conventions
+### Before Submitting
 
-### Branch Names
+1. Ensure your code follows the style guidelines
+2. Test your changes thoroughly
+3. Update documentation if needed
+4. Rebase on the latest main branch
 
-Use descriptive branch names with prefixes:
-
-- `feature/` - New features
-- `fix/` - Bug fixes
-- `docs/` - Documentation changes
-- `refactor/` - Code refactoring
-- `perf/` - Performance improvements
-
-Examples:
-```
-feature/add-entropy-metric
-fix/colormap-switching-freeze
-docs/update-primer-examples
-refactor/extract-probe-logic
-perf/optimize-gradient-computation
-```
-
-### Commit Messages
-
-Write clear, concise commit messages:
+### PR Template
 
 ```
-Add entropy metric to structural analysis
-
-- Implement Shannon entropy calculation for field values
-- Add entropy display to signature bar
-- Include entropy in metrics export
-```
-
-### Pull Request Guidelines
-
-1. **Title**: Clear summary of changes
-2. **Description**: Explain what changed and why
-3. **Testing**: Describe how you tested the changes
-4. **Screenshots**: Include before/after images for UI changes
-5. **Breaking Changes**: Clearly note any breaking changes
-
-PR Template:
-```markdown
 ## Description
 Brief description of changes
 
 ## Type of Change
 - [ ] Bug fix
 - [ ] New feature
-- [ ] Documentation
+- [ ] Documentation update
 - [ ] Refactoring
-- [ ] Performance improvement
+- [ ] Other (describe)
 
-## Testing
-How was this tested?
+## Testing Performed
+Describe how you tested the changes
 
-## Screenshots (if applicable)
+## Screenshots
+If applicable, add screenshots
 
 ## Checklist
 - [ ] Code follows project style guidelines
-- [ ] Self-reviewed the code
-- [ ] Tested on desktop and mobile
+- [ ] Self-reviewed my code
+- [ ] Added comments for complex logic
 - [ ] Updated documentation if needed
+- [ ] No new warnings or errors
 ```
 
-## Review Process
+### Review Process
 
-1. **Automated checks**: Must pass (if configured)
-2. **Code review**: At least one maintainer approval required
-3. **Testing verification**: Changes tested in development environment
-4. **Documentation check**: README or other docs updated if needed
+1. Maintainers will review your PR
+2. Address any requested changes
+3. Once approved, your PR will be merged
 
-### Response Times
+### Response Time
 
-We aim to respond to:
-- Issues: Within 1 week
-- PRs: Within 2 weeks
+We aim to respond to PRs within one week. Complex changes may require additional review time.
 
-Please be patient; this is a research project with limited maintainer time.
+---
 
 ## Questions?
 
-If you have questions about contributing, feel free to:
-- Open a GitHub Discussion
-- Comment on a related issue
-- Reach out via the contact information in the README
+If you have questions about contributing, please open an issue with the `question` label.
 
-Thank you for contributing to the SFD Engine!
+Thank you for helping improve the SFD Engine!

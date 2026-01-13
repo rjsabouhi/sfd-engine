@@ -732,20 +732,12 @@ export function FloatingExportDialog({
                               <DropdownMenuItem onClick={() => option.onViewChange?.('main')} className="text-xs">
                                 Main Field
                               </DropdownMenuItem>
-                              {getDerivedCanvas() ? (
-                                <>
-                                  <DropdownMenuItem onClick={() => option.onViewChange?.('projection')} className="text-xs">
-                                    Projection
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => option.onViewChange?.('sideBySide')} className="text-xs">
-                                    Side by Side
-                                  </DropdownMenuItem>
-                                </>
-                              ) : (
-                                <div className="px-2 py-1 text-[10px] text-neutral-500 italic">
-                                  Open projection view for more options
-                                </div>
-                              )}
+                              <DropdownMenuItem onClick={() => option.onViewChange?.('projection')} className="text-xs">
+                                Projection
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => option.onViewChange?.('sideBySide')} className="text-xs">
+                                Side by Side
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
