@@ -1572,10 +1572,23 @@ export async function exportVideoWebMProjection(
   
   const derivedBuffer = new Float32Array(width * height);
   
+  // Helper for pixel-level color blending (like dual-field-view does)
+  function blendColors(
+    primary: [number, number, number], 
+    overlay: [number, number, number], 
+    opacity: number
+  ): [number, number, number] {
+    return [
+      Math.round(primary[0] * (1 - opacity) + overlay[0] * opacity),
+      Math.round(primary[1] * (1 - opacity) + overlay[1] * opacity),
+      Math.round(primary[2] * (1 - opacity) + overlay[2] * opacity),
+    ];
+  }
+  
   return new Promise((resolve) => {
     mediaRecorder.onstop = () => {
       const blob = new Blob(chunks, { type: "video/webm" });
-      downloadBlob(blob, `sfd-${derivedType}-video-${getTimestamp()}.webm`);
+      downloadBlob(blob, `sfd-projection-video-${getTimestamp()}.webm`);
       resolve(true);
     };
     
@@ -1583,16 +1596,6 @@ export async function exportVideoWebMProjection(
     
     let frameIndex = 0;
     const frameDuration = 1000 / fps;
-    
-    // Create overlay canvas for blending
-    const overlayCanvas = document.createElement("canvas");
-    overlayCanvas.width = width;
-    overlayCanvas.height = height;
-    const overlayCtx = overlayCanvas.getContext("2d");
-    if (!overlayCtx) {
-      resolve(false);
-      return;
-    }
     
     const renderNextFrame = () => {
       if (frameIndex >= frames.length) {
@@ -1603,8 +1606,7 @@ export async function exportVideoWebMProjection(
       const frame = frames[frameIndex];
       const mainGrid = frame.grid;
       
-      // Step 1: Render main field first
-      const mainImageData = ctx.createImageData(width, height);
+      // Calculate main field min/max for normalization
       let mainMin = Infinity, mainMax = -Infinity;
       for (let j = 0; j < mainGrid.length; j++) {
         mainMin = Math.min(mainMin, mainGrid[j]);
@@ -1612,44 +1614,40 @@ export async function exportVideoWebMProjection(
       }
       const mainRange = mainMax - mainMin || 1;
       
-      for (let j = 0; j < mainGrid.length; j++) {
-        const t = Math.max(0, Math.min(1, (mainGrid[j] - mainMin) / mainRange));
-        const [r, g, b] = interpolateMain(t);
-        const pixIdx = j * 4;
-        mainImageData.data[pixIdx] = r;
-        mainImageData.data[pixIdx + 1] = g;
-        mainImageData.data[pixIdx + 2] = b;
-        mainImageData.data[pixIdx + 3] = 255;
-      }
-      ctx.putImageData(mainImageData, 0, 0);
-      
-      // Step 2: Compute derived field for this frame
+      // Compute derived field for this frame
       computeDerivedFromGrid(mainGrid, derivedBuffer);
       
-      // Step 3: Render derived field to overlay canvas
-      const overlayImageData = overlayCtx.createImageData(width, height);
-      let min = Infinity, max = -Infinity;
+      // Calculate derived field min/max for normalization
+      let derivedMin = Infinity, derivedMax = -Infinity;
       for (let j = 0; j < derivedBuffer.length; j++) {
-        min = Math.min(min, derivedBuffer[j]);
-        max = Math.max(max, derivedBuffer[j]);
+        derivedMin = Math.min(derivedMin, derivedBuffer[j]);
+        derivedMax = Math.max(derivedMax, derivedBuffer[j]);
       }
-      const range = max - min || 1;
+      const derivedRange = derivedMax - derivedMin || 1;
       
-      for (let j = 0; j < derivedBuffer.length; j++) {
-        const t = (derivedBuffer[j] - min) / range;
-        const [r, g, b] = interpolatePlasma(t);
+      // Create blended image data - pixel by pixel blending
+      const imageData = ctx.createImageData(width, height);
+      
+      for (let j = 0; j < mainGrid.length; j++) {
+        // Get primary color from main field
+        const mainT = Math.max(0, Math.min(1, (mainGrid[j] - mainMin) / mainRange));
+        const primaryColor = interpolateMain(mainT);
+        
+        // Get overlay color from derived field
+        const derivedT = Math.max(0, Math.min(1, (derivedBuffer[j] - derivedMin) / derivedRange));
+        const overlayColor = interpolatePlasma(derivedT);
+        
+        // Blend colors at pixel level
+        const [r, g, b] = blendColors(primaryColor, overlayColor, blendOpacity);
+        
         const pixIdx = j * 4;
-        overlayImageData.data[pixIdx] = r;
-        overlayImageData.data[pixIdx + 1] = g;
-        overlayImageData.data[pixIdx + 2] = b;
-        overlayImageData.data[pixIdx + 3] = 255;
+        imageData.data[pixIdx] = r;
+        imageData.data[pixIdx + 1] = g;
+        imageData.data[pixIdx + 2] = b;
+        imageData.data[pixIdx + 3] = 255;
       }
-      overlayCtx.putImageData(overlayImageData, 0, 0);
       
-      // Step 4: Blend overlay on top of main with opacity
-      ctx.globalAlpha = blendOpacity;
-      ctx.drawImage(overlayCanvas, 0, 0);
-      ctx.globalAlpha = 1.0;
+      ctx.putImageData(imageData, 0, 0);
       
       if (onProgress) {
         onProgress((frameIndex + 1) / frames.length);
@@ -1837,6 +1835,19 @@ export async function exportVideoWebMDual(
   
   const derivedBuffer = new Float32Array(width * height);
   
+  // Helper for pixel-level color blending (like dual-field-view does)
+  function blendColors(
+    primary: [number, number, number], 
+    overlay: [number, number, number], 
+    opacity: number
+  ): [number, number, number] {
+    return [
+      Math.round(primary[0] * (1 - opacity) + overlay[0] * opacity),
+      Math.round(primary[1] * (1 - opacity) + overlay[1] * opacity),
+      Math.round(primary[2] * (1 - opacity) + overlay[2] * opacity),
+    ];
+  }
+  
   return new Promise((resolve) => {
     mediaRecorder.onstop = () => {
       const blob = new Blob(chunks, { type: "video/webm" });
@@ -1848,22 +1859,6 @@ export async function exportVideoWebMDual(
     
     let frameIndex = 0;
     const frameDuration = 1000 / fps;
-    
-    // Create temporary canvases for right panel blending
-    const rightCanvas = document.createElement("canvas");
-    rightCanvas.width = width;
-    rightCanvas.height = height;
-    const rightCtx = rightCanvas.getContext("2d");
-    
-    const overlayCanvas = document.createElement("canvas");
-    overlayCanvas.width = width;
-    overlayCanvas.height = height;
-    const overlayCtx = overlayCanvas.getContext("2d");
-    
-    if (!rightCtx || !overlayCtx) {
-      resolve(false);
-      return;
-    }
     
     const renderNextFrame = () => {
       if (frameIndex >= frames.length) {
@@ -1878,17 +1873,28 @@ export async function exportVideoWebMDual(
       ctx.fillRect(0, 0, totalWidth, height);
       
       // Compute min/max for main field once
-      let min = Infinity, max = -Infinity;
+      let mainMin = Infinity, mainMax = -Infinity;
       for (let j = 0; j < mainGrid.length; j++) {
-        min = Math.min(min, mainGrid[j]);
-        max = Math.max(max, mainGrid[j]);
+        mainMin = Math.min(mainMin, mainGrid[j]);
+        mainMax = Math.max(mainMax, mainGrid[j]);
       }
-      const range = max - min || 1;
+      const mainRange = mainMax - mainMin || 1;
       
-      // Render main field (left side)
+      // Compute derived field for this frame
+      computeDerivedFromGrid(mainGrid, derivedBuffer);
+      
+      // Compute derived field min/max for normalization
+      let derivedMin = Infinity, derivedMax = -Infinity;
+      for (let j = 0; j < derivedBuffer.length; j++) {
+        derivedMin = Math.min(derivedMin, derivedBuffer[j]);
+        derivedMax = Math.max(derivedMax, derivedBuffer[j]);
+      }
+      const derivedRange = derivedMax - derivedMin || 1;
+      
+      // Render left side: main field only
       const mainImageData = ctx.createImageData(width, height);
       for (let j = 0; j < mainGrid.length; j++) {
-        const t = (mainGrid[j] - min) / range;
+        const t = Math.max(0, Math.min(1, (mainGrid[j] - mainMin) / mainRange));
         const [r, g, b] = interpolateColor(t);
         const pixIdx = j * 4;
         mainImageData.data[pixIdx] = r;
@@ -1898,49 +1904,27 @@ export async function exportVideoWebMDual(
       }
       ctx.putImageData(mainImageData, 0, 0);
       
-      // Render right side: main field + blended projection
-      // Step 1: Draw main field to right canvas
-      const rightMainImageData = rightCtx.createImageData(width, height);
+      // Render right side: main field + blended projection (pixel-level blending)
+      const rightImageData = ctx.createImageData(width, height);
       for (let j = 0; j < mainGrid.length; j++) {
-        const t = (mainGrid[j] - min) / range;
-        const [r, g, b] = interpolateColor(t);
+        // Get primary color from main field
+        const mainT = Math.max(0, Math.min(1, (mainGrid[j] - mainMin) / mainRange));
+        const primaryColor = interpolateColor(mainT);
+        
+        // Get overlay color from derived field
+        const derivedT = Math.max(0, Math.min(1, (derivedBuffer[j] - derivedMin) / derivedRange));
+        const overlayColor = interpolatePlasma(derivedT);
+        
+        // Blend colors at pixel level
+        const [r, g, b] = blendColors(primaryColor, overlayColor, blendOpacity);
+        
         const pixIdx = j * 4;
-        rightMainImageData.data[pixIdx] = r;
-        rightMainImageData.data[pixIdx + 1] = g;
-        rightMainImageData.data[pixIdx + 2] = b;
-        rightMainImageData.data[pixIdx + 3] = 255;
+        rightImageData.data[pixIdx] = r;
+        rightImageData.data[pixIdx + 1] = g;
+        rightImageData.data[pixIdx + 2] = b;
+        rightImageData.data[pixIdx + 3] = 255;
       }
-      rightCtx.putImageData(rightMainImageData, 0, 0);
-      
-      // Step 2: Compute and render derived field to overlay canvas
-      computeDerivedFromGrid(mainGrid, derivedBuffer);
-      
-      const overlayImageData = overlayCtx.createImageData(width, height);
-      let dMin = Infinity, dMax = -Infinity;
-      for (let j = 0; j < derivedBuffer.length; j++) {
-        dMin = Math.min(dMin, derivedBuffer[j]);
-        dMax = Math.max(dMax, derivedBuffer[j]);
-      }
-      const dRange = dMax - dMin || 1;
-      
-      for (let j = 0; j < derivedBuffer.length; j++) {
-        const t = (derivedBuffer[j] - dMin) / dRange;
-        const [r, g, b] = interpolatePlasma(t);
-        const pixIdx = j * 4;
-        overlayImageData.data[pixIdx] = r;
-        overlayImageData.data[pixIdx + 1] = g;
-        overlayImageData.data[pixIdx + 2] = b;
-        overlayImageData.data[pixIdx + 3] = 255;
-      }
-      overlayCtx.putImageData(overlayImageData, 0, 0);
-      
-      // Step 3: Blend overlay onto right canvas
-      rightCtx.globalAlpha = blendOpacity;
-      rightCtx.drawImage(overlayCanvas, 0, 0);
-      rightCtx.globalAlpha = 1.0;
-      
-      // Step 4: Draw blended right canvas to main canvas
-      ctx.drawImage(rightCanvas, width + gap, 0);
+      ctx.putImageData(rightImageData, width + gap, 0);
       
       if (onProgress) {
         onProgress((frameIndex + 1) / frames.length);
