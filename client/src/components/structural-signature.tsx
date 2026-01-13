@@ -159,8 +159,8 @@ function getStabilityColor(stable: number, borderline: number, unstable: number)
 }
 
 export function StructuralSignatureBar({ signature, coherenceHistory, trendMetrics, state, modeLabels }: StructuralSignatureBarProps) {
-  const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [basinDynamicsOpen, setBasinDynamicsOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(true);
+  const [basinDynamicsOpen, setBasinDynamicsOpen] = useState(true);
   
   const attractor = getAttractorStatus(signature.basinCount, signature.stabilityMetric, signature.avgBasinDepth);
   const fieldMode = getFieldMode(signature, state.variance);

@@ -157,6 +157,9 @@ export function ControlPanel({
   const [notebookParamsOpen, setNotebookParamsOpen] = useState(true);
   const [notebookEquationOpen, setNotebookEquationOpen] = useState(true);
   const [notebookWeightsOpen, setNotebookWeightsOpen] = useState(true);
+  const [homeControlsOpen, setHomeControlsOpen] = useState(true);
+  const [homeParamsOpen, setHomeParamsOpen] = useState(true);
+  const [homeAnalysisOpen, setHomeAnalysisOpen] = useState(true);
   const [panelWidth, setPanelWidth] = useState(400);
   
   const panelRef = useRef<HTMLDivElement>(null);
@@ -237,146 +240,164 @@ export function ControlPanel({
 
         <div className="flex-1 overflow-y-auto">
           <TabsContent value="home" className="m-0 p-2 space-y-2">
-            {/* Unified Dashboard - All sections at a glance */}
-            
             {/* Controls Section */}
             <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-controls">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                  <Play className="h-3 w-3" />
-                  Controls
-                </span>
-              </div>
-              <div className="flex items-center gap-1 mb-2">
-                {state.isRunning ? (
-                  <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="home-button-pause">
-                    <Pause className="h-3.5 w-3.5 mr-1" />
-                    Pause
-                  </Button>
-                ) : (
-                  <Button 
-                    onClick={onPlay} 
-                    variant="secondary" 
-                    className="flex-1 relative ring-1 ring-cyan-500/50 shadow-[0_0_8px_rgba(34,211,238,0.2)]" 
-                    size="sm" 
-                    data-testid="home-button-play"
-                  >
-                    <Play className="h-3.5 w-3.5 mr-1" />
-                    Run Simulation
-                  </Button>
-                )}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => onShowDualViewChange(!showDualView)}
-                  data-testid="home-button-dual-view"
-                >
-                  <Columns2 className="h-3.5 w-3.5" />
-                </Button>
-                <Button onClick={onReset} variant="outline" size="icon" data-testid="home-button-reset">
-                  <RotateCcw className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-              <TemporalControls
-                historyLength={historyLength}
-                currentIndex={currentHistoryIndex}
-                isPlaybackMode={isPlaybackMode}
-                isRunning={state.isRunning}
-                onStepBackward={onStepBackward}
-                onStepForward={onStepForward}
-                onSeek={onSeekFrame}
-                onExitPlayback={onExitPlayback}
-              />
-              <div className="grid grid-cols-3 gap-1 text-xs mt-2">
-                <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-step">
-                  <div className="text-[10px] text-muted-foreground">Step</div>
-                  <div className="font-mono tabular-nums">{state.step}</div>
-                </div>
-                <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-status">
-                  <div className="text-[10px] text-muted-foreground">Status</div>
-                  <div className={state.isRunning ? "text-green-500" : "text-yellow-500"}>
-                    {state.isRunning ? "Running" : "Paused"}
+              <Collapsible open={homeControlsOpen} onOpenChange={setHomeControlsOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-home-controls">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                      <Play className="h-3 w-3" />
+                      Controls
+                    </span>
+                    {homeControlsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2 space-y-2">
+                  <div className="flex items-center gap-1">
+                    {state.isRunning ? (
+                      <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="home-button-pause">
+                        <Pause className="h-3.5 w-3.5 mr-1" />
+                        Pause
+                      </Button>
+                    ) : (
+                      <Button 
+                        onClick={onPlay} 
+                        variant="secondary" 
+                        className="flex-1 relative ring-1 ring-cyan-500/50 shadow-[0_0_8px_rgba(34,211,238,0.2)]" 
+                        size="sm" 
+                        data-testid="home-button-play"
+                      >
+                        <Play className="h-3.5 w-3.5 mr-1" />
+                        Run Simulation
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => onShowDualViewChange(!showDualView)}
+                      data-testid="home-button-dual-view"
+                    >
+                      <Columns2 className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button onClick={onReset} variant="outline" size="icon" data-testid="home-button-reset">
+                      <RotateCcw className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
-                </div>
-                <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-history">
-                  <div className="text-[10px] text-muted-foreground">History</div>
-                  <div className="font-mono tabular-nums">{historyLength}</div>
-                </div>
-              </div>
+                  <TemporalControls
+                    historyLength={historyLength}
+                    currentIndex={currentHistoryIndex}
+                    isPlaybackMode={isPlaybackMode}
+                    isRunning={state.isRunning}
+                    onStepBackward={onStepBackward}
+                    onStepForward={onStepForward}
+                    onSeek={onSeekFrame}
+                    onExitPlayback={onExitPlayback}
+                  />
+                  <div className="grid grid-cols-3 gap-1 text-xs">
+                    <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-step">
+                      <div className="text-[10px] text-muted-foreground">Step</div>
+                      <div className="font-mono tabular-nums">{state.step}</div>
+                    </div>
+                    <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-status">
+                      <div className="text-[10px] text-muted-foreground">Status</div>
+                      <div className={state.isRunning ? "text-green-500" : "text-yellow-500"}>
+                        {state.isRunning ? "Running" : "Paused"}
+                      </div>
+                    </div>
+                    <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-history">
+                      <div className="text-[10px] text-muted-foreground">History</div>
+                      <div className="font-mono tabular-nums">{historyLength}</div>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
 
             {/* Params Section */}
             <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-params">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                  <Sliders className="h-3 w-3" />
-                  Parameters
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-1 text-xs font-mono">
-                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-dt">
-                  <span className="text-muted-foreground">dt:</span> {params.dt.toFixed(2)}
-                </div>
-                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-k">
-                  <span className="text-muted-foreground">K:</span> {params.curvatureGain.toFixed(1)}
-                </div>
-                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-c">
-                  <span className="text-muted-foreground">C:</span> {params.couplingWeight.toFixed(2)}
-                </div>
-                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-a">
-                  <span className="text-muted-foreground">A:</span> {params.attractorStrength.toFixed(1)}
-                </div>
-                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-r">
-                  <span className="text-muted-foreground">R:</span> {params.redistributionRate.toFixed(2)}
-                </div>
-                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-grid">
-                  <span className="text-muted-foreground">Grid:</span> {params.gridSize}
-                </div>
-              </div>
-              <div className="grid grid-cols-5 gap-1 text-xs font-mono mt-1">
-                <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wk">wK={params.wK.toFixed(1)}</div>
-                <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wt">wT={params.wT.toFixed(1)}</div>
-                <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wc">wC={params.wC.toFixed(1)}</div>
-                <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wa">wA={params.wA.toFixed(1)}</div>
-                <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wr">wR={params.wR.toFixed(1)}</div>
-              </div>
+              <Collapsible open={homeParamsOpen} onOpenChange={setHomeParamsOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-home-params">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                      <Sliders className="h-3 w-3" />
+                      Parameters
+                    </span>
+                    {homeParamsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2 space-y-1">
+                  <div className="grid grid-cols-3 gap-1 text-xs font-mono">
+                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-dt">
+                      <span className="text-muted-foreground">dt:</span> {params.dt.toFixed(2)}
+                    </div>
+                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-k">
+                      <span className="text-muted-foreground">K:</span> {params.curvatureGain.toFixed(1)}
+                    </div>
+                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-c">
+                      <span className="text-muted-foreground">C:</span> {params.couplingWeight.toFixed(2)}
+                    </div>
+                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-a">
+                      <span className="text-muted-foreground">A:</span> {params.attractorStrength.toFixed(1)}
+                    </div>
+                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-r">
+                      <span className="text-muted-foreground">R:</span> {params.redistributionRate.toFixed(2)}
+                    </div>
+                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-grid">
+                      <span className="text-muted-foreground">Grid:</span> {params.gridSize}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-5 gap-1 text-xs font-mono">
+                    <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wk">wK={params.wK.toFixed(1)}</div>
+                    <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wt">wT={params.wT.toFixed(1)}</div>
+                    <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wc">wC={params.wC.toFixed(1)}</div>
+                    <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wa">wA={params.wA.toFixed(1)}</div>
+                    <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wr">wR={params.wR.toFixed(1)}</div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
 
             {/* Analysis Section */}
             <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-analysis">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                  <Activity className="h-3 w-3" />
-                  Analysis
-                </span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary" data-testid="home-regime-badge">
-                  {currentRegime.replace(/_/g, ' ')}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-1 text-xs">
-                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-energy">
-                  <span className="text-muted-foreground">Energy:</span>{" "}
-                  <span className="font-mono tabular-nums">{state.energy.toFixed(3)}</span>
-                </div>
-                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-variance">
-                  <span className="text-muted-foreground">Variance:</span>{" "}
-                  <span className="font-mono tabular-nums">{state.variance.toFixed(4)}</span>
-                </div>
-                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-basins">
-                  <span className="text-muted-foreground">Basins:</span>{" "}
-                  <span className="font-mono tabular-nums">{state.basinCount}</span>
-                </div>
-                <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-events">
-                  <span className="text-muted-foreground">Events:</span>{" "}
-                  <span className="font-mono tabular-nums">{events.length}</span>
-                </div>
-              </div>
-              <div className="mt-1.5">
-                <OperatorSensitivity contributions={operatorContributions} modeLabels={modeLabels} compact />
-              </div>
+              <Collapsible open={homeAnalysisOpen} onOpenChange={setHomeAnalysisOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-home-analysis">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                      <Activity className="h-3 w-3" />
+                      Analysis
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary" data-testid="home-regime-badge">
+                        {currentRegime.replace(/_/g, ' ')}
+                      </span>
+                      {homeAnalysisOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                    </div>
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2 space-y-1.5">
+                  <div className="grid grid-cols-2 gap-1 text-xs">
+                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-energy">
+                      <span className="text-muted-foreground">Energy:</span>{" "}
+                      <span className="font-mono tabular-nums">{state.energy.toFixed(3)}</span>
+                    </div>
+                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-variance">
+                      <span className="text-muted-foreground">Variance:</span>{" "}
+                      <span className="font-mono tabular-nums">{state.variance.toFixed(4)}</span>
+                    </div>
+                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-basins">
+                      <span className="text-muted-foreground">Basins:</span>{" "}
+                      <span className="font-mono tabular-nums">{state.basinCount}</span>
+                    </div>
+                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-events">
+                      <span className="text-muted-foreground">Events:</span>{" "}
+                      <span className="font-mono tabular-nums">{events.length}</span>
+                    </div>
+                  </div>
+                  <OperatorSensitivity contributions={operatorContributions} modeLabels={modeLabels} compact />
+                </CollapsibleContent>
+              </Collapsible>
             </div>
-
-            </TabsContent>
+          </TabsContent>
 
           <TabsContent value="controls" className="m-0 p-2 space-y-2">
             <div className="border border-border/50 rounded-md p-2 bg-muted/20">
