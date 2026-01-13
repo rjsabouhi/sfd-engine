@@ -928,11 +928,17 @@ export async function exportLayersSeparate(
   format: "png" | "npz" = "npz"
 ): Promise<boolean> {
   const { width, height } = engine.getGridSize();
-  const frames = engine.getAllFrames();
-  if (frames.length === 0) return false;
   
-  const currentFrame = frames[frames.length - 1];
-  const grid = currentFrame.grid;
+  // Get grid from ring buffer if available, otherwise fall back to current field
+  const frames = engine.getAllFrames();
+  let grid: Float32Array;
+  if (frames.length > 0) {
+    grid = frames[frames.length - 1].grid;
+  } else {
+    // Fallback to current field when ring buffer is empty
+    const field = engine.getField();
+    grid = new Float32Array(field.grid);
+  }
   
   // Compute derived fields
   const curvatureField = new Float32Array(width * height);
@@ -1054,14 +1060,17 @@ export async function exportLayersSeparate(
 export async function exportLayersAsZip(engine: SFDEngine): Promise<boolean> {
   try {
     const { width, height } = engine.getGridSize();
+    
+    // Get grid from ring buffer if available, otherwise fall back to current field
     const frames = engine.getAllFrames();
-    if (frames.length === 0) {
-      console.error('exportLayersAsZip: No frames available');
-      return false;
+    let grid: Float32Array;
+    if (frames.length > 0) {
+      grid = frames[frames.length - 1].grid;
+    } else {
+      // Fallback to current field when ring buffer is empty
+      const field = engine.getField();
+      grid = new Float32Array(field.grid);
     }
-  
-    const currentFrame = frames[frames.length - 1];
-    const grid = currentFrame.grid;
   
     const curvatureField = new Float32Array(width * height);
     const tensionField = new Float32Array(width * height);
@@ -1272,8 +1281,8 @@ export async function exportFullArchive(
       stability: m.stability
     })),
     currentField: {
-      grid: Array.from(frames.length > 0 ? frames[frames.length - 1].grid : new Float32Array(0)),
-      stats: frames.length > 0 ? frames[frames.length - 1].stats : null
+      grid: Array.from(frames.length > 0 ? frames[frames.length - 1].grid : engine.getField().grid),
+      stats: frames.length > 0 ? frames[frames.length - 1].stats : { energy: state.energy, variance: state.variance, basinCount: state.basinCount }
     },
     readme
   };
