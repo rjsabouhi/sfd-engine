@@ -1310,6 +1310,120 @@ export class SFDEngine {
     return { type, grid, width: this.width, height: this.height };
   }
 
+  /**
+   * Compute derived field from an arbitrary source grid (for video export)
+   * Uses the same algorithms as computeDerivedField but operates on provided grid
+   */
+  computeDerivedFieldFromSource(
+    sourceGrid: Float32Array,
+    type: "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality"
+  ): DerivedField {
+    const w = this.width;
+    const h = this.height;
+    const grid = new Float32Array(w * h);
+    
+    // Helper to get value with toroidal wrapping from source grid
+    const getValue = (x: number, y: number): number => {
+      const nx = ((x % w) + w) % w;
+      const ny = ((y % h) + h) % h;
+      return sourceGrid[ny * w + nx];
+    };
+    
+    // Helper for laplacian
+    const computeLaplacian = (x: number, y: number): number => {
+      const center = getValue(x, y);
+      const left = getValue(x - 1, y);
+      const right = getValue(x + 1, y);
+      const up = getValue(x, y - 1);
+      const down = getValue(x, y + 1);
+      return (left + right + up + down) / 4 - center;
+    };
+    
+    // Helper for local mean
+    const computeLocalMean = (x: number, y: number): number => {
+      let sum = 0;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          sum += getValue(x + dx, y + dy);
+        }
+      }
+      return sum / 9;
+    };
+    
+    // Helper for gaussian blur (5x5)
+    const computeGaussianBlur = (x: number, y: number): number => {
+      let sum = 0;
+      let weight = 0;
+      for (let dy = -2; dy <= 2; dy++) {
+        for (let dx = -2; dx <= 2; dx++) {
+          const d = Math.sqrt(dx * dx + dy * dy);
+          const w = Math.exp(-d * d / 2);
+          sum += getValue(x + dx, y + dy) * w;
+          weight += w;
+        }
+      }
+      return sum / weight;
+    };
+    
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const idx = y * w + x;
+        const value = sourceGrid[idx];
+        
+        switch (type) {
+          case "curvature": {
+            const laplacian = computeLaplacian(x, y);
+            grid[idx] = Math.tanh(laplacian * this.params.curvatureGain);
+            break;
+          }
+          case "tension": {
+            const gx = (getValue(x + 1, y) - getValue(x - 1, y)) / 2;
+            const gy = (getValue(x, y + 1) - getValue(x, y - 1)) / 2;
+            const gradMag = gx * gx + gy * gy;
+            grid[idx] = -gradMag / (1 + Math.abs(gradMag));
+            break;
+          }
+          case "coupling": {
+            const blurred = computeGaussianBlur(x, y);
+            grid[idx] = this.params.couplingWeight * blurred - (1 - this.params.couplingWeight) * value;
+            break;
+          }
+          case "variance": {
+            let variance = 0;
+            const localMean = computeLocalMean(x, y);
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                const v = getValue(x + dx, y + dy);
+                variance += (v - localMean) * (v - localMean);
+              }
+            }
+            grid[idx] = variance / 9;
+            break;
+          }
+          case "gradientFlow": {
+            const gx = (getValue(x + 1, y) - getValue(x - 1, y)) / 2;
+            const gy = (getValue(x, y + 1) - getValue(x, y - 1)) / 2;
+            const mag = Math.sqrt(gx * gx + gy * gy);
+            const angle = Math.atan2(gy, gx);
+            grid[idx] = (angle + Math.PI) / (2 * Math.PI) * mag;
+            break;
+          }
+          case "criticality": {
+            const dxx = getValue(x + 1, y) - 2 * value + getValue(x - 1, y);
+            const dyy = getValue(x, y + 1) - 2 * value + getValue(x, y - 1);
+            const dxy = (getValue(x + 1, y + 1) - getValue(x - 1, y + 1) 
+                       - getValue(x + 1, y - 1) + getValue(x - 1, y - 1)) / 4;
+            const detH = dxx * dyy - dxy * dxy;
+            grid[idx] = 1.0 / (Math.abs(detH) + 1e-6);
+            break;
+          }
+        }
+      }
+    }
+    
+    return { type, grid, width: w, height: h };
+  }
+
   computeStructuralSignature(): StructuralSignature {
     const stats = this.computeStatistics();
     

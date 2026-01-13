@@ -1411,6 +1411,7 @@ export async function exportVideoWebM(
 
 /**
  * Export projection field as WebM video (renders main field with blended projection overlay)
+ * Uses engine's computeDerivedFieldFromSource for accurate derived field computation
  */
 export type DerivedFieldType = "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality";
 
@@ -1473,82 +1474,17 @@ export async function exportVideoWebMProjection(
     ];
   }
   
-  // Helper to compute derived field from a grid
-  function computeDerivedFromGrid(sourceGrid: Float32Array, output: Float32Array): void {
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const idx = y * width + x;
-        const getValue = (dx: number, dy: number) => {
-          const nx = (x + dx + width) % width;
-          const ny = (y + dy + height) % height;
-          return sourceGrid[ny * width + nx];
-        };
-        const value = sourceGrid[idx];
-        
-        switch (derivedType) {
-          case "curvature": {
-            const l = getValue(-1, 0);
-            const r = getValue(1, 0);
-            const u = getValue(0, -1);
-            const d = getValue(0, 1);
-            const laplacian = l + r + u + d - 4 * value;
-            output[idx] = Math.tanh(laplacian * 2.0);
-            break;
-          }
-          case "tension": {
-            const gx = (getValue(1, 0) - getValue(-1, 0)) / 2;
-            const gy = (getValue(0, 1) - getValue(0, -1)) / 2;
-            const gradMag = gx * gx + gy * gy;
-            output[idx] = -gradMag / (1 + Math.abs(gradMag));
-            break;
-          }
-          case "coupling": {
-            let sum = 0;
-            for (let dy = -2; dy <= 2; dy++) {
-              for (let dx = -2; dx <= 2; dx++) {
-                sum += getValue(dx, dy);
-              }
-            }
-            output[idx] = sum / 25 - value * 0.5;
-            break;
-          }
-          case "variance": {
-            let localMean = 0;
-            for (let dy = -1; dy <= 1; dy++) {
-              for (let dx = -1; dx <= 1; dx++) {
-                localMean += getValue(dx, dy);
-              }
-            }
-            localMean /= 9;
-            let variance = 0;
-            for (let dy = -1; dy <= 1; dy++) {
-              for (let dx = -1; dx <= 1; dx++) {
-                const v = getValue(dx, dy);
-                variance += (v - localMean) * (v - localMean);
-              }
-            }
-            output[idx] = variance / 9;
-            break;
-          }
-          case "gradientFlow": {
-            const gx = (getValue(1, 0) - getValue(-1, 0)) / 2;
-            const gy = (getValue(0, 1) - getValue(0, -1)) / 2;
-            const mag = Math.sqrt(gx * gx + gy * gy);
-            const angle = Math.atan2(gy, gx);
-            output[idx] = (angle + Math.PI) / (2 * Math.PI) * mag;
-            break;
-          }
-          case "criticality": {
-            const dxx = getValue(1, 0) - 2 * value + getValue(-1, 0);
-            const dyy = getValue(0, 1) - 2 * value + getValue(0, -1);
-            const dxy = (getValue(1, 1) - getValue(-1, 1) - getValue(1, -1) + getValue(-1, -1)) / 4;
-            const detH = dxx * dyy - dxy * dxy;
-            output[idx] = 1.0 / (Math.abs(detH) + 1e-6);
-            break;
-          }
-        }
-      }
-    }
+  // Helper for pixel-level color blending (like dual-field-view does)
+  function blendColors(
+    primary: [number, number, number], 
+    overlay: [number, number, number], 
+    opacity: number
+  ): [number, number, number] {
+    return [
+      Math.round(primary[0] * (1 - opacity) + overlay[0] * opacity),
+      Math.round(primary[1] * (1 - opacity) + overlay[1] * opacity),
+      Math.round(primary[2] * (1 - opacity) + overlay[2] * opacity),
+    ];
   }
   
   if (typeof MediaRecorder === "undefined") {
@@ -1569,21 +1505,6 @@ export async function exportVideoWebMProjection(
       chunks.push(e.data);
     }
   };
-  
-  const derivedBuffer = new Float32Array(width * height);
-  
-  // Helper for pixel-level color blending (like dual-field-view does)
-  function blendColors(
-    primary: [number, number, number], 
-    overlay: [number, number, number], 
-    opacity: number
-  ): [number, number, number] {
-    return [
-      Math.round(primary[0] * (1 - opacity) + overlay[0] * opacity),
-      Math.round(primary[1] * (1 - opacity) + overlay[1] * opacity),
-      Math.round(primary[2] * (1 - opacity) + overlay[2] * opacity),
-    ];
-  }
   
   return new Promise((resolve) => {
     mediaRecorder.onstop = () => {
@@ -1614,14 +1535,15 @@ export async function exportVideoWebMProjection(
       }
       const mainRange = mainMax - mainMin || 1;
       
-      // Compute derived field for this frame
-      computeDerivedFromGrid(mainGrid, derivedBuffer);
+      // Use engine's method to compute derived field (uses correct parameters)
+      const derivedField = engine.computeDerivedFieldFromSource(mainGrid, derivedType);
+      const derivedGrid = derivedField.grid;
       
       // Calculate derived field min/max for normalization
       let derivedMin = Infinity, derivedMax = -Infinity;
-      for (let j = 0; j < derivedBuffer.length; j++) {
-        derivedMin = Math.min(derivedMin, derivedBuffer[j]);
-        derivedMax = Math.max(derivedMax, derivedBuffer[j]);
+      for (let j = 0; j < derivedGrid.length; j++) {
+        derivedMin = Math.min(derivedMin, derivedGrid[j]);
+        derivedMax = Math.max(derivedMax, derivedGrid[j]);
       }
       const derivedRange = derivedMax - derivedMin || 1;
       
@@ -1634,7 +1556,7 @@ export async function exportVideoWebMProjection(
         const primaryColor = interpolateMain(mainT);
         
         // Get overlay color from derived field
-        const derivedT = Math.max(0, Math.min(1, (derivedBuffer[j] - derivedMin) / derivedRange));
+        const derivedT = Math.max(0, Math.min(1, (derivedGrid[j] - derivedMin) / derivedRange));
         const overlayColor = interpolatePlasma(derivedT);
         
         // Blend colors at pixel level
@@ -1664,6 +1586,7 @@ export async function exportVideoWebMProjection(
 /**
  * Export simulation as WebM video with side-by-side main and blended projection view
  * Left: main field, Right: main field with blended projection overlay
+ * Uses engine's computeDerivedFieldFromSource for accurate derived field computation
  */
 export async function exportVideoWebMDual(
   engine: SFDEngine,
@@ -1728,90 +1651,17 @@ export async function exportVideoWebMDual(
     ];
   }
   
-  // Helper to compute derived field from a grid
-  function computeDerivedFromGrid(sourceGrid: Float32Array, output: Float32Array): void {
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const idx = y * width + x;
-        const getValue = (dx: number, dy: number) => {
-          const nx = (x + dx + width) % width;
-          const ny = (y + dy + height) % height;
-          return sourceGrid[ny * width + nx];
-        };
-        const value = sourceGrid[idx];
-        
-        switch (derivedType) {
-          case "curvature": {
-            const l = getValue(-1, 0);
-            const r = getValue(1, 0);
-            const u = getValue(0, -1);
-            const d = getValue(0, 1);
-            const laplacian = l + r + u + d - 4 * value;
-            output[idx] = Math.tanh(laplacian * 2.0);
-            break;
-          }
-          case "tension": {
-            const gx = (getValue(1, 0) - getValue(-1, 0)) / 2;
-            const gy = (getValue(0, 1) - getValue(0, -1)) / 2;
-            const gradMag = gx * gx + gy * gy;
-            output[idx] = -gradMag / (1 + Math.abs(gradMag));
-            break;
-          }
-          case "coupling": {
-            let sum = 0;
-            for (let dy = -2; dy <= 2; dy++) {
-              for (let dx = -2; dx <= 2; dx++) {
-                sum += getValue(dx, dy);
-              }
-            }
-            output[idx] = sum / 25 - value * 0.5;
-            break;
-          }
-          case "variance": {
-            let localMean = 0;
-            for (let dy = -1; dy <= 1; dy++) {
-              for (let dx = -1; dx <= 1; dx++) {
-                localMean += getValue(dx, dy);
-              }
-            }
-            localMean /= 9;
-            let variance = 0;
-            for (let dy = -1; dy <= 1; dy++) {
-              for (let dx = -1; dx <= 1; dx++) {
-                const v = getValue(dx, dy);
-                variance += (v - localMean) * (v - localMean);
-              }
-            }
-            output[idx] = variance / 9;
-            break;
-          }
-          case "gradientFlow": {
-            const gx = (getValue(1, 0) - getValue(-1, 0)) / 2;
-            const gy = (getValue(0, 1) - getValue(0, -1)) / 2;
-            const mag = Math.sqrt(gx * gx + gy * gy);
-            const angle = Math.atan2(gy, gx);
-            output[idx] = (angle + Math.PI) / (2 * Math.PI) * mag;
-            break;
-          }
-          case "criticality": {
-            const dxx = getValue(1, 0) - 2 * value + getValue(-1, 0);
-            const dyy = getValue(0, 1) - 2 * value + getValue(0, -1);
-            const dxy = (getValue(1, 1) - getValue(-1, 1) - getValue(1, -1) + getValue(-1, -1)) / 4;
-            const detH = dxx * dyy - dxy * dxy;
-            output[idx] = 1.0 / (Math.abs(detH) + 1e-6);
-            break;
-          }
-          default:
-            // For unsupported types, fall back to curvature
-            const l = getValue(-1, 0);
-            const r = getValue(1, 0);
-            const u = getValue(0, -1);
-            const d = getValue(0, 1);
-            const laplacian = l + r + u + d - 4 * value;
-            output[idx] = Math.tanh(laplacian * 2.0);
-        }
-      }
-    }
+  // Helper for pixel-level color blending (like dual-field-view does)
+  function blendColors(
+    primary: [number, number, number], 
+    overlay: [number, number, number], 
+    opacity: number
+  ): [number, number, number] {
+    return [
+      Math.round(primary[0] * (1 - opacity) + overlay[0] * opacity),
+      Math.round(primary[1] * (1 - opacity) + overlay[1] * opacity),
+      Math.round(primary[2] * (1 - opacity) + overlay[2] * opacity),
+    ];
   }
   
   if (typeof MediaRecorder === "undefined") {
@@ -1832,21 +1682,6 @@ export async function exportVideoWebMDual(
       chunks.push(e.data);
     }
   };
-  
-  const derivedBuffer = new Float32Array(width * height);
-  
-  // Helper for pixel-level color blending (like dual-field-view does)
-  function blendColors(
-    primary: [number, number, number], 
-    overlay: [number, number, number], 
-    opacity: number
-  ): [number, number, number] {
-    return [
-      Math.round(primary[0] * (1 - opacity) + overlay[0] * opacity),
-      Math.round(primary[1] * (1 - opacity) + overlay[1] * opacity),
-      Math.round(primary[2] * (1 - opacity) + overlay[2] * opacity),
-    ];
-  }
   
   return new Promise((resolve) => {
     mediaRecorder.onstop = () => {
@@ -1880,14 +1715,15 @@ export async function exportVideoWebMDual(
       }
       const mainRange = mainMax - mainMin || 1;
       
-      // Compute derived field for this frame
-      computeDerivedFromGrid(mainGrid, derivedBuffer);
+      // Use engine's method to compute derived field (uses correct parameters)
+      const derivedField = engine.computeDerivedFieldFromSource(mainGrid, derivedType);
+      const derivedGrid = derivedField.grid;
       
       // Compute derived field min/max for normalization
       let derivedMin = Infinity, derivedMax = -Infinity;
-      for (let j = 0; j < derivedBuffer.length; j++) {
-        derivedMin = Math.min(derivedMin, derivedBuffer[j]);
-        derivedMax = Math.max(derivedMax, derivedBuffer[j]);
+      for (let j = 0; j < derivedGrid.length; j++) {
+        derivedMin = Math.min(derivedMin, derivedGrid[j]);
+        derivedMax = Math.max(derivedMax, derivedGrid[j]);
       }
       const derivedRange = derivedMax - derivedMin || 1;
       
@@ -1912,7 +1748,7 @@ export async function exportVideoWebMDual(
         const primaryColor = interpolateColor(mainT);
         
         // Get overlay color from derived field
-        const derivedT = Math.max(0, Math.min(1, (derivedBuffer[j] - derivedMin) / derivedRange));
+        const derivedT = Math.max(0, Math.min(1, (derivedGrid[j] - derivedMin) / derivedRange));
         const overlayColor = interpolatePlasma(derivedT);
         
         // Blend colors at pixel level
