@@ -82,6 +82,42 @@ export async function exportPNGSnapshot(canvas: HTMLCanvasElement | null): Promi
   }
 }
 
+export async function exportPNGSnapshotDual(
+  mainCanvas: HTMLCanvasElement | null,
+  projectionCanvas: HTMLCanvasElement | null
+): Promise<boolean> {
+  if (!mainCanvas || !projectionCanvas) {
+    return false;
+  }
+  try {
+    const gap = 20;
+    const maxHeight = Math.max(mainCanvas.height, projectionCanvas.height);
+    const totalWidth = mainCanvas.width + projectionCanvas.width + gap;
+    
+    const exportCanvas = document.createElement("canvas");
+    exportCanvas.width = totalWidth;
+    exportCanvas.height = maxHeight;
+    const ctx = exportCanvas.getContext("2d");
+    if (!ctx) return false;
+    
+    ctx.fillStyle = "#0a0a0f";
+    ctx.fillRect(0, 0, totalWidth, maxHeight);
+    
+    ctx.drawImage(mainCanvas, 0, (maxHeight - mainCanvas.height) / 2);
+    ctx.drawImage(projectionCanvas, mainCanvas.width + gap, (maxHeight - projectionCanvas.height) / 2);
+    
+    const blob = await new Promise<Blob | null>((resolve) => {
+      exportCanvas.toBlob((b) => resolve(b), "image/png");
+    });
+    if (!blob) return false;
+    
+    downloadBlob(blob, `sfd-dual-snapshot-${getTimestamp()}.png`);
+    return true;
+  } catch (_e) {
+    return false;
+  }
+}
+
 export interface MobileShareOptions {
   regime: string;
   stability: string;
@@ -89,6 +125,7 @@ export interface MobileShareOptions {
   energy: number;
   overlayCanvas?: HTMLCanvasElement | null;
   overlayOpacity?: number;
+  forceDownload?: boolean;
 }
 
 export async function exportMobileShareSnapshot(
@@ -151,7 +188,7 @@ export async function exportMobileShareSnapshot(
   
   if (!blob) return false;
   
-  if (navigator.share && navigator.canShare) {
+  if (!options.forceDownload && navigator.share && navigator.canShare) {
     try {
       const file = new File([blob], `sfd-${getTimestamp()}.png`, { type: "image/png" });
       if (navigator.canShare({ files: [file] })) {
@@ -1004,6 +1041,136 @@ export async function exportLayersSeparate(
 }
 
 /**
+ * Export all field layers as a single ZIP-like bundle
+ * Creates a contact sheet with all layers arranged in a grid
+ */
+export async function exportLayersAsZip(engine: SFDEngine): Promise<boolean> {
+  const { width, height } = engine.getGridSize();
+  const frames = engine.getAllFrames();
+  if (frames.length === 0) return false;
+  
+  const currentFrame = frames[frames.length - 1];
+  const grid = currentFrame.grid;
+  
+  const curvatureField = new Float32Array(width * height);
+  const tensionField = new Float32Array(width * height);
+  const gradientField = new Float32Array(width * height);
+  const varianceField = new Float32Array(width * height);
+  
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      const idx = y * width + x;
+      const c = grid[idx];
+      const l = grid[idx - 1];
+      const r = grid[idx + 1];
+      const u = grid[idx - width];
+      const d = grid[idx + width];
+      
+      curvatureField[idx] = l + r + u + d - 4 * c;
+      const gx = (r - l) / 2;
+      const gy = (d - u) / 2;
+      gradientField[idx] = Math.sqrt(gx * gx + gy * gy);
+      tensionField[idx] = Math.abs(curvatureField[idx]) * gradientField[idx];
+      
+      let sum = 0, sumSq = 0, count = 0;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const ni = (y + dy) * width + (x + dx);
+          sum += grid[ni];
+          sumSq += grid[ni] * grid[ni];
+          count++;
+        }
+      }
+      const mean = sum / count;
+      varianceField[idx] = sumSq / count - mean * mean;
+    }
+  }
+  
+  const viridisColors = [[68,1,84],[72,36,117],[65,68,135],[53,95,141],[42,120,142],[33,144,140],[34,167,132],[68,190,112],[122,209,81],[189,222,38],[253,231,37]];
+  
+  const interpolateViridis = (t: number): [number, number, number] => {
+    const idx = t * (viridisColors.length - 1);
+    const i = Math.floor(idx);
+    const f = idx - i;
+    const c1 = viridisColors[Math.min(i, viridisColors.length - 1)];
+    const c2 = viridisColors[Math.min(i + 1, viridisColors.length - 1)];
+    return [
+      Math.round(c1[0] + f * (c2[0] - c1[0])),
+      Math.round(c1[1] + f * (c2[1] - c1[1])),
+      Math.round(c1[2] + f * (c2[2] - c1[2]))
+    ];
+  };
+  
+  const gap = 10;
+  const cols = 3;
+  const rows = 2;
+  const layers = [
+    { data: grid, label: "Primary" },
+    { data: curvatureField, label: "Curvature" },
+    { data: gradientField, label: "Gradient" },
+    { data: tensionField, label: "Tension" },
+    { data: varianceField, label: "Variance" },
+  ];
+  
+  const contactWidth = cols * width + (cols - 1) * gap;
+  const contactHeight = rows * height + (rows - 1) * gap + 30 * rows;
+  
+  const contactCanvas = document.createElement("canvas");
+  contactCanvas.width = contactWidth;
+  contactCanvas.height = contactHeight;
+  const ctx = contactCanvas.getContext("2d")!;
+  
+  ctx.fillStyle = "#0a0a0f";
+  ctx.fillRect(0, 0, contactWidth, contactHeight);
+  
+  for (let li = 0; li < layers.length; li++) {
+    const layer = layers[li];
+    const col = li % cols;
+    const row = Math.floor(li / cols);
+    const xOff = col * (width + gap);
+    const yOff = row * (height + gap + 30);
+    
+    let min = Infinity, max = -Infinity;
+    for (let i = 0; i < layer.data.length; i++) {
+      min = Math.min(min, layer.data[i]);
+      max = Math.max(max, layer.data[i]);
+    }
+    const range = max - min || 1;
+    
+    const imageData = ctx.createImageData(width, height);
+    for (let i = 0; i < layer.data.length; i++) {
+      const t = (layer.data[i] - min) / range;
+      const [r, g, b] = interpolateViridis(t);
+      const pi = i * 4;
+      imageData.data[pi] = r;
+      imageData.data[pi + 1] = g;
+      imageData.data[pi + 2] = b;
+      imageData.data[pi + 3] = 255;
+    }
+    
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = width;
+    tempCanvas.height = height;
+    const tempCtx = tempCanvas.getContext("2d")!;
+    tempCtx.putImageData(imageData, 0, 0);
+    ctx.drawImage(tempCanvas, xOff, yOff);
+    
+    ctx.font = "bold 14px Inter, system-ui, sans-serif";
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "left";
+    ctx.fillText(layer.label, xOff + 4, yOff + height + 20);
+  }
+  
+  const blob = await new Promise<Blob | null>((resolve) => {
+    contactCanvas.toBlob((b) => resolve(b), "image/png");
+  });
+  
+  if (!blob) return false;
+  downloadBlob(blob, `sfd-layers-bundle-${getTimestamp()}.png`);
+  return true;
+}
+
+/**
  * Export full data archive as a downloadable bundle
  * Contains: field data, operators, metrics, events, config, readme
  */
@@ -1203,6 +1370,127 @@ export async function exportVideoWebM(
       }
       
       ctx.putImageData(imageData, 0, 0);
+      
+      if (onProgress) {
+        onProgress((frameIndex + 1) / frames.length);
+      }
+      
+      frameIndex++;
+      setTimeout(renderNextFrame, frameDuration);
+    };
+    
+    renderNextFrame();
+  });
+}
+
+/**
+ * Export simulation as WebM video with side-by-side main and projection view
+ */
+export async function exportVideoWebMDual(
+  engine: SFDEngine,
+  mainCanvas: HTMLCanvasElement | null,
+  projectionCanvas: HTMLCanvasElement | null,
+  colormap: "inferno" | "viridis" | "cividis",
+  fps: number = 30,
+  onProgress?: (progress: number) => void
+): Promise<boolean> {
+  const frames = engine.getAllFrames();
+  if (frames.length === 0 || !mainCanvas || !projectionCanvas) return false;
+  
+  const { width, height } = engine.getGridSize();
+  const gap = 10;
+  const totalWidth = width * 2 + gap;
+  
+  const offCanvas = document.createElement("canvas");
+  offCanvas.width = totalWidth;
+  offCanvas.height = height;
+  const ctx = offCanvas.getContext("2d");
+  if (!ctx) return false;
+  
+  const colormaps: Record<string, number[][]> = {
+    inferno: [[0,0,4],[40,11,84],[101,21,110],[159,42,99],[212,72,66],[245,125,21],[252,192,39],[252,255,164]],
+    viridis: [[68,1,84],[72,36,117],[65,68,135],[53,95,141],[42,120,142],[33,144,140],[34,167,132],[68,190,112],[122,209,81],[189,222,38],[253,231,37]],
+    cividis: [[0,32,77],[42,67,108],[75,99,130],[107,130,151],[140,160,170],[175,191,186],[212,221,198],[253,252,205]]
+  };
+  
+  const colors = colormaps[colormap] || colormaps.viridis;
+  
+  function interpolateColor(t: number): [number, number, number] {
+    const idx = t * (colors.length - 1);
+    const i = Math.floor(idx);
+    const f = idx - i;
+    const c1 = colors[Math.min(i, colors.length - 1)];
+    const c2 = colors[Math.min(i + 1, colors.length - 1)];
+    return [
+      Math.round(c1[0] + f * (c2[0] - c1[0])),
+      Math.round(c1[1] + f * (c2[1] - c1[1])),
+      Math.round(c1[2] + f * (c2[2] - c1[2]))
+    ];
+  }
+  
+  if (typeof MediaRecorder === "undefined") {
+    console.error("MediaRecorder not supported");
+    return false;
+  }
+  
+  const stream = offCanvas.captureStream(fps);
+  const chunks: Blob[] = [];
+  
+  const mediaRecorder = new MediaRecorder(stream, {
+    mimeType: "video/webm;codecs=vp9",
+    videoBitsPerSecond: 5000000
+  });
+  
+  mediaRecorder.ondataavailable = (e) => {
+    if (e.data.size > 0) {
+      chunks.push(e.data);
+    }
+  };
+  
+  return new Promise((resolve) => {
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, { type: "video/webm" });
+      downloadBlob(blob, `sfd-dual-video-${getTimestamp()}.webm`);
+      resolve(true);
+    };
+    
+    mediaRecorder.start();
+    
+    let frameIndex = 0;
+    const frameDuration = 1000 / fps;
+    
+    const renderNextFrame = () => {
+      if (frameIndex >= frames.length) {
+        mediaRecorder.stop();
+        return;
+      }
+      
+      const frame = frames[frameIndex];
+      
+      ctx.fillStyle = "#0a0a0f";
+      ctx.fillRect(0, 0, totalWidth, height);
+      
+      const imageData = ctx.createImageData(width, height);
+      
+      let min = Infinity, max = -Infinity;
+      for (let j = 0; j < frame.grid.length; j++) {
+        min = Math.min(min, frame.grid[j]);
+        max = Math.max(max, frame.grid[j]);
+      }
+      const range = max - min || 1;
+      
+      for (let j = 0; j < frame.grid.length; j++) {
+        const t = (frame.grid[j] - min) / range;
+        const [r, g, b] = interpolateColor(t);
+        const pixIdx = j * 4;
+        imageData.data[pixIdx] = r;
+        imageData.data[pixIdx + 1] = g;
+        imageData.data[pixIdx + 2] = b;
+        imageData.data[pixIdx + 3] = 255;
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+      ctx.drawImage(projectionCanvas, width + gap, 0, width, height);
       
       if (onProgress) {
         onProgress((frameIndex + 1) / frames.length);

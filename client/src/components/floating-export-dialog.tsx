@@ -25,7 +25,14 @@ import {
   Lock,
   ToggleLeft,
   ToggleRight,
+  ChevronDown,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -33,6 +40,7 @@ import type { SFDEngine } from "@/lib/sfd-engine";
 import type { StructuralEvent, SavedProbe } from "@shared/schema";
 import {
   exportPNGSnapshot,
+  exportPNGSnapshotDual,
   exportMobileShareSnapshot,
   saveConfiguration,
   exportSimulationData,
@@ -44,9 +52,13 @@ import {
   exportOperatorContributions,
   exportPythonScript,
   exportLayersSeparate,
+  exportLayersAsZip,
   exportFullArchive,
   exportVideoWebM,
+  exportVideoWebMDual,
 } from "@/lib/export-utils";
+
+export type ExportViewType = 'main' | 'projection' | 'sideBySide';
 
 type ExportCategory = 'visual' | 'data' | 'probes' | 'technical';
 
@@ -61,6 +73,9 @@ interface ExportOption {
   requires?: string;
   requiresAdvanced?: boolean;
   advancedNote?: string;
+  hasViewSelector?: boolean;
+  viewType?: ExportViewType;
+  onViewChange?: (v: ExportViewType) => void;
 }
 
 interface FloatingExportDialogProps {
@@ -111,7 +126,9 @@ export function FloatingExportDialog({
   const [selectedCategory, setSelectedCategory] = useState<ExportCategory>('visual');
   const [loadingExport, setLoadingExport] = useState<string | null>(null);
   const [completedExports, setCompletedExports] = useState<Set<string>>(new Set());
-  const [advancedMode, setAdvancedMode] = useState(false); // Does not persist across reloads
+  const [advancedMode, setAdvancedMode] = useState(false);
+  const [snapshotView, setSnapshotView] = useState<ExportViewType>('main');
+  const [videoView, setVideoView] = useState<ExportViewType>('main');
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Use lifted state if provided, otherwise use local state
@@ -213,21 +230,52 @@ export function FloatingExportDialog({
     return document.querySelector('[data-testid="canvas-overlay"]') as HTMLCanvasElement | null;
   }, []);
 
+  const getDerivedCanvas = useCallback(() => {
+    return document.querySelector('[data-testid="canvas-derived-field"]') as HTMLCanvasElement | null;
+  }, []);
+
+  const viewLabels: Record<ExportViewType, string> = {
+    main: 'Main Field',
+    projection: 'Projection',
+    sideBySide: 'Side by Side',
+  };
+
   const exportOptions: ExportOption[] = [
     // === VISUAL (Safe for sharing) ===
     {
       id: 'snapshot',
       name: 'Field Snapshot',
-      description: 'Current field visualization as an image',
+      description: `Export ${viewLabels[snapshotView]} as image`,
       icon: <Camera className="h-5 w-5" />,
       format: 'PNG',
       category: 'visual',
-      action: async () => exportPNGSnapshot(getCanvas()),
+      action: async () => {
+        if (snapshotView === 'main') {
+          return exportPNGSnapshot(getCanvas());
+        } else if (snapshotView === 'projection') {
+          const derivedCanvas = getDerivedCanvas();
+          if (!derivedCanvas) {
+            toast({ title: "Projection view not available", description: "Please open the projection view first", variant: "destructive" });
+            return false;
+          }
+          return exportPNGSnapshot(derivedCanvas);
+        } else {
+          const derivedCanvas = getDerivedCanvas();
+          if (!derivedCanvas) {
+            toast({ title: "Projection view not available", description: "Please open the projection view first", variant: "destructive" });
+            return false;
+          }
+          return exportPNGSnapshotDual(getCanvas(), derivedCanvas);
+        }
+      },
+      hasViewSelector: true,
+      viewType: snapshotView,
+      onViewChange: setSnapshotView,
     },
     {
       id: 'share-card',
       name: 'Share Card',
-      description: 'Branded image with regime info for sharing',
+      description: 'Branded image with regime info',
       icon: <Share2 className="h-5 w-5" />,
       format: 'PNG',
       category: 'visual',
@@ -243,13 +291,14 @@ export function FloatingExportDialog({
           energy: state.energy,
           overlayCanvas: getOverlayCanvas(),
           overlayOpacity: 0.3,
+          forceDownload: true,
         });
       },
     },
     {
       id: 'video',
       name: 'Playback Video',
-      description: 'Animated video of simulation history',
+      description: `Export ${viewLabels[videoView]} animation`,
       icon: <Film className="h-5 w-5" />,
       format: 'WebM',
       category: 'visual',
@@ -258,19 +307,38 @@ export function FloatingExportDialog({
       action: async () => {
         const canvas = getCanvas();
         if (!engine || !canvas) return false;
-        return exportVideoWebM(engine, canvas, colormap);
+        if (videoView === 'main') {
+          return exportVideoWebM(engine, canvas, colormap);
+        } else if (videoView === 'projection') {
+          const derivedCanvas = getDerivedCanvas();
+          if (!derivedCanvas) {
+            toast({ title: "Projection view not available", description: "Please open the projection view first", variant: "destructive" });
+            return false;
+          }
+          return exportVideoWebM(engine, derivedCanvas, colormap);
+        } else {
+          const derivedCanvas = getDerivedCanvas();
+          if (!derivedCanvas) {
+            toast({ title: "Projection view not available", description: "Please open the projection view first", variant: "destructive" });
+            return false;
+          }
+          return exportVideoWebMDual(engine, canvas, derivedCanvas, colormap);
+        }
       },
+      hasViewSelector: true,
+      viewType: videoView,
+      onViewChange: setVideoView,
     },
     {
       id: 'layers',
       name: 'Field Layers',
-      description: 'Separate PNG images for each derived field',
+      description: 'All layers in a single contact sheet',
       icon: <Layers className="h-5 w-5" />,
       format: 'PNG',
       category: 'visual',
       action: async () => {
         if (!engine) return false;
-        return exportLayersSeparate(engine, "png");
+        return exportLayersAsZip(engine);
       },
     },
     // === DATA (Mixed: summary safe, full matrices require advanced) ===
@@ -650,6 +718,38 @@ export function FloatingExportDialog({
                       <p className="text-[11px] text-neutral-500 mt-0.5 leading-snug">
                         {option.description}
                       </p>
+                      {option.hasViewSelector && option.onViewChange && (
+                        <div className="flex items-center gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>
+                          <span className="text-[10px] text-neutral-500">View:</span>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-white/10 text-neutral-300 hover:bg-white/15">
+                                {viewLabels[option.viewType || 'main']}
+                                <ChevronDown className="h-3 w-3" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start" className="min-w-[140px]">
+                              <DropdownMenuItem onClick={() => option.onViewChange?.('main')} className="text-xs">
+                                Main Field
+                              </DropdownMenuItem>
+                              {getDerivedCanvas() ? (
+                                <>
+                                  <DropdownMenuItem onClick={() => option.onViewChange?.('projection')} className="text-xs">
+                                    Projection
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => option.onViewChange?.('sideBySide')} className="text-xs">
+                                    Side by Side
+                                  </DropdownMenuItem>
+                                </>
+                              ) : (
+                                <div className="px-2 py-1 text-[10px] text-neutral-500 italic">
+                                  Open projection view for more options
+                                </div>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      )}
                       {option.requires && !needsAdvanced && (
                         <p className="text-[10px] text-amber-500/70 mt-1">
                           Requires: {option.requires}
