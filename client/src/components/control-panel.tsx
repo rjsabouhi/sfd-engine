@@ -246,22 +246,48 @@ export function ControlPanel({
                   <Play className="h-3 w-3" />
                   Controls
                 </span>
-                <div className="flex items-center gap-1">
-                  {state.isRunning ? (
-                    <Button onClick={onPause} variant="ghost" size="icon" data-testid="home-button-pause">
-                      <Pause className="h-3.5 w-3.5" />
-                    </Button>
-                  ) : (
-                    <Button onClick={onPlay} variant="ghost" size="icon" data-testid="home-button-play">
-                      <Play className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
-                  <Button onClick={onReset} variant="ghost" size="icon" data-testid="home-button-reset">
-                    <RotateCcw className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
               </div>
-              <div className="grid grid-cols-3 gap-1 text-xs">
+              <div className="flex items-center gap-1 mb-2">
+                {state.isRunning ? (
+                  <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="home-button-pause">
+                    <Pause className="h-3.5 w-3.5 mr-1" />
+                    Pause
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={onPlay} 
+                    variant="secondary" 
+                    className="flex-1 relative ring-1 ring-cyan-500/50 shadow-[0_0_8px_rgba(34,211,238,0.2)]" 
+                    size="sm" 
+                    data-testid="home-button-play"
+                  >
+                    <Play className="h-3.5 w-3.5 mr-1" />
+                    Run Simulation
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => onShowDualViewChange(!showDualView)}
+                  data-testid="home-button-dual-view"
+                >
+                  <Columns2 className="h-3.5 w-3.5" />
+                </Button>
+                <Button onClick={onReset} variant="outline" size="icon" data-testid="home-button-reset">
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              <TemporalControls
+                historyLength={historyLength}
+                currentIndex={currentHistoryIndex}
+                isPlaybackMode={isPlaybackMode}
+                isRunning={state.isRunning}
+                onStepBackward={onStepBackward}
+                onStepForward={onStepForward}
+                onSeek={onSeekFrame}
+                onExitPlayback={onExitPlayback}
+              />
+              <div className="grid grid-cols-3 gap-1 text-xs mt-2">
                 <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-step">
                   <div className="text-[10px] text-muted-foreground">Step</div>
                   <div className="font-mono tabular-nums">{state.step}</div>
