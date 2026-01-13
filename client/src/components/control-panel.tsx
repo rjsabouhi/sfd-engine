@@ -378,198 +378,214 @@ export function ControlPanel({
 
             </TabsContent>
 
-          <TabsContent value="controls" className="m-0 p-3 space-y-4">
-            <Collapsible open={metricsOpen} onOpenChange={setMetricsOpen}>
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-metrics-inline">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Simulation Metrics</span>
-                  {metricsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2 space-y-2">
-                <StructuralSignatureBar 
-                  signature={structuralSignature} 
-                  coherenceHistory={coherenceHistory}
-                  trendMetrics={trendMetrics}
-                  state={state}
-                  modeLabels={modeLabels} 
-                />
-              </CollapsibleContent>
-            </Collapsible>
+          <TabsContent value="controls" className="m-0 p-2 space-y-2">
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20">
+              <Collapsible open={metricsOpen} onOpenChange={setMetricsOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-metrics-inline">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Simulation Metrics</span>
+                    {metricsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2 space-y-2">
+                  <StructuralSignatureBar 
+                    signature={structuralSignature} 
+                    coherenceHistory={coherenceHistory}
+                    trendMetrics={trendMetrics}
+                    state={state}
+                    modeLabels={modeLabels} 
+                  />
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
 
-            <Collapsible open={interpretationOpen} onOpenChange={setInterpretationOpen} className="border-t border-border/50 pt-3">
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-interpretation">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Interpretation Mode</span>
-                  {interpretationOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2 space-y-2">
-                <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
-                  <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-interpretation-mode">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {modeOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
-              </CollapsibleContent>
-            </Collapsible>
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20">
+              <Collapsible open={interpretationOpen} onOpenChange={setInterpretationOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-interpretation">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Interpretation Mode</span>
+                    {interpretationOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2 space-y-2">
+                  <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
+                    <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-interpretation-mode">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {modeOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{modeLabels.subtitle}</p>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
           </TabsContent>
 
-          <TabsContent value="params" className="m-0 p-3 space-y-4">
-            <p className="text-xs text-muted-foreground italic border-b border-border/50 pb-2">
-              Adjust the operator weights and simulation parameters.
-            </p>
-            <Collapsible open={coreParamsOpen} onOpenChange={setCoreParamsOpen}>
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-2 text-xs font-medium text-muted-foreground hover-elevate rounded px-2" data-testid="button-toggle-core-params">
-                  Core Parameters
-                  {coreParamsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-2 pt-2">
-                <ParameterSlider label="Timestep" value={params.dt} min={0.01} max={0.2} step={0.01} onChange={(v) => onParamsChange({ dt: v })} testId="slider-timestep" />
-                <ParameterSlider label="Curvature" value={params.curvatureGain} min={0.1} max={10} step={0.1} onChange={(v) => onParamsChange({ curvatureGain: v })} testId="slider-curvature-gain" />
-                <ParameterSlider label="Coupling" value={params.couplingWeight} min={0} max={1} step={0.05} onChange={(v) => onParamsChange({ couplingWeight: v })} testId="slider-coupling-weight" />
-                <ParameterSlider label="Attractor" value={params.attractorStrength} min={0.1} max={10} step={0.1} onChange={(v) => onParamsChange({ attractorStrength: v })} testId="slider-attractor-strength" />
-                <ParameterSlider label="Redistribution" value={params.redistributionRate} min={0} max={1} step={0.05} onChange={(v) => onParamsChange({ redistributionRate: v })} testId="slider-redistribution" />
-              </CollapsibleContent>
-            </Collapsible>
+          <TabsContent value="params" className="m-0 p-2 space-y-2">
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20">
+              <Collapsible open={coreParamsOpen} onOpenChange={setCoreParamsOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-core-params">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Core Parameters</span>
+                    {coreParamsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-2 pt-2">
+                  <ParameterSlider label="Timestep" value={params.dt} min={0.01} max={0.2} step={0.01} onChange={(v) => onParamsChange({ dt: v })} testId="slider-timestep" />
+                  <ParameterSlider label="Curvature" value={params.curvatureGain} min={0.1} max={10} step={0.1} onChange={(v) => onParamsChange({ curvatureGain: v })} testId="slider-curvature-gain" />
+                  <ParameterSlider label="Coupling" value={params.couplingWeight} min={0} max={1} step={0.05} onChange={(v) => onParamsChange({ couplingWeight: v })} testId="slider-coupling-weight" />
+                  <ParameterSlider label="Attractor" value={params.attractorStrength} min={0.1} max={10} step={0.1} onChange={(v) => onParamsChange({ attractorStrength: v })} testId="slider-attractor-strength" />
+                  <ParameterSlider label="Redistribution" value={params.redistributionRate} min={0} max={1} step={0.05} onChange={(v) => onParamsChange({ redistributionRate: v })} testId="slider-redistribution" />
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
 
-            <Collapsible open={weightsOpen} onOpenChange={setWeightsOpen} className="border-t border-border/50 pt-3">
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-2 text-xs font-medium text-muted-foreground hover-elevate rounded px-2" data-testid="button-toggle-operators">
-                  Operator Weights
-                  {weightsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-2 pt-2">
-                <ParameterSlider label="wK" value={params.wK} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wK: v })} testId="slider-wk" />
-                <ParameterSlider label="wT" value={params.wT} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wT: v })} testId="slider-wt" />
-                <ParameterSlider label="wC" value={params.wC} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wC: v })} testId="slider-wc" />
-                <ParameterSlider label="wA" value={params.wA} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wA: v })} testId="slider-wa" />
-                <ParameterSlider label="wR" value={params.wR} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wR: v })} testId="slider-wr" />
-              </CollapsibleContent>
-            </Collapsible>
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20">
+              <Collapsible open={weightsOpen} onOpenChange={setWeightsOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-operators">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Operator Weights</span>
+                    {weightsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-2 pt-2">
+                  <ParameterSlider label="wK" value={params.wK} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wK: v })} testId="slider-wk" />
+                  <ParameterSlider label="wT" value={params.wT} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wT: v })} testId="slider-wt" />
+                  <ParameterSlider label="wC" value={params.wC} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wC: v })} testId="slider-wc" />
+                  <ParameterSlider label="wA" value={params.wA} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wA: v })} testId="slider-wa" />
+                  <ParameterSlider label="wR" value={params.wR} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wR: v })} testId="slider-wr" />
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
 
-            <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen} className="border-t border-border/50 pt-3">
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-2 text-xs font-medium text-muted-foreground hover-elevate rounded px-2" data-testid="button-toggle-advanced">
-                  <span className="flex items-center gap-1.5">
-                    <Settings2 className="h-3.5 w-3.5" />
-                    Advanced
-                  </span>
-                  {advancedOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-2 pt-2">
-                <ParameterSlider label="Grid Size" value={params.gridSize} min={50} max={400} step={10} onChange={(v) => onParamsChange({ gridSize: v })} testId="slider-grid-size" />
-                <ParameterSlider label="Radius" value={params.couplingRadius} min={0.5} max={5} step={0.25} onChange={(v) => onParamsChange({ couplingRadius: v })} testId="slider-coupling-radius" />
-                <Button variant="secondary" size="sm" className="w-full" onClick={() => onParamsChange(defaultParameters)} data-testid="button-reset-params">
-                  {LANGUAGE.UI.RESET}
-                </Button>
-              </CollapsibleContent>
-            </Collapsible>
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20">
+              <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-advanced">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                      <Settings2 className="h-3 w-3" />
+                      Advanced
+                    </span>
+                    {advancedOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-2 pt-2">
+                  <ParameterSlider label="Grid Size" value={params.gridSize} min={50} max={400} step={10} onChange={(v) => onParamsChange({ gridSize: v })} testId="slider-grid-size" />
+                  <ParameterSlider label="Radius" value={params.couplingRadius} min={0.5} max={5} step={0.25} onChange={(v) => onParamsChange({ couplingRadius: v })} testId="slider-coupling-radius" />
+                  <Button variant="secondary" size="sm" className="w-full" onClick={() => onParamsChange(defaultParameters)} data-testid="button-reset-params">
+                    {LANGUAGE.UI.RESET}
+                  </Button>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
           </TabsContent>
 
-          <TabsContent value="analysis" className="m-0 p-3 space-y-4">
-            <Collapsible open={regimeOpen} onOpenChange={setRegimeOpen}>
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-regime">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Regime</span>
-                  {regimeOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2">
-                <LegacyRegimeDisplay regime={currentRegime} mode={languageMode} />
-              </CollapsibleContent>
-            </Collapsible>
+          <TabsContent value="analysis" className="m-0 p-2 space-y-2">
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20">
+              <Collapsible open={regimeOpen} onOpenChange={setRegimeOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-regime">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Regime</span>
+                    {regimeOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <LegacyRegimeDisplay regime={currentRegime} mode={languageMode} />
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
 
-            <Collapsible open={operatorOpen} onOpenChange={setOperatorOpen} className="border-t border-border/50 pt-3">
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-operator">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Operator Contributions</span>
-                  {operatorOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2">
-                <OperatorSensitivity contributions={operatorContributions} modeLabels={modeLabels} />
-              </CollapsibleContent>
-            </Collapsible>
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20">
+              <Collapsible open={operatorOpen} onOpenChange={setOperatorOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-operator">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Operator Contributions</span>
+                    {operatorOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <OperatorSensitivity contributions={operatorContributions} modeLabels={modeLabels} />
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
 
-            <Collapsible open={eventLogOpen} onOpenChange={setEventLogOpen} className="border-t border-border/50 pt-3">
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-event-log">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Event Log ({events.length})</span>
-                  {eventLogOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2">
-                <EventLog events={events} onClear={onClearEvents} onExport={onExportEvents} />
-              </CollapsibleContent>
-            </Collapsible>
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20">
+              <Collapsible open={eventLogOpen} onOpenChange={setEventLogOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-event-log">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Event Log ({events.length})</span>
+                    {eventLogOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <EventLog events={events} onClear={onClearEvents} onExport={onExportEvents} />
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
           </TabsContent>
 
-          <TabsContent value="notebook" className="m-0 p-3 space-y-4">
-            <p className="text-xs text-muted-foreground italic border-b border-border/50 pb-2">
-              These are the active equations and operator weights governing the field.
-            </p>
-            <Collapsible open={notebookParamsOpen} onOpenChange={setNotebookParamsOpen}>
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-params">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Current Parameters</span>
-                  {notebookParamsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2">
-                <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-muted/30 p-2 rounded">
-                  <div>dt = {params.dt.toFixed(3)}</div>
-                  <div>K = {params.curvatureGain.toFixed(2)}</div>
-                  <div>C = {params.couplingWeight.toFixed(2)}</div>
-                  <div>A = {params.attractorStrength.toFixed(2)}</div>
-                  <div>R = {params.redistributionRate.toFixed(2)}</div>
-                  <div>Grid: {params.gridSize}x{params.gridSize}</div>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+          <TabsContent value="notebook" className="m-0 p-2 space-y-2">
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20">
+              <Collapsible open={notebookParamsOpen} onOpenChange={setNotebookParamsOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-params">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Current Parameters</span>
+                    {notebookParamsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-background/50 p-2 rounded">
+                    <div>dt = {params.dt.toFixed(3)}</div>
+                    <div>K = {params.curvatureGain.toFixed(2)}</div>
+                    <div>C = {params.couplingWeight.toFixed(2)}</div>
+                    <div>A = {params.attractorStrength.toFixed(2)}</div>
+                    <div>R = {params.redistributionRate.toFixed(2)}</div>
+                    <div>Grid: {params.gridSize}x{params.gridSize}</div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
             
-            <Collapsible open={notebookEquationOpen} onOpenChange={setNotebookEquationOpen} className="border-t border-border/50 pt-3">
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-equation">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Field Equation</span>
-                  {notebookEquationOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2">
-                <code className="text-xs block bg-muted p-2 rounded font-mono">
-                  dF/dt = wK*K(F) + wT*T(F) + wC*C(F) + wA*A(F) + wR*R(F)
-                </code>
-              </CollapsibleContent>
-            </Collapsible>
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20">
+              <Collapsible open={notebookEquationOpen} onOpenChange={setNotebookEquationOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-equation">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Field Equation</span>
+                    {notebookEquationOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <code className="text-xs block bg-background/50 p-2 rounded font-mono">
+                    dF/dt = wK*K(F) + wT*T(F) + wC*C(F) + wA*A(F) + wR*R(F)
+                  </code>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
 
-            <Collapsible open={notebookWeightsOpen} onOpenChange={setNotebookWeightsOpen} className="border-t border-border/50 pt-3">
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-weights">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Operator Weights</span>
-                  {notebookWeightsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2">
-                <div className="grid grid-cols-5 gap-1 text-xs font-mono bg-muted/30 p-2 rounded text-center">
-                  <div>wK={params.wK.toFixed(1)}</div>
-                  <div>wT={params.wT.toFixed(1)}</div>
-                  <div>wC={params.wC.toFixed(1)}</div>
-                  <div>wA={params.wA.toFixed(1)}</div>
-                  <div>wR={params.wR.toFixed(1)}</div>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+            <div className="border border-border/50 rounded-md p-2 bg-muted/20">
+              <Collapsible open={notebookWeightsOpen} onOpenChange={setNotebookWeightsOpen}>
+                <CollapsibleTrigger asChild>
+                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-notebook-weights">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Operator Weights</span>
+                    {notebookWeightsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <div className="grid grid-cols-5 gap-1 text-xs font-mono bg-background/50 p-2 rounded text-center">
+                    <div>wK={params.wK.toFixed(1)}</div>
+                    <div>wT={params.wT.toFixed(1)}</div>
+                    <div>wC={params.wC.toFixed(1)}</div>
+                    <div>wA={params.wA.toFixed(1)}</div>
+                    <div>wR={params.wR.toFixed(1)}</div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
           </TabsContent>
         </div>
       </Tabs>
