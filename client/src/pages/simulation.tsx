@@ -2921,7 +2921,7 @@ export default function SimulationPage() {
                       variant="ghost"
                       size="sm"
                       data-testid="button-perturb-dropdown"
-                      className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${perturbMode ? "bg-white/20 text-white" : ""}`}
+                      className="h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10"
                     >
                       <Zap className="h-3 w-3" />
                       Perturb
