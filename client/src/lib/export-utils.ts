@@ -15,12 +15,28 @@ function getTimestamp(): string {
 }
 
 function downloadBlob(blob: Blob, filename: string): void {
+  console.log("[Export] Starting download:", filename, "size:", blob.size);
+  
   const url = URL.createObjectURL(blob);
+  
+  // Try using window.open as fallback for iframe environments
+  const newWindow = window.open(url, "_blank");
+  if (newWindow) {
+    console.log("[Export] Opened in new window");
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    return;
+  }
+  
+  // Fallback to anchor element download
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   a.style.display = "none";
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
   document.body.appendChild(a);
+  
+  console.log("[Export] Attempting anchor click download");
   
   // Use MouseEvent for more reliable click triggering across browsers
   const clickEvent = new MouseEvent("click", {
@@ -36,7 +52,7 @@ function downloadBlob(blob: Blob, filename: string): void {
       document.body.removeChild(a);
     }
     URL.revokeObjectURL(url);
-  }, 5000);
+  }, 10000);
 }
 
 export async function exportPNGSnapshot(canvas: HTMLCanvasElement | null): Promise<boolean> {
