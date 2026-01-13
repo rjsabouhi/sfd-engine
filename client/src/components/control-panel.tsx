@@ -771,7 +771,7 @@ export function ControlPanel({
                 <CollapsibleContent className="pt-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <code className="text-xs block bg-background/50 p-2 rounded font-mono cursor-help">
+                      <code className="text-xs block bg-background/50 p-2 rounded font-mono">
                         dF/dt = wK*K(F) + wT*T(F) + wC*C(F) + wA*A(F) + wR*R(F)
                       </code>
                     </TooltipTrigger>

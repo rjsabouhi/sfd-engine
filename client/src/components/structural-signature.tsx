@@ -217,7 +217,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
         <div className="flex items-center justify-between gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="text-xs text-muted-foreground cursor-help">Energy (avg)</span>
+              <span className="text-xs text-muted-foreground">Energy (avg)</span>
             </TooltipTrigger>
             <TooltipContent side="left" className="text-xs max-w-[200px]">
               Average energy over recent frames - indicates structural tension
@@ -235,7 +235,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
         <div className="flex items-center justify-between gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="text-xs text-muted-foreground cursor-help">Variance (avg)</span>
+              <span className="text-xs text-muted-foreground">Variance (avg)</span>
             </TooltipTrigger>
             <TooltipContent side="left" className="text-xs max-w-[200px]">
               How much field values vary across space - high = active dynamics
@@ -253,7 +253,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
         <div className="flex items-center justify-between gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="text-xs text-muted-foreground cursor-help">Curvature (avg)</span>
+              <span className="text-xs text-muted-foreground">Curvature (avg)</span>
             </TooltipTrigger>
             <TooltipContent side="left" className="text-xs max-w-[200px]">
               Global field bending - positive = convex, negative = concave
@@ -271,7 +271,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
         <div className="flex items-center justify-between">
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="text-xs text-muted-foreground cursor-help">Field State</span>
+              <span className="text-xs text-muted-foreground">Field State</span>
             </TooltipTrigger>
             <TooltipContent side="left" className="text-xs max-w-[200px]">
               Whether system is relaxing, drifting, or stable
@@ -288,7 +288,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
         <div className="flex items-center justify-between mb-1">
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider cursor-help">Coherence Trend</span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Coherence Trend</span>
             </TooltipTrigger>
             <TooltipContent side="top" className="text-xs max-w-[200px]">
               Measure of spatial organization and correlation over time
@@ -304,7 +304,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
           <div className="flex items-center justify-between mb-2">
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider cursor-help">Stability History</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Stability History</span>
               </TooltipTrigger>
               <TooltipContent side="top" className="text-xs max-w-[200px]">
                 Frame counts: stable (s), borderline (b), unstable (u)
@@ -354,7 +354,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
               <div className="flex justify-between">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="text-muted-foreground cursor-help">Avg Basins</span>
+                    <span className="text-muted-foreground">Avg Basins</span>
                   </TooltipTrigger>
                   <TooltipContent side="left" className="text-xs max-w-[200px]">
                     Average number of stable attractor regions in the field
@@ -365,7 +365,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
               <div className="flex justify-between">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="text-muted-foreground cursor-help">Merge Rate</span>
+                    <span className="text-muted-foreground">Merge Rate</span>
                   </TooltipTrigger>
                   <TooltipContent side="left" className="text-xs max-w-[200px]">
                     Rate at which basins are combining or splitting
@@ -376,7 +376,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
               <div className="flex justify-between">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="text-muted-foreground cursor-help">Peak Gradient</span>
+                    <span className="text-muted-foreground">Peak Gradient</span>
                   </TooltipTrigger>
                   <TooltipContent side="left" className="text-xs max-w-[200px]">
                     Maximum rate of change in the field
@@ -387,7 +387,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
               <div className="flex justify-between">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="text-muted-foreground cursor-help">Peak Energy</span>
+                    <span className="text-muted-foreground">Peak Energy</span>
                   </TooltipTrigger>
                   <TooltipContent side="left" className="text-xs max-w-[200px]">
                     Highest energy level observed in recent frames
@@ -398,7 +398,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
               <div className="flex justify-between col-span-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="text-muted-foreground cursor-help">Complexity</span>
+                    <span className="text-muted-foreground">Complexity</span>
                   </TooltipTrigger>
                   <TooltipContent side="left" className="text-xs max-w-[200px]">
                     Overall system complexity based on multiple metrics
@@ -426,7 +426,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
             <div className="flex justify-between">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="text-muted-foreground cursor-help">Step</span>
+                  <span className="text-muted-foreground">Step</span>
                 </TooltipTrigger>
                 <TooltipContent side="left" className="text-xs max-w-[200px]">
                   Current simulation step number
@@ -437,7 +437,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
             <div className="flex justify-between">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="text-muted-foreground cursor-help">FPS</span>
+                  <span className="text-muted-foreground">FPS</span>
                 </TooltipTrigger>
                 <TooltipContent side="left" className="text-xs max-w-[200px]">
                   Frames per second - simulation update rate
@@ -448,7 +448,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
             <div className="flex justify-between">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="text-muted-foreground cursor-help">Coherence</span>
+                  <span className="text-muted-foreground">Coherence</span>
                 </TooltipTrigger>
                 <TooltipContent side="left" className="text-xs max-w-[200px]">
                   Measure of spatial organization and correlation
@@ -459,7 +459,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
             <div className="flex justify-between">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="text-muted-foreground cursor-help">Stability</span>
+                  <span className="text-muted-foreground">Stability</span>
                 </TooltipTrigger>
                 <TooltipContent side="left" className="text-xs max-w-[200px]">
                   Fraction of field cells in stable configurations
@@ -470,7 +470,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
             <div className="flex justify-between">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="text-muted-foreground cursor-help">Attractors</span>
+                  <span className="text-muted-foreground">Attractors</span>
                 </TooltipTrigger>
                 <TooltipContent side="left" className="text-xs max-w-[200px]">
                   Status of stable basin formations in the field
@@ -481,7 +481,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
             <div className="flex justify-between">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="text-muted-foreground cursor-help">Field Mode</span>
+                  <span className="text-muted-foreground">Field Mode</span>
                 </TooltipTrigger>
                 <TooltipContent side="left" className="text-xs max-w-[200px]">
                   Current dynamical state classification of the system
@@ -492,7 +492,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
             <div className="flex justify-between">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="text-muted-foreground cursor-help">{modeLabels.stats.energy}</span>
+                  <span className="text-muted-foreground">{modeLabels.stats.energy}</span>
                 </TooltipTrigger>
                 <TooltipContent side="left" className="text-xs max-w-[200px]">
                   Instantaneous energy level of the field
@@ -503,7 +503,7 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
             <div className="flex justify-between">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="text-muted-foreground cursor-help">{modeLabels.stats.variance}</span>
+                  <span className="text-muted-foreground">{modeLabels.stats.variance}</span>
                 </TooltipTrigger>
                 <TooltipContent side="left" className="text-xs max-w-[200px]">
                   Instantaneous variance across the field

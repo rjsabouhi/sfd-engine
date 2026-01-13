@@ -37,7 +37,7 @@ function Bar({ label, value, color, compact = false, tooltip }: BarProps) {
       return (
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="cursor-help">{content}</div>
+            <div>{content}</div>
           </TooltipTrigger>
           <TooltipContent side="left" className="text-xs max-w-[220px]">
             {tooltip}
@@ -67,7 +67,7 @@ function Bar({ label, value, color, compact = false, tooltip }: BarProps) {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="cursor-help">{content}</div>
+          <div>{content}</div>
         </TooltipTrigger>
         <TooltipContent side="left" className="text-xs max-w-[220px]">
           {tooltip}

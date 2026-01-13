@@ -381,7 +381,7 @@ export function FullscreenMenuBar({
           <div className="flex items-center gap-2 px-2">
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-[10px] text-muted-foreground cursor-help">Blend</span>
+                <span className="text-[10px] text-muted-foreground">Blend</span>
               </TooltipTrigger>
               <TooltipContent side="top" className="text-xs">Opacity blend between primary and derived field</TooltipContent>
             </Tooltip>

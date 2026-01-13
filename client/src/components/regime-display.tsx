@@ -43,7 +43,7 @@ export function RegimeDisplay({ regime, mode, compact = false, showWatchFor = tr
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <Badge variant={variant} className="gap-1 cursor-help">
+          <Badge variant={variant} className="gap-1">
             <Icon className="h-3 w-3" />
             {regimeData.name}
           </Badge>
@@ -60,7 +60,7 @@ export function RegimeDisplay({ regime, mode, compact = false, showWatchFor = tr
     <div className="space-y-2">
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="flex items-center gap-2 cursor-help">
+          <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">{LANGUAGE.UI.REGIME_SELECTOR}</span>
           </div>
         </TooltipTrigger>
@@ -197,7 +197,7 @@ export function LegacyRegimeDisplay({ regime, mode, compact = false }: { regime:
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="flex items-center gap-2 cursor-help">
+          <div className="flex items-center gap-2">
             <span className={`h-2 w-2 rounded-full ${dotColor}`} />
             <Badge variant={variant} className="gap-1">
               <Icon className="h-3 w-3" />
@@ -216,7 +216,7 @@ export function LegacyRegimeDisplay({ regime, mode, compact = false }: { regime:
     <div className="space-y-1.5">
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="flex items-center gap-2 cursor-help">
+          <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Dynamic Regime</span>
           </div>
         </TooltipTrigger>
