@@ -1300,7 +1300,7 @@ export async function exportVideoWebM(
   engine: SFDEngine,
   canvas: HTMLCanvasElement | null,
   colormap: "inferno" | "viridis" | "cividis",
-  fps: number = 30,
+  fps: number = 10,
   onProgress?: (progress: number) => void
 ): Promise<boolean> {
   const frames = engine.getAllFrames();
@@ -1410,15 +1410,213 @@ export async function exportVideoWebM(
 }
 
 /**
+ * Export projection field as WebM video (computes derived field for each historical frame)
+ */
+export type DerivedFieldType = "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality";
+
+export async function exportVideoWebMProjection(
+  engine: SFDEngine,
+  derivedType: DerivedFieldType = "curvature",
+  fps: number = 10,
+  onProgress?: (progress: number) => void
+): Promise<boolean> {
+  const frames = engine.getAllFrames();
+  if (frames.length === 0) return false;
+  
+  const { width, height } = engine.getGridSize();
+  
+  const offCanvas = document.createElement("canvas");
+  offCanvas.width = width;
+  offCanvas.height = height;
+  const ctx = offCanvas.getContext("2d");
+  if (!ctx) return false;
+  
+  // Plasma colormap for derived fields (matches dual-field-view)
+  const plasmaColors = [
+    [13, 8, 135], [75, 3, 161], [126, 3, 168], [168, 34, 150],
+    [203, 70, 121], [229, 107, 93], [248, 148, 65], [253, 195, 40], [240, 249, 33]
+  ];
+  
+  function interpolatePlasma(t: number): [number, number, number] {
+    const idx = Math.max(0, Math.min(1, t)) * (plasmaColors.length - 1);
+    const i = Math.floor(idx);
+    const f = idx - i;
+    const c1 = plasmaColors[Math.min(i, plasmaColors.length - 1)];
+    const c2 = plasmaColors[Math.min(i + 1, plasmaColors.length - 1)];
+    return [
+      Math.round(c1[0] + f * (c2[0] - c1[0])),
+      Math.round(c1[1] + f * (c2[1] - c1[1])),
+      Math.round(c1[2] + f * (c2[2] - c1[2]))
+    ];
+  }
+  
+  // Helper to compute derived field from a grid
+  function computeDerivedFromGrid(sourceGrid: Float32Array, output: Float32Array): void {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = y * width + x;
+        const getValue = (dx: number, dy: number) => {
+          const nx = (x + dx + width) % width;
+          const ny = (y + dy + height) % height;
+          return sourceGrid[ny * width + nx];
+        };
+        const value = sourceGrid[idx];
+        
+        switch (derivedType) {
+          case "curvature": {
+            const l = getValue(-1, 0);
+            const r = getValue(1, 0);
+            const u = getValue(0, -1);
+            const d = getValue(0, 1);
+            const laplacian = l + r + u + d - 4 * value;
+            output[idx] = Math.tanh(laplacian * 2.0);
+            break;
+          }
+          case "tension": {
+            const gx = (getValue(1, 0) - getValue(-1, 0)) / 2;
+            const gy = (getValue(0, 1) - getValue(0, -1)) / 2;
+            const gradMag = gx * gx + gy * gy;
+            output[idx] = -gradMag / (1 + Math.abs(gradMag));
+            break;
+          }
+          case "coupling": {
+            let sum = 0;
+            for (let dy = -2; dy <= 2; dy++) {
+              for (let dx = -2; dx <= 2; dx++) {
+                sum += getValue(dx, dy);
+              }
+            }
+            output[idx] = sum / 25 - value * 0.5;
+            break;
+          }
+          case "variance": {
+            let localMean = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                localMean += getValue(dx, dy);
+              }
+            }
+            localMean /= 9;
+            let variance = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                const v = getValue(dx, dy);
+                variance += (v - localMean) * (v - localMean);
+              }
+            }
+            output[idx] = variance / 9;
+            break;
+          }
+          case "gradientFlow": {
+            const gx = (getValue(1, 0) - getValue(-1, 0)) / 2;
+            const gy = (getValue(0, 1) - getValue(0, -1)) / 2;
+            const mag = Math.sqrt(gx * gx + gy * gy);
+            const angle = Math.atan2(gy, gx);
+            output[idx] = (angle + Math.PI) / (2 * Math.PI) * mag;
+            break;
+          }
+          case "criticality": {
+            const dxx = getValue(1, 0) - 2 * value + getValue(-1, 0);
+            const dyy = getValue(0, 1) - 2 * value + getValue(0, -1);
+            const dxy = (getValue(1, 1) - getValue(-1, 1) - getValue(1, -1) + getValue(-1, -1)) / 4;
+            const detH = dxx * dyy - dxy * dxy;
+            output[idx] = 1.0 / (Math.abs(detH) + 1e-6);
+            break;
+          }
+        }
+      }
+    }
+  }
+  
+  if (typeof MediaRecorder === "undefined") {
+    console.error("MediaRecorder not supported");
+    return false;
+  }
+  
+  const stream = offCanvas.captureStream(fps);
+  const chunks: Blob[] = [];
+  
+  const mediaRecorder = new MediaRecorder(stream, {
+    mimeType: "video/webm;codecs=vp9",
+    videoBitsPerSecond: 5000000
+  });
+  
+  mediaRecorder.ondataavailable = (e) => {
+    if (e.data.size > 0) {
+      chunks.push(e.data);
+    }
+  };
+  
+  const derivedBuffer = new Float32Array(width * height);
+  
+  return new Promise((resolve) => {
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, { type: "video/webm" });
+      downloadBlob(blob, `sfd-${derivedType}-video-${getTimestamp()}.webm`);
+      resolve(true);
+    };
+    
+    mediaRecorder.start();
+    
+    let frameIndex = 0;
+    const frameDuration = 1000 / fps;
+    
+    const renderNextFrame = () => {
+      if (frameIndex >= frames.length) {
+        mediaRecorder.stop();
+        return;
+      }
+      
+      const frame = frames[frameIndex];
+      
+      // Compute derived field for this frame
+      computeDerivedFromGrid(frame.grid, derivedBuffer);
+      
+      const imageData = ctx.createImageData(width, height);
+      
+      let min = Infinity, max = -Infinity;
+      for (let j = 0; j < derivedBuffer.length; j++) {
+        min = Math.min(min, derivedBuffer[j]);
+        max = Math.max(max, derivedBuffer[j]);
+      }
+      const range = max - min || 1;
+      
+      for (let j = 0; j < derivedBuffer.length; j++) {
+        const t = (derivedBuffer[j] - min) / range;
+        const [r, g, b] = interpolatePlasma(t);
+        const pixIdx = j * 4;
+        imageData.data[pixIdx] = r;
+        imageData.data[pixIdx + 1] = g;
+        imageData.data[pixIdx + 2] = b;
+        imageData.data[pixIdx + 3] = 255;
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+      
+      if (onProgress) {
+        onProgress((frameIndex + 1) / frames.length);
+      }
+      
+      frameIndex++;
+      setTimeout(renderNextFrame, frameDuration);
+    };
+    
+    renderNextFrame();
+  });
+}
+
+/**
  * Export simulation as WebM video with side-by-side main and projection view
+ * Computes derived fields for each historical frame for the projection side
  */
 export async function exportVideoWebMDual(
   engine: SFDEngine,
   mainCanvas: HTMLCanvasElement | null,
   projectionCanvas: HTMLCanvasElement | null,
   colormap: "inferno" | "viridis" | "cividis",
-  fps: number = 30,
-  onProgress?: (progress: number) => void
+  fps: number = 10,
+  onProgress?: (progress: number) => void,
+  derivedType: DerivedFieldType = "curvature"
 ): Promise<boolean> {
   const frames = engine.getAllFrames();
   if (frames.length === 0 || !mainCanvas || !projectionCanvas) return false;
@@ -1441,6 +1639,12 @@ export async function exportVideoWebMDual(
   
   const colors = colormaps[colormap] || colormaps.viridis;
   
+  // Plasma colormap for derived fields
+  const plasmaColors = [
+    [13, 8, 135], [75, 3, 161], [126, 3, 168], [168, 34, 150],
+    [203, 70, 121], [229, 107, 93], [248, 148, 65], [253, 195, 40], [240, 249, 33]
+  ];
+  
   function interpolateColor(t: number): [number, number, number] {
     const idx = t * (colors.length - 1);
     const i = Math.floor(idx);
@@ -1452,6 +1656,105 @@ export async function exportVideoWebMDual(
       Math.round(c1[1] + f * (c2[1] - c1[1])),
       Math.round(c1[2] + f * (c2[2] - c1[2]))
     ];
+  }
+  
+  function interpolatePlasma(t: number): [number, number, number] {
+    const idx = Math.max(0, Math.min(1, t)) * (plasmaColors.length - 1);
+    const i = Math.floor(idx);
+    const f = idx - i;
+    const c1 = plasmaColors[Math.min(i, plasmaColors.length - 1)];
+    const c2 = plasmaColors[Math.min(i + 1, plasmaColors.length - 1)];
+    return [
+      Math.round(c1[0] + f * (c2[0] - c1[0])),
+      Math.round(c1[1] + f * (c2[1] - c1[1])),
+      Math.round(c1[2] + f * (c2[2] - c1[2]))
+    ];
+  }
+  
+  // Helper to compute derived field from a grid
+  function computeDerivedFromGrid(sourceGrid: Float32Array, output: Float32Array): void {
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = y * width + x;
+        const getValue = (dx: number, dy: number) => {
+          const nx = (x + dx + width) % width;
+          const ny = (y + dy + height) % height;
+          return sourceGrid[ny * width + nx];
+        };
+        const value = sourceGrid[idx];
+        
+        switch (derivedType) {
+          case "curvature": {
+            const l = getValue(-1, 0);
+            const r = getValue(1, 0);
+            const u = getValue(0, -1);
+            const d = getValue(0, 1);
+            const laplacian = l + r + u + d - 4 * value;
+            output[idx] = Math.tanh(laplacian * 2.0);
+            break;
+          }
+          case "tension": {
+            const gx = (getValue(1, 0) - getValue(-1, 0)) / 2;
+            const gy = (getValue(0, 1) - getValue(0, -1)) / 2;
+            const gradMag = gx * gx + gy * gy;
+            output[idx] = -gradMag / (1 + Math.abs(gradMag));
+            break;
+          }
+          case "coupling": {
+            let sum = 0;
+            for (let dy = -2; dy <= 2; dy++) {
+              for (let dx = -2; dx <= 2; dx++) {
+                sum += getValue(dx, dy);
+              }
+            }
+            output[idx] = sum / 25 - value * 0.5;
+            break;
+          }
+          case "variance": {
+            let localMean = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                localMean += getValue(dx, dy);
+              }
+            }
+            localMean /= 9;
+            let variance = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                const v = getValue(dx, dy);
+                variance += (v - localMean) * (v - localMean);
+              }
+            }
+            output[idx] = variance / 9;
+            break;
+          }
+          case "gradientFlow": {
+            const gx = (getValue(1, 0) - getValue(-1, 0)) / 2;
+            const gy = (getValue(0, 1) - getValue(0, -1)) / 2;
+            const mag = Math.sqrt(gx * gx + gy * gy);
+            const angle = Math.atan2(gy, gx);
+            output[idx] = (angle + Math.PI) / (2 * Math.PI) * mag;
+            break;
+          }
+          case "criticality": {
+            const dxx = getValue(1, 0) - 2 * value + getValue(-1, 0);
+            const dyy = getValue(0, 1) - 2 * value + getValue(0, -1);
+            const dxy = (getValue(1, 1) - getValue(-1, 1) - getValue(1, -1) + getValue(-1, -1)) / 4;
+            const detH = dxx * dyy - dxy * dxy;
+            output[idx] = 1.0 / (Math.abs(detH) + 1e-6);
+            break;
+          }
+          default:
+            // For unsupported types, fall back to curvature
+            const l = getValue(-1, 0);
+            const r = getValue(1, 0);
+            const u = getValue(0, -1);
+            const d = getValue(0, 1);
+            const laplacian = l + r + u + d - 4 * value;
+            output[idx] = Math.tanh(laplacian * 2.0);
+        }
+      }
+    }
   }
   
   if (typeof MediaRecorder === "undefined") {
@@ -1472,6 +1775,8 @@ export async function exportVideoWebMDual(
       chunks.push(e.data);
     }
   };
+  
+  const derivedBuffer = new Float32Array(width * height);
   
   return new Promise((resolve) => {
     mediaRecorder.onstop = () => {
@@ -1496,7 +1801,8 @@ export async function exportVideoWebMDual(
       ctx.fillStyle = "#0a0a0f";
       ctx.fillRect(0, 0, totalWidth, height);
       
-      const imageData = ctx.createImageData(width, height);
+      // Render main field (left side)
+      const mainImageData = ctx.createImageData(width, height);
       
       let min = Infinity, max = -Infinity;
       for (let j = 0; j < frame.grid.length; j++) {
@@ -1509,14 +1815,37 @@ export async function exportVideoWebMDual(
         const t = (frame.grid[j] - min) / range;
         const [r, g, b] = interpolateColor(t);
         const pixIdx = j * 4;
-        imageData.data[pixIdx] = r;
-        imageData.data[pixIdx + 1] = g;
-        imageData.data[pixIdx + 2] = b;
-        imageData.data[pixIdx + 3] = 255;
+        mainImageData.data[pixIdx] = r;
+        mainImageData.data[pixIdx + 1] = g;
+        mainImageData.data[pixIdx + 2] = b;
+        mainImageData.data[pixIdx + 3] = 255;
       }
       
-      ctx.putImageData(imageData, 0, 0);
-      ctx.drawImage(projectionCanvas, width + gap, 0, width, height);
+      ctx.putImageData(mainImageData, 0, 0);
+      
+      // Render derived field (right side)
+      computeDerivedFromGrid(frame.grid, derivedBuffer);
+      
+      const derivedImageData = ctx.createImageData(width, height);
+      
+      let dMin = Infinity, dMax = -Infinity;
+      for (let j = 0; j < derivedBuffer.length; j++) {
+        dMin = Math.min(dMin, derivedBuffer[j]);
+        dMax = Math.max(dMax, derivedBuffer[j]);
+      }
+      const dRange = dMax - dMin || 1;
+      
+      for (let j = 0; j < derivedBuffer.length; j++) {
+        const t = (derivedBuffer[j] - dMin) / dRange;
+        const [r, g, b] = interpolatePlasma(t);
+        const pixIdx = j * 4;
+        derivedImageData.data[pixIdx] = r;
+        derivedImageData.data[pixIdx + 1] = g;
+        derivedImageData.data[pixIdx + 2] = b;
+        derivedImageData.data[pixIdx + 3] = 255;
+      }
+      
+      ctx.putImageData(derivedImageData, width + gap, 0);
       
       if (onProgress) {
         onProgress((frameIndex + 1) / frames.length);

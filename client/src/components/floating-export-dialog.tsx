@@ -50,6 +50,8 @@ import {
   exportFullArchive,
   exportVideoWebM,
   exportVideoWebMDual,
+  exportVideoWebMProjection,
+  type DerivedFieldType,
 } from "@/lib/export-utils";
 
 export type ExportViewType = 'main' | 'projection' | 'sideBySide';
@@ -89,6 +91,7 @@ interface FloatingExportDialogProps {
   isPinned?: boolean;
   pinnedPosition?: { x: number; y: number } | null;
   onPinnedChange?: (isPinned: boolean, position: { x: number; y: number } | null) => void;
+  derivedType?: DerivedFieldType;
 }
 
 const CATEGORY_INFO: Record<ExportCategory, { label: string; icon: React.ReactNode; color: string }> = {
@@ -115,6 +118,7 @@ export function FloatingExportDialog({
   isPinned: isPinnedProp,
   pinnedPosition: pinnedPositionProp,
   onPinnedChange,
+  derivedType = "curvature",
 }: FloatingExportDialogProps) {
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<ExportCategory>('visual');
@@ -261,21 +265,17 @@ export function FloatingExportDialog({
     if (view === 'main') {
       return exportVideoWebM(engine, canvas, colormap);
     } else if (view === 'projection') {
-      const derivedCanvas = getDerivedCanvas();
-      if (!derivedCanvas) {
-        toast({ title: "Projection view not available", description: "Please open the projection view first", variant: "destructive" });
-        return false;
-      }
-      return exportVideoWebM(engine, derivedCanvas, colormap);
+      // Use the new projection video export that computes derived fields for each historical frame
+      return exportVideoWebMProjection(engine, derivedType);
     } else {
       const derivedCanvas = getDerivedCanvas();
       if (!derivedCanvas) {
         toast({ title: "Projection view not available", description: "Please open the projection view first", variant: "destructive" });
         return false;
       }
-      return exportVideoWebMDual(engine, canvas, derivedCanvas, colormap);
+      return exportVideoWebMDual(engine, canvas, derivedCanvas, colormap, 10, undefined, derivedType);
     }
-  }, [engine, colormap, getCanvas, getDerivedCanvas, toast]);
+  }, [engine, colormap, derivedType, getCanvas, getDerivedCanvas, toast]);
 
   const exportOptions: ExportOption[] = [
     // === VISUAL (Safe for sharing) ===

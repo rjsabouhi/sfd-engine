@@ -2802,6 +2802,7 @@ export default function SimulationPage() {
           isPinned={exportPinned.isPinned}
           pinnedPosition={exportPinned.position}
           onPinnedChange={(isPinned, position) => setExportPinned({ isPinned, position })}
+          derivedType={derivedType === "basins" ? "curvature" : derivedType as any}
         />
       </div>
     );
@@ -3444,6 +3445,7 @@ export default function SimulationPage() {
         isPinned={exportPinned.isPinned}
         pinnedPosition={exportPinned.position}
         onPinnedChange={(isPinned, position) => setExportPinned({ isPinned, position })}
+        derivedType={derivedType === "basins" ? "curvature" : derivedType as any}
       />
       
       {/* Floating Diagnostics Console - CTRL+SHIFT+D to toggle - only visible in focusMode */}
