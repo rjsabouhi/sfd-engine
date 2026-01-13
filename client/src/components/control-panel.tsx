@@ -376,32 +376,7 @@ export function ControlPanel({
               </div>
             </div>
 
-            {/* Export Section */}
-            <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-export">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                  <Download className="h-3 w-3" />
-                  Quick Export
-                </span>
-              </div>
-              <div className="flex gap-1">
-                <Button size="sm" variant="ghost" className="flex-1 text-xs" onClick={onExportPNG} data-testid="home-button-export-png">
-                  <Image className="h-3 w-3 mr-1" />
-                  PNG
-                </Button>
-                <Button size="sm" variant="ghost" className="flex-1 text-xs" onClick={onExportJSON} data-testid="home-button-export-json">
-                  <FileJson className="h-3 w-3 mr-1" />
-                  JSON
-                </Button>
-                {onExportWebM && (
-                  <Button size="sm" variant="ghost" className="flex-1 text-xs" onClick={onExportWebM} disabled={isExporting} data-testid="home-button-export-webm">
-                    <Video className="h-3 w-3 mr-1" />
-                    Video
-                  </Button>
-                )}
-              </div>
-            </div>
-          </TabsContent>
+            </TabsContent>
 
           <TabsContent value="controls" className="m-0 p-3 space-y-4">
             <Collapsible open={playbackOpen} onOpenChange={setPlaybackOpen}>
