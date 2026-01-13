@@ -1052,129 +1052,139 @@ export async function exportLayersSeparate(
  * Creates a contact sheet with all layers arranged in a grid
  */
 export async function exportLayersAsZip(engine: SFDEngine): Promise<boolean> {
-  const { width, height } = engine.getGridSize();
-  const frames = engine.getAllFrames();
-  if (frames.length === 0) return false;
+  try {
+    const { width, height } = engine.getGridSize();
+    const frames = engine.getAllFrames();
+    if (frames.length === 0) {
+      console.error('exportLayersAsZip: No frames available');
+      return false;
+    }
   
-  const currentFrame = frames[frames.length - 1];
-  const grid = currentFrame.grid;
+    const currentFrame = frames[frames.length - 1];
+    const grid = currentFrame.grid;
   
-  const curvatureField = new Float32Array(width * height);
-  const tensionField = new Float32Array(width * height);
-  const gradientField = new Float32Array(width * height);
-  const varianceField = new Float32Array(width * height);
+    const curvatureField = new Float32Array(width * height);
+    const tensionField = new Float32Array(width * height);
+    const gradientField = new Float32Array(width * height);
+    const varianceField = new Float32Array(width * height);
   
-  for (let y = 1; y < height - 1; y++) {
-    for (let x = 1; x < width - 1; x++) {
-      const idx = y * width + x;
-      const c = grid[idx];
-      const l = grid[idx - 1];
-      const r = grid[idx + 1];
-      const u = grid[idx - width];
-      const d = grid[idx + width];
+    for (let y = 1; y < height - 1; y++) {
+      for (let x = 1; x < width - 1; x++) {
+        const idx = y * width + x;
+        const c = grid[idx];
+        const l = grid[idx - 1];
+        const r = grid[idx + 1];
+        const u = grid[idx - width];
+        const d = grid[idx + width];
       
-      curvatureField[idx] = l + r + u + d - 4 * c;
-      const gx = (r - l) / 2;
-      const gy = (d - u) / 2;
-      gradientField[idx] = Math.sqrt(gx * gx + gy * gy);
-      tensionField[idx] = Math.abs(curvatureField[idx]) * gradientField[idx];
+        curvatureField[idx] = l + r + u + d - 4 * c;
+        const gx = (r - l) / 2;
+        const gy = (d - u) / 2;
+        gradientField[idx] = Math.sqrt(gx * gx + gy * gy);
+        tensionField[idx] = Math.abs(curvatureField[idx]) * gradientField[idx];
       
-      let sum = 0, sumSq = 0, count = 0;
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          const ni = (y + dy) * width + (x + dx);
-          sum += grid[ni];
-          sumSq += grid[ni] * grid[ni];
-          count++;
+        let sum = 0, sumSq = 0, count = 0;
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            const ni = (y + dy) * width + (x + dx);
+            sum += grid[ni];
+            sumSq += grid[ni] * grid[ni];
+            count++;
+          }
         }
+        const mean = sum / count;
+        varianceField[idx] = sumSq / count - mean * mean;
       }
-      const mean = sum / count;
-      varianceField[idx] = sumSq / count - mean * mean;
     }
-  }
   
-  const viridisColors = [[68,1,84],[72,36,117],[65,68,135],[53,95,141],[42,120,142],[33,144,140],[34,167,132],[68,190,112],[122,209,81],[189,222,38],[253,231,37]];
+    const viridisColors = [[68,1,84],[72,36,117],[65,68,135],[53,95,141],[42,120,142],[33,144,140],[34,167,132],[68,190,112],[122,209,81],[189,222,38],[253,231,37]];
   
-  const interpolateViridis = (t: number): [number, number, number] => {
-    const idx = t * (viridisColors.length - 1);
-    const i = Math.floor(idx);
-    const f = idx - i;
-    const c1 = viridisColors[Math.min(i, viridisColors.length - 1)];
-    const c2 = viridisColors[Math.min(i + 1, viridisColors.length - 1)];
-    return [
-      Math.round(c1[0] + f * (c2[0] - c1[0])),
-      Math.round(c1[1] + f * (c2[1] - c1[1])),
-      Math.round(c1[2] + f * (c2[2] - c1[2]))
+    const interpolateViridis = (t: number): [number, number, number] => {
+      const idx = t * (viridisColors.length - 1);
+      const i = Math.floor(idx);
+      const f = idx - i;
+      const c1 = viridisColors[Math.min(i, viridisColors.length - 1)];
+      const c2 = viridisColors[Math.min(i + 1, viridisColors.length - 1)];
+      return [
+        Math.round(c1[0] + f * (c2[0] - c1[0])),
+        Math.round(c1[1] + f * (c2[1] - c1[1])),
+        Math.round(c1[2] + f * (c2[2] - c1[2]))
+      ];
+    };
+  
+    const gap = 10;
+    const cols = 3;
+    const rows = 2;
+    const layers = [
+      { data: grid, label: "Primary" },
+      { data: curvatureField, label: "Curvature" },
+      { data: gradientField, label: "Gradient" },
+      { data: tensionField, label: "Tension" },
+      { data: varianceField, label: "Variance" },
     ];
-  };
   
-  const gap = 10;
-  const cols = 3;
-  const rows = 2;
-  const layers = [
-    { data: grid, label: "Primary" },
-    { data: curvatureField, label: "Curvature" },
-    { data: gradientField, label: "Gradient" },
-    { data: tensionField, label: "Tension" },
-    { data: varianceField, label: "Variance" },
-  ];
+    const contactWidth = cols * width + (cols - 1) * gap;
+    const contactHeight = rows * height + (rows - 1) * gap + 30 * rows;
   
-  const contactWidth = cols * width + (cols - 1) * gap;
-  const contactHeight = rows * height + (rows - 1) * gap + 30 * rows;
+    const contactCanvas = document.createElement("canvas");
+    contactCanvas.width = contactWidth;
+    contactCanvas.height = contactHeight;
+    const ctx = contactCanvas.getContext("2d");
+    if (!ctx) return false;
   
-  const contactCanvas = document.createElement("canvas");
-  contactCanvas.width = contactWidth;
-  contactCanvas.height = contactHeight;
-  const ctx = contactCanvas.getContext("2d")!;
+    ctx.fillStyle = "#0a0a0f";
+    ctx.fillRect(0, 0, contactWidth, contactHeight);
   
-  ctx.fillStyle = "#0a0a0f";
-  ctx.fillRect(0, 0, contactWidth, contactHeight);
-  
-  for (let li = 0; li < layers.length; li++) {
-    const layer = layers[li];
-    const col = li % cols;
-    const row = Math.floor(li / cols);
-    const xOff = col * (width + gap);
-    const yOff = row * (height + gap + 30);
+    for (let li = 0; li < layers.length; li++) {
+      const layer = layers[li];
+      const col = li % cols;
+      const row = Math.floor(li / cols);
+      const xOff = col * (width + gap);
+      const yOff = row * (height + gap + 30);
     
-    let min = Infinity, max = -Infinity;
-    for (let i = 0; i < layer.data.length; i++) {
-      min = Math.min(min, layer.data[i]);
-      max = Math.max(max, layer.data[i]);
+      let min = Infinity, max = -Infinity;
+      for (let i = 0; i < layer.data.length; i++) {
+        min = Math.min(min, layer.data[i]);
+        max = Math.max(max, layer.data[i]);
+      }
+      const range = max - min || 1;
+    
+      const imageData = ctx.createImageData(width, height);
+      for (let i = 0; i < layer.data.length; i++) {
+        const t = (layer.data[i] - min) / range;
+        const [r, g, b] = interpolateViridis(t);
+        const pi = i * 4;
+        imageData.data[pi] = r;
+        imageData.data[pi + 1] = g;
+        imageData.data[pi + 2] = b;
+        imageData.data[pi + 3] = 255;
+      }
+    
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = width;
+      tempCanvas.height = height;
+      const tempCtx = tempCanvas.getContext("2d");
+      if (!tempCtx) continue;
+      tempCtx.putImageData(imageData, 0, 0);
+      ctx.drawImage(tempCanvas, xOff, yOff);
+    
+      ctx.font = "bold 14px Inter, system-ui, sans-serif";
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "left";
+      ctx.fillText(layer.label, xOff + 4, yOff + height + 20);
     }
-    const range = max - min || 1;
-    
-    const imageData = ctx.createImageData(width, height);
-    for (let i = 0; i < layer.data.length; i++) {
-      const t = (layer.data[i] - min) / range;
-      const [r, g, b] = interpolateViridis(t);
-      const pi = i * 4;
-      imageData.data[pi] = r;
-      imageData.data[pi + 1] = g;
-      imageData.data[pi + 2] = b;
-      imageData.data[pi + 3] = 255;
-    }
-    
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = width;
-    tempCanvas.height = height;
-    const tempCtx = tempCanvas.getContext("2d")!;
-    tempCtx.putImageData(imageData, 0, 0);
-    ctx.drawImage(tempCanvas, xOff, yOff);
-    
-    ctx.font = "bold 14px Inter, system-ui, sans-serif";
-    ctx.fillStyle = "#ffffff";
-    ctx.textAlign = "left";
-    ctx.fillText(layer.label, xOff + 4, yOff + height + 20);
+  
+    const blob = await new Promise<Blob | null>((resolve) => {
+      contactCanvas.toBlob((b) => resolve(b), "image/png");
+    });
+  
+    if (!blob) return false;
+    downloadBlob(blob, `sfd-layers-bundle-${getTimestamp()}.png`);
+    return true;
+  } catch (e) {
+    console.error('exportLayersAsZip error:', e);
+    return false;
   }
-  
-  const blob = await new Promise<Blob | null>((resolve) => {
-    contactCanvas.toBlob((b) => resolve(b), "image/png");
-  });
-  
-  if (!blob) return false;
-  downloadBlob(blob, `sfd-layers-bundle-${getTimestamp()}.png`);
-  return true;
 }
 
 /**
