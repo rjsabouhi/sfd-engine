@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -157,6 +157,39 @@ export function ControlPanel({
   const [notebookParamsOpen, setNotebookParamsOpen] = useState(true);
   const [notebookEquationOpen, setNotebookEquationOpen] = useState(true);
   const [notebookWeightsOpen, setNotebookWeightsOpen] = useState(true);
+  const [panelWidth, setPanelWidth] = useState(400);
+  
+  const panelRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setPanelWidth(entry.contentRect.width);
+      }
+    });
+    
+    observer.observe(panel);
+    return () => observer.disconnect();
+  }, []);
+  
+  const STACK_START = 380;
+  const STACK_FULL = 280;
+  const isLayeredMode = panelWidth < STACK_START;
+  const layerFactor = isLayeredMode 
+    ? Math.min(1, (STACK_START - panelWidth) / (STACK_START - STACK_FULL))
+    : 0;
+  
+  const tabs = [
+    { value: "home", label: "Home", icon: Home },
+    { value: "controls", label: "Controls", icon: Play },
+    { value: "params", label: "Params", icon: Sliders },
+    { value: "analysis", label: "Analysis", icon: Activity },
+    { value: "notebook", label: "Notebook", icon: BookOpen },
+    { value: "export", label: "Export", icon: Download },
+  ];
 
   const modeLabels = getModeLabels(interpretationMode);
   const languageMode = toLanguageMode(interpretationMode);
@@ -169,33 +202,35 @@ export function ControlPanel({
   );
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div ref={panelRef} className="flex flex-col h-full overflow-hidden">
       <Tabs defaultValue="home" className="flex-1 flex flex-col overflow-hidden">
-        <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent px-1 h-9 shrink-0 flex-wrap">
-          <TabsTrigger value="home" className="text-xs gap-1 px-2">
-            <Home className="h-3 w-3" />
-            Home
-          </TabsTrigger>
-          <TabsTrigger value="controls" className="text-xs gap-1 px-2">
-            <Play className="h-3 w-3" />
-            Controls
-          </TabsTrigger>
-          <TabsTrigger value="params" className="text-xs gap-1 px-2">
-            <Sliders className="h-3 w-3" />
-            Params
-          </TabsTrigger>
-          <TabsTrigger value="analysis" className="text-xs gap-1 px-2">
-            <Activity className="h-3 w-3" />
-            Analysis
-          </TabsTrigger>
-          <TabsTrigger value="notebook" className="text-xs gap-1 px-2">
-            <BookOpen className="h-3 w-3" />
-            Notebook
-          </TabsTrigger>
-          <TabsTrigger value="export" className="text-xs gap-1 px-2">
-            <Download className="h-3 w-3" />
-            Export
-          </TabsTrigger>
+        <TabsList 
+          className={`w-full justify-start rounded-none border-b border-border bg-transparent px-1 shrink-0 ${
+            isLayeredMode ? 'relative h-10 overflow-visible' : 'h-9 flex-wrap'
+          }`}
+        >
+          {tabs.map((tab, index) => {
+            const Icon = tab.icon;
+            const offset = isLayeredMode ? -16 * layerFactor * index : 0;
+            const zIndex = isLayeredMode ? tabs.length - index : undefined;
+            
+            return (
+              <TabsTrigger 
+                key={tab.value}
+                value={tab.value} 
+                className="text-xs gap-1 px-2 data-[state=active]:z-50"
+                style={isLayeredMode ? {
+                  marginLeft: index === 0 ? 0 : offset,
+                  zIndex,
+                  position: 'relative',
+                  boxShadow: index > 0 ? '-2px 0 4px rgba(0,0,0,0.3)' : undefined,
+                } : undefined}
+              >
+                <Icon className="h-3 w-3" />
+                {!isLayeredMode || layerFactor < 0.7 ? tab.label : null}
+              </TabsTrigger>
+            );
+          })}
         </TabsList>
 
         <div className="flex-1 overflow-y-auto">
