@@ -157,7 +157,6 @@ export function ControlPanel({
   const [notebookParamsOpen, setNotebookParamsOpen] = useState(true);
   const [notebookEquationOpen, setNotebookEquationOpen] = useState(true);
   const [notebookWeightsOpen, setNotebookWeightsOpen] = useState(true);
-  const [homeNotebookOpen, setHomeNotebookOpen] = useState(false);
   const [panelWidth, setPanelWidth] = useState(400);
   
   const panelRef = useRef<HTMLDivElement>(null);
@@ -350,26 +349,6 @@ export function ControlPanel({
                 <OperatorSensitivity contributions={operatorContributions} modeLabels={modeLabels} compact />
               </div>
             </div>
-
-            {/* Notebook Section - Collapsible, collapsed by default */}
-            <Collapsible open={homeNotebookOpen} onOpenChange={setHomeNotebookOpen}>
-              <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-notebook">
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full hover-elevate rounded px-1" data-testid="button-toggle-home-notebook">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                      <BookOpen className="h-3 w-3" />
-                      Notebook
-                    </span>
-                    {homeNotebookOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pt-2">
-                  <code className="text-[10px] block bg-background/50 p-1.5 rounded font-mono text-muted-foreground" data-testid="home-equation">
-                    dF/dt = wK*K(F) + wT*T(F) + wC*C(F) + wA*A(F) + wR*R(F)
-                  </code>
-                </CollapsibleContent>
-              </div>
-            </Collapsible>
 
             {/* Export Section */}
             <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-export">
