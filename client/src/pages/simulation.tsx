@@ -2969,25 +2969,6 @@ export default function SimulationPage() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            {/* Diagnostics */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setDiagnosticsVisible(!diagnosticsVisible)}
-                  data-testid="button-diagnostics"
-                  className={`h-6 text-[10px] gap-1 text-white/70 hover:text-white hover:bg-white/10 ${diagnosticsVisible ? "bg-white/20 text-white" : ""}`}
-                >
-                  <Gauge className="h-3 w-3" />
-                  Diagnostics
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="text-xs">
-                Show real-time stability and energy metrics
-              </TooltipContent>
-            </Tooltip>
-            <div className="w-px h-5 bg-white/30 shrink-0" />
             {/* Color Map */}
             <Tooltip>
               <TooltipTrigger asChild>
