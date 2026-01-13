@@ -2831,7 +2831,7 @@ export default function SimulationPage() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => setExportDialogOpen(true)} 
+                onClick={() => setExportDialogOpen(!exportDialogOpen)} 
                 data-testid="button-header-export"
                 className="h-7 text-xs gap-1.5"
               >
