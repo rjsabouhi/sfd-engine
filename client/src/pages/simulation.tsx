@@ -2535,6 +2535,7 @@ export default function SimulationPage() {
               bringPanelToFront('inspector');
             } else {
               setFieldInspectorEnabled(false);
+              setProbeDetailOpen(false); // Close probe detail when inspector closes
             }
           }}
           exportDialogOpen={exportDialogOpen}
