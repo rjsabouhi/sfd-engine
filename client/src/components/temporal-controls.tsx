@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { SkipBack, SkipForward, History } from "lucide-react";
 
 interface TemporalControlsProps {
@@ -28,37 +29,52 @@ export function TemporalControls({
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={onStepBackward}
-          disabled={!hasHistory || isRunning || currentIndex <= 0}
-          data-testid="button-step-backward"
-        >
-          <SkipBack className="h-4 w-4" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onStepBackward}
+              disabled={!hasHistory || isRunning || currentIndex <= 0}
+              data-testid="button-step-backward"
+            >
+              <SkipBack className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">Step backward in history</TooltipContent>
+        </Tooltip>
         
-        <div className="flex-1 px-2">
-          <Slider
-            value={[hasHistory ? currentIndex : 0]}
-            min={0}
-            max={Math.max(0, historyLength - 1)}
-            step={1}
-            onValueChange={([v]) => onSeek(v)}
-            disabled={!hasHistory || isRunning}
-            data-testid="slider-timeline"
-          />
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex-1 px-2">
+              <Slider
+                value={[hasHistory ? currentIndex : 0]}
+                min={0}
+                max={Math.max(0, historyLength - 1)}
+                step={1}
+                onValueChange={([v]) => onSeek(v)}
+                disabled={!hasHistory || isRunning}
+                data-testid="slider-timeline"
+              />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">Scrub through simulation history</TooltipContent>
+        </Tooltip>
         
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={onStepForward}
-          disabled={!hasHistory || isRunning || currentIndex >= historyLength - 1}
-          data-testid="button-step-forward"
-        >
-          <SkipForward className="h-4 w-4" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onStepForward}
+              disabled={!hasHistory || isRunning || currentIndex >= historyLength - 1}
+              data-testid="button-step-forward"
+            >
+              <SkipForward className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">Step forward in history</TooltipContent>
+        </Tooltip>
       </div>
       
       <div className="flex items-center justify-between text-xs text-muted-foreground">

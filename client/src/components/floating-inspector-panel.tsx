@@ -243,15 +243,20 @@ export function FloatingInspectorPanel({
                 {isPinned ? 'Unpin Position' : 'Pin Position'}
               </TooltipContent>
             </Tooltip>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-5 w-5 rounded-full text-neutral-500 hover:text-neutral-300"
-              data-testid="inspector-close"
-            >
-              <X className="h-3 w-3" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClose}
+                  className="h-5 w-5 rounded-full text-neutral-500 hover:text-neutral-300"
+                  data-testid="inspector-close"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Close panel</TooltipContent>
+            </Tooltip>
           </div>
         </div>
         
@@ -346,7 +351,7 @@ export function FloatingInspectorPanel({
                                 <ExternalLink className="h-2.5 w-2.5" />
                               </Button>
                             </TooltipTrigger>
-                            <TooltipContent side="top" className="text-xs">View Details</TooltipContent>
+                            <TooltipContent side="top" className="text-xs">Open detailed probe analysis</TooltipContent>
                           </Tooltip>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -364,7 +369,7 @@ export function FloatingInspectorPanel({
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent side="top" className="text-xs">
-                              {probe.isBaseline ? 'Remove Baseline' : 'Set as Baseline'}
+                              {probe.isBaseline ? 'Remove baseline' : 'Set as baseline for comparison'}
                             </TooltipContent>
                           </Tooltip>
                           <Tooltip>
@@ -382,7 +387,7 @@ export function FloatingInspectorPanel({
                                 <Trash2 className="h-2.5 w-2.5" />
                               </Button>
                             </TooltipTrigger>
-                            <TooltipContent side="top" className="text-xs">Remove Probe</TooltipContent>
+                            <TooltipContent side="top" className="text-xs">Remove this probe</TooltipContent>
                           </Tooltip>
                         </div>
                       </div>

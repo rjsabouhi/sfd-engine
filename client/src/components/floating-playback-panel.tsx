@@ -235,15 +235,20 @@ export function FloatingPlaybackPanel({
                 {isPinned ? 'Unpin Position' : 'Pin Position'}
               </TooltipContent>
             </Tooltip>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-5 w-5 rounded-full text-neutral-500 hover:text-neutral-300"
-              data-testid="playback-close"
-            >
-              <X className="h-3 w-3" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClose}
+                  className="h-5 w-5 rounded-full text-neutral-500 hover:text-neutral-300"
+                  data-testid="playback-close"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Close panel</TooltipContent>
+            </Tooltip>
           </div>
         </div>
         
@@ -264,15 +269,20 @@ export function FloatingPlaybackPanel({
               <TooltipContent side="bottom" className="text-xs">Reset</TooltipContent>
             </Tooltip>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleJumpBack}
-              className="h-7 w-7 rounded-full"
-              data-testid="playback-jump-back"
-            >
-              <ChevronLeft className="h-3.5 w-3.5" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleJumpBack}
+                  className="h-7 w-7 rounded-full"
+                  data-testid="playback-jump-back"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Jump back 10 frames</TooltipContent>
+            </Tooltip>
 
             <Tooltip>
               <TooltipTrigger asChild>
@@ -325,15 +335,20 @@ export function FloatingPlaybackPanel({
               <TooltipContent side="bottom" className="text-xs">Step Forward</TooltipContent>
             </Tooltip>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleJumpForward}
-              className="h-7 w-7 rounded-full"
-              data-testid="playback-jump-forward"
-            >
-              <ChevronRight className="h-3.5 w-3.5" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleJumpForward}
+                  className="h-7 w-7 rounded-full"
+                  data-testid="playback-jump-forward"
+                >
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Jump forward 10 frames</TooltipContent>
+            </Tooltip>
           </div>
 
           <div className="flex items-center gap-2 mt-2">

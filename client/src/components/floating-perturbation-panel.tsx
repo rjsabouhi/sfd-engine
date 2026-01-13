@@ -500,15 +500,20 @@ export function FloatingPerturbationPanel({
                 {isPinned ? 'Unpin Position' : 'Pin Position'}
               </TooltipContent>
             </Tooltip>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-5 w-5 rounded-full text-neutral-500 hover:text-neutral-300"
-              data-testid="perturbation-close"
-            >
-              <X className="h-3 w-3" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClose}
+                  className="h-5 w-5 rounded-full text-neutral-500 hover:text-neutral-300"
+                  data-testid="perturbation-close"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Close panel</TooltipContent>
+            </Tooltip>
           </div>
         </div>
         
@@ -545,24 +550,34 @@ export function FloatingPerturbationPanel({
           </div>
 
           <div className="flex gap-2">
-            <Button
-              onClick={handleApplyAtCenter}
-              className="flex-1 h-7 text-xs"
-              size="sm"
-              data-testid="floating-apply-perturbation"
-            >
-              <Target className="h-3 w-3 mr-1.5" />
-              Apply at Center
-            </Button>
-            <Button
-              variant="outline"
-              onClick={onResetField}
-              className="h-7 text-xs px-2"
-              size="sm"
-              data-testid="floating-reset-field"
-            >
-              <RotateCcw className="h-3 w-3" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={handleApplyAtCenter}
+                  className="flex-1 h-7 text-xs"
+                  size="sm"
+                  data-testid="floating-apply-perturbation"
+                >
+                  <Target className="h-3 w-3 mr-1.5" />
+                  Apply at Center
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Apply perturbation at field center</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  onClick={onResetField}
+                  className="h-7 text-xs px-2"
+                  size="sm"
+                  data-testid="floating-reset-field"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Reset field to initial state</TooltipContent>
+            </Tooltip>
           </div>
           
           {perturbMode && (

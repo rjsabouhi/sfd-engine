@@ -176,6 +176,20 @@ export function FullscreenMenuBar({
   const [aboutOpen, setAboutOpen] = useState(false);
   const [selectedRegime, setSelectedRegime] = useState<string>("");
   
+  const regimeDescriptions: Record<string, string> = {
+    "uniform-field": "Equilibrium field - stable, minimal dynamics",
+    "high-curvature": "Curvature flow - sharp features and bending forces",
+    "multi-basin": "Multiple stable regions competing for dominance",
+    "near-critical": "System balanced near a transition point",
+    "transition-edge": "Boundary between states - high sensitivity",
+    "entropic-dispersion": "Structure dissolves into noise",
+    "post-cooling": "System reorganizes after turbulence",
+    "quasicrystal": "Aperiodic tiling with emergent symmetry",
+    "criticality-cascade": "High sensitivity, potential rapid changes",
+    "fractal-corridor": "Multi-scale coherence emergence",
+    "cosmic-web": "Filament-void structure formation",
+  };
+  
   const playbackButtonRef = useRef<HTMLButtonElement>(null);
   const diagnosticsButtonRef = useRef<HTMLButtonElement>(null);
   const perturbButtonRef = useRef<HTMLButtonElement>(null);
@@ -315,14 +329,20 @@ export function FullscreenMenuBar({
             }}
           >
             {Object.entries(structuralPresets).map(([key]) => (
-              <DropdownMenuRadioItem 
-                key={key} 
-                value={key}
-                className="text-xs cursor-pointer"
-                data-testid={`regime-${key}`}
-              >
-                {key.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-              </DropdownMenuRadioItem>
+              <Tooltip key={key}>
+                <TooltipTrigger asChild>
+                  <DropdownMenuRadioItem 
+                    value={key}
+                    className="text-xs cursor-pointer"
+                    data-testid={`regime-${key}`}
+                  >
+                    {key.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                  </DropdownMenuRadioItem>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="text-xs max-w-[200px]">
+                  {regimeDescriptions[key] || key}
+                </TooltipContent>
+              </Tooltip>
             ))}
           </DropdownMenuRadioGroup>
         </DropdownMenuContent>
@@ -331,18 +351,23 @@ export function FullscreenMenuBar({
       {showDualView && (
         <>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 text-xs px-2 gap-1"
-                data-testid="dropdown-projection-layer"
-              >
-                <Layers className="h-3 w-3" />
-                <span>Layers</span>
-                <ChevronDown className="h-3 w-3 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 text-xs px-2 gap-1"
+                    data-testid="dropdown-projection-layer"
+                  >
+                    <Layers className="h-3 w-3" />
+                    <span>Layers</span>
+                    <ChevronDown className="h-3 w-3 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Select derived field layer to display</TooltipContent>
+            </Tooltip>
             <DropdownMenuContent className="bg-popover border-border max-h-64 overflow-y-auto z-[200]">
               <DropdownMenuRadioGroup value={derivedType} onValueChange={(v) => onDerivedTypeChange(v as OverlayType)}>
                 {OVERLAY_OPTIONS.map((option) => (
@@ -355,7 +380,12 @@ export function FullscreenMenuBar({
           </DropdownMenu>
 
           <div className="flex items-center gap-2 px-2">
-            <span className="text-[10px] text-muted-foreground">Blend</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-[10px] text-muted-foreground cursor-help">Blend</span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">Opacity blend between primary and derived field</TooltipContent>
+            </Tooltip>
             <Slider
               min={0}
               max={100}
@@ -392,16 +422,21 @@ export function FullscreenMenuBar({
         <TooltipContent side="bottom" className="text-xs">Export Options</TooltipContent>
       </Tooltip>
 
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onToggleFullscreen}
-        className="h-6 px-2 text-xs"
-        data-testid="button-exit-focus"
-      >
-        <Minimize2 className="h-3.5 w-3.5 mr-1" />
-        Dashboard
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleFullscreen}
+            className="h-6 px-2 text-xs"
+            data-testid="button-exit-focus"
+          >
+            <Minimize2 className="h-3.5 w-3.5 mr-1" />
+            Dashboard
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="text-xs">Return to dashboard view (Escape)</TooltipContent>
+      </Tooltip>
 
       <Dialog open={aboutOpen} onOpenChange={setAboutOpen}>
         <DialogContent className="max-w-lg bg-card border-border">

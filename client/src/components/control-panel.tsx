@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Sliders, Activity, Settings2, BookOpen, Download, Columns2, Home, Image, FileJson, Video } from "lucide-react";
 import type { SimulationParameters, SimulationState, OperatorContributions, StructuralSignature, StructuralEvent, TrendMetrics } from "@shared/schema";
 import { defaultParameters } from "@shared/schema";
@@ -76,12 +77,22 @@ interface ParameterSliderProps {
   step: number;
   onChange: (value: number) => void;
   testId: string;
+  tooltip?: string;
 }
 
-function ParameterSlider({ label, value, min, max, step, onChange, testId }: ParameterSliderProps) {
+function ParameterSlider({ label, value, min, max, step, onChange, testId, tooltip }: ParameterSliderProps) {
+  const labelElement = (
+    <Label className="text-xs text-zinc-400 w-24 shrink-0 truncate">{label}</Label>
+  );
+  
   return (
     <div className="flex items-center gap-3">
-      <Label className="text-xs text-zinc-400 w-24 shrink-0 truncate">{label}</Label>
+      {tooltip ? (
+        <Tooltip>
+          <TooltipTrigger asChild>{labelElement}</TooltipTrigger>
+          <TooltipContent side="left" className="text-xs max-w-[200px]">{tooltip}</TooltipContent>
+        </Tooltip>
+      ) : labelElement}
       <Slider
         value={[value]}
         min={min}
@@ -271,17 +282,27 @@ export function ControlPanel({
                         Run Simulation
                       </Button>
                     )}
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => onShowDualViewChange(!showDualView)}
-                      data-testid="home-button-dual-view"
-                    >
-                      <Columns2 className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button onClick={onReset} variant="outline" size="icon" data-testid="home-button-reset">
-                      <RotateCcw className="h-3.5 w-3.5" />
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => onShowDualViewChange(!showDualView)}
+                          data-testid="home-button-dual-view"
+                        >
+                          <Columns2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Toggle side-by-side field comparison</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button onClick={onReset} variant="outline" size="icon" data-testid="home-button-reset">
+                          <RotateCcw className="h-3.5 w-3.5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Reset simulation to initial state</TooltipContent>
+                    </Tooltip>
                   </div>
                   <TemporalControls
                     historyLength={historyLength}
@@ -294,20 +315,35 @@ export function ControlPanel({
                     onExitPlayback={onExitPlayback}
                   />
                   <div className="grid grid-cols-3 gap-1 text-xs">
-                    <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-step">
-                      <div className="text-[10px] text-muted-foreground">Step</div>
-                      <div className="font-mono tabular-nums">{state.step}</div>
-                    </div>
-                    <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-status">
-                      <div className="text-[10px] text-muted-foreground">Status</div>
-                      <div className={state.isRunning ? "text-green-500" : "text-yellow-500"}>
-                        {state.isRunning ? "Running" : "Paused"}
-                      </div>
-                    </div>
-                    <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-history">
-                      <div className="text-[10px] text-muted-foreground">History</div>
-                      <div className="font-mono tabular-nums">{historyLength}</div>
-                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-step">
+                          <div className="text-[10px] text-muted-foreground">Step</div>
+                          <div className="font-mono tabular-nums">{state.step}</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Current simulation step count</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-status">
+                          <div className="text-[10px] text-muted-foreground">Status</div>
+                          <div className={state.isRunning ? "text-green-500" : "text-yellow-500"}>
+                            {state.isRunning ? "Running" : "Paused"}
+                          </div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Whether the simulation is running or paused</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1.5 py-1 text-center" data-testid="home-metric-history">
+                          <div className="text-[10px] text-muted-foreground">History</div>
+                          <div className="font-mono tabular-nums">{historyLength}</div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Number of frames stored in timeline buffer</TooltipContent>
+                    </Tooltip>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -327,31 +363,86 @@ export function ControlPanel({
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pt-2 space-y-1">
                   <div className="grid grid-cols-3 gap-1 text-xs font-mono">
-                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-dt">
-                      <span className="text-muted-foreground">dt:</span> {params.dt.toFixed(2)}
-                    </div>
-                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-k">
-                      <span className="text-muted-foreground">K:</span> {params.curvatureGain.toFixed(1)}
-                    </div>
-                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-c">
-                      <span className="text-muted-foreground">C:</span> {params.couplingWeight.toFixed(2)}
-                    </div>
-                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-a">
-                      <span className="text-muted-foreground">A:</span> {params.attractorStrength.toFixed(1)}
-                    </div>
-                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-r">
-                      <span className="text-muted-foreground">R:</span> {params.redistributionRate.toFixed(2)}
-                    </div>
-                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-grid">
-                      <span className="text-muted-foreground">Grid:</span> {params.gridSize}
-                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-dt">
+                          <span className="text-muted-foreground">dt:</span> {params.dt.toFixed(2)}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Timestep - simulation time increment</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-k">
+                          <span className="text-muted-foreground">K:</span> {params.curvatureGain.toFixed(1)}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Curvature gain parameter</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-c">
+                          <span className="text-muted-foreground">C:</span> {params.couplingWeight.toFixed(2)}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Coupling weight between neighbors</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-a">
+                          <span className="text-muted-foreground">A:</span> {params.attractorStrength.toFixed(1)}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Attractor strength</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-r">
+                          <span className="text-muted-foreground">R:</span> {params.redistributionRate.toFixed(2)}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Redistribution rate</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-param-grid">
+                          <span className="text-muted-foreground">Grid:</span> {params.gridSize}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Grid resolution (NxN cells)</TooltipContent>
+                    </Tooltip>
                   </div>
                   <div className="grid grid-cols-5 gap-1 text-xs font-mono">
-                    <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wk">wK={params.wK.toFixed(1)}</div>
-                    <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wt">wT={params.wT.toFixed(1)}</div>
-                    <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wc">wC={params.wC.toFixed(1)}</div>
-                    <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wa">wA={params.wA.toFixed(1)}</div>
-                    <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wr">wR={params.wR.toFixed(1)}</div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wk">wK={params.wK.toFixed(1)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Curvature operator weight - controls bending influence</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wt">wT={params.wT.toFixed(1)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Tension operator weight - controls smoothing forces</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wc">wC={params.wC.toFixed(1)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Coupling operator weight - controls neighbor interactions</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wa">wA={params.wA.toFixed(1)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Attractor operator weight - controls basin pull</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1 py-0.5 text-center text-[10px]" data-testid="home-weight-wr">wR={params.wR.toFixed(1)}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Redistribution operator weight - controls energy spreading</TooltipContent>
+                    </Tooltip>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
@@ -376,22 +467,42 @@ export function ControlPanel({
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pt-2 space-y-1.5">
                   <div className="grid grid-cols-2 gap-1 text-xs">
-                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-energy">
-                      <span className="text-muted-foreground">Energy:</span>{" "}
-                      <span className="font-mono tabular-nums">{state.energy.toFixed(3)}</span>
-                    </div>
-                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-variance">
-                      <span className="text-muted-foreground">Variance:</span>{" "}
-                      <span className="font-mono tabular-nums">{state.variance.toFixed(4)}</span>
-                    </div>
-                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-basins">
-                      <span className="text-muted-foreground">Basins:</span>{" "}
-                      <span className="font-mono tabular-nums">{state.basinCount}</span>
-                    </div>
-                    <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-events">
-                      <span className="text-muted-foreground">Events:</span>{" "}
-                      <span className="font-mono tabular-nums">{events.length}</span>
-                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-energy">
+                          <span className="text-muted-foreground">Energy:</span>{" "}
+                          <span className="font-mono tabular-nums">{state.energy.toFixed(3)}</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Total structural tension in the system</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-variance">
+                          <span className="text-muted-foreground">Variance:</span>{" "}
+                          <span className="font-mono tabular-nums">{state.variance.toFixed(4)}</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">How different the field values are across space</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-basins">
+                          <span className="text-muted-foreground">Basins:</span>{" "}
+                          <span className="font-mono tabular-nums">{state.basinCount}</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Number of stable attractor regions detected</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="bg-background/50 rounded px-1.5 py-1" data-testid="home-metric-events">
+                          <span className="text-muted-foreground">Events:</span>{" "}
+                          <span className="font-mono tabular-nums">{events.length}</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs max-w-[200px]">Structural events detected during simulation</TooltipContent>
+                    </Tooltip>
                   </div>
                   <OperatorSensitivity contributions={operatorContributions} modeLabels={modeLabels} compact />
                 </CollapsibleContent>
@@ -457,11 +568,11 @@ export function ControlPanel({
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-2 pt-2">
-                  <ParameterSlider label="Timestep" value={params.dt} min={0.01} max={0.2} step={0.01} onChange={(v) => onParamsChange({ dt: v })} testId="slider-timestep" />
-                  <ParameterSlider label="Curvature" value={params.curvatureGain} min={0.1} max={10} step={0.1} onChange={(v) => onParamsChange({ curvatureGain: v })} testId="slider-curvature-gain" />
-                  <ParameterSlider label="Coupling" value={params.couplingWeight} min={0} max={1} step={0.05} onChange={(v) => onParamsChange({ couplingWeight: v })} testId="slider-coupling-weight" />
-                  <ParameterSlider label="Attractor" value={params.attractorStrength} min={0.1} max={10} step={0.1} onChange={(v) => onParamsChange({ attractorStrength: v })} testId="slider-attractor-strength" />
-                  <ParameterSlider label="Redistribution" value={params.redistributionRate} min={0} max={1} step={0.05} onChange={(v) => onParamsChange({ redistributionRate: v })} testId="slider-redistribution" />
+                  <ParameterSlider label="Timestep" value={params.dt} min={0.01} max={0.2} step={0.01} onChange={(v) => onParamsChange({ dt: v })} testId="slider-timestep" tooltip="Controls simulation speed. Lower values = more precise, higher = faster evolution" />
+                  <ParameterSlider label="Curvature" value={params.curvatureGain} min={0.1} max={10} step={0.1} onChange={(v) => onParamsChange({ curvatureGain: v })} testId="slider-curvature-gain" tooltip="Strength of curvature-driven flow. Higher values create sharper features" />
+                  <ParameterSlider label="Coupling" value={params.couplingWeight} min={0} max={1} step={0.05} onChange={(v) => onParamsChange({ couplingWeight: v })} testId="slider-coupling-weight" tooltip="How strongly neighboring regions influence each other" />
+                  <ParameterSlider label="Attractor" value={params.attractorStrength} min={0.1} max={10} step={0.1} onChange={(v) => onParamsChange({ attractorStrength: v })} testId="slider-attractor-strength" tooltip="Pull strength toward stable configurations" />
+                  <ParameterSlider label="Redistribution" value={params.redistributionRate} min={0} max={1} step={0.05} onChange={(v) => onParamsChange({ redistributionRate: v })} testId="slider-redistribution" tooltip="Rate of energy spreading across the field" />
                 </CollapsibleContent>
               </Collapsible>
             </div>
@@ -475,11 +586,11 @@ export function ControlPanel({
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-2 pt-2">
-                  <ParameterSlider label="wK" value={params.wK} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wK: v })} testId="slider-wk" />
-                  <ParameterSlider label="wT" value={params.wT} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wT: v })} testId="slider-wt" />
-                  <ParameterSlider label="wC" value={params.wC} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wC: v })} testId="slider-wc" />
-                  <ParameterSlider label="wA" value={params.wA} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wA: v })} testId="slider-wa" />
-                  <ParameterSlider label="wR" value={params.wR} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wR: v })} testId="slider-wr" />
+                  <ParameterSlider label="wK" value={params.wK} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wK: v })} testId="slider-wk" tooltip="Curvature operator weight - controls bending influence" />
+                  <ParameterSlider label="wT" value={params.wT} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wT: v })} testId="slider-wt" tooltip="Tension operator weight - controls smoothing forces" />
+                  <ParameterSlider label="wC" value={params.wC} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wC: v })} testId="slider-wc" tooltip="Coupling operator weight - controls neighbor interactions" />
+                  <ParameterSlider label="wA" value={params.wA} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wA: v })} testId="slider-wa" tooltip="Attractor operator weight - controls basin pull" />
+                  <ParameterSlider label="wR" value={params.wR} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wR: v })} testId="slider-wr" tooltip="Redistribution operator weight - controls energy spreading" />
                 </CollapsibleContent>
               </Collapsible>
             </div>
@@ -496,8 +607,8 @@ export function ControlPanel({
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-2 pt-2">
-                  <ParameterSlider label="Grid Size" value={params.gridSize} min={50} max={400} step={10} onChange={(v) => onParamsChange({ gridSize: v })} testId="slider-grid-size" />
-                  <ParameterSlider label="Radius" value={params.couplingRadius} min={0.5} max={5} step={0.25} onChange={(v) => onParamsChange({ couplingRadius: v })} testId="slider-coupling-radius" />
+                  <ParameterSlider label="Grid Size" value={params.gridSize} min={50} max={400} step={10} onChange={(v) => onParamsChange({ gridSize: v })} testId="slider-grid-size" tooltip="Resolution of the simulation field (higher = more detail, slower)" />
+                  <ParameterSlider label="Radius" value={params.couplingRadius} min={0.5} max={5} step={0.25} onChange={(v) => onParamsChange({ couplingRadius: v })} testId="slider-coupling-radius" tooltip="Coupling influence radius - how far neighbors affect each point" />
                   <Button variant="secondary" size="sm" className="w-full" onClick={() => onParamsChange(defaultParameters)} data-testid="button-reset-params">
                     {LANGUAGE.UI.RESET}
                   </Button>

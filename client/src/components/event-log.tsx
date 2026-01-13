@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Download, Trash2 } from "lucide-react";
 import type { StructuralEvent } from "@shared/schema";
 
@@ -28,26 +29,36 @@ export function EventLog({ events, onClear, onExport }: EventLogProps) {
           {events.length} event{events.length !== 1 ? 's' : ''}
         </span>
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6"
-            onClick={onExport}
-            disabled={events.length === 0}
-            data-testid="button-export-events"
-          >
-            <Download className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6"
-            onClick={onClear}
-            disabled={events.length === 0}
-            data-testid="button-clear-events"
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={onExport}
+                disabled={events.length === 0}
+                data-testid="button-export-events"
+              >
+                <Download className="h-3 w-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs">Export events log</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={onClear}
+                disabled={events.length === 0}
+                data-testid="button-clear-events"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs">Clear all events</TooltipContent>
+          </Tooltip>
         </div>
       </div>
       

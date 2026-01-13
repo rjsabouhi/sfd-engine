@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ChevronDown, ChevronUp, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { StructuralSignature, AttractorStatus, FieldMode, SimulationState, TrendMetrics } from "@shared/schema";
 import type { ModeLabels } from "@/lib/interpretation-modes";
@@ -214,7 +215,14 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
       <div className="space-y-2">
         {/* Energy Trend */}
         <div className="flex items-center justify-between gap-2">
-          <span className="text-xs text-muted-foreground">Energy (avg)</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xs text-muted-foreground cursor-help">Energy (avg)</span>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="text-xs max-w-[200px]">
+              Average energy over recent frames - indicates structural tension
+            </TooltipContent>
+          </Tooltip>
           <div className="flex items-center gap-1.5">
             {trendMetrics && <TrendIndicator trend={trendMetrics.energyTrend} />}
             <span className="font-mono text-sm font-semibold" data-testid="metric-energy-avg">
@@ -225,7 +233,14 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
         
         {/* Variance Trend */}
         <div className="flex items-center justify-between gap-2">
-          <span className="text-xs text-muted-foreground">Variance (avg)</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xs text-muted-foreground cursor-help">Variance (avg)</span>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="text-xs max-w-[200px]">
+              How much field values vary across space - high = active dynamics
+            </TooltipContent>
+          </Tooltip>
           <div className="flex items-center gap-1.5">
             {trendMetrics && <TrendIndicator trend={trendMetrics.varianceTrend} />}
             <span className="font-mono text-sm font-semibold" data-testid="metric-variance-avg">
@@ -236,7 +251,14 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
         
         {/* Curvature Trend */}
         <div className="flex items-center justify-between gap-2">
-          <span className="text-xs text-muted-foreground">Curvature (avg)</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xs text-muted-foreground cursor-help">Curvature (avg)</span>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="text-xs max-w-[200px]">
+              Global field bending - positive = convex, negative = concave
+            </TooltipContent>
+          </Tooltip>
           <div className="flex items-center gap-1.5">
             {trendMetrics && <TrendIndicator trend={trendMetrics.curvatureTrend} />}
             <span className="font-mono text-sm font-semibold" data-testid="metric-curvature-avg">
@@ -247,7 +269,14 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
         
         {/* Drift/Relaxation State */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Field State</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-xs text-muted-foreground cursor-help">Field State</span>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="text-xs max-w-[200px]">
+              Whether system is relaxing, drifting, or stable
+            </TooltipContent>
+          </Tooltip>
           <span className={`text-xs font-medium ${driftState.color}`} data-testid="metric-drift-state">
             {driftState.label}
           </span>
@@ -257,7 +286,14 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
       {/* Stability History Sparkline */}
       <div className="pt-2 border-t border-border/50">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Coherence Trend</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider cursor-help">Coherence Trend</span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs max-w-[200px]">
+              Measure of spatial organization and correlation over time
+            </TooltipContent>
+          </Tooltip>
         </div>
         <Sparkline data={coherenceHistory} width={200} height={24} />
       </div>
@@ -266,7 +302,14 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
       {trendMetrics && (
         <div className="pt-2 border-t border-border/50">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Stability History</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider cursor-help">Stability History</span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs max-w-[200px]">
+                Frame counts: stable (s), borderline (b), unstable (u)
+              </TooltipContent>
+            </Tooltip>
             <span className={`text-xs font-mono ${getStabilityColor(trendMetrics.stableFrames, trendMetrics.borderlineFrames, trendMetrics.unstableFrames)}`}>
               {trendMetrics.stableFrames}s / {trendMetrics.borderlineFrames}b / {trendMetrics.unstableFrames}u
             </span>
@@ -309,23 +352,58 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
           {trendMetrics ? (
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Avg Basins</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-muted-foreground cursor-help">Avg Basins</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Average number of stable attractor regions in the field
+                  </TooltipContent>
+                </Tooltip>
                 <span className="font-mono">{trendMetrics.avgBasinCount.toFixed(1)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Merge Rate</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-muted-foreground cursor-help">Merge Rate</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Rate at which basins are combining or splitting
+                  </TooltipContent>
+                </Tooltip>
                 <span className="font-mono">{(trendMetrics.basinMergeRate * 100).toFixed(1)}%</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Peak Gradient</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-muted-foreground cursor-help">Peak Gradient</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Maximum rate of change in the field
+                  </TooltipContent>
+                </Tooltip>
                 <span className="font-mono">{trendMetrics.peakGradient.toFixed(4)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Peak Energy</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-muted-foreground cursor-help">Peak Energy</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Highest energy level observed in recent frames
+                  </TooltipContent>
+                </Tooltip>
                 <span className="font-mono">{trendMetrics.peakEnergy.toFixed(4)}</span>
               </div>
               <div className="flex justify-between col-span-2">
-                <span className="text-muted-foreground">Complexity</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-muted-foreground cursor-help">Complexity</span>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Overall system complexity based on multiple metrics
+                  </TooltipContent>
+                </Tooltip>
                 <span className="font-mono">{getComplexityLabel(trendMetrics.complexity)}</span>
               </div>
             </div>
@@ -346,35 +424,91 @@ export function StructuralSignatureBar({ signature, coherenceHistory, trendMetri
         <CollapsibleContent className="pt-2 space-y-1.5">
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Step</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-muted-foreground cursor-help">Step</span>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="text-xs max-w-[200px]">
+                  Current simulation step number
+                </TooltipContent>
+              </Tooltip>
               <span className="font-mono">{state.step.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">FPS</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-muted-foreground cursor-help">FPS</span>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="text-xs max-w-[200px]">
+                  Frames per second - simulation update rate
+                </TooltipContent>
+              </Tooltip>
               <span className="font-mono">{state.fps}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Coherence</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-muted-foreground cursor-help">Coherence</span>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="text-xs max-w-[200px]">
+                  Measure of spatial organization and correlation
+                </TooltipContent>
+              </Tooltip>
               <span className="font-mono">{signature.coherence.toFixed(3)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Stability</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-muted-foreground cursor-help">Stability</span>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="text-xs max-w-[200px]">
+                  Fraction of field cells in stable configurations
+                </TooltipContent>
+              </Tooltip>
               <span className="font-mono">{signature.stabilityMetric.toFixed(3)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Attractors</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-muted-foreground cursor-help">Attractors</span>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="text-xs max-w-[200px]">
+                  Status of stable basin formations in the field
+                </TooltipContent>
+              </Tooltip>
               <span className={`font-mono ${getAttractorColor(attractor.status)}`}>{attractorDisplay}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Field Mode</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-muted-foreground cursor-help">Field Mode</span>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="text-xs max-w-[200px]">
+                  Current dynamical state classification of the system
+                </TooltipContent>
+              </Tooltip>
               <span className="font-mono text-[10px] truncate max-w-[80px]" title={fieldMode}>{fieldMode}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">{modeLabels.stats.energy}</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-muted-foreground cursor-help">{modeLabels.stats.energy}</span>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="text-xs max-w-[200px]">
+                  Instantaneous energy level of the field
+                </TooltipContent>
+              </Tooltip>
               <span className="font-mono">{state.energy.toFixed(4)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">{modeLabels.stats.variance}</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-muted-foreground cursor-help">{modeLabels.stats.variance}</span>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="text-xs max-w-[200px]">
+                  Instantaneous variance across the field
+                </TooltipContent>
+              </Tooltip>
               <span className="font-mono">{state.variance.toFixed(6)}</span>
             </div>
           </div>
