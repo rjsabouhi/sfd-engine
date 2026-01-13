@@ -129,8 +129,8 @@ export function DiagnosticPanel({
   const [timestampPrecision, setTimestampPrecision] = useState<"ms" | "s">("s");
   const [isStepMode, setIsStepMode] = useState(false);
   
-  const [solverOpen, setSolverOpen] = useState(false);
-  const [energyOpen, setEnergyOpen] = useState(false);
+  const [solverOpen, setSolverOpen] = useState(true);
+  const [energyOpen, setEnergyOpen] = useState(true);
   const [varianceOpen, setVarianceOpen] = useState(false);
   
   const eventLogRef = useRef<HTMLDivElement>(null);
