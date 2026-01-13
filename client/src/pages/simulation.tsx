@@ -276,12 +276,13 @@ export default function SimulationPage() {
       const saved = localStorage.getItem('sfd-metrics-panel-size');
       if (saved) {
         const value = parseFloat(saved);
-        // Guard against NaN and clamp to valid bounds (15-75%)
+        // Guard against NaN and clamp to valid bounds (50-75%) - minimum 50% to show all tabs
         if (!Number.isFinite(value)) {
           localStorage.setItem('sfd-metrics-panel-size', '50');
           return 50;
         }
-        const clamped = Math.max(15, Math.min(75, value));
+        // Enforce minimum 50% so Export tab is always visible
+        const clamped = Math.max(50, Math.min(75, value));
         // Persist corrected value if it was out of bounds
         if (clamped !== value) {
           localStorage.setItem('sfd-metrics-panel-size', String(clamped));
@@ -2851,7 +2852,7 @@ export default function SimulationPage() {
         setMetricsPanelSize(newSize);
         try { localStorage.setItem('sfd-metrics-panel-size', String(newSize)); } catch {}
       }}>
-        <ResizablePanel defaultSize={100 - metricsPanelSize} minSize={25} className="relative bg-gray-950 min-w-0 flex flex-col">
+        <ResizablePanel defaultSize={100 - metricsPanelSize} minSize={25} maxSize={50} className="relative bg-gray-950 min-w-0 flex flex-col">
           {/* Tools Row - at top (horizontally scrollable, compact when metrics expanded) */}
           <div className="relative shrink-0 border-b border-white/10 bg-gray-950">
             {/* Left fade indicator */}
@@ -3330,7 +3331,7 @@ export default function SimulationPage() {
         
         <ResizableHandle withHandle />
         
-        <ResizablePanel defaultSize={metricsPanelSize} minSize={15} maxSize={75} className="border-l border-border bg-card flex flex-col overflow-hidden">
+        <ResizablePanel defaultSize={metricsPanelSize} minSize={50} maxSize={75} className="border-l border-border bg-card flex flex-col overflow-hidden">
           {showPerturbControls && (
             <div className="p-3 border-b border-border">
               <div className="flex items-center justify-between mb-2">
