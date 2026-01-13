@@ -13,7 +13,6 @@ import { TemporalControls } from "./temporal-controls";
 import { OperatorSensitivity } from "./operator-sensitivity";
 import { StructuralSignatureBar } from "./structural-signature";
 import { EventLog } from "./event-log";
-import { PresetMenu } from "./preset-menu";
 import type { SmartViewConfig } from "@/config/smart-view-map";
 import { LegacyRegimeDisplay } from "./regime-display";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
@@ -151,7 +150,6 @@ export function ControlPanel({
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [metricsOpen, setMetricsOpen] = useState(false);
   const [interpretationOpen, setInterpretationOpen] = useState(false);
-  const [presetsOpen, setPresetsOpen] = useState(true);
   const [playbackOpen, setPlaybackOpen] = useState(true);
   const [regimeOpen, setRegimeOpen] = useState(true);
   const [operatorOpen, setOperatorOpen] = useState(true);
@@ -257,21 +255,6 @@ export function ControlPanel({
                 {!state.isRunning && historyLength > 0 && (
                   <p className="text-xs text-muted-foreground leading-relaxed">Scrub step-by-step to see shape as it changes.</p>
                 )}
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Collapsible open={presetsOpen} onOpenChange={setPresetsOpen} className="border-t border-border/50 pt-3">
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-presets">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Behavior Presets</span>
-                  {presetsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2">
-                <PresetMenu 
-                  onApply={onParamsChange} 
-                  onSmartViewApply={onSmartViewApply}
-                />
               </CollapsibleContent>
             </Collapsible>
 
