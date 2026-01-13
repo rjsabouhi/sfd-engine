@@ -472,16 +472,10 @@ export function FloatingPerturbationPanel({
       data-testid="floating-perturbation-panel"
     >
       <div 
-        className="rounded-lg w-[260px]"
-        style={{
-          backgroundColor: 'rgba(23, 23, 23, 0.90)',
-          border: `1px solid ${isPinned ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-          boxShadow: isPinned ? '0 8px 32px rgba(251, 191, 36, 0.15)' : '0 8px 32px rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(12px)',
-        }}
+        className={`rounded-lg w-[260px] bg-sidebar/95 backdrop-blur-md ${isPinned ? 'border border-amber-500/30 shadow-[0_8px_32px_rgba(251,191,36,0.15)]' : 'border border-sidebar-border shadow-lg'}`}
       >
         <div 
-          className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 cursor-move select-none"
+          className="flex items-center justify-between px-3 py-1.5 border-b border-sidebar-border cursor-move select-none"
           onMouseDown={handleMouseDown}
         >
           <div className="flex items-center gap-1.5">
@@ -543,7 +537,7 @@ export function FloatingPerturbationPanel({
             </Select>
           </div>
 
-          <div className="pt-2 border-t border-white/10">
+          <div className="pt-2 border-t border-sidebar-border">
             <div className="text-[10px] text-neutral-400 mb-2 uppercase tracking-wide">
               {selectedModeConfig?.label} Parameters
             </div>

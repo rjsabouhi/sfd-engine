@@ -208,7 +208,7 @@ export function FullscreenMenuBar({
   const currentOverlayLabel = OVERLAY_OPTIONS.find(o => o.value === derivedType)?.label || "Constraint Layer";
 
   return (
-    <div className="relative flex items-center justify-center gap-1 px-2 py-1 bg-card/95 backdrop-blur-sm border-b border-border">
+    <div className="relative flex items-center justify-center gap-1 px-2 py-1 bg-sidebar border-b border-sidebar-border">
       <div className="absolute left-2">
         <img src={sfdLogo} alt="SFD" className="w-6 h-6 rounded" />
       </div>

@@ -348,19 +348,12 @@ export function ProbeDetailDialog({
       data-testid="probe-detail-panel"
     >
       <div
-        className="rounded-lg relative"
-        style={{
-          backgroundColor: 'rgba(23, 23, 23, 0.95)',
-          border: `1px solid ${isPinned ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-          boxShadow: isPinned ? '0 8px 32px rgba(251, 191, 36, 0.15)' : '0 8px 32px rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(12px)',
-          width: size.width,
-          height: size.height,
-        }}
+        className={`rounded-lg relative bg-sidebar/95 backdrop-blur-md ${isPinned ? 'border border-amber-500/30 shadow-[0_8px_32px_rgba(251,191,36,0.15)]' : 'border border-sidebar-border shadow-lg'}`}
+        style={{ width: size.width, height: size.height }}
       >
         {/* Header - Draggable */}
         <div
-          className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 cursor-move select-none"
+          className="flex items-center justify-between px-3 py-1.5 border-b border-sidebar-border cursor-move select-none"
           onMouseDown={handleMouseDown}
         >
           <div className="flex items-center gap-1.5">

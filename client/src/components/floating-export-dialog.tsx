@@ -524,17 +524,11 @@ export function FloatingExportDialog({
       data-testid="floating-export-dialog"
     >
       <div
-        className="rounded-lg overflow-hidden"
-        style={{
-          backgroundColor: 'rgba(23, 23, 23, 0.95)',
-          border: `1px solid ${isPinned ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-          boxShadow: isPinned ? '0 8px 32px rgba(251, 191, 36, 0.15)' : '0 8px 32px rgba(0, 0, 0, 0.6)',
-          backdropFilter: 'blur(12px)',
-          width: 480,
-        }}
+        className={`rounded-lg overflow-hidden bg-sidebar/95 backdrop-blur-md ${isPinned ? 'border border-amber-500/30 shadow-[0_8px_32px_rgba(251,191,36,0.15)]' : 'border border-sidebar-border shadow-lg'}`}
+        style={{ width: 480 }}
       >
         <div
-          className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 cursor-move select-none"
+          className="flex items-center justify-between px-3 py-1.5 border-b border-sidebar-border cursor-move select-none"
           onMouseDown={handleMouseDown}
         >
           <div className="flex items-center gap-1.5">
@@ -572,7 +566,7 @@ export function FloatingExportDialog({
         </div>
 
         <div className="flex flex-1 min-h-0">
-          <div className="w-28 border-r border-white/10 p-2 space-y-1 flex flex-col">
+          <div className="w-28 border-r border-sidebar-border p-2 space-y-1 flex flex-col">
             {(Object.keys(CATEGORY_INFO) as ExportCategory[]).map(cat => {
               const info = CATEGORY_INFO[cat];
               const isSelected = selectedCategory === cat;
@@ -691,7 +685,7 @@ export function FloatingExportDialog({
         </div>
 
         {/* Advanced Mode Toggle */}
-        <div className="flex items-center justify-between px-3 py-2 border-t border-white/10 bg-white/5">
+        <div className="flex items-center justify-between px-3 py-2 border-t border-sidebar-border bg-sidebar-accent/30">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setAdvancedMode(!advancedMode)}

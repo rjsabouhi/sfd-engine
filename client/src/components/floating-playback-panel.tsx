@@ -207,16 +207,10 @@ export function FloatingPlaybackPanel({
       data-testid="floating-playback-panel"
     >
       <div 
-        className="rounded-lg"
-        style={{
-          backgroundColor: 'rgba(23, 23, 23, 0.90)',
-          border: `1px solid ${isPinned ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-          boxShadow: isPinned ? '0 8px 32px rgba(251, 191, 36, 0.15)' : '0 8px 32px rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(12px)',
-        }}
+        className={`rounded-lg bg-sidebar/95 backdrop-blur-md ${isPinned ? 'border border-amber-500/30 shadow-[0_8px_32px_rgba(251,191,36,0.15)]' : 'border border-sidebar-border shadow-lg'}`}
       >
         <div 
-          className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 cursor-move select-none"
+          className="flex items-center justify-between px-3 py-1.5 border-b border-sidebar-border cursor-move select-none"
           onMouseDown={handleMouseDown}
         >
           <div className="flex items-center gap-1.5">
@@ -360,7 +354,7 @@ export function FloatingPlaybackPanel({
             <span className="text-[10px] font-mono text-neutral-500 w-7">
               {historyLength}
             </span>
-            <div className="border-l border-white/10 pl-2 ml-1">
+            <div className="border-l border-sidebar-border pl-2 ml-1">
               <div className="text-center">
                 <span className="text-xs font-mono text-neutral-200">{currentStep}</span>
                 <span className="text-[8px] text-neutral-500 ml-1">step</span>

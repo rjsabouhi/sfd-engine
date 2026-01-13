@@ -56,7 +56,7 @@ const EventItem = memo(function EventItem({
   compactView: boolean; 
 }) {
   return (
-    <div className={`text-xs ${compactView ? 'py-0.5' : 'py-1 border-b border-white/5'}`}>
+    <div className={`text-xs ${compactView ? 'py-0.5' : 'py-1 border-b border-sidebar-border/50'}`}>
       <div className="flex items-start gap-2">
         <span className="text-neutral-500 font-mono shrink-0">{event.step}</span>
         <Badge variant="outline" className="text-[10px] px-1 py-0 shrink-0 border-neutral-700">
@@ -130,7 +130,7 @@ function StatRow({ label, value, warning, success, mono = true }: { label: strin
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
-    <div className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500 border-b border-white/5 pb-1 mb-2">
+    <div className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500 border-b border-sidebar-border/50 pb-1 mb-2">
       {children}
     </div>
   );
@@ -413,25 +413,20 @@ export function FloatingDiagnostics({
   return (
     <div
       ref={containerRef}
-      className={`fixed flex flex-col ${isMinimized ? 'h-auto' : ''}`}
+      className={`fixed flex flex-col rounded-lg bg-sidebar/95 backdrop-blur-md ${isMinimized ? 'h-auto' : ''} ${isPinned ? 'border border-amber-500/30 shadow-[0_8px_32px_rgba(251,191,36,0.15)]' : 'border border-sidebar-border shadow-lg'}`}
       style={{
         left: position.x,
         top: position.y,
         width: isMinimized ? 280 : size.width,
         height: isMinimized ? 'auto' : size.height,
         zIndex: zIndex,
-        backgroundColor: 'rgba(23, 23, 23, 0.90)',
-        border: `1px solid ${isPinned ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-        borderRadius: '8px',
-        boxShadow: isPinned ? '0 8px 32px rgba(251, 191, 36, 0.15)' : '0 8px 32px rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(12px)',
       }}
       onMouseDown={() => onFocus?.()}
       data-testid="floating-diagnostics"
     >
       {/* Header / Drag Handle */}
       <div 
-        className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 cursor-move select-none shrink-0"
+        className="flex items-center justify-between px-3 py-1.5 border-b border-sidebar-border cursor-move select-none shrink-0"
         onMouseDown={handleMouseDown}
       >
         <div className="flex items-center gap-1.5">
@@ -484,7 +479,7 @@ export function FloatingDiagnostics({
       {!isMinimized && (
         <>
           {/* Tab Bar */}
-          <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-white/10 shrink-0 overflow-x-auto">
+          <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-sidebar-border shrink-0 overflow-x-auto">
             {tabs.map(tab => (
               <button
                 key={tab.id}
@@ -580,7 +575,7 @@ export function FloatingDiagnostics({
                   )}
                   
                   {determinismReport && !isRunningDeterminism && (
-                    <div className="mt-3 space-y-1 bg-black/30 rounded p-2.5 border border-white/10">
+                    <div className="mt-3 space-y-1 bg-black/30 rounded p-2.5 border border-sidebar-border">
                       <StatRow 
                         label="Status" 
                         value={determinismReport.isDeterministic ? "DETERMINISTIC" : "NON-DETERMINISTIC"}

@@ -214,18 +214,11 @@ export function FloatingInspectorPanel({
       data-testid="floating-inspector-panel"
     >
       <div 
-        className="rounded-lg"
-        style={{
-          backgroundColor: 'rgba(23, 23, 23, 0.95)',
-          border: `1px solid ${isPinned ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-          boxShadow: isPinned ? '0 8px 32px rgba(251, 191, 36, 0.15)' : '0 8px 32px rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(12px)',
-          width: PANEL_WIDTH,
-          maxHeight: '70vh',
-        }}
+        className={`rounded-lg bg-sidebar/95 backdrop-blur-md ${isPinned ? 'border border-amber-500/30 shadow-[0_8px_32px_rgba(251,191,36,0.15)]' : 'border border-sidebar-border shadow-lg'}`}
+        style={{ width: PANEL_WIDTH, maxHeight: '70vh' }}
       >
         <div 
-          className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 cursor-move select-none"
+          className="flex items-center justify-between px-3 py-1.5 border-b border-sidebar-border cursor-move select-none"
           onMouseDown={handleMouseDown}
         >
           <div className="flex items-center gap-1.5">
@@ -263,7 +256,7 @@ export function FloatingInspectorPanel({
         </div>
         
         <div className="overflow-y-auto" style={{ maxHeight: 'calc(70vh - 40px)' }}>
-          <div className="px-3 py-2 border-b border-white/10">
+          <div className="px-3 py-2 border-b border-sidebar-border">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] text-neutral-500 uppercase tracking-wide">Current Hover</span>
             </div>

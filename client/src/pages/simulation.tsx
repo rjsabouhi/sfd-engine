@@ -2811,7 +2811,7 @@ export default function SimulationPage() {
       <OnboardingModal ref={onboardingRef} />
       
       {/* Header - spans full width */}
-      <header className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-card/50 shrink-0">
+      <header className="flex items-center justify-between gap-2 px-3 py-2 border-b border-sidebar-border bg-sidebar shrink-0">
         <div className="flex items-center gap-3">
           <img src={sfdLogo} alt="SFD Engine" className="w-7 h-7 rounded-md" />
           <div>
