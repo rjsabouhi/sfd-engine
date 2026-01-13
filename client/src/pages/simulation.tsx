@@ -2794,6 +2794,7 @@ export default function SimulationPage() {
           engine={engineRef.current}
           canvasRef={canvasRef}
           colormap={colormap}
+          blendOpacity={blendOpacity}
           regime={selectedRegimeKey || 'default'}
           interpretationMode={interpretationMode}
           events={events}
@@ -3437,6 +3438,7 @@ export default function SimulationPage() {
         engine={engineRef.current}
         canvasRef={canvasRef}
         colormap={colormap}
+        blendOpacity={blendOpacity}
         regime={selectedRegimeKey || 'default'}
         interpretationMode={interpretationMode}
         events={events}

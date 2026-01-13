@@ -83,6 +83,7 @@ interface FloatingExportDialogProps {
   canvasRef?: React.RefObject<HTMLCanvasElement | null>;
   basinCanvasRef?: React.RefObject<HTMLCanvasElement | null>;
   colormap: "inferno" | "viridis" | "cividis";
+  blendOpacity?: number;
   regime: string;
   interpretationMode: string;
   events: StructuralEvent[];
@@ -110,6 +111,7 @@ export function FloatingExportDialog({
   canvasRef,
   basinCanvasRef,
   colormap,
+  blendOpacity = 0.52,
   regime,
   interpretationMode,
   events,
@@ -265,17 +267,17 @@ export function FloatingExportDialog({
     if (view === 'main') {
       return exportVideoWebM(engine, canvas, colormap);
     } else if (view === 'projection') {
-      // Use the new projection video export that computes derived fields for each historical frame
-      return exportVideoWebMProjection(engine, derivedType);
+      // Use the new projection video export that renders main field with blended overlay
+      return exportVideoWebMProjection(engine, derivedType, colormap, blendOpacity);
     } else {
       const derivedCanvas = getDerivedCanvas();
       if (!derivedCanvas) {
         toast({ title: "Projection view not available", description: "Please open the projection view first", variant: "destructive" });
         return false;
       }
-      return exportVideoWebMDual(engine, canvas, derivedCanvas, colormap, 10, undefined, derivedType);
+      return exportVideoWebMDual(engine, canvas, derivedCanvas, colormap, blendOpacity, 10, undefined, derivedType);
     }
-  }, [engine, colormap, derivedType, getCanvas, getDerivedCanvas, toast]);
+  }, [engine, colormap, blendOpacity, derivedType, getCanvas, getDerivedCanvas, toast]);
 
   const exportOptions: ExportOption[] = [
     // === VISUAL (Safe for sharing) ===
@@ -342,25 +344,7 @@ export function FloatingExportDialog({
       requires: 'playback history',
       advancedNote: 'Full-length history export requires Advanced Mode',
       action: async () => {
-        const canvas = getCanvas();
-        if (!engine || !canvas) return false;
-        if (videoView === 'main') {
-          return exportVideoWebM(engine, canvas, colormap);
-        } else if (videoView === 'projection') {
-          const derivedCanvas = getDerivedCanvas();
-          if (!derivedCanvas) {
-            toast({ title: "Projection view not available", description: "Please open the projection view first", variant: "destructive" });
-            return false;
-          }
-          return exportVideoWebM(engine, derivedCanvas, colormap);
-        } else {
-          const derivedCanvas = getDerivedCanvas();
-          if (!derivedCanvas) {
-            toast({ title: "Projection view not available", description: "Please open the projection view first", variant: "destructive" });
-            return false;
-          }
-          return exportVideoWebMDual(engine, canvas, derivedCanvas, colormap);
-        }
+        return exportVideoWithView(videoView);
       },
       hasViewSelector: true,
       viewType: videoView,

@@ -1410,13 +1410,15 @@ export async function exportVideoWebM(
 }
 
 /**
- * Export projection field as WebM video (computes derived field for each historical frame)
+ * Export projection field as WebM video (renders main field with blended projection overlay)
  */
 export type DerivedFieldType = "curvature" | "tension" | "coupling" | "variance" | "gradientFlow" | "criticality";
 
 export async function exportVideoWebMProjection(
   engine: SFDEngine,
   derivedType: DerivedFieldType = "curvature",
+  colormap: "inferno" | "viridis" | "cividis" = "viridis",
+  blendOpacity: number = 0.52,
   fps: number = 10,
   onProgress?: (progress: number) => void
 ): Promise<boolean> {
@@ -1430,6 +1432,27 @@ export async function exportVideoWebMProjection(
   offCanvas.height = height;
   const ctx = offCanvas.getContext("2d");
   if (!ctx) return false;
+  
+  // Main field colormaps
+  const colormaps: Record<string, number[][]> = {
+    inferno: [[0,0,4],[40,11,84],[101,21,110],[159,42,99],[212,72,66],[245,125,21],[252,192,39],[252,255,164]],
+    viridis: [[68,1,84],[72,36,117],[65,68,135],[53,95,141],[42,120,142],[33,144,140],[34,167,132],[68,190,112],[122,209,81],[189,222,38],[253,231,37]],
+    cividis: [[0,32,77],[42,67,108],[75,99,130],[107,130,151],[140,160,170],[175,191,186],[212,221,198],[253,252,205]]
+  };
+  const mainColors = colormaps[colormap] || colormaps.viridis;
+  
+  function interpolateMain(t: number): [number, number, number] {
+    const idx = t * (mainColors.length - 1);
+    const i = Math.floor(idx);
+    const f = idx - i;
+    const c1 = mainColors[Math.min(i, mainColors.length - 1)];
+    const c2 = mainColors[Math.min(i + 1, mainColors.length - 1)];
+    return [
+      Math.round(c1[0] + f * (c2[0] - c1[0])),
+      Math.round(c1[1] + f * (c2[1] - c1[1])),
+      Math.round(c1[2] + f * (c2[2] - c1[2]))
+    ];
+  }
   
   // Plasma colormap for derived fields (matches dual-field-view)
   const plasmaColors = [
@@ -1561,6 +1584,16 @@ export async function exportVideoWebMProjection(
     let frameIndex = 0;
     const frameDuration = 1000 / fps;
     
+    // Create overlay canvas for blending
+    const overlayCanvas = document.createElement("canvas");
+    overlayCanvas.width = width;
+    overlayCanvas.height = height;
+    const overlayCtx = overlayCanvas.getContext("2d");
+    if (!overlayCtx) {
+      resolve(false);
+      return;
+    }
+    
     const renderNextFrame = () => {
       if (frameIndex >= frames.length) {
         mediaRecorder.stop();
@@ -1568,12 +1601,33 @@ export async function exportVideoWebMProjection(
       }
       
       const frame = frames[frameIndex];
+      const mainGrid = frame.grid;
       
-      // Compute derived field for this frame
-      computeDerivedFromGrid(frame.grid, derivedBuffer);
+      // Step 1: Render main field first
+      const mainImageData = ctx.createImageData(width, height);
+      let mainMin = Infinity, mainMax = -Infinity;
+      for (let j = 0; j < mainGrid.length; j++) {
+        mainMin = Math.min(mainMin, mainGrid[j]);
+        mainMax = Math.max(mainMax, mainGrid[j]);
+      }
+      const mainRange = mainMax - mainMin || 1;
       
-      const imageData = ctx.createImageData(width, height);
+      for (let j = 0; j < mainGrid.length; j++) {
+        const t = Math.max(0, Math.min(1, (mainGrid[j] - mainMin) / mainRange));
+        const [r, g, b] = interpolateMain(t);
+        const pixIdx = j * 4;
+        mainImageData.data[pixIdx] = r;
+        mainImageData.data[pixIdx + 1] = g;
+        mainImageData.data[pixIdx + 2] = b;
+        mainImageData.data[pixIdx + 3] = 255;
+      }
+      ctx.putImageData(mainImageData, 0, 0);
       
+      // Step 2: Compute derived field for this frame
+      computeDerivedFromGrid(mainGrid, derivedBuffer);
+      
+      // Step 3: Render derived field to overlay canvas
+      const overlayImageData = overlayCtx.createImageData(width, height);
       let min = Infinity, max = -Infinity;
       for (let j = 0; j < derivedBuffer.length; j++) {
         min = Math.min(min, derivedBuffer[j]);
@@ -1585,13 +1639,17 @@ export async function exportVideoWebMProjection(
         const t = (derivedBuffer[j] - min) / range;
         const [r, g, b] = interpolatePlasma(t);
         const pixIdx = j * 4;
-        imageData.data[pixIdx] = r;
-        imageData.data[pixIdx + 1] = g;
-        imageData.data[pixIdx + 2] = b;
-        imageData.data[pixIdx + 3] = 255;
+        overlayImageData.data[pixIdx] = r;
+        overlayImageData.data[pixIdx + 1] = g;
+        overlayImageData.data[pixIdx + 2] = b;
+        overlayImageData.data[pixIdx + 3] = 255;
       }
+      overlayCtx.putImageData(overlayImageData, 0, 0);
       
-      ctx.putImageData(imageData, 0, 0);
+      // Step 4: Blend overlay on top of main with opacity
+      ctx.globalAlpha = blendOpacity;
+      ctx.drawImage(overlayCanvas, 0, 0);
+      ctx.globalAlpha = 1.0;
       
       if (onProgress) {
         onProgress((frameIndex + 1) / frames.length);
@@ -1606,14 +1664,15 @@ export async function exportVideoWebMProjection(
 }
 
 /**
- * Export simulation as WebM video with side-by-side main and projection view
- * Computes derived fields for each historical frame for the projection side
+ * Export simulation as WebM video with side-by-side main and blended projection view
+ * Left: main field, Right: main field with blended projection overlay
  */
 export async function exportVideoWebMDual(
   engine: SFDEngine,
   mainCanvas: HTMLCanvasElement | null,
   projectionCanvas: HTMLCanvasElement | null,
   colormap: "inferno" | "viridis" | "cividis",
+  blendOpacity: number = 0.52,
   fps: number = 10,
   onProgress?: (progress: number) => void,
   derivedType: DerivedFieldType = "curvature"
@@ -1790,6 +1849,22 @@ export async function exportVideoWebMDual(
     let frameIndex = 0;
     const frameDuration = 1000 / fps;
     
+    // Create temporary canvases for right panel blending
+    const rightCanvas = document.createElement("canvas");
+    rightCanvas.width = width;
+    rightCanvas.height = height;
+    const rightCtx = rightCanvas.getContext("2d");
+    
+    const overlayCanvas = document.createElement("canvas");
+    overlayCanvas.width = width;
+    overlayCanvas.height = height;
+    const overlayCtx = overlayCanvas.getContext("2d");
+    
+    if (!rightCtx || !overlayCtx) {
+      resolve(false);
+      return;
+    }
+    
     const renderNextFrame = () => {
       if (frameIndex >= frames.length) {
         mediaRecorder.stop();
@@ -1797,22 +1872,23 @@ export async function exportVideoWebMDual(
       }
       
       const frame = frames[frameIndex];
+      const mainGrid = frame.grid;
       
       ctx.fillStyle = "#0a0a0f";
       ctx.fillRect(0, 0, totalWidth, height);
       
-      // Render main field (left side)
-      const mainImageData = ctx.createImageData(width, height);
-      
+      // Compute min/max for main field once
       let min = Infinity, max = -Infinity;
-      for (let j = 0; j < frame.grid.length; j++) {
-        min = Math.min(min, frame.grid[j]);
-        max = Math.max(max, frame.grid[j]);
+      for (let j = 0; j < mainGrid.length; j++) {
+        min = Math.min(min, mainGrid[j]);
+        max = Math.max(max, mainGrid[j]);
       }
       const range = max - min || 1;
       
-      for (let j = 0; j < frame.grid.length; j++) {
-        const t = (frame.grid[j] - min) / range;
+      // Render main field (left side)
+      const mainImageData = ctx.createImageData(width, height);
+      for (let j = 0; j < mainGrid.length; j++) {
+        const t = (mainGrid[j] - min) / range;
         const [r, g, b] = interpolateColor(t);
         const pixIdx = j * 4;
         mainImageData.data[pixIdx] = r;
@@ -1820,14 +1896,26 @@ export async function exportVideoWebMDual(
         mainImageData.data[pixIdx + 2] = b;
         mainImageData.data[pixIdx + 3] = 255;
       }
-      
       ctx.putImageData(mainImageData, 0, 0);
       
-      // Render derived field (right side)
-      computeDerivedFromGrid(frame.grid, derivedBuffer);
+      // Render right side: main field + blended projection
+      // Step 1: Draw main field to right canvas
+      const rightMainImageData = rightCtx.createImageData(width, height);
+      for (let j = 0; j < mainGrid.length; j++) {
+        const t = (mainGrid[j] - min) / range;
+        const [r, g, b] = interpolateColor(t);
+        const pixIdx = j * 4;
+        rightMainImageData.data[pixIdx] = r;
+        rightMainImageData.data[pixIdx + 1] = g;
+        rightMainImageData.data[pixIdx + 2] = b;
+        rightMainImageData.data[pixIdx + 3] = 255;
+      }
+      rightCtx.putImageData(rightMainImageData, 0, 0);
       
-      const derivedImageData = ctx.createImageData(width, height);
+      // Step 2: Compute and render derived field to overlay canvas
+      computeDerivedFromGrid(mainGrid, derivedBuffer);
       
+      const overlayImageData = overlayCtx.createImageData(width, height);
       let dMin = Infinity, dMax = -Infinity;
       for (let j = 0; j < derivedBuffer.length; j++) {
         dMin = Math.min(dMin, derivedBuffer[j]);
@@ -1839,13 +1927,20 @@ export async function exportVideoWebMDual(
         const t = (derivedBuffer[j] - dMin) / dRange;
         const [r, g, b] = interpolatePlasma(t);
         const pixIdx = j * 4;
-        derivedImageData.data[pixIdx] = r;
-        derivedImageData.data[pixIdx + 1] = g;
-        derivedImageData.data[pixIdx + 2] = b;
-        derivedImageData.data[pixIdx + 3] = 255;
+        overlayImageData.data[pixIdx] = r;
+        overlayImageData.data[pixIdx + 1] = g;
+        overlayImageData.data[pixIdx + 2] = b;
+        overlayImageData.data[pixIdx + 3] = 255;
       }
+      overlayCtx.putImageData(overlayImageData, 0, 0);
       
-      ctx.putImageData(derivedImageData, width + gap, 0);
+      // Step 3: Blend overlay onto right canvas
+      rightCtx.globalAlpha = blendOpacity;
+      rightCtx.drawImage(overlayCanvas, 0, 0);
+      rightCtx.globalAlpha = 1.0;
+      
+      // Step 4: Draw blended right canvas to main canvas
+      ctx.drawImage(rightCanvas, width + gap, 0);
       
       if (onProgress) {
         onProgress((frameIndex + 1) / frames.length);
