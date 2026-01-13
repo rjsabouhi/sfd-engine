@@ -2929,7 +2929,7 @@ export default function SimulationPage() {
                     </Button>
                   </DropdownMenuTrigger>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="text-xs">Apply perturbations to the field - click to select type</TooltipContent>
+                <TooltipContent side="top" className="text-xs">Apply perturbations to the field</TooltipContent>
               </Tooltip>
               <DropdownMenuContent align="start" className="w-48">
                 <DropdownMenuItem 
