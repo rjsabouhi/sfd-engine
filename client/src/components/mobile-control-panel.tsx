@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -31,20 +31,36 @@ interface ParameterSliderProps {
 }
 
 function ParameterSlider({ label, value, min, max, step, onChange, testId }: ParameterSliderProps) {
+  const [localValue, setLocalValue] = useState(value);
+  const [isDragging, setIsDragging] = useState(false);
+  
+  useEffect(() => {
+    if (!isDragging) {
+      setLocalValue(value);
+    }
+  }, [value, isDragging]);
+  
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
         <Label className="text-sm text-white/90">{label}</Label>
         <span className="text-sm font-mono tabular-nums text-white/60">
-          {value.toFixed(2)}
+          {localValue.toFixed(2)}
         </span>
       </div>
       <Slider
-        value={[value]}
+        value={[localValue]}
         min={min}
         max={max}
         step={step}
-        onValueChange={([v]) => onChange(v)}
+        onValueChange={([v]) => {
+          setIsDragging(true);
+          setLocalValue(v);
+        }}
+        onValueCommit={([v]) => {
+          setIsDragging(false);
+          onChange(v);
+        }}
         className="touch-none"
         data-testid={testId}
       />

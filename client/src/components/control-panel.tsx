@@ -81,6 +81,15 @@ interface ParameterSliderProps {
 }
 
 function ParameterSlider({ label, value, min, max, step, onChange, testId, tooltip }: ParameterSliderProps) {
+  const [localValue, setLocalValue] = useState(value);
+  const [isDragging, setIsDragging] = useState(false);
+  
+  useEffect(() => {
+    if (!isDragging) {
+      setLocalValue(value);
+    }
+  }, [value, isDragging]);
+  
   const labelElement = (
     <Label className="text-xs text-zinc-400 w-24 shrink-0 truncate">{label}</Label>
   );
@@ -94,16 +103,23 @@ function ParameterSlider({ label, value, min, max, step, onChange, testId, toolt
         </Tooltip>
       ) : labelElement}
       <Slider
-        value={[value]}
+        value={[localValue]}
         min={min}
         max={max}
         step={step}
-        onValueChange={([v]) => onChange(v)}
+        onValueChange={([v]) => {
+          setIsDragging(true);
+          setLocalValue(v);
+        }}
+        onValueCommit={([v]) => {
+          setIsDragging(false);
+          onChange(v);
+        }}
         className="flex-1"
         data-testid={testId}
       />
       <span className="text-xs font-mono tabular-nums text-zinc-500 w-10 text-right">
-        {value.toFixed(2)}
+        {localValue.toFixed(2)}
       </span>
     </div>
   );
