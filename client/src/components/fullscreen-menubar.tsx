@@ -213,6 +213,7 @@ export function FullscreenMenuBar({
         <img src={sfdLogo} alt="SFD" className="w-6 h-6 rounded" />
       </div>
       
+      {/* === TOOLS GROUP === */}
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -229,8 +230,6 @@ export function FullscreenMenuBar({
         </TooltipTrigger>
         <TooltipContent side="bottom" className="text-xs">Playback Controls</TooltipContent>
       </Tooltip>
-
-      <div className="w-px h-4 bg-border mx-1" />
 
       <Tooltip>
         <TooltipTrigger asChild>
@@ -285,22 +284,7 @@ export function FullscreenMenuBar({
 
       <div className="w-px h-4 bg-border mx-1" />
 
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleExportDialog}
-            className={`h-6 text-xs px-2 ${exportDialogOpen ? 'bg-accent text-accent-foreground' : ''}`}
-            data-testid="button-export-dialog"
-          >
-            <Download className="h-3 w-3 mr-1" />
-            Export
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className="text-xs">Export Options</TooltipContent>
-      </Tooltip>
-
+      {/* === VISUAL EFFECTS GROUP === */}
       <DropdownMenu>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -326,8 +310,6 @@ export function FullscreenMenuBar({
               setSelectedRegime(value);
               const preset = structuralPresets[value];
               if (preset) {
-                // Apply parameters dynamically without reset
-                // This allows event detection during regime transitions
                 onParamsChange(preset);
               }
             }}
@@ -348,8 +330,6 @@ export function FullscreenMenuBar({
 
       {showDualView && (
         <>
-          <div className="w-px h-4 bg-border mx-1" />
-          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -383,8 +363,6 @@ export function FullscreenMenuBar({
               value={[blendOpacity * 100]}
               onValueChange={(v) => {
                 onBlendOpacityChange(v[0] / 100);
-                // Keep blendMode true - don't toggle it off at 0% because
-                // that causes rendering to jump to 100% overlay
                 if (v[0] > 0 && !blendMode) onBlendModeChange(true);
               }}
               className="w-20"
@@ -395,7 +373,26 @@ export function FullscreenMenuBar({
         </>
       )}
 
-      <div className="absolute right-2">
+      {/* === RIGHT SIDE: Export + Dashboard === */}
+      <div className="absolute right-2 flex items-center gap-1">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleExportDialog}
+              className={`h-6 text-xs px-2 ${exportDialogOpen ? 'bg-accent text-accent-foreground' : ''}`}
+              data-testid="button-export-dialog"
+            >
+              <Download className="h-3 w-3 mr-1" />
+              Export
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs">Export Options</TooltipContent>
+        </Tooltip>
+
+        <div className="w-px h-4 bg-border mx-1" />
+
         <Button
           variant="ghost"
           size="sm"
