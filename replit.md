@@ -188,17 +188,12 @@ Complete simulation history preservation across all parameter and regime changes
 
 ## External Dependencies
 
-### Database
-- **ORM**: Drizzle ORM configured for PostgreSQL
-- **Schema**: Located in `shared/schema.ts`
-- **Status**: Schema defined but currently unused (placeholder `users` export)
-
 ### UI Components
-- **Radix UI**: Full suite of accessible primitives (dialog, dropdown, tooltip, etc.)
+- **Radix UI**: Core accessible primitives (dialog, dropdown, tooltip, accordion, select, slider, tabs, etc.)
 - **Lucide React**: Icon library
-- **Embla Carousel**: Carousel component
-- **React Day Picker**: Calendar component
-- **Recharts**: Charting library (available but not currently used)
+- **Framer Motion**: Animation library (used in welcome modal)
+- **React Resizable Panels**: Resizable panel layout
+- **React Query**: Server state management
 
 ### Build & Development
 - **Vite**: Frontend bundler with React plugin
@@ -208,3 +203,29 @@ Complete simulation history preservation across all parameter and regime changes
 ### Fonts
 - **Inter**: Primary UI font (Google Fonts)
 - **JetBrains Mono**: Monospace font for numerical values and notebook mode
+
+## Production Audit (January 2026)
+
+### Removed Dependencies
+- react-icons (unused)
+- passport, passport-local (unused)
+- connect-pg-simple (unused)
+- drizzle-orm, drizzle-zod, drizzle-kit (unused)
+- pg, ws (unused)
+- express-session, memorystore (unused)
+- react-hook-form, @hookform/resolvers (unused)
+- recharts, embla-carousel-react, react-day-picker, input-otp, cmdk, vaul, date-fns (unused)
+- Multiple unused Radix packages
+
+### Removed UI Components
+- chart.tsx, carousel.tsx, calendar.tsx, input-otp.tsx, drawer.tsx, command.tsx
+- navigation-menu.tsx, context-menu.tsx, hover-card.tsx, toggle-group.tsx
+- pagination.tsx, aspect-ratio.tsx, breadcrumb.tsx, table.tsx, sidebar.tsx
+- avatar.tsx, form.tsx
+
+### Build Stats
+- **0 vulnerabilities**
+- **Client JS**: 908KB (264KB gzipped)
+- **Client CSS**: 68KB (12KB gzipped)
+- **Server**: 840KB
+- **Total dist**: ~3.1MB
