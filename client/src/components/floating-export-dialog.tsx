@@ -681,10 +681,17 @@ export function FloatingExportDialog({
                 const isDisabled = isLoading || needsProbes || needsAdvanced;
                 
                 const exportButton = (
-                  <button
+                  <div
                     key={option.id}
+                    role="button"
+                    tabIndex={isDisabled ? -1 : 0}
                     onClick={() => !isDisabled && handleExport(option)}
-                    disabled={isDisabled}
+                    onKeyDown={(e) => {
+                      if ((e.key === 'Enter' || e.key === ' ') && !isDisabled) {
+                        e.preventDefault();
+                        handleExport(option);
+                      }
+                    }}
                     className={`flex items-start gap-3 p-3 rounded-lg text-left transition-all ${
                       isDisabled
                         ? 'opacity-50 cursor-not-allowed bg-white/5'
@@ -753,7 +760,7 @@ export function FloatingExportDialog({
                         </p>
                       )}
                     </div>
-                  </button>
+                  </div>
                 );
 
                 // Wrap with tooltip if disabled due to advanced mode
