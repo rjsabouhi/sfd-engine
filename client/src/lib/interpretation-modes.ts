@@ -96,10 +96,10 @@ export const interpretationModes: Record<InterpretationMode, ModeLabels> = {
   },
 };
 
-export const modeOptions: { value: InterpretationMode; label: string }[] = [
-  { value: "technical", label: LANGUAGE.MODES.technical.name },
-  { value: "structural", label: LANGUAGE.MODES.structural.name },
-  { value: "intuitive", label: LANGUAGE.MODES.intuitive.name },
+export const modeOptions: { value: InterpretationMode; label: string; tooltip: string }[] = [
+  { value: "technical", label: LANGUAGE.MODES.technical.name, tooltip: "Scientific terminology with precise mathematical notation" },
+  { value: "structural", label: LANGUAGE.MODES.structural.name, tooltip: "Field-theoretic language focusing on structural dynamics" },
+  { value: "intuitive", label: LANGUAGE.MODES.intuitive.name, tooltip: "Everyday language describing behavior in simple terms" },
 ];
 
 export interface InterpretationSentence {

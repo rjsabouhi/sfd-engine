@@ -254,33 +254,50 @@ export function ControlPanel({
             {/* Controls Section */}
             <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-controls">
               <Collapsible open={homeControlsOpen} onOpenChange={setHomeControlsOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-home-controls">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                      <Play className="h-3 w-3" />
-                      Controls
-                    </span>
-                    {homeControlsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </button>
-                </CollapsibleTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-home-controls">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                          <Play className="h-3 w-3" />
+                          Controls
+                        </span>
+                        {homeControlsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </button>
+                    </CollapsibleTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Playback controls for running, pausing, and stepping through the simulation
+                  </TooltipContent>
+                </Tooltip>
                 <CollapsibleContent className="pt-2 space-y-2">
                   <div className="flex items-center gap-1">
                     {state.isRunning ? (
-                      <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="home-button-pause">
-                        <Pause className="h-3.5 w-3.5 mr-1" />
-                        Pause
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button onClick={onPause} variant="secondary" className="flex-1" size="sm" data-testid="home-button-pause">
+                            <Pause className="h-3.5 w-3.5 mr-1" />
+                            Pause
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="text-xs">Pause the simulation</TooltipContent>
+                      </Tooltip>
                     ) : (
-                      <Button 
-                        onClick={onPlay} 
-                        variant="secondary" 
-                        className="flex-1 relative ring-1 ring-cyan-500/50 shadow-[0_0_8px_rgba(34,211,238,0.2)]" 
-                        size="sm" 
-                        data-testid="home-button-play"
-                      >
-                        <Play className="h-3.5 w-3.5 mr-1" />
-                        Run Simulation
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            onClick={onPlay} 
+                            variant="secondary" 
+                            className="flex-1 relative ring-1 ring-cyan-500/50 shadow-[0_0_8px_rgba(34,211,238,0.2)]" 
+                            size="sm" 
+                            data-testid="home-button-play"
+                          >
+                            <Play className="h-3.5 w-3.5 mr-1" />
+                            Run Simulation
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="text-xs">Start running the simulation</TooltipContent>
+                      </Tooltip>
                     )}
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -352,15 +369,22 @@ export function ControlPanel({
             {/* Params Section */}
             <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-params">
               <Collapsible open={homeParamsOpen} onOpenChange={setHomeParamsOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-home-params">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                      <Sliders className="h-3 w-3" />
-                      Parameters
-                    </span>
-                    {homeParamsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </button>
-                </CollapsibleTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-home-params">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                          <Sliders className="h-3 w-3" />
+                          Parameters
+                        </span>
+                        {homeParamsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </button>
+                    </CollapsibleTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Current simulation parameter values and operator weights
+                  </TooltipContent>
+                </Tooltip>
                 <CollapsibleContent className="pt-2 space-y-1">
                   <div className="grid grid-cols-3 gap-1 text-xs font-mono">
                     <Tooltip>
@@ -451,20 +475,27 @@ export function ControlPanel({
             {/* Analysis Section */}
             <div className="border border-border/50 rounded-md p-2 bg-muted/20" data-testid="home-section-analysis">
               <Collapsible open={homeAnalysisOpen} onOpenChange={setHomeAnalysisOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-home-analysis">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                      <Activity className="h-3 w-3" />
-                      Analysis
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary" data-testid="home-regime-badge">
-                        {currentRegime.replace(/_/g, ' ')}
-                      </span>
-                      {homeAnalysisOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                    </div>
-                  </button>
-                </CollapsibleTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-home-analysis">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                          <Activity className="h-3 w-3" />
+                          Analysis
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary" data-testid="home-regime-badge">
+                            {currentRegime.replace(/_/g, ' ')}
+                          </span>
+                          {homeAnalysisOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                        </div>
+                      </button>
+                    </CollapsibleTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Live metrics, operator contributions, and system state analysis
+                  </TooltipContent>
+                </Tooltip>
                 <CollapsibleContent className="pt-2 space-y-1.5">
                   <div className="grid grid-cols-2 gap-1 text-xs">
                     <Tooltip>
@@ -513,12 +544,19 @@ export function ControlPanel({
           <TabsContent value="controls" className="m-0 p-2 space-y-2">
             <div className="border border-border/50 rounded-md p-2 bg-muted/20">
               <Collapsible open={metricsOpen} onOpenChange={setMetricsOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-metrics-inline">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Simulation Metrics</span>
-                    {metricsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </button>
-                </CollapsibleTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-metrics-inline">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Simulation Metrics</span>
+                        {metricsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </button>
+                    </CollapsibleTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Key structural metrics and trend indicators for the simulation
+                  </TooltipContent>
+                </Tooltip>
                 <CollapsibleContent className="pt-2 space-y-2">
                   <StructuralSignatureBar 
                     signature={structuralSignature} 
@@ -533,12 +571,19 @@ export function ControlPanel({
 
             <div className="border border-border/50 rounded-md p-2 bg-muted/20">
               <Collapsible open={interpretationOpen} onOpenChange={setInterpretationOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-interpretation">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Interpretation Mode</span>
-                    {interpretationOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </button>
-                </CollapsibleTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-interpretation">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Interpretation Mode</span>
+                        {interpretationOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </button>
+                    </CollapsibleTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Choose how metrics and states are described (Technical, Structural, or Intuitive)
+                  </TooltipContent>
+                </Tooltip>
                 <CollapsibleContent className="pt-2 space-y-2">
                   <Select value={interpretationMode} onValueChange={(v) => onInterpretationModeChange(v as InterpretationMode)}>
                     <SelectTrigger className="h-8 focus:ring-0 focus:ring-offset-0" data-testid="select-interpretation-mode">
@@ -546,9 +591,16 @@ export function ControlPanel({
                     </SelectTrigger>
                     <SelectContent>
                       {modeOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
+                        <Tooltip key={option.value}>
+                          <TooltipTrigger asChild>
+                            <SelectItem value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          </TooltipTrigger>
+                          <TooltipContent side="left" className="text-xs max-w-[200px]">
+                            {option.tooltip}
+                          </TooltipContent>
+                        </Tooltip>
                       ))}
                     </SelectContent>
                   </Select>
@@ -561,12 +613,19 @@ export function ControlPanel({
           <TabsContent value="params" className="m-0 p-2 space-y-2">
             <div className="border border-border/50 rounded-md p-2 bg-muted/20">
               <Collapsible open={coreParamsOpen} onOpenChange={setCoreParamsOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-core-params">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Core Parameters</span>
-                    {coreParamsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </button>
-                </CollapsibleTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-core-params">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Core Parameters</span>
+                        {coreParamsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </button>
+                    </CollapsibleTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Main simulation parameters controlling speed, forces, and behavior
+                  </TooltipContent>
+                </Tooltip>
                 <CollapsibleContent className="space-y-2 pt-2">
                   <ParameterSlider label="Timestep" value={params.dt} min={0.01} max={0.2} step={0.01} onChange={(v) => onParamsChange({ dt: v })} testId="slider-timestep" tooltip="Controls simulation speed. Lower values = more precise, higher = faster evolution" />
                   <ParameterSlider label="Curvature" value={params.curvatureGain} min={0.1} max={10} step={0.1} onChange={(v) => onParamsChange({ curvatureGain: v })} testId="slider-curvature-gain" tooltip="Strength of curvature-driven flow. Higher values create sharper features" />
@@ -579,12 +638,19 @@ export function ControlPanel({
 
             <div className="border border-border/50 rounded-md p-2 bg-muted/20">
               <Collapsible open={weightsOpen} onOpenChange={setWeightsOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-operators">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Operator Weights</span>
-                    {weightsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </button>
-                </CollapsibleTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-operators">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Operator Weights</span>
+                        {weightsOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </button>
+                    </CollapsibleTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Relative influence of each operator on field evolution
+                  </TooltipContent>
+                </Tooltip>
                 <CollapsibleContent className="space-y-2 pt-2">
                   <ParameterSlider label="wK" value={params.wK} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wK: v })} testId="slider-wk" tooltip="Curvature operator weight - controls bending influence" />
                   <ParameterSlider label="wT" value={params.wT} min={0} max={5} step={0.1} onChange={(v) => onParamsChange({ wT: v })} testId="slider-wt" tooltip="Tension operator weight - controls smoothing forces" />
@@ -597,21 +663,33 @@ export function ControlPanel({
 
             <div className="border border-border/50 rounded-md p-2 bg-muted/20">
               <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-                <CollapsibleTrigger asChild>
-                  <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-advanced">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                      <Settings2 className="h-3 w-3" />
-                      Advanced
-                    </span>
-                    {advancedOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                  </button>
-                </CollapsibleTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-advanced">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                          <Settings2 className="h-3 w-3" />
+                          Advanced
+                        </span>
+                        {advancedOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </button>
+                    </CollapsibleTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-xs max-w-[200px]">
+                    Grid resolution, coupling radius, and reset options
+                  </TooltipContent>
+                </Tooltip>
                 <CollapsibleContent className="space-y-2 pt-2">
                   <ParameterSlider label="Grid Size" value={params.gridSize} min={50} max={400} step={10} onChange={(v) => onParamsChange({ gridSize: v })} testId="slider-grid-size" tooltip="Resolution of the simulation field (higher = more detail, slower)" />
                   <ParameterSlider label="Radius" value={params.couplingRadius} min={0.5} max={5} step={0.25} onChange={(v) => onParamsChange({ couplingRadius: v })} testId="slider-coupling-radius" tooltip="Coupling influence radius - how far neighbors affect each point" />
-                  <Button variant="secondary" size="sm" className="w-full" onClick={() => onParamsChange(defaultParameters)} data-testid="button-reset-params">
-                    {LANGUAGE.UI.RESET}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="secondary" size="sm" className="w-full" onClick={() => onParamsChange(defaultParameters)} data-testid="button-reset-params">
+                        {LANGUAGE.UI.RESET}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="text-xs">Reset all parameters to their default values</TooltipContent>
+                  </Tooltip>
                 </CollapsibleContent>
               </Collapsible>
             </div>
