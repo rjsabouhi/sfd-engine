@@ -6,13 +6,14 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Sliders, Activity, Settings2, BookOpen, Download, Columns2 } from "lucide-react";
+import { Play, Pause, RotateCcw, StepForward, ChevronDown, ChevronUp, Sliders, Activity, Settings2, BookOpen, Download, Columns2, LayoutGrid } from "lucide-react";
 import type { SimulationParameters, SimulationState, OperatorContributions, StructuralSignature, StructuralEvent, TrendMetrics } from "@shared/schema";
 import { defaultParameters } from "@shared/schema";
 import { TemporalControls } from "./temporal-controls";
 import { OperatorSensitivity } from "./operator-sensitivity";
 import { StructuralSignatureBar } from "./structural-signature";
 import { EventLog } from "./event-log";
+import { MetricsWorkspace } from "./metrics-workspace";
 import type { SmartViewConfig } from "@/config/smart-view-map";
 import { LegacyRegimeDisplay } from "./regime-display";
 import type { InterpretationMode } from "@/lib/interpretation-modes";
@@ -151,9 +152,6 @@ export function ControlPanel({
   const [metricsOpen, setMetricsOpen] = useState(false);
   const [interpretationOpen, setInterpretationOpen] = useState(false);
   const [playbackOpen, setPlaybackOpen] = useState(true);
-  const [regimeOpen, setRegimeOpen] = useState(true);
-  const [operatorOpen, setOperatorOpen] = useState(true);
-  const [eventLogOpen, setEventLogOpen] = useState(true);
   const [notebookParamsOpen, setNotebookParamsOpen] = useState(true);
   const [notebookEquationOpen, setNotebookEquationOpen] = useState(true);
   const [notebookWeightsOpen, setNotebookWeightsOpen] = useState(true);
@@ -170,8 +168,12 @@ export function ControlPanel({
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <Tabs defaultValue="controls" className="flex-1 flex flex-col overflow-hidden">
+      <Tabs defaultValue="workspace" className="flex-1 flex flex-col overflow-hidden">
         <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent px-1 h-9 shrink-0 flex-wrap">
+          <TabsTrigger value="workspace" className="text-xs gap-1 px-2">
+            <LayoutGrid className="h-3 w-3" />
+            Workspace
+          </TabsTrigger>
           <TabsTrigger value="controls" className="text-xs gap-1 px-2">
             <Play className="h-3 w-3" />
             Controls
@@ -179,10 +181,6 @@ export function ControlPanel({
           <TabsTrigger value="params" className="text-xs gap-1 px-2">
             <Sliders className="h-3 w-3" />
             Params
-          </TabsTrigger>
-          <TabsTrigger value="analysis" className="text-xs gap-1 px-2">
-            <Activity className="h-3 w-3" />
-            Analysis
           </TabsTrigger>
           <TabsTrigger value="notebook" className="text-xs gap-1 px-2">
             <BookOpen className="h-3 w-3" />
@@ -195,6 +193,29 @@ export function ControlPanel({
         </TabsList>
 
         <div className="flex-1 overflow-y-auto">
+          <TabsContent value="workspace" className="m-0 h-full">
+            <MetricsWorkspace
+              state={state}
+              params={params}
+              operatorContributions={operatorContributions}
+              structuralSignature={structuralSignature}
+              coherenceHistory={coherenceHistory}
+              trendMetrics={trendMetrics}
+              events={events}
+              modeLabels={modeLabels}
+              interpretationMode={interpretationMode}
+              historyLength={historyLength}
+              currentHistoryIndex={currentHistoryIndex}
+              isPlaybackMode={isPlaybackMode}
+              varianceChange={varianceChange}
+              onStepBackward={onStepBackward}
+              onStepForward={onStepForward}
+              onSeekFrame={onSeekFrame}
+              onExitPlayback={onExitPlayback}
+              onClearEvents={onClearEvents}
+              onExportEvents={onExportEvents}
+            />
+          </TabsContent>
           <TabsContent value="controls" className="m-0 p-3 space-y-4">
             <Collapsible open={playbackOpen} onOpenChange={setPlaybackOpen}>
               <CollapsibleTrigger asChild>
@@ -353,44 +374,6 @@ export function ControlPanel({
                 <Button variant="secondary" size="sm" className="w-full" onClick={() => onParamsChange(defaultParameters)} data-testid="button-reset-params">
                   {LANGUAGE.UI.RESET}
                 </Button>
-              </CollapsibleContent>
-            </Collapsible>
-          </TabsContent>
-
-          <TabsContent value="analysis" className="m-0 p-3 space-y-4">
-            <Collapsible open={regimeOpen} onOpenChange={setRegimeOpen}>
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-regime">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">System Regime</span>
-                  {regimeOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2">
-                <LegacyRegimeDisplay regime={currentRegime} mode={languageMode} />
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Collapsible open={operatorOpen} onOpenChange={setOperatorOpen} className="border-t border-border/50 pt-3">
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-operator">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Operator Contributions</span>
-                  {operatorOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2">
-                <OperatorSensitivity contributions={operatorContributions} modeLabels={modeLabels} />
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Collapsible open={eventLogOpen} onOpenChange={setEventLogOpen} className="border-t border-border/50 pt-3">
-              <CollapsibleTrigger asChild>
-                <button className="flex items-center justify-between w-full py-1 hover-elevate rounded px-1" data-testid="button-toggle-event-log">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Event Log ({events.length})</span>
-                  {eventLogOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-2">
-                <EventLog events={events} onClear={onClearEvents} onExport={onExportEvents} />
               </CollapsibleContent>
             </Collapsible>
           </TabsContent>
