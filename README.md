@@ -4,7 +4,7 @@ A computational framework for visualizing emergent structure in complex adaptive
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](RELEASE_NOTES.md)
-[![Live Demo](https://img.shields.io/badge/version-1.0.0-red.svg)](https://sfd-engine.replit.app/)
+[![Live Demo](https://img.shields.io/badge/SFD%20Engine-Live%20Demo-red.svg)](https://sfd-engine.replit.app/)
 ---
 
 ## Abstract
