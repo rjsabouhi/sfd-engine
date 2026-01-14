@@ -4,7 +4,7 @@ A computational framework for visualizing emergent structure in complex adaptive
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](RELEASE_NOTES.md)
-
+[![Live Demo](https://img.shields.io/badge/SFD%20Engine-Live%20Demo-blue?style=for-the-badge)](https://sfd-engine.replit.app/)
 ---
 
 ## Abstract
@@ -183,6 +183,10 @@ plt.show()
 
 ---
 
+## Live Simulator Demo
+Run the SFD Engine directly in your browser:
+https://sfd-engine.replit.app/
+
 ## Citation
 
 If you use the SFD Engine in your research, please cite:
@@ -193,7 +197,7 @@ If you use the SFD Engine in your research, please cite:
   title = {Structural Field Dynamics (SFD) Engine},
   year = {2026},
   version = {1.0.0},
-  url = {https://github.com/username/sfd-engine}
+  url = {https://github.com/rjsabouhi/sfd-engine}
 }
 ```
 
